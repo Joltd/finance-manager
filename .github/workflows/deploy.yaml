@@ -1,0 +1,139 @@
+name: Deploy
+
+concurrency: deploy
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: finance-manager
+  BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+
+  server:
+    name: Build server
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    defaults:
+      run:
+        working-directory: ./server
+    env:
+      PACKAGES_DIRECTORY: ~/packages/finance-manager/${{ github.ref_name }}/server
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: war -Dprofile=prod
+          build-root-directory: ./server
+
+      - name: Artifact name
+        run: echo "ARTIFACT=$(find ./build/libs -name '*.war' | xargs basename)" >> $GITHUB_ENV
+
+      - name: Upload
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          source: server/build/libs/${{ env.ARTIFACT }}
+          target: ${{ env.PACKAGES_DIRECTORY }}
+          rm: true
+          strip_components: 3
+
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            systemctl stop tomcat
+            find /opt/tomcat/work/Catalina/localhost -name '${{ env.PROJECT_NAME }}*' | xargs rm -rf
+            find /opt/tomcat/webapps -name '${{ env.PROJECT_NAME }}*' | xargs rm -rf
+            cp ${{ env.PACKAGES_DIRECTORY }}/${{ env.ARTIFACT }} /opt/tomcat/webapps
+            systemctl start tomcat
+
+  web:
+    name: Build web
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    defaults:
+      run:
+        working-directory: ./web
+    outputs:
+      emoji: "${{ steps.result.outputs.emoji }}${{ steps.result.outputs.emoji }}"
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: npm
+          cache-dependency-path: '**/package-lock.json'
+      - run: |
+          npm install -g @angular/cli
+          npm update
+
+      - name: Set version
+        run: node set-version.js
+
+      - name: Build
+        run: ng build --base-href /${{ env.PROJECT_NAME }}/
+
+      - name: Deploy
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          source: ./web/dist/${{ env.PROJECT_NAME }}
+          target: /var/www/${{ secrets.HOST }}/html
+          rm: true
+          strip_components: 3
+
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    needs: [server, web]
+    if: ${{ always() }}
+    steps:
+      - name: Determine emoji
+        run: |
+          declare -A emoji=([success]=✅ [failure]=❌)
+          echo "SERVER_EMOJI=${emoji[${{needs.server.result}}]}" >> $GITHUB_ENV
+          echo "WEB_EMOJI=${emoji[${{needs.web.result}}]}" >> $GITHUB_ENV
+
+      - name: Notify to telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ env.PROJECT_NAME }} (${{ github.run_number }}) - build done
+            
+            ${{ env.SERVER_EMOJI }} Server ${{ needs.server.result }}
+            ${{ env.WEB_EMOJI }} Web ${{ needs.web.result }}
+            
+            App https://${{ secrets.HOST }}/${{ env.PROJECT_NAME }}
+            
+            Build run https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Manager https://${{ secrets.HOST }}:8090/manager

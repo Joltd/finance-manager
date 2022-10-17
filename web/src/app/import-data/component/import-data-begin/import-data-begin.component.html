@@ -1,0 +1,24 @@
+<edit-toolbar title="Import" (save)="save()" (close)="close()"></edit-toolbar>
+
+<mat-card>
+
+  <form [formGroup]="importData">
+
+    <mat-form-field>
+      <mat-label>Account</mat-label>
+      <reference-input api="/account/reference" formControlName="account"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Template</mat-label>
+      <reference-input api="/import-data/reference" formControlName="template"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>File</mat-label>
+      <file-input formControlName="file"></file-input>
+    </mat-form-field>
+
+  </form>
+
+</mat-card>

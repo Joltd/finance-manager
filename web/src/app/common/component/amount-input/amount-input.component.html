@@ -1,0 +1,7 @@
+<div class="container" [formGroup]="amount" (focusin)="onFocusIn($event)" (focusout)="onFocusOut($event)">
+  <input #value class="simple-input" formControlName="value" type="number" (input)="this.onInput()">
+  <select #currency class="simple-input" formControlName="currency" [class.hide]="!shouldLabelFloat" (change)="this.onInput()">
+    <option [ngValue]="''"></option>
+    <option *ngFor="let currency of currencies" [ngValue]="currency">{{currency}}</option>
+  </select>
+</div>

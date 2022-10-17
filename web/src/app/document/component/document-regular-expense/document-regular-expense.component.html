@@ -1,0 +1,29 @@
+<mat-card>
+
+  <form>
+
+    <mat-form-field>
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="picker">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Account</mat-label>
+      <reference-input api="/account/reference"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Expense category</mat-label>
+      <reference-input api="/expense/reference"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Amount</mat-label>
+      <amount-input></amount-input>
+    </mat-form-field>
+
+  </form>
+
+</mat-card>

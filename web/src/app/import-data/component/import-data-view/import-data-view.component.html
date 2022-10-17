@@ -1,0 +1,20 @@
+<edit-toolbar title="Import" (save)="save()" (close)="close()"></edit-toolbar>
+
+<mat-card>
+
+  <div>{{importData.account}}</div>
+  <div>{{importData.template}}</div>
+  <div>{{importData.file}}</div>
+
+  <mat-list>
+    <mat-list-item *ngFor="let entry of importData.entries">
+      <div mat-line>
+        <mat-checkbox *ngIf="entry.fromFile && !entry.fromDb" (change)="entry.selected = $event.checked"></mat-checkbox>
+        <mat-checkbox *ngIf="entry.fromFile && entry.fromDb" [disabled]="true" [checked]="true"></mat-checkbox>
+        <mat-checkbox *ngIf="!entry.fromFile && entry.fromDb" class="hide"></mat-checkbox>
+        <div>{{entry.date}} {{entry.direction}} {{entry.amount.value}} {{entry.amount.currency}}</div>
+      </div>
+    </mat-list-item>
+  </mat-list>
+
+</mat-card>

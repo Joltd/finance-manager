@@ -1,0 +1,26 @@
+.container {
+  display: grid;
+  grid-template-columns: 8em 5em;
+}
+
+.simple-input {
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
+  font: inherit;
+}
+
+.hide {
+  opacity: 0;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance:textfield;
+}
