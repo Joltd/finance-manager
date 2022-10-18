@@ -1,3 +1,9 @@
+:host {
+  display: grid;
+  grid-template-rows: min-content 1fr;
+  height: 100%;
+}
+
 .loading {
   background-color: #00000070;
   width: 100vw;
@@ -15,6 +21,6 @@
 }
 
 .content {
-  display: grid;
   background-color: #bdbdbd;
+  padding: 1em;
 }

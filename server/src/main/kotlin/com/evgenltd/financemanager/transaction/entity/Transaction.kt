@@ -10,7 +10,8 @@ abstract class Transaction(
         var id: String?,
         var date: LocalDate,
         var direction: Direction,
-        var amount: Amount
+        var amount: Amount,
+        var document: String
 )
 
 enum class Direction { IN, OUT }
@@ -21,5 +22,45 @@ class AccountTransaction(
         date: LocalDate,
         direction: Direction,
         amount: Amount,
+        document: String,
         var account: String
-) : Transaction(id, date, direction, amount)
+) : Transaction(id, date, direction, amount, document)
+
+@Document("transactions")
+class ExpenseTransaction(
+        id: String?,
+        date: LocalDate,
+        direction: Direction,
+        amount: Amount,
+        document: String,
+        var expenseCategory: String
+) : Transaction(id, date, direction, amount, document)
+
+@Document("transactions")
+class IncomeTransaction(
+        id: String?,
+        date: LocalDate,
+        direction: Direction,
+        amount: Amount,
+        document: String,
+        var incomeCategory: String
+) : Transaction(id, date, direction, amount, document)
+
+@Document("transactions")
+class PersonTransaction(
+        id: String?,
+        date: LocalDate,
+        direction: Direction,
+        amount: Amount,
+        document: String,
+        var person: String
+) : Transaction(id, date, direction, amount, document)
+
+@Document("transactions")
+class ExchangeTransaction(
+        id: String?,
+        date: LocalDate,
+        direction: Direction,
+        amount: Amount,
+        document: String
+) : Transaction(id, date, direction, amount, document)

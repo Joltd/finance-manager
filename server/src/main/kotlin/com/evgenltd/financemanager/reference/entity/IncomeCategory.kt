@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.reference.entity
 
-class ExpenseCategory(
+class IncomeCategory(
         var id: String?,
         var name: String,
         var deleted: Boolean = false

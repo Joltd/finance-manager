@@ -13,6 +13,7 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {EditToolbarComponent} from "./component/edit-toolbar/edit-toolbar.component";
 import {MatCardModule} from "@angular/material/card";
 import {FileInputComponent} from "./component/file-input/file-input.component";
+import {AmountPipe} from "./model/amount";
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import {FileInputComponent} from "./component/file-input/file-input.component";
     ReferenceInputComponent,
     ReferenceSelectComponent,
     EditToolbarComponent,
-    FileInputComponent
+    FileInputComponent,
+    AmountPipe
   ],
   imports: [
     ReactiveFormsModule,
@@ -38,7 +40,8 @@ import {FileInputComponent} from "./component/file-input/file-input.component";
     AmountInputComponent,
     ReferenceInputComponent,
     EditToolbarComponent,
-    FileInputComponent
+    FileInputComponent,
+    AmountPipe
   ]
 })
 export class CommonModule {}

@@ -12,6 +12,7 @@ import {ImportDataBrowserComponent} from "./component/import-data-browser/import
 import {MatButtonModule} from "@angular/material/button";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatCheckboxModule} from "@angular/material/checkbox";
+import {MatInputModule} from "@angular/material/input";
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
     MatButtonModule,
     NgForOf,
     MatMenuModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatInputModule
   ],
   exports: [
     ImportDataViewComponent,

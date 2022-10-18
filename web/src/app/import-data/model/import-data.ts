@@ -1,4 +1,4 @@
-import {ImportDataEntry} from "./import-data-entry";
+import {Amount} from "../../common/model/amount";
 
 export class ImportData {
   id!: string
@@ -6,8 +6,24 @@ export class ImportData {
   template!: string
   file!: string
   entries: ImportDataEntry[] = []
+  documents: ImportDataRelatedDocument[] = []
+}
+
+export class ImportDataEntry {
+  id!: string
+  date!: string
+  direction!: 'IN' | 'OUT'
+  amount!: Amount
+  description!: string
+  imported: boolean = false
+  selected: boolean = false
 }
 
 export class ImportDataFileResponse {
   filename!: string
+}
+
+export class ImportDataRelatedDocument {
+  id!: string
+  date!: string
 }

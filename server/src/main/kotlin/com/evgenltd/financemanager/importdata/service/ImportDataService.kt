@@ -1,10 +1,11 @@
 package com.evgenltd.financemanager.importdata.service
 
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.util.IdGenerator
 import com.evgenltd.financemanager.importdata.entity.ImportData
+import com.evgenltd.financemanager.importdata.entity.ImportDataEntry
 import com.evgenltd.financemanager.importdata.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importdata.record.ImportDataRecord
+import com.evgenltd.financemanager.importdata.record.ImportDataRelatedDocument
 import com.evgenltd.financemanager.importdata.repository.ImportDataRepository
 import com.evgenltd.financemanager.importdata.service.template.ImportDataTemplate
 import com.evgenltd.financemanager.reference.record.Reference
@@ -16,7 +17,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.UUID
 import javax.annotation.PostConstruct
-import kotlin.reflect.full.findAnnotation
 
 @Service
 class ImportDataService(
@@ -33,9 +33,9 @@ class ImportDataService(
     
     fun listReference(): List<Reference> = importDataTemplates.map {
         Reference(
-                it.javaClass.simpleName,
-                it.javaClass.simpleName,
-                false
+                id = it.javaClass.simpleName,
+                name = it.javaClass.simpleName,
+                deleted = false
         )
     }
     
@@ -46,80 +46,37 @@ class ImportDataService(
                         account = it.account,
                         template = it.template,
                         file = it.file,
-                        entries = listOf()
+                        entries = listOf(),
+                        documents = listOf()
                 )
             }
 
     fun byId(id: String): ImportDataRecord {
 
         val dataImport = importDataRepository.find(id)
-        val entries = dataImport.mapEntries()
-                .associateBy { it.id }
-                .toMutableMap()
-
-        accountTransactionService.transactionsByAccount(dataImport.account!!)
-                .mapEntries()
-                .onEach {
-                    val fromDb = entries[it.id]
-                    if (fromDb != null) {
-                        entries[it.id] = merge(fromDb, it)
-                    } else {
-                        entries[it.id] = it
-                    }
-                }
+        val documents = accountTransactionService.findTransactionByAccount(dataImport.account)
+                .map { ImportDataRelatedDocument(it.id!!, it.date) }
 
         return ImportDataRecord(
                 id = dataImport.id,
                 account = dataImport.account,
                 template = dataImport.template,
                 file = dataImport.file,
-                entries.values.sortedBy { it.id }
+                entries = dataImport.entries
+                        .map {
+                            ImportDataEntryRecord(
+                                    id = it.id,
+                                    date = it.date,
+                                    direction = it.direction,
+                                    amount = it.amount,
+                                    description = it.description,
+                                    imported = it.imported
+                            )
+                        },
+                documents = documents
         )
 
     }
-
-    private fun ImportData.mapEntries(): List<ImportDataEntryRecord> {
-        val idGenerator = IdGenerator()
-        return entries.map {
-            ImportDataEntryRecord(
-                    id = idGenerator.next(it.date, it.direction, it.amount),
-                    fromDb = false,
-                    fromFile = true,
-                    systemId = null,
-                    date = it.date,
-                    direction = it.direction,
-                    amount = it.amount,
-                    description = it.description
-            )
-        }
-    }
-
-    private fun List<AccountTransaction>.mapEntries(): List<ImportDataEntryRecord> {
-        val idGenerator = IdGenerator()
-        return map {
-            ImportDataEntryRecord(
-                    id = idGenerator.next(it.date, it.direction, it.amount),
-                    fromDb = true,
-                    fromFile = false,
-                    systemId = it.id,
-                    date = it.date,
-                    direction = it.direction,
-                    amount = it.amount,
-                    description = ""
-            )
-        }
-    }
-
-    private fun merge(fromFile: ImportDataEntryRecord, fromDb: ImportDataEntryRecord): ImportDataEntryRecord = ImportDataEntryRecord(
-            id = fromFile.id,
-            fromDb = true,
-            fromFile = true,
-            systemId = fromDb.systemId,
-            date = fromFile.date,
-            direction = fromFile.direction,
-            amount = fromFile.amount,
-            description = fromFile.description
-    )
 
     fun uploadFile(file: MultipartFile): String {
         val filename = UUID.randomUUID().toString()
@@ -134,24 +91,35 @@ class ImportDataService(
         val entity = record.toEntity()
 
         val path = Paths.get(importDataProperties.directory, entity.file)
-        val importDataTemplate = importDataTemplates.first { it.javaClass.simpleName == entity.template }
-        val entries = importDataTemplate.convert(path)
+        entity.entries = importDataTemplates.first { it.javaClass.simpleName == entity.template }
+                .convert(path)
 
-        entity.entries = entries
+        val transactions = accountTransactionService.findTransactionByAccount(entity.account)
+                .map { it.asString() }
+                .groupBy { it }
+                .filter { it.value.size == 1 }
+                .keys
+
+        entity.entries.onEach {
+            if (transactions.contains(it.asString())) {
+                it.imported = true
+            }
+        }
+
         importDataRepository.save(entity)
     }
 
     fun performImport(importData: ImportDataRecord) {
-        val transactions = importData.entries.map {
-            AccountTransaction(
-                    null,
-                    it.date,
-                    it.direction,
-                    it.amount,
-                    importData.account!!
-            )
-        }
-        accountTransactionService.createTransactions(transactions)
+//        val transactions = importData.entries.map {
+//            AccountTransaction(
+//                    null,
+//                    it.date,
+//                    it.direction,
+//                    it.amount,
+//                    importData.account!!
+//            )
+//        }
+//        accountTransactionService.createTransactions(transactions)
     }
 
     fun delete(id: String) = importDataRepository.deleteById(id)
@@ -163,5 +131,9 @@ class ImportDataService(
             file = file,
             entries = emptyList()
     )
-    
+
+    private fun AccountTransaction.asString() = "$date-$direction-$amount"
+
+    private fun ImportDataEntry.asString() = "$date-$direction-$amount"
+
 }

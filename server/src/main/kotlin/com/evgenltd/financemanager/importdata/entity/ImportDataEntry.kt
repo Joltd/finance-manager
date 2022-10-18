@@ -5,9 +5,10 @@ import com.evgenltd.financemanager.transaction.entity.Direction
 import java.time.LocalDate
 
 class ImportDataEntry(
-        val id: String,
-        val date: LocalDate,
-        val direction: Direction,
-        val amount: Amount,
-        val description: String
+        var id: String,
+        var date: LocalDate,
+        var direction: Direction,
+        var amount: Amount,
+        var description: String,
+        var imported: Boolean
 )

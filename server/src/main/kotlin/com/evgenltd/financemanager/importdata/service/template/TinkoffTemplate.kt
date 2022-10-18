@@ -42,11 +42,12 @@ class TinkoffTemplate : ImportDataTemplate {
                     val amount = Amount(amountValue.absoluteValue, "RUB")
                     val id = idGenerator.next(it.date, direction, amount)
                     ImportDataEntry(
-                            id,
-                            it.date,
-                            direction,
-                            amount,
-                            it.category + "|" + it.description
+                            id = id,
+                            date = it.date,
+                            direction = direction,
+                            amount = amount,
+                            description = it.category + "|" + it.description,
+                            imported = false
                     )
                 }
     }

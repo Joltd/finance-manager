@@ -1,9 +1,9 @@
 <mat-card>
-  <h1>{{title}}</h1>
-  <button mat-button (click)="save.emit()" color="primary">
+  <div class="title">{{title}}</div>
+  <button mat-icon-button (click)="save.emit()" color="primary">
     <mat-icon>done</mat-icon>
   </button>
-  <button mat-button (click)="close.emit()" color="primary">
+  <button mat-icon-button (click)="close.emit()" color="primary">
     <mat-icon>close</mat-icon>
   </button>
 </mat-card>

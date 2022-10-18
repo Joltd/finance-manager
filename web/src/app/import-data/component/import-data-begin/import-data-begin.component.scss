@@ -6,3 +6,8 @@
 .file-input {
   display: none;
 }
+
+form {
+  display: grid;
+  grid-auto-flow: row;
+}

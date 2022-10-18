@@ -1,20 +1,41 @@
 <edit-toolbar title="Import" (save)="save()" (close)="close()"></edit-toolbar>
 
-<mat-card>
+<mat-card class="import-data">
 
-  <div>{{importData.account}}</div>
-  <div>{{importData.template}}</div>
-  <div>{{importData.file}}</div>
+  <mat-form-field>
+    <mat-label>Account</mat-label>
+    <input matInput [value]="importData.account" readonly>
+  </mat-form-field>
 
-  <mat-list>
-    <mat-list-item *ngFor="let entry of importData.entries">
-      <div mat-line>
-        <mat-checkbox *ngIf="entry.fromFile && !entry.fromDb" (change)="entry.selected = $event.checked"></mat-checkbox>
-        <mat-checkbox *ngIf="entry.fromFile && entry.fromDb" [disabled]="true" [checked]="true"></mat-checkbox>
-        <mat-checkbox *ngIf="!entry.fromFile && entry.fromDb" class="hide"></mat-checkbox>
-        <div>{{entry.date}} {{entry.direction}} {{entry.amount.value}} {{entry.amount.currency}}</div>
-      </div>
-    </mat-list-item>
-  </mat-list>
+  <mat-form-field>
+    <mat-label>Template</mat-label>
+    <input matInput [value]="importData.template" readonly>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>File</mat-label>
+    <input matInput [value]="importData.file" readonly>
+  </mat-form-field>
+
+</mat-card>
+
+<mat-card class="import-data-entries">
+
+  <div class="date-group" *ngFor="let dateGroup of dateGroups">
+    <h2 class="date">{{dateGroup.date}}</h2>
+    <mat-action-list>
+      <button mat-list-item [class.entry-imported]="entry.imported" *ngFor="let entry of dateGroup.entries">
+        <mat-icon matListIcon class="entry-in" *ngIf="entry.direction == 'IN'">arrow_downward</mat-icon>
+        <mat-icon matListIcon class="entry-out" *ngIf="entry.direction == 'OUT'">arrow_upward</mat-icon>
+        <div matLine>{{entry.amount | format}}</div>
+        <div matLine>{{entry.description}}</div>
+      </button>
+    </mat-action-list>
+    <mat-list>
+      <mat-list-item *ngFor="let document of dateGroup.documents">
+        <div matLine>{{document.id}}</div>
+      </mat-list-item>
+    </mat-list>
+  </div>
 
 </mat-card>
