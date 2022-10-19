@@ -4,10 +4,10 @@ import java.time.LocalDate
 import org.springframework.data.mongodb.core.mapping.Document as Entity
 
 @Entity("documents")
-class ExpenseDocument(
+class DocumentIncome(
         id: String?,
         date: LocalDate,
         description: String,
         var account: String,
-        var expenseCategory: String
+        var incomeCategory: String
 ) : Document(id, date, description)

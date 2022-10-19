@@ -1,6 +1,8 @@
-<mat-list>
-  <mat-list-item *ngFor="let document of documents">{{document.date}} {{document.type}}</mat-list-item>
-</mat-list>
-<button mat-button color="primary" (click)="add()">
+<mat-card>
+  <mat-list>
+    <mat-list-item *ngFor="let document of documents">{{document.date}}</mat-list-item>
+  </mat-list>
+</mat-card>
+<button class="fab" mat-fab color="primary" (click)="add()">
   <mat-icon>add</mat-icon>
 </button>

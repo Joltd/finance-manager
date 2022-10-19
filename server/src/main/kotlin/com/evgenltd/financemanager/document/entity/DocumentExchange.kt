@@ -5,7 +5,7 @@ import java.time.LocalDate
 import org.springframework.data.mongodb.core.mapping.Document as Entity
 
 @Entity("documents")
-class ExchangeDocument(
+class DocumentExchange(
         id: String?,
         date: LocalDate,
         description: String,

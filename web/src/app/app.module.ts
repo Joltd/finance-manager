@@ -18,6 +18,7 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {ImportDataModule} from "./import-data/import-data.module";
 import {MatSidenavModule} from "@angular/material/sidenav";
+import {DocumentModule} from "./document/document.module";
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import {MatSidenavModule} from "@angular/material/sidenav";
     MatInputModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
-    MatSidenavModule
+    MatSidenavModule,
+    DocumentModule
   ],
   providers: [
     restInterceptorProvider,

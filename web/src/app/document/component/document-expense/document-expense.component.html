@@ -1,29 +1,29 @@
-<edit-toolbar></edit-toolbar>
+<edit-toolbar title="Expense" [save]="save"></edit-toolbar>
 
 <mat-card>
 
-  <form>
+  <form [formGroup]="document">
 
     <mat-form-field>
       <mat-label>Date</mat-label>
-      <input matInput [matDatepicker]="picker">
+      <input matInput [matDatepicker]="picker" formControlName="date">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Account</mat-label>
-      <reference-input api="/account/reference"></reference-input>
+      <reference-input api="/account/reference" formControlName="account"></reference-input>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Expense category</mat-label>
-      <reference-input api="/expense/reference"></reference-input>
+      <reference-input api="/expense/reference" formControlName="expenseCategory"></reference-input>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Amount</mat-label>
-      <amount-input></amount-input>
+      <amount-input formControlName="amount"></amount-input>
     </mat-form-field>
 
   </form>

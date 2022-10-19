@@ -4,17 +4,18 @@ import {MatListModule} from "@angular/material/list";
 import {NgForOf} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
-import {DocumentRegularExpenseComponent} from "./component/document-regular-expense/document-regular-expense.component";
+import {DocumentExpenseComponent} from "./component/document-expense/document-expense.component";
 import {MatCardModule} from "@angular/material/card";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {CommonModule} from "../common/common.module";
+import {ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
     DocumentBrowserComponent,
-    DocumentRegularExpenseComponent
+    DocumentExpenseComponent
   ],
   imports: [
     MatListModule,
@@ -25,11 +26,12 @@ import {CommonModule} from "../common/common.module";
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
-    CommonModule
+    CommonModule,
+    ReactiveFormsModule
   ],
   exports: [
     DocumentBrowserComponent,
-    DocumentRegularExpenseComponent
+    DocumentExpenseComponent
   ]
 })
 export class DocumentModule {}
