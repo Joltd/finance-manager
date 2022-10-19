@@ -2,7 +2,9 @@ package com.evgenltd.financemanager.document.entity
 
 import org.springframework.data.annotation.Id
 import java.time.LocalDate
+import org.springframework.data.mongodb.core.mapping.Document as Entity
 
+@Entity("documents")
 abstract class Document(
         @Id
         var id: String?,

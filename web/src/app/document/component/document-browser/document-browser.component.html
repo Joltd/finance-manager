@@ -1,6 +1,17 @@
 <mat-card>
   <mat-list>
-    <mat-list-item *ngFor="let document of documents">{{document.date}}</mat-list-item>
+    <mat-list-item *ngFor="let document of documents">
+      <div matLine class="mat-line-with-menu">
+        {{document.date}} {{document.type}}
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu>
+          <button mat-menu-item (click)="edit(document.id)">Edit</button>
+          <button mat-menu-item (click)="delete(document.id)">Delete</button>
+        </mat-menu>
+      </div>
+    </mat-list-item>
   </mat-list>
 </mat-card>
 <button class="fab" mat-fab color="primary" (click)="add()">

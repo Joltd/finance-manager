@@ -52,8 +52,8 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
     public ngControl: NgControl
   ) {
     this.amount = fb.group({
-      'value': '',
-      'currency': ''
+      'value': null,
+      'currency': null
     })
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this
@@ -72,12 +72,12 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
       return null
     }
     let amount = new Amount()
-    amount.value = value
+    amount.value = value * 10000
     amount.currency = currency
     return amount
   }
   set value(amount: Amount | null) {
-    let value = amount ? amount.value : ''
+    let value = amount ? amount.value / 10000 : ''
     let currency = amount ? amount.currency : ''
     this.amount.setValue({
       value: value,

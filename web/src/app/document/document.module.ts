@@ -11,11 +11,15 @@ import {MatInputModule} from "@angular/material/input";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {CommonModule} from "../common/common.module";
 import {ReactiveFormsModule} from "@angular/forms";
+import {MatNativeDateModule} from "@angular/material/core";
+import {MatMenuModule} from "@angular/material/menu";
+import {DocumentIncomeComponent} from "./component/document-income/document-income.component";
 
 @NgModule({
   declarations: [
     DocumentBrowserComponent,
-    DocumentExpenseComponent
+    DocumentExpenseComponent,
+    DocumentIncomeComponent
   ],
   imports: [
     MatListModule,
@@ -26,12 +30,18 @@ import {ReactiveFormsModule} from "@angular/forms";
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
+    MatNativeDateModule,
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatMenuModule
+  ],
+  providers: [
+    MatDatepickerModule
   ],
   exports: [
     DocumentBrowserComponent,
-    DocumentExpenseComponent
+    DocumentExpenseComponent,
+    DocumentIncomeComponent
   ]
 })
 export class DocumentModule {}

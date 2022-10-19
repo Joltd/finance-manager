@@ -2,20 +2,20 @@ import {Component, EventEmitter} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {Observable} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
-import {DocumentExpenseService} from "../../service/document-expense.service";
+import {DocumentIncomeService} from "../../service/document-income.service";
 
 @Component({
-  selector: 'document-expense',
-  templateUrl: 'document-expense.component.html',
-  styleUrls: ['document-expense.component.scss']
+  selector: 'document-income',
+  templateUrl: 'document-income.component.html',
+  styleUrls: ['document-income.component.scss']
 })
-export class DocumentExpenseComponent {
+export class DocumentIncomeComponent {
 
   document: FormGroup = new FormGroup({
     id: new FormControl(null),
     date: new FormControl(null, Validators.required),
     account: new FormControl(null, Validators.required),
-    expenseCategory: new FormControl(null, Validators.required),
+    incomeCategory: new FormControl(null, Validators.required),
     amount: new FormControl(null, Validators.required),
     description: new FormControl('')
   })
@@ -23,7 +23,7 @@ export class DocumentExpenseComponent {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private documentExpenseService: DocumentExpenseService
+    private documentIncomeService: DocumentIncomeService
   ) {
     this.activatedRoute.params
       .subscribe(params => {
@@ -40,13 +40,13 @@ export class DocumentExpenseComponent {
     if (id == null) {
       return
     }
-    this.documentExpenseService.byId(id)
+    this.documentIncomeService.byId(id)
       .subscribe(result => this.document.setValue(result))
   }
 
   private doSave(): Observable<void> {
     let eventEmitter = new EventEmitter<void>()
-    this.documentExpenseService.update(this.document.value)
+    this.documentIncomeService.update(this.document.value)
       .subscribe(() => eventEmitter.emit())
     return eventEmitter
   }

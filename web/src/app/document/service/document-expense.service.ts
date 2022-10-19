@@ -19,8 +19,4 @@ export class DocumentExpenseService {
     return this.http.post<void>('/document/expense', document)
   }
 
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>('/document/expense/' + id)
-  }
-
 }

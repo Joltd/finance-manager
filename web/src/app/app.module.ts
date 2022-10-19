@@ -19,6 +19,8 @@ import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {ImportDataModule} from "./import-data/import-data.module";
 import {MatSidenavModule} from "@angular/material/sidenav";
 import {DocumentModule} from "./document/document.module";
+import {MAT_DATE_LOCALE} from "@angular/material/core";
+import {MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule} from "@angular/material-moment-adapter";
 
 @NgModule({
   declarations: [
@@ -43,11 +45,14 @@ import {DocumentModule} from "./document/document.module";
     ReactiveFormsModule,
     MatProgressSpinnerModule,
     MatSidenavModule,
-    DocumentModule
+    DocumentModule,
+    MatMomentDateModule
   ],
   providers: [
     restInterceptorProvider,
-    {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}}
+    {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 3000}},
+    {provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
+    {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {useUtc: true}}
   ],
   bootstrap: [AppComponent]
 })

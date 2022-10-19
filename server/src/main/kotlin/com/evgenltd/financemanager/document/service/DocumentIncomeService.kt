@@ -2,50 +2,53 @@ package com.evgenltd.financemanager.document.service
 
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.DocumentExpense
-import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
+import com.evgenltd.financemanager.document.entity.DocumentIncome
+import com.evgenltd.financemanager.document.record.DocumentIncomeRecord
 import com.evgenltd.financemanager.document.repository.DocumentExpenseRepository
+import com.evgenltd.financemanager.document.repository.DocumentIncomeRepository
 import com.evgenltd.financemanager.transaction.entity.AccountTransaction
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.ExpenseTransaction
+import com.evgenltd.financemanager.transaction.entity.IncomeTransaction
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 
 @Service
-class DocumentExpenseService(
-        private val documentExpenseRepository: DocumentExpenseRepository,
+class DocumentIncomeService(
+        private val documentIncomeRepository: DocumentIncomeRepository,
         private val transactionService: TransactionService
 ) {
 
-    fun byId(id: String): DocumentExpenseRecord = documentExpenseRepository.find(id).toRecord()
+    fun byId(id: String): DocumentIncomeRecord = documentIncomeRepository.find(id).toRecord()
 
-    fun update(record: DocumentExpenseRecord) {
+    fun update(record: DocumentIncomeRecord) {
         val entity = record.toEntity()
-        documentExpenseRepository.save(entity)
+        documentIncomeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
         AccountTransaction(null, entity.date, Direction.OUT, entity.amount, entity.id!!, entity.account)
                 .also { transactionService.save(it) }
-        ExpenseTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.expenseCategory)
+        IncomeTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.incomeCategory)
                 .also { transactionService.save(it) }
     }
 
-    fun delete(id: String) = documentExpenseRepository.deleteById(id)
+    fun delete(id: String) = documentIncomeRepository.deleteById(id)
 
-    private fun DocumentExpense.toRecord(): DocumentExpenseRecord = DocumentExpenseRecord(
+    private fun DocumentIncome.toRecord(): DocumentIncomeRecord = DocumentIncomeRecord(
             id = id,
             date = date,
             description = description,
             amount = amount,
             account = account,
-            expenseCategory = expenseCategory
+            incomeCategory = incomeCategory
     )
 
-    private fun DocumentExpenseRecord.toEntity(): DocumentExpense = DocumentExpense(
+    private fun DocumentIncomeRecord.toEntity(): DocumentIncome = DocumentIncome(
             id = id,
             date = date,
             description = description,
             amount = amount,
             account = account,
-            expenseCategory = expenseCategory
+            incomeCategory = incomeCategory
     )
 
 }

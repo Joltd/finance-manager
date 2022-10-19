@@ -15,4 +15,8 @@ export class DocumentService {
     return this.http.get<Document[]>('/document', TypeUtils.of(Document))
   }
 
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>('/document/' + id)
+  }
+
 }
