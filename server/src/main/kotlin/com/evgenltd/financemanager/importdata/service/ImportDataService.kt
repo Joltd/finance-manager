@@ -2,9 +2,11 @@ package com.evgenltd.financemanager.importdata.service
 
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.IdGenerator
+import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.document.entity.Document
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.entity.DocumentIncome
+import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importdata.entity.ImportData
 import com.evgenltd.financemanager.importdata.record.*
@@ -24,7 +26,7 @@ class ImportDataService(
         private val importDataRepository: ImportDataRepository,
         private val importDataTemplates: List<ImportDataTemplate>,
         private val documentService: DocumentService
-) {
+) : Loggable() {
 
     @PostConstruct
     fun postConstruct() {
@@ -99,17 +101,12 @@ class ImportDataService(
         importDataRepository.save(entity)
     }
 
-    fun performImport(importData: ImportDataRecord) {
-//        val transactions = importData.entries.map {
-//            AccountTransaction(
-//                    null,
-//                    it.date,
-//                    it.direction,
-//                    it.amount,
-//                    importData.account!!
-//            )
-//        }
-//        accountTransactionService.createTransactions(transactions)
+    fun performImport(document: DocumentTypedRecord): ImportDataResult = try {
+        documentService.update(document)
+        ImportDataResult(true)
+    } catch (e: Exception) {
+        log.error("Unable to import document $document", e)
+        ImportDataResult(false)
     }
 
     fun delete(id: String) = importDataRepository.deleteById(id)

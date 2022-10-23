@@ -19,3 +19,7 @@ export class DocumentEntry {
 export class ImportDataFileResponse {
   filename!: string
 }
+
+export class ImportDataResult {
+  result: boolean = false
+}

@@ -2,8 +2,7 @@ package com.evgenltd.financemanager.document.service
 
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.Document
-import com.evgenltd.financemanager.document.record.DocumentRecord
-import com.evgenltd.financemanager.document.record.DocumentTypedRecord
+import com.evgenltd.financemanager.document.record.*
 import com.evgenltd.financemanager.document.repository.DocumentRepository
 import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import com.evgenltd.financemanager.transaction.service.TransactionService
@@ -13,15 +12,23 @@ import org.springframework.stereotype.Service
 class DocumentService(
         private val documentRepository: DocumentRepository,
         private val accountTransactionService: AccountTransactionService,
-        private val transactionService: TransactionService
+        private val transactionService: TransactionService,
+        private val documentExpenseService: DocumentExpenseService,
+        private val documentIncomeService: DocumentIncomeService,
+        private val documentExchangeService: DocumentExchangeService
 ) {
 
-    fun list(): List<DocumentRecord> = documentRepository.findAll().map { it.toSimpleRecord() }
+    fun list(): List<DocumentRowRecord> = documentRepository.findAll().map { it.toSimpleRecord() }
 
     fun byId(id: String): DocumentTypedRecord = documentRepository.find(id).toTypedRecord()
 
     fun update(record: DocumentTypedRecord) {
-        println()
+        when (record.value) {
+            is DocumentExpenseRecord -> documentExpenseService.update(record.value)
+            is DocumentIncomeRecord -> documentIncomeService.update(record.value)
+            is DocumentExchangeRecord -> documentExchangeService.update(record.value)
+            else -> throw IllegalStateException("Unknown document type ${record.type}")
+        }
     }
 
     fun delete(id: String) {

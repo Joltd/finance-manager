@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importdata.controller
 
+import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.importdata.record.ImportDataFilerResponse
 import com.evgenltd.financemanager.importdata.record.ImportDataRecord
 import com.evgenltd.financemanager.importdata.service.ImportDataService
@@ -32,7 +33,7 @@ class ImportDataController(
             ImportDataFilerResponse(importDataService.uploadFile(file))
 
     @PatchMapping("/import-data")
-    fun performImport(@RequestBody importDataRecord: ImportDataRecord) = importDataService.performImport(importDataRecord)
+    fun performImport(@RequestBody document: DocumentTypedRecord) = importDataService.performImport(document)
 
     @DeleteMapping("/import-data/{id}")
     fun delete(@PathVariable("id") id: String) = importDataService.delete(id)

@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.document.entity
 
-import com.evgenltd.financemanager.document.record.DocumentRecord
+import com.evgenltd.financemanager.document.record.DocumentRowRecord
 import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import org.springframework.data.annotation.Id
 import java.time.LocalDate
@@ -21,7 +21,7 @@ abstract class Document(
         else -> throw IllegalStateException("Unknown document type ${this::class}")
     }
 
-    fun toSimpleRecord(): DocumentRecord = DocumentRecord(
+    fun toSimpleRecord(): DocumentRowRecord = DocumentRowRecord(
             type = type(),
             id = id!!,
             date = date,

@@ -14,29 +14,17 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class DocumentController(
-        private val documentService: DocumentService,
-        private val documentExpenseService: DocumentExpenseService,
-        private val documentIncomeService: DocumentIncomeService,
-        private val documentExchangeService: DocumentExchangeService
+        private val documentService: DocumentService
 ) {
 
     @GetMapping("/document")
-    fun list(): List<DocumentRecord> = documentService.list()
+    fun list(): List<DocumentRowRecord> = documentService.list()
 
     @GetMapping("/document/{id}")
     fun byId(@PathVariable("id") id: String): DocumentTypedRecord = documentService.byId(id)
 
     @PostMapping("/document")
     fun update(@RequestBody record: DocumentTypedRecord) = documentService.update(record)
-
-    @PostMapping("/document/expense")
-    fun updateExpense(@RequestBody record: DocumentExpenseRecord) = documentExpenseService.update(record)
-
-    @PostMapping("/document/income")
-    fun updateIncome(@RequestBody record: DocumentIncomeRecord) = documentIncomeService.update(record)
-
-    @PostMapping("/document/exchange")
-    fun updateExchange(@RequestBody record: DocumentExchangeRecord) = documentExchangeService.update(record)
 
     @DeleteMapping("/document/{id}")
     fun delete(@PathVariable("id") id: String) = documentService.delete(id)

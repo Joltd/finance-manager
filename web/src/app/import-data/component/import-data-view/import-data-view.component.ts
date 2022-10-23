@@ -100,13 +100,38 @@ export class ImportDataViewComponent {
   }
 
   save() {
-    // let selected = this.importData.entries.filter(entry => entry.selected)
-    // if (selected.length == 0) {
-    //   return
-    // }
-    //
-    // this.importDataService.performImport(this.importData.account, selected)
-    //   .subscribe(() => this.load())
+    let nodes = this.asLinkList()
+    if (nodes.length > 0) {
+      this.performImport(nodes[0])
+    }
+  }
+
+  private performImport(node: DocumentNode) {
+    this.importDataService.performImport(node.entry.suggested)
+      .subscribe(result => {
+        node.entry.state = result.result ? 'success' : 'fail'
+        if (node.next != null) {
+          this.performImport(node.next)
+        }
+      })
+  }
+
+  private asLinkList(): DocumentNode[] {
+    let nodes = this.dateGroups.flatMap(dateGroup => dateGroup.entries)
+      .filter(entry => entry.selected)
+      .map(entry => {
+        let node = new DocumentNode()
+        node.entry = entry
+        return node
+      })
+
+    for (let index = 0; index < nodes.length; index++) {
+      let node = nodes[index]
+      if (index < nodes.length - 1) {
+        node.next = nodes[index + 1]
+      }
+    }
+    return nodes
   }
 
   close() {
@@ -121,7 +146,14 @@ class DateGroup {
 }
 
 class DateGroupEntry {
+  selected: boolean = false
+  state: 'none' | 'success' | 'fail' = 'none'
   source!: string
   suggested!: DocumentTyped
   existed!: DocumentTyped
+}
+
+class DocumentNode {
+  entry!: DateGroupEntry
+  next!: DocumentNode | null
 }

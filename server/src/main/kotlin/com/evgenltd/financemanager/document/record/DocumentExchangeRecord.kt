@@ -13,4 +13,4 @@ class DocumentExchangeRecord(
         val amountTo: Amount,
         val commissionExpenseCategory: String,
         val commissionAmount: Amount
-)
+) : DocumentRecord
