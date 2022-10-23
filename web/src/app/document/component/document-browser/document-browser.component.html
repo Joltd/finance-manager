@@ -14,6 +14,17 @@
     </mat-list-item>
   </mat-list>
 </mat-card>
-<button class="fab" mat-fab color="primary" (click)="add()">
+
+<button class="fab" mat-fab (click)="select()">
   <mat-icon>add</mat-icon>
 </button>
+
+<div class="select" *ngIf="selection" (click)="selection = false">
+  <mat-card (click)="$event.stopPropagation()">
+    <mat-action-list>
+      <button mat-list-item (click)="add('expense')">Expense</button>
+      <button mat-list-item (click)="add('income')">Income</button>
+      <button mat-list-item (click)="add('exchange')">Exchange</button>
+    </mat-action-list>
+  </mat-card>
+</div>

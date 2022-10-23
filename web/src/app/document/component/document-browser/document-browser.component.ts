@@ -1,7 +1,9 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, OnInit, ViewChild} from "@angular/core";
 import {DocumentService} from "../../service/document.service";
-import {Document} from "../../model/document";
+import {DocumentRow} from "../../model/document-row";
 import {Router} from "@angular/router";
+import {MatMenuTrigger} from "@angular/material/menu";
+import {trigger} from "@angular/animations";
 
 @Component({
   selector: 'document-browser',
@@ -10,7 +12,8 @@ import {Router} from "@angular/router";
 })
 export class DocumentBrowserComponent implements OnInit {
 
-  documents: Document[] = []
+  documents: DocumentRow[] = []
+  selection: boolean = false
 
   constructor(
     private router: Router,
@@ -25,12 +28,16 @@ export class DocumentBrowserComponent implements OnInit {
     this.documentService.list().subscribe(result => this.documents = result)
   }
 
-  add() {
-    this.router.navigate(['document', 'expense', 'new']).then()
+  select() {
+    this.selection = true
+  }
+
+  add(type: string) {
+    this.router.navigate(['document', type]).then()
   }
 
   edit(id: string) {
-    this.router.navigate(['document', 'expense', id]).then()
+    this.router.navigate(['document', id]).then()
   }
 
   delete(id: string) {

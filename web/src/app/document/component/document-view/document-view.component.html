@@ -1,0 +1,3 @@
+<document-expense *ngIf="type == 'expense'" [document]="document" (onSave)="save($event)" (onClose)="close()"></document-expense>
+<document-income *ngIf="type == 'income'" [document]="document" (onSave)="save($event)" (onClose)="close()"></document-income>
+<document-exchange *ngIf="type == 'exchange'" [document]="document" (onSave)="save($event)" (onClose)="close()"></document-exchange>

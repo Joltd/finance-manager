@@ -16,8 +16,6 @@ class DocumentExpenseService(
         private val transactionService: TransactionService
 ) {
 
-    fun byId(id: String): DocumentExpenseRecord = documentExpenseRepository.find(id).toRecord()
-
     fun update(record: DocumentExpenseRecord) {
         val entity = record.toEntity()
         documentExpenseRepository.save(entity)
@@ -28,15 +26,13 @@ class DocumentExpenseService(
                 .also { transactionService.save(it) }
     }
 
-    fun delete(id: String) = documentExpenseRepository.deleteById(id)
-
-    private fun DocumentExpense.toRecord(): DocumentExpenseRecord = DocumentExpenseRecord(
-            id = id,
-            date = date,
-            description = description,
-            amount = amount,
-            account = account,
-            expenseCategory = expenseCategory
+    fun toRecord(entity: DocumentExpense): DocumentExpenseRecord = DocumentExpenseRecord(
+            id = entity.id,
+            date = entity.date,
+            description = entity.description,
+            amount = entity.amount,
+            account = entity.account,
+            expenseCategory = entity.expenseCategory
     )
 
     private fun DocumentExpenseRecord.toEntity(): DocumentExpense = DocumentExpense(

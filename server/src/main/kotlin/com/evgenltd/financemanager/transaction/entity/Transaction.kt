@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 
-@Document("transactions")
+@Document("transaction")
 abstract class Transaction(
         @Id
         var id: String?,
@@ -17,7 +17,7 @@ abstract class Transaction(
 
 enum class Direction { IN, OUT }
 
-@Document("transactions")
+@Document("transaction")
 class AccountTransaction(
         id: String?,
         date: LocalDate,
@@ -27,7 +27,7 @@ class AccountTransaction(
         var account: String
 ) : Transaction(id, date, direction, amount, document)
 
-@Document("transactions")
+@Document("transaction")
 class ExpenseTransaction(
         id: String?,
         date: LocalDate,
@@ -37,7 +37,7 @@ class ExpenseTransaction(
         var expenseCategory: String
 ) : Transaction(id, date, direction, amount, document)
 
-@Document("transactions")
+@Document("transaction")
 class IncomeTransaction(
         id: String?,
         date: LocalDate,
@@ -47,7 +47,7 @@ class IncomeTransaction(
         var incomeCategory: String
 ) : Transaction(id, date, direction, amount, document)
 
-@Document("transactions")
+@Document("transaction")
 class PersonTransaction(
         id: String?,
         date: LocalDate,
@@ -57,7 +57,7 @@ class PersonTransaction(
         var person: String
 ) : Transaction(id, date, direction, amount, document)
 
-@Document("transactions")
+@Document("transaction")
 class ExchangeTransaction(
         id: String?,
         date: LocalDate,

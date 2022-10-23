@@ -1,8 +1,9 @@
 package com.evgenltd.financemanager.importdata.service.template
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.common.util.IdGenerator
-import com.evgenltd.financemanager.importdata.entity.ImportDataEntry
+import com.evgenltd.financemanager.document.entity.DocumentExpense
+import com.evgenltd.financemanager.document.entity.DocumentIncome
+import com.evgenltd.financemanager.importdata.entity.DocumentEntry
 import com.evgenltd.financemanager.transaction.entity.Direction
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -17,13 +18,13 @@ import kotlin.math.absoluteValue
 @ImportDataTemplate.Info("Tinkoff Account")
 class TinkoffTemplate : ImportDataTemplate {
 
-    override fun convert(path: Path): List<ImportDataEntry> {
-        val idGenerator = IdGenerator()
+    override fun convert(account: String, path: Path): List<DocumentEntry> {
         return Files.readAllLines(path)
                 .filterIndexed { index, _ -> index > 0 }
                 .map {
                     val parts = it.split(";")
                     Record(
+                            it,
                             parts[0].date(),
                             parts[3].clean(),
                             parts[6].amount(),
@@ -40,14 +41,16 @@ class TinkoffTemplate : ImportDataTemplate {
                             .toLong()
                     val direction = if (amountValue < 0) Direction.OUT else Direction.IN
                     val amount = Amount(amountValue.absoluteValue, "RUB")
-                    val id = idGenerator.next(it.date, direction, amount)
-                    ImportDataEntry(
-                            id = id,
-                            date = it.date,
-                            direction = direction,
-                            amount = amount,
-                            description = it.category + "|" + it.description,
-                            imported = false
+
+                    val document = if (direction == Direction.OUT) {
+                        DocumentExpense(null, it.date, "Expense $amount", amount, account, "")
+                    } else {
+                        DocumentIncome(null, it.date, "Income $amount", amount, account, "")
+                    }
+
+                    DocumentEntry(
+                            it.raw,
+                            document
                     )
                 }
     }
@@ -65,6 +68,7 @@ class TinkoffTemplate : ImportDataTemplate {
     }
 
     private data class Record(
+            val raw: String,
             val date: LocalDate,
             val status: String,
             val amount: BigDecimal,

@@ -1,0 +1,4 @@
+<mat-icon class="income" *ngIf="document.type == 'income'">arrow_downward</mat-icon>
+<mat-icon class="expense" *ngIf="document.type == 'expense'">arrow_upward</mat-icon>
+<mat-icon class="exchange" *ngIf="document.type == 'exchange'">sync</mat-icon>
+<div>{{document.value.description}}</div>

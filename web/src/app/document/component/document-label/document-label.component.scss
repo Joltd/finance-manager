@@ -1,0 +1,23 @@
+:host {
+  display: grid;
+  grid-template-columns: 2.5em 1fr;
+  grid-gap: 0.5em;
+  height: 2.5em;
+  align-items: center;
+}
+
+mat-icon {
+  justify-self: center;
+}
+
+.income {
+  color: green;
+}
+
+.expense {
+  color: red;
+}
+
+.exchange {
+  color: yellow;
+}

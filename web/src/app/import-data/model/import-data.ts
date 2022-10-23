@@ -1,29 +1,21 @@
 import {Amount} from "../../common/model/amount";
+import {DocumentTyped} from "../../document/model/document-typed";
 
 export class ImportData {
   id!: string
   account!: string
   template!: string
   file!: string
-  entries: ImportDataEntry[] = []
-  documents: ImportDataRelatedDocument[] = []
+  documents: DocumentEntry[] = []
+  other: DocumentTyped[] = []
 }
 
-export class ImportDataEntry {
-  id!: string
-  date!: string
-  direction!: 'IN' | 'OUT'
-  amount!: Amount
-  description!: string
-  imported: boolean = false
-  selected: boolean = false
+export class DocumentEntry {
+  source!: string
+  suggested!: DocumentTyped
+  existed!: DocumentTyped
 }
 
 export class ImportDataFileResponse {
   filename!: string
-}
-
-export class ImportDataRelatedDocument {
-  id!: string
-  date!: string
 }

@@ -1,5 +1,5 @@
-export class Document {
-  id!: string
-  date!: string
-  type!: string
+export interface Document {
+  date: string
+
+  description: string
 }

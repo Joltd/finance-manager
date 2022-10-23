@@ -1,7 +1,8 @@
-import {Component} from "@angular/core";
+import {Component, EventEmitter} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ImportData, ImportDataEntry, ImportDataRelatedDocument} from "../../model/import-data";
+import {ImportData, DocumentEntry} from "../../model/import-data";
 import {ImportDataService} from "../../service/import-data.service";
+import {DocumentTyped} from "../../../document/model/document-typed";
 
 @Component({
   selector: 'import-data-view',
@@ -13,6 +14,9 @@ export class ImportDataViewComponent {
   private id!: string
   importData: ImportData = new ImportData()
   dateGroups: DateGroup[] = []
+
+  entry: DocumentEntry | null = null
+  document!: DocumentTyped
 
   constructor(
     private router: Router,
@@ -32,24 +36,32 @@ export class ImportDataViewComponent {
         this.importData = result
         let dateGroups: Map<string, DateGroup> = new Map()
 
-        for (let entry of result.entries) {
-          let dateGroup = dateGroups.get(entry.date)
+        for (let document of result.documents) {
+          let date = document.suggested.value.date;
+          let dateGroup = dateGroups.get(date)
           if (!dateGroup) {
             dateGroup = new DateGroup()
-            dateGroup.date = entry.date
-            dateGroups.set(entry.date, dateGroup)
+            dateGroup.date = date
+            dateGroups.set(date, dateGroup)
           }
-          dateGroup.entries.push(entry)
+          let dateGroupEntry = new DateGroupEntry()
+          dateGroupEntry.source = document.source
+          dateGroupEntry.suggested = document.suggested
+          dateGroupEntry.existed = document.existed
+          dateGroup.entries.push(dateGroupEntry)
         }
 
-        for (let document of result.documents) {
-          let dateGroup = dateGroups.get(document.date)
+        for (let document of result.other) {
+          let date = document.value.date;
+          let dateGroup = dateGroups.get(date)
           if (!dateGroup) {
             dateGroup = new DateGroup()
-            dateGroup.date = document.date
-            dateGroups.set(document.date, dateGroup)
+            dateGroup.date = date
+            dateGroups.set(date, dateGroup)
           }
-          dateGroup.documents.push(document)
+          let dateGroupEntry = new DateGroupEntry()
+          dateGroupEntry.existed = document
+          dateGroup.entries.push(dateGroupEntry)
         }
 
         this.dateGroups = []
@@ -58,6 +70,33 @@ export class ImportDataViewComponent {
         }
         this.dateGroups.sort((left,right) => left.date > right.date ? 1 : -1)
       })
+  }
+
+  viewDocument(entry: DocumentEntry) {
+    this.entry = entry
+    this.document = entry.suggested
+  }
+
+  createDocument(entry: DocumentEntry, type: string) {
+    this.entry = entry
+    this.document = new DocumentTyped()
+    this.document.type = type
+    this.document.value = {
+      date: entry.suggested.value.date,
+      description: ''
+    }
+  }
+
+  saveDocument(document: DocumentTyped) {
+    if (this.entry == null) {
+      return
+    }
+    this.entry.suggested = document
+    this.entry = null
+  }
+
+  closeDocument() {
+    this.entry = null
   }
 
   save() {
@@ -78,6 +117,11 @@ export class ImportDataViewComponent {
 
 class DateGroup {
   date!: string
-  entries: ImportDataEntry[] = []
-  documents: ImportDataRelatedDocument[] = []
+  entries: DateGroupEntry[] = []
+}
+
+class DateGroupEntry {
+  source!: string
+  suggested!: DocumentTyped
+  existed!: DocumentTyped
 }

@@ -1,8 +1,16 @@
-<edit-toolbar title="Expense" [save]="save"></edit-toolbar>
+<mat-card class="toolbar">
+  <div class="title">Income</div>
+  <button mat-icon-button (click)="save()" [disabled]="!form.valid">
+    <mat-icon>done</mat-icon>
+  </button>
+  <button mat-icon-button (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-card>
 
 <mat-card>
 
-  <form [formGroup]="document">
+  <form [formGroup]="form">
 
     <mat-form-field>
       <mat-label>Date</mat-label>

@@ -1,0 +1,54 @@
+<mat-card class="toolbar">
+  <div class="title">Exchange</div>
+  <button mat-icon-button (click)="save()" [disabled]="!form.valid">
+    <mat-icon>done</mat-icon>
+  </button>
+  <button mat-icon-button (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-card>
+
+<mat-card>
+
+  <form [formGroup]="form">
+
+    <mat-form-field>
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="date">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker touchUi #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Account from</mat-label>
+      <reference-input api="/account/reference" formControlName="accountFrom"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Amount from</mat-label>
+      <amount-input formControlName="amountFrom"></amount-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Account to</mat-label>
+      <reference-input api="/account/reference" formControlName="accountTo"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Amount to</mat-label>
+      <amount-input formControlName="amountTo"></amount-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Commission expense category</mat-label>
+      <reference-input api="/expense/reference" formControlName="commissionExpenseCategory"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Commission amount</mat-label>
+      <amount-input formControlName="commissionAmount"></amount-input>
+    </mat-form-field>
+
+  </form>
+
+</mat-card>

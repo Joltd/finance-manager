@@ -1,3 +1,14 @@
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr min-content min-content;
+  align-items: center;
+  margin-bottom: 1em;
+
+  .title {
+    font-size: 1.5em;
+  }
+}
+
 form {
   display: grid;
   grid-auto-flow: row;

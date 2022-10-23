@@ -19,8 +19,6 @@ class DocumentIncomeService(
         private val transactionService: TransactionService
 ) {
 
-    fun byId(id: String): DocumentIncomeRecord = documentIncomeRepository.find(id).toRecord()
-
     fun update(record: DocumentIncomeRecord) {
         val entity = record.toEntity()
         documentIncomeRepository.save(entity)
@@ -30,17 +28,6 @@ class DocumentIncomeService(
         IncomeTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.incomeCategory)
                 .also { transactionService.save(it) }
     }
-
-    fun delete(id: String) = documentIncomeRepository.deleteById(id)
-
-    private fun DocumentIncome.toRecord(): DocumentIncomeRecord = DocumentIncomeRecord(
-            id = id,
-            date = date,
-            description = description,
-            amount = amount,
-            account = account,
-            incomeCategory = incomeCategory
-    )
 
     private fun DocumentIncomeRecord.toEntity(): DocumentIncome = DocumentIncome(
             id = id,

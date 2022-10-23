@@ -1,4 +1,4 @@
-import {Component, NgModule} from "@angular/core";
+import {NgModule} from "@angular/core";
 import {ImportDataViewComponent} from "./component/import-data-view/import-data-view.component";
 import {MatCardModule} from "@angular/material/card";
 import {MatListModule} from "@angular/material/list";
@@ -13,6 +13,8 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatInputModule} from "@angular/material/input";
+import {DocumentModule} from "../document/document.module";
+import {MatRippleModule} from "@angular/material/core";
 
 @NgModule({
   declarations: [
@@ -32,7 +34,9 @@ import {MatInputModule} from "@angular/material/input";
     NgForOf,
     MatMenuModule,
     MatCheckboxModule,
-    MatInputModule
+    MatInputModule,
+    DocumentModule,
+    MatRippleModule
   ],
   exports: [
     ImportDataViewComponent,

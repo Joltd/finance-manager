@@ -110,7 +110,6 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   }
 
   get empty() {
-    // console.log(`empty() "${this._value}"`)
     return this._value == null
   }
 

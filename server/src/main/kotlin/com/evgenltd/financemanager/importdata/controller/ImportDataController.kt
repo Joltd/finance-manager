@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.importdata.controller
 
-import com.evgenltd.financemanager.importdata.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importdata.record.ImportDataFilerResponse
 import com.evgenltd.financemanager.importdata.record.ImportDataRecord
 import com.evgenltd.financemanager.importdata.service.ImportDataService

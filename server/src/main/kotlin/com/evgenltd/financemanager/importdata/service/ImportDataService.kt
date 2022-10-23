@@ -1,16 +1,16 @@
 package com.evgenltd.financemanager.importdata.service
 
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.util.IdGenerator
+import com.evgenltd.financemanager.document.entity.Document
+import com.evgenltd.financemanager.document.entity.DocumentExpense
+import com.evgenltd.financemanager.document.entity.DocumentIncome
+import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importdata.entity.ImportData
-import com.evgenltd.financemanager.importdata.entity.ImportDataEntry
-import com.evgenltd.financemanager.importdata.record.ImportDataEntryRecord
-import com.evgenltd.financemanager.importdata.record.ImportDataRecord
-import com.evgenltd.financemanager.importdata.record.ImportDataRelatedDocument
+import com.evgenltd.financemanager.importdata.record.*
 import com.evgenltd.financemanager.importdata.repository.ImportDataRepository
 import com.evgenltd.financemanager.importdata.service.template.ImportDataTemplate
 import com.evgenltd.financemanager.reference.record.Reference
-import com.evgenltd.financemanager.transaction.entity.AccountTransaction
-import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
@@ -23,7 +23,7 @@ class ImportDataService(
         private val importDataProperties: ImportDataProperties,
         private val importDataRepository: ImportDataRepository,
         private val importDataTemplates: List<ImportDataTemplate>,
-        private val accountTransactionService: AccountTransactionService
+        private val documentService: DocumentService
 ) {
 
     @PostConstruct
@@ -46,34 +46,36 @@ class ImportDataService(
                         account = it.account,
                         template = it.template,
                         file = it.file,
-                        entries = listOf(),
-                        documents = listOf()
+                        documents = listOf(),
+                        other = listOf()
                 )
             }
 
     fun byId(id: String): ImportDataRecord {
 
         val dataImport = importDataRepository.find(id)
-        val documents = accountTransactionService.findTransactionByAccount(dataImport.account)
-                .map { ImportDataRelatedDocument(it.id!!, it.date) }
+
+        val existedDocuments = documentService.findDocumentByAccount(dataImport.account)
+                .asIndex()
+                .toMutableMap()
+
+        val generator = IdGenerator()
+        val documents = dataImport.documents.map {
+            val hash = generator.next(it.suggested.hash())
+            DocumentEntryRecord(
+                    it.source,
+                    it.suggested.toTypedRecord(),
+                    existedDocuments.remove(hash)?.toTypedRecord()
+            )
+        }
 
         return ImportDataRecord(
                 id = dataImport.id,
                 account = dataImport.account,
                 template = dataImport.template,
                 file = dataImport.file,
-                entries = dataImport.entries
-                        .map {
-                            ImportDataEntryRecord(
-                                    id = it.id,
-                                    date = it.date,
-                                    direction = it.direction,
-                                    amount = it.amount,
-                                    description = it.description,
-                                    imported = it.imported
-                            )
-                        },
-                documents = documents
+                documents = documents,
+                other = existedDocuments.values.map { it.toTypedRecord() }
         )
 
     }
@@ -91,20 +93,8 @@ class ImportDataService(
         val entity = record.toEntity()
 
         val path = Paths.get(importDataProperties.directory, entity.file)
-        entity.entries = importDataTemplates.first { it.javaClass.simpleName == entity.template }
-                .convert(path)
-
-        val transactions = accountTransactionService.findTransactionByAccount(entity.account)
-                .map { it.asString() }
-                .groupBy { it }
-                .filter { it.value.size == 1 }
-                .keys
-
-        entity.entries.onEach {
-            if (transactions.contains(it.asString())) {
-                it.imported = true
-            }
-        }
+        entity.documents = importDataTemplates.first { it.javaClass.simpleName == entity.template }
+                .convert(entity.account, path)
 
         importDataRepository.save(entity)
     }
@@ -129,11 +119,18 @@ class ImportDataService(
             account = account,
             template = template,
             file = file,
-            entries = emptyList()
+            documents = emptyList()
     )
 
-    private fun AccountTransaction.asString() = "$date-$direction-$amount"
+    private fun Document.hash(): String = when (this) {
+        is DocumentExpense -> "$date-$amount-$account-$expenseCategory"
+        is DocumentIncome -> "$date-$amount-$account-$incomeCategory"
+        else -> id!!
+    }
 
-    private fun ImportDataEntry.asString() = "$date-$direction-$amount"
+    private fun List<Document>.asIndex(): Map<String,Document> {
+        val generator = IdGenerator()
+        return this.associateBy { generator.next(it.hash()) }
+    }
 
 }

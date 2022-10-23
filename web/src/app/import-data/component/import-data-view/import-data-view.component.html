@@ -1,41 +1,58 @@
-<edit-toolbar title="Import"></edit-toolbar>
+<ng-container *ngIf="entry == null">
+  <edit-toolbar title="Import"></edit-toolbar>
 
-<mat-card class="import-data">
+  <mat-card class="import-data">
 
-  <mat-form-field>
-    <mat-label>Account</mat-label>
-    <input matInput [value]="importData.account" readonly>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Account</mat-label>
+      <input matInput [value]="importData.account" readonly>
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Template</mat-label>
-    <input matInput [value]="importData.template" readonly>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Template</mat-label>
+      <input matInput [value]="importData.template" readonly>
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>File</mat-label>
-    <input matInput [value]="importData.file" readonly>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>File</mat-label>
+      <input matInput [value]="importData.file" readonly>
+    </mat-form-field>
 
-</mat-card>
+  </mat-card>
 
-<mat-card class="import-data-entries">
+  <mat-card class="import-data-entries">
 
-  <div class="date-group" *ngFor="let dateGroup of dateGroups">
-    <h2 class="date">{{dateGroup.date}}</h2>
-    <mat-action-list>
-      <button mat-list-item [class.entry-imported]="entry.imported" *ngFor="let entry of dateGroup.entries">
-        <mat-icon matListIcon class="entry-in" *ngIf="entry.direction == 'IN'">arrow_downward</mat-icon>
-        <mat-icon matListIcon class="entry-out" *ngIf="entry.direction == 'OUT'">arrow_upward</mat-icon>
-        <div matLine>{{entry.amount | format}}</div>
-        <div matLine>{{entry.description}}</div>
-      </button>
-    </mat-action-list>
     <mat-list>
-      <mat-list-item *ngFor="let document of dateGroup.documents">
-        <div matLine>{{document.id}}</div>
-      </mat-list-item>
+      <ng-container *ngFor="let dateGroup of dateGroups">
+        <h2 matSubheader>{{dateGroup.date}}</h2>
+        <mat-list-item *ngFor="let entry of dateGroup.entries">
+          <div matLine class="line">
+            <mat-checkbox></mat-checkbox>
+            <document-label matRipple
+                            [matRippleColor]="'#00000020'"
+                            class="suggested"
+                            *ngIf="entry.suggested"
+                            [document]="entry.suggested"
+                            [mat-menu-trigger-for]="menu"></document-label>
+            <document-label *ngIf="entry.existed" [document]="entry.existed"></document-label>
+            <div *ngIf="!entry.suggested"></div>
+            <div *ngIf="!entry.existed"></div>
+            <mat-menu #menu>
+              <button mat-menu-item (click)="viewDocument(entry)">View</button>
+              <button mat-menu-item (click)="createDocument(entry, 'expense')">Expense</button>
+              <button mat-menu-item (click)="createDocument(entry, 'income')">Income</button>
+              <button mat-menu-item (click)="createDocument(entry, 'exchange')">Exchange</button>
+            </mat-menu>
+          </div>
+        </mat-list-item>
+      </ng-container>
     </mat-list>
-  </div>
 
-</mat-card>
+  </mat-card>
+</ng-container>
+
+<document-view *ngIf="entry != null"
+               [type]="entry.suggested.type"
+               [document]="entry.suggested.value"
+               (onSave)="saveDocument($event)"
+               (onClose)="closeDocument()"></document-view>

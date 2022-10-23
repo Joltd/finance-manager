@@ -4,18 +4,21 @@ import {Document} from "../../model/document";
 import {DocumentTyped} from "../../model/document-typed";
 
 @Component({
-  selector: 'document-expense',
-  templateUrl: 'document-expense.component.html',
-  styleUrls: ['document-expense.component.scss']
+  selector: 'document-exchange',
+  templateUrl: 'document-exchange.component.html',
+  styleUrls: ['document-exchange.component.scss']
 })
-export class DocumentExpenseComponent {
+export class DocumentExchangeComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
     date: new FormControl(null, Validators.required),
-    account: new FormControl(null, Validators.required),
-    expenseCategory: new FormControl(null, Validators.required),
-    amount: new FormControl(null, Validators.required),
+    accountFrom: new FormControl(null, Validators.required),
+    amountFrom: new FormControl(null, Validators.required),
+    accountTo: new FormControl(null, Validators.required),
+    amountTo: new FormControl(null, Validators.required),
+    commissionExpenseCategory: new FormControl(null),
+    commissionAmount: new FormControl(null),
     description: new FormControl('')
   })
 
@@ -36,13 +39,13 @@ export class DocumentExpenseComponent {
     }
 
     let document = new DocumentTyped()
-    document.type = 'expense'
+    document.type = 'exchange'
     document.value = this.form.value
-    this.onSave.emit(document)
+    this.onSave.next(document)
   }
 
   close() {
-    this.onClose.emit()
+    this.onClose.next()
   }
 
 }

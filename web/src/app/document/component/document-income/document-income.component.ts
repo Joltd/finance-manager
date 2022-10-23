@@ -1,8 +1,7 @@
-import {Component, EventEmitter} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {Observable} from "rxjs";
-import {ActivatedRoute} from "@angular/router";
-import {DocumentIncomeService} from "../../service/document-income.service";
+import {Document} from "../../model/document";
+import {DocumentTyped} from "../../model/document-typed";
 
 @Component({
   selector: 'document-income',
@@ -11,7 +10,7 @@ import {DocumentIncomeService} from "../../service/document-income.service";
 })
 export class DocumentIncomeComponent {
 
-  document: FormGroup = new FormGroup({
+  form: FormGroup = new FormGroup({
     id: new FormControl(null),
     date: new FormControl(null, Validators.required),
     account: new FormControl(null, Validators.required),
@@ -19,36 +18,31 @@ export class DocumentIncomeComponent {
     amount: new FormControl(null, Validators.required),
     description: new FormControl('')
   })
-  save: () => Observable<void> = () => this.doSave()
 
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private documentIncomeService: DocumentIncomeService
-  ) {
-    this.activatedRoute.params
-      .subscribe(params => {
-        let id = params['id']
-        if (id != 'new') {
-          this.document.patchValue({id})
-          this.load()
-        }
-      })
+  @Input()
+  set document(document: Document) {
+    this.form.patchValue(document)
   }
 
-  private load() {
-    let id = this.document.value.id;
-    if (id == null) {
+  @Output()
+  onSave: EventEmitter<DocumentTyped> = new EventEmitter<DocumentTyped>()
+
+  @Output()
+  onClose: EventEmitter<void> = new EventEmitter<void>()
+
+  save() {
+    if (!this.form.valid) {
       return
     }
-    this.documentIncomeService.byId(id)
-      .subscribe(result => this.document.setValue(result))
+
+    let document = new DocumentTyped()
+    document.type = 'income'
+    document.value = this.form.value
+    this.onSave.next(document)
   }
 
-  private doSave(): Observable<void> {
-    let eventEmitter = new EventEmitter<void>()
-    this.documentIncomeService.update(this.document.value)
-      .subscribe(() => eventEmitter.emit())
-    return eventEmitter
+  close() {
+    this.onClose.next()
   }
 
 }

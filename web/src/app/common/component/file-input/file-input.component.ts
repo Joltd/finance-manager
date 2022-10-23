@@ -96,7 +96,6 @@ export class FileInputComponent implements MatFormFieldControl<File>, ControlVal
   }
 
   get shouldLabelFloat() {
-    // console.log(`${this.focused || !this.empty}`)
     return this.focused || !this.empty
   }
 
