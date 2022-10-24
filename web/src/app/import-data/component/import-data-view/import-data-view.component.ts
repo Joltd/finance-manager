@@ -14,7 +14,6 @@ export class ImportDataViewComponent {
   private id!: string
   importData: ImportData = new ImportData()
   dateGroups: DateGroup[] = []
-
   entry: DocumentEntry | null = null
   document: DocumentTyped | null = null
   create: boolean = false

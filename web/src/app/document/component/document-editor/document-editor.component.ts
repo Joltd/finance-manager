@@ -1,7 +1,6 @@
 import {Component} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {DocumentService} from "../../service/document.service";
-import {NavigationService} from "../../../common/service/navigation.service";
 import {Document} from "../../model/document";
 import {DocumentTyped} from "../../model/document-typed";
 
@@ -19,7 +18,7 @@ export class DocumentEditorComponent {
   constructor(
     private activatedRoute: ActivatedRoute,
     private documentService: DocumentService,
-    private navigationService: NavigationService
+    private router: Router
   ) {
     this.activatedRoute.params
       .subscribe(params => {
@@ -51,7 +50,7 @@ export class DocumentEditorComponent {
   }
 
   close() {
-    this.navigationService.back()
+    this.router.navigate(['import-data']).then()
   }
 
 }

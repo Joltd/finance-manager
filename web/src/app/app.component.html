@@ -6,7 +6,10 @@
 <mat-sidenav-container>
   <mat-sidenav #left position="start" class="left-side">
     <mat-nav-list>
-      <a mat-list-item [routerLink]="['reference']" (click)="left.close()">Reference</a>
+      <a mat-list-item [routerLink]="['account']" (click)="left.close()">Account</a>
+      <a mat-list-item [routerLink]="['expense']" (click)="left.close()">Expense</a>
+      <a mat-list-item [routerLink]="['income']" (click)="left.close()">Income</a>
+      <mat-divider></mat-divider>
       <a mat-list-item [routerLink]="['document']" (click)="left.close()">Document</a>
       <a mat-list-item [routerLink]="['import-data']" (click)="left.close()">Import</a>
       <a mat-list-item [routerLink]="['settings']" (click)="left.close()">Settings</a>

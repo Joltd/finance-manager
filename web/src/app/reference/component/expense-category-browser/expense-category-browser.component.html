@@ -1,0 +1,15 @@
+<mat-card>
+  <mat-list>
+    <mat-list-item *ngFor="let expenseCategory of expenseCategories">
+      <div matLine class="mat-line-with-menu">
+        <div>{{expenseCategory.name}}</div>
+        <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
+        <mat-menu #menu>
+          <button mat-menu-item (click)="edit(expenseCategory.id)">Edit</button>
+          <button mat-menu-item (click)="delete(expenseCategory.id)">Remove</button>
+        </mat-menu>
+      </div>
+    </mat-list-item>
+  </mat-list>
+</mat-card>
+<button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>
