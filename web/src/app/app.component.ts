@@ -10,25 +10,15 @@ import {RestInterceptorService} from "./common/service/rest-interceptor.service"
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
 
-  message: string = "None"
   version: string = environment.version
 
   constructor(private restInterceptorService: RestInterceptorService) {}
 
-  ngOnInit(): void {
-    // this.http.get<MainResponse>('/main', TypeUtils.of(MainResponse))
-    //   .subscribe(result => this.message = result.message)
-  }
-
   loading(): boolean {
     return this.restInterceptorService.loading
-    // return true
   }
 
 }
 
-class MainResponse {
-  message!: string
-}

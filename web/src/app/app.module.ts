@@ -22,6 +22,11 @@ import {DocumentModule} from "./document/document.module";
 import {MAT_DATE_LOCALE} from "@angular/material/core";
 import {MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule} from "@angular/material-moment-adapter";
 import {ReferenceModule} from "./reference/reference.module";
+import {MatBadgeModule} from "@angular/material/badge";
+import {ReportModule} from "./report/report.module";
+import {MatListModule} from "@angular/material/list";
+import {MatIconModule} from "@angular/material/icon";
+import {MatButtonModule} from "@angular/material/button";
 
 @NgModule({
   declarations: [
@@ -48,7 +53,12 @@ import {ReferenceModule} from "./reference/reference.module";
     MatSidenavModule,
     DocumentModule,
     MatMomentDateModule,
-    ReferenceModule
+    ReferenceModule,
+    MatBadgeModule,
+    ReportModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule
   ],
   providers: [
     restInterceptorProvider,

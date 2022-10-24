@@ -5,6 +5,7 @@ import {ImportDataViewComponent} from "./import-data/component/import-data-view/
 import {ImportDataBeginComponent} from "./import-data/component/import-data-begin/import-data-begin.component";
 import {DocumentBrowserComponent} from "./document/component/document-browser/document-browser.component";
 import {DocumentEditorComponent} from "./document/component/document-editor/document-editor.component";
+import {DashboardComponent} from "./report/component/dashboard/dashboard.component";
 
 const routes: Routes = [
   { path: 'document', component: DocumentBrowserComponent },
@@ -12,7 +13,8 @@ const routes: Routes = [
   { path: 'import-data', component: ImportDataBrowserComponent },
   { path: 'import-data/new', component: ImportDataBeginComponent },
   { path: 'import-data/:id', component: ImportDataViewComponent },
-  { path: '', redirectTo: '/document', pathMatch: 'full' }
+  { path: 'dashboard', component: DashboardComponent },
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];
 
 @NgModule({

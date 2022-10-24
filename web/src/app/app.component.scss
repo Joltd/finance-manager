@@ -4,6 +4,14 @@
   height: 100%;
 }
 
+.app-title {
+  cursor: pointer;
+}
+
+.app-version {
+  margin-left: 1em;
+}
+
 .loading {
   background-color: #00000070;
   width: 100vw;
