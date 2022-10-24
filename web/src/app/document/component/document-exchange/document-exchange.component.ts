@@ -27,6 +27,9 @@ export class DocumentExchangeComponent {
     this.form.patchValue(document)
   }
 
+  @Input()
+  hint: string | null = null
+
   @Output()
   onSave: EventEmitter<DocumentTyped> = new EventEmitter<DocumentTyped>()
 

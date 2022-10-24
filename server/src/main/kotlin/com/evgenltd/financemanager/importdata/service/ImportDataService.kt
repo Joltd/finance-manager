@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.IdGenerator
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.document.entity.Document
+import com.evgenltd.financemanager.document.entity.DocumentExchange
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.entity.DocumentIncome
 import com.evgenltd.financemanager.document.record.DocumentTypedRecord
@@ -63,11 +64,16 @@ class ImportDataService(
 
         val generator = IdGenerator()
         val documents = dataImport.documents.map {
-            val hash = generator.next(it.suggested.hash())
+            val existed = it.suggested?.let { suggested ->
+                val hash = generator.next(suggested.hash())
+                existedDocuments.remove(hash)?.toTypedRecord()
+            }
+
             DocumentEntryRecord(
+                    it.id,
                     it.source,
-                    it.suggested.toTypedRecord(),
-                    existedDocuments.remove(hash)?.toTypedRecord()
+                    it.suggested?.toTypedRecord(),
+                    existed
             )
         }
 
@@ -97,8 +103,27 @@ class ImportDataService(
         val path = Paths.get(importDataProperties.directory, entity.file)
         entity.documents = importDataTemplates.first { it.javaClass.simpleName == entity.template }
                 .convert(entity.account, path)
+                .onEach {
+                    val suggested = it.suggested
+                    if (suggested != null) {
+                        suggested.description = generateDescription(suggested)
+                    }
+                }
 
         importDataRepository.save(entity)
+    }
+
+    fun updateDocumentEntry(id: String, entryRecord: DocumentEntryRecord) {
+        val importData = importDataRepository.find(id)
+        importData.documents
+                .find { it.id == entryRecord.id }
+                ?.let {
+                    it.suggested = entryRecord.suggested?.toEntity()
+                    it.suggested?.let { suggested ->
+                        suggested.description = generateDescription(suggested)
+                    }
+                }
+        importDataRepository.save(importData)
     }
 
     fun performImport(document: DocumentTypedRecord): ImportDataResult = try {
@@ -119,10 +144,18 @@ class ImportDataService(
             documents = emptyList()
     )
 
+    private fun generateDescription(document: Document): String = when (document) {
+        is DocumentExpense -> "${document.amount}"
+        is DocumentIncome -> "${document.amount}"
+        is DocumentExchange -> "${document.amountFrom} -> ${document.amountTo}"
+        else -> throw IllegalStateException("Unknown document type ${document::class}")
+    }
+
     private fun Document.hash(): String = when (this) {
         is DocumentExpense -> "$date-$amount-$account-$expenseCategory"
         is DocumentIncome -> "$date-$amount-$account-$incomeCategory"
-        else -> id!!
+        is DocumentExchange -> "$date-$amountFrom"
+        else -> id ?: System.currentTimeMillis().toString()
     }
 
     private fun List<Document>.asIndex(): Map<String,Document> {

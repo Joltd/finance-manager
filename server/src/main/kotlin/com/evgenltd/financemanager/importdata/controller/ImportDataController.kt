@@ -1,8 +1,10 @@
 package com.evgenltd.financemanager.importdata.controller
 
 import com.evgenltd.financemanager.document.record.DocumentTypedRecord
+import com.evgenltd.financemanager.importdata.record.DocumentEntryRecord
 import com.evgenltd.financemanager.importdata.record.ImportDataFilerResponse
 import com.evgenltd.financemanager.importdata.record.ImportDataRecord
+import com.evgenltd.financemanager.importdata.record.ImportDataResult
 import com.evgenltd.financemanager.importdata.service.ImportDataService
 import com.evgenltd.financemanager.reference.record.Reference
 import org.springframework.web.bind.annotation.*
@@ -32,8 +34,14 @@ class ImportDataController(
     fun uploadFile(@RequestParam("file") file: MultipartFile): ImportDataFilerResponse =
             ImportDataFilerResponse(importDataService.uploadFile(file))
 
+    @PatchMapping("/import-data/{id}")
+    fun updateDocumentEntry(
+            @PathVariable("id") id: String,
+            @RequestBody record: DocumentEntryRecord
+    ) = importDataService.updateDocumentEntry(id, record)
+
     @PatchMapping("/import-data")
-    fun performImport(@RequestBody document: DocumentTypedRecord) = importDataService.performImport(document)
+    fun performImport(@RequestBody document: DocumentTypedRecord): ImportDataResult = importDataService.performImport(document)
 
     @DeleteMapping("/import-data/{id}")
     fun delete(@PathVariable("id") id: String) = importDataService.delete(id)

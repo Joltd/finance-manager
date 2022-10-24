@@ -21,6 +21,7 @@ import {MatSidenavModule} from "@angular/material/sidenav";
 import {DocumentModule} from "./document/document.module";
 import {MAT_DATE_LOCALE} from "@angular/material/core";
 import {MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule} from "@angular/material-moment-adapter";
+import {ReferenceModule} from "./reference/reference.module";
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import {MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule} from "@angular/mat
     MatProgressSpinnerModule,
     MatSidenavModule,
     DocumentModule,
-    MatMomentDateModule
+    MatMomentDateModule,
+    ReferenceModule
   ],
   providers: [
     restInterceptorProvider,

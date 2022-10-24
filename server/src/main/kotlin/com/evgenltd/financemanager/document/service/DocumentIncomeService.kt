@@ -29,13 +29,4 @@ class DocumentIncomeService(
                 .also { transactionService.save(it) }
     }
 
-    private fun DocumentIncomeRecord.toEntity(): DocumentIncome = DocumentIncome(
-            id = id,
-            date = date,
-            description = description,
-            amount = amount,
-            account = account,
-            incomeCategory = incomeCategory
-    )
-
 }

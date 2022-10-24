@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.reference.entity.IncomeCategory
 import com.evgenltd.financemanager.reference.record.ExpenseCategoryRecord
 import com.evgenltd.financemanager.reference.record.IncomeCategoryRecord
 import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.reference.record.ReferencePattern
 import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import com.evgenltd.financemanager.reference.repository.IncomeCategoryRepository
 import org.springframework.stereotype.Service
@@ -41,16 +42,22 @@ class IncomeCategoryService(
 
     fun delete(id: String) = incomeCategoryRepository.deleteById(id)
 
+    fun patterns(): List<ReferencePattern> = incomeCategoryRepository.findAll()
+            .map { it.patterns.map { pattern -> ReferencePattern(it.id!!, pattern.toRegex()) } }
+            .flatten()
+
     private fun IncomeCategory.toRecord(): IncomeCategoryRecord = IncomeCategoryRecord(
-            id,
-            name,
-            deleted
+            id = id,
+            name = name,
+            deleted = deleted,
+            patterns = patterns
     )
 
     private fun IncomeCategoryRecord.toEntity(): IncomeCategory = IncomeCategory(
-            id,
-            name,
-            deleted
+            id = id,
+            name = name,
+            deleted = deleted,
+            patterns = patterns
     )
 
 }

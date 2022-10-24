@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {ImportData, ImportDataFileResponse, ImportDataResult} from "../model/import-data";
+import {DocumentEntry, ImportData, ImportDataFileResponse, ImportDataResult} from "../model/import-data";
 import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {TypeUtils} from "../../common/service/type-utils";
@@ -29,6 +29,10 @@ export class ImportDataService {
 
   create(importData: ImportData): Observable<void> {
     return this.http.post<void>('/import-data', importData)
+  }
+
+  updateDocumentEntry(id: string, entry: DocumentEntry): Observable<void> {
+    return this.http.patch<void>('/import-data/' + id, entry)
   }
 
   performImport(document: DocumentTyped): Observable<ImportDataResult> {

@@ -15,6 +15,9 @@ export class DocumentViewComponent {
   @Input()
   document!: Document
 
+  @Input()
+  hint: string | null = null
+
   @Output()
   onSave: EventEmitter<DocumentTyped> = new EventEmitter<DocumentTyped>()
 

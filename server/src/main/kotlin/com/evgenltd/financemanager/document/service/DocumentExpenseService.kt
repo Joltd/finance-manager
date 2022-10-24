@@ -26,22 +26,4 @@ class DocumentExpenseService(
                 .also { transactionService.save(it) }
     }
 
-    fun toRecord(entity: DocumentExpense): DocumentExpenseRecord = DocumentExpenseRecord(
-            id = entity.id,
-            date = entity.date,
-            description = entity.description,
-            amount = entity.amount,
-            account = entity.account,
-            expenseCategory = entity.expenseCategory
-    )
-
-    private fun DocumentExpenseRecord.toEntity(): DocumentExpense = DocumentExpense(
-            id = id,
-            date = date,
-            description = description,
-            amount = amount,
-            account = account,
-            expenseCategory = expenseCategory
-    )
-
 }

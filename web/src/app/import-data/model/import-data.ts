@@ -11,6 +11,7 @@ export class ImportData {
 }
 
 export class DocumentEntry {
+  id!: string
   source!: string
   suggested!: DocumentTyped
   existed!: DocumentTyped

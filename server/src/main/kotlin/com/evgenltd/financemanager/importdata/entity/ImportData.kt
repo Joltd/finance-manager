@@ -11,6 +11,7 @@ class ImportData(
 )
 
 class DocumentEntry(
-        val source: String,
-        val suggested: Document
+        var id: String,
+        var source: String,
+        var suggested: Document?
 )

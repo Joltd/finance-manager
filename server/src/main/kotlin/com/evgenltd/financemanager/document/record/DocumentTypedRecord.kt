@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.document.record
 
+import com.evgenltd.financemanager.document.entity.Document
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
@@ -10,7 +11,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 class DocumentTypedRecord(
         val type: String,
         val value: DocumentRecord
-)
+) {
+
+    fun toEntity(): Document = when (value) {
+        is DocumentExpenseRecord -> value.toEntity()
+        is DocumentIncomeRecord -> value.toEntity()
+        is DocumentExchangeRecord -> value.toEntity()
+        else -> throw IllegalStateException("Unknown document type ${this::class}")
+    }
+
+}
 
 class DocumentTypedRecordDeserializer : JsonDeserializer<DocumentTypedRecord>() {
 

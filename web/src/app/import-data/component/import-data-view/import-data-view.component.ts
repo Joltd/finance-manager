@@ -1,4 +1,4 @@
-import {Component, EventEmitter} from "@angular/core";
+import {Component} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ImportData, DocumentEntry} from "../../model/import-data";
 import {ImportDataService} from "../../service/import-data.service";
@@ -16,7 +16,8 @@ export class ImportDataViewComponent {
   dateGroups: DateGroup[] = []
 
   entry: DocumentEntry | null = null
-  document!: DocumentTyped
+  document: DocumentTyped | null = null
+  create: boolean = false
 
   constructor(
     private router: Router,
@@ -31,20 +32,19 @@ export class ImportDataViewComponent {
   }
 
   load() {
+    this.dateGroups = []
+    this.entry = null
+    this.document = null
     this.importDataService.byId(this.id)
       .subscribe(result => {
         this.importData = result
         let dateGroups: Map<string, DateGroup> = new Map()
 
         for (let document of result.documents) {
-          let date = document.suggested.value.date;
-          let dateGroup = dateGroups.get(date)
-          if (!dateGroup) {
-            dateGroup = new DateGroup()
-            dateGroup.date = date
-            dateGroups.set(date, dateGroup)
-          }
+          let date = document.suggested?.value?.date || 'Other'
+          let dateGroup = this.dateGroup(dateGroups, date)
           let dateGroupEntry = new DateGroupEntry()
+          dateGroupEntry.id = document.id
           dateGroupEntry.source = document.source
           dateGroupEntry.suggested = document.suggested
           dateGroupEntry.existed = document.existed
@@ -53,18 +53,12 @@ export class ImportDataViewComponent {
 
         for (let document of result.other) {
           let date = document.value.date;
-          let dateGroup = dateGroups.get(date)
-          if (!dateGroup) {
-            dateGroup = new DateGroup()
-            dateGroup.date = date
-            dateGroups.set(date, dateGroup)
-          }
+          let dateGroup = this.dateGroup(dateGroups, date)
           let dateGroupEntry = new DateGroupEntry()
           dateGroupEntry.existed = document
           dateGroup.entries.push(dateGroupEntry)
         }
 
-        this.dateGroups = []
         for (let dateGroup of dateGroups.values()) {
           this.dateGroups.push(dateGroup)
         }
@@ -72,9 +66,23 @@ export class ImportDataViewComponent {
       })
   }
 
+  private dateGroup(dateGroups: Map<string, DateGroup>, date: string): DateGroup {
+    let dateGroup = dateGroups.get(date)
+    if (!dateGroup) {
+      dateGroup = new DateGroup()
+      dateGroup.date = date
+      dateGroups.set(date, dateGroup)
+    }
+    return dateGroup
+  }
+
   viewDocument(entry: DocumentEntry) {
+    if (!entry.suggested) {
+      return
+    }
     this.entry = entry
     this.document = entry.suggested
+    this.create = false
   }
 
   createDocument(entry: DocumentEntry, type: string) {
@@ -82,25 +90,36 @@ export class ImportDataViewComponent {
     this.document = new DocumentTyped()
     this.document.type = type
     this.document.value = {
-      date: entry.suggested.value.date,
+      date: '',
       description: ''
     }
+    this.create = true
   }
 
   saveDocument(document: DocumentTyped) {
     if (this.entry == null) {
       return
     }
+
     this.entry.suggested = document
-    this.entry = null
+
+    if (this.create) {
+      this.importDataService.updateDocumentEntry(this.id, this.entry)
+        .subscribe(() => this.load())
+    } else {
+      this.closeDocument()
+    }
   }
 
   closeDocument() {
     this.entry = null
+    this.document = null
+    this.create = false
   }
 
   save() {
     let nodes = this.asLinkList()
+    console.log(nodes.length)
     if (nodes.length > 0) {
       this.performImport(nodes[0])
     }
@@ -112,6 +131,8 @@ export class ImportDataViewComponent {
         node.entry.state = result.result ? 'success' : 'fail'
         if (node.next != null) {
           this.performImport(node.next)
+        } else {
+          this.load()
         }
       })
   }
@@ -146,6 +167,7 @@ class DateGroup {
 }
 
 class DateGroupEntry {
+  id!: string
   selected: boolean = false
   state: 'none' | 'success' | 'fail' = 'none'
   source!: string

@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.document.record
 
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.document.entity.DocumentExpense
 import java.time.LocalDate
 
 class DocumentExpenseRecord(
@@ -10,4 +11,15 @@ class DocumentExpenseRecord(
         val amount: Amount,
         val account: String,
         val expenseCategory: String
-) : DocumentRecord
+) : DocumentRecord {
+
+    fun toEntity(): DocumentExpense = DocumentExpense(
+            id = id,
+            date = date,
+            description = description,
+            amount = amount,
+            account = account,
+            expenseCategory = expenseCategory
+    )
+
+}

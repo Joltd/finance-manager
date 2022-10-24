@@ -1,5 +1,14 @@
-<ng-container *ngIf="entry == null">
-  <edit-toolbar title="Import"></edit-toolbar>
+<ng-container *ngIf="entry == null || document == null">
+
+  <mat-card class="toolbar">
+    <div class="title">Import</div>
+    <button mat-icon-button (click)="save()">
+      <mat-icon>done</mat-icon>
+    </button>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-card>
 
   <mat-card class="import-data">
 
@@ -27,10 +36,7 @@
         <h2 matSubheader>{{dateGroup.date}}</h2>
         <mat-list-item *ngFor="let entry of dateGroup.entries">
           <div matLine class="line">
-<!--            <mat-checkbox *ngIf="entry.state == 'none'" [(ngModel)]="entry.selected"></mat-checkbox>-->
-<!--            <mat-icon *ngIf="entry.state == 'success'" (click)="entry.state = 'none'" class="success">check_circle</mat-icon>-->
-<!--            <mat-icon *ngIf="entry.state == 'fail'" (click)="entry.state = 'none'" class="fail">cancel</mat-icon>-->
-            <mat-checkbox *ngIf="entry.state == 'none'" [(ngModel)]="entry.selected"></mat-checkbox>
+            <mat-checkbox *ngIf="entry.state == 'none'" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
             <mat-icon *ngIf="entry.state == 'success'" (click)="entry.state = 'none'" class="success">check_circle</mat-icon>
             <mat-icon *ngIf="entry.state == 'fail'" (click)="entry.state = 'none'" class="fail">cancel</mat-icon>
             <document-label matRipple
@@ -39,11 +45,15 @@
                             *ngIf="entry.suggested"
                             [document]="entry.suggested"
                             [mat-menu-trigger-for]="menu"></document-label>
+            <div matRipple
+                 [matRippleColor]="'#00000020'"
+                 class="suggested"
+                 *ngIf="!entry.suggested"
+                 [mat-menu-trigger-for]="menu">{{entry.source}}</div>
             <document-label *ngIf="entry.existed" [document]="entry.existed"></document-label>
-            <div *ngIf="!entry.suggested"></div>
             <div *ngIf="!entry.existed"></div>
             <mat-menu #menu>
-              <button mat-menu-item (click)="viewDocument(entry)">View</button>
+              <button mat-menu-item (click)="viewDocument(entry)" *ngIf="entry.suggested">View</button>
               <button mat-menu-item (click)="createDocument(entry, 'expense')">Expense</button>
               <button mat-menu-item (click)="createDocument(entry, 'income')">Income</button>
               <button mat-menu-item (click)="createDocument(entry, 'exchange')">Exchange</button>
@@ -56,8 +66,9 @@
   </mat-card>
 </ng-container>
 
-<document-view *ngIf="entry != null"
-               [type]="entry.suggested.type"
-               [document]="entry.suggested.value"
+<document-view *ngIf="entry != null && document != null"
+               [type]="document.type"
+               [document]="document.value"
+               [hint]="entry.source"
                (onSave)="saveDocument($event)"
                (onClose)="closeDocument()"></document-view>

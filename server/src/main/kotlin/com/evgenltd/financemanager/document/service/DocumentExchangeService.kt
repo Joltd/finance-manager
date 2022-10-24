@@ -33,17 +33,5 @@ class DocumentExchangeService(
         AccountTransaction(null, entity.date, Direction.IN, entity.amountTo, entity.id!!, entity.accountTo).also { transactionService.save(it) }
         ExchangeTransaction(null, entity.date, Direction.OUT, entity.amountTo, entity.id!!).also { transactionService.save(it) }
     }
-
-    private fun DocumentExchangeRecord.toEntity(): DocumentExchange = DocumentExchange(
-            id = id,
-            date = date,
-            description = description,
-            accountFrom = accountFrom,
-            amountFrom = amountFrom,
-            accountTo = accountTo,
-            amountTo = amountTo,
-            commissionExpenseCategory = commissionExpenseCategory,
-            commissionAmount = commissionAmount
-    )
     
 }

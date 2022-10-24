@@ -4,6 +4,9 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.entity.DocumentIncome
 import com.evgenltd.financemanager.importdata.entity.DocumentEntry
+import com.evgenltd.financemanager.reference.record.ReferencePattern
+import com.evgenltd.financemanager.reference.service.ExpenseCategoryService
+import com.evgenltd.financemanager.reference.service.IncomeCategoryService
 import com.evgenltd.financemanager.transaction.entity.Direction
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -16,9 +19,15 @@ import kotlin.math.absoluteValue
 
 @Component
 @ImportDataTemplate.Info("Tinkoff Account")
-class TinkoffTemplate : ImportDataTemplate {
+class TinkoffTemplate(
+        private val expenseCategoryService: ExpenseCategoryService,
+        private val incomeCategoryService: IncomeCategoryService
+) : ImportDataTemplate {
 
     override fun convert(account: String, path: Path): List<DocumentEntry> {
+        val expensePatterns = expenseCategoryService.patterns()
+        val incomePatterns = incomeCategoryService.patterns()
+        var id = 1L
         return Files.readAllLines(path)
                 .filterIndexed { index, _ -> index > 0 }
                 .map {
@@ -43,12 +52,17 @@ class TinkoffTemplate : ImportDataTemplate {
                     val amount = Amount(amountValue.absoluteValue, "RUB")
 
                     val document = if (direction == Direction.OUT) {
-                        DocumentExpense(null, it.date, "Expense $amount", amount, account, "")
+                        expensePatterns.matches(it.description)?.let { category ->
+                            DocumentExpense(null, it.date, "", amount, account, category)
+                        }
                     } else {
-                        DocumentIncome(null, it.date, "Income $amount", amount, account, "")
+                        incomePatterns.matches(it.description)?.let { category ->
+                            DocumentIncome(null, it.date, "", amount, account, category)
+                        }
                     }
 
                     DocumentEntry(
+                            (id++).toString(),
                             it.raw,
                             document
                     )
@@ -62,6 +76,8 @@ class TinkoffTemplate : ImportDataTemplate {
     private fun String.amount(): BigDecimal = clean()
             .replace(",", ".")
             .toBigDecimal()
+
+    private fun List<ReferencePattern>.matches(value: String): String? = find { it.pattern.containsMatchIn(value) }?.id
 
     private companion object {
         val DATE_TIME_PATTERN: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")

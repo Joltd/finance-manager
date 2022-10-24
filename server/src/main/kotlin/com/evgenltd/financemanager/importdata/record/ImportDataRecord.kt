@@ -12,8 +12,9 @@ class ImportDataRecord(
 )
 
 class DocumentEntryRecord(
+        val id: String,
         val source: String,
-        val suggested: DocumentTypedRecord,
+        val suggested: DocumentTypedRecord?,
         val existed: DocumentTypedRecord?
 )
 

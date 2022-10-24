@@ -37,7 +37,7 @@ class DocumentService(
     }
 
     fun findDocumentByAccount(account: String): List<Document> {
-        val transactionIds = accountTransactionService.findTransactionByAccount(account).map { it.id }
+        val transactionIds = accountTransactionService.findTransactionByAccount(account).map { it.document }
         return documentRepository.findAllById(transactionIds).toList()
     }
 

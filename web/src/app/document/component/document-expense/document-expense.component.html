@@ -8,6 +8,12 @@
   </button>
 </mat-card>
 
+<mat-card *ngIf="hint">
+  <mat-card-content>
+    <p>{{hint}}</p>
+  </mat-card-content>
+</mat-card>
+
 <mat-card>
 
   <form [formGroup]="form">
