@@ -46,38 +46,40 @@
     <mat-list>
       <ng-container *ngFor="let dateGroup of dateGroups">
         <h2 matSubheader>{{dateGroup.date}}</h2>
-        <mat-list-item *ngFor="let entry of dateGroup.entries">
-          <div matLine class="line" *ngIf="hideImported && !(entry.suggested && entry.existed)">
-            <mat-checkbox *ngIf="entry.state == 'none'" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
-            <mat-icon *ngIf="entry.state == 'success'" (click)="entry.state = 'none'" class="success">check_circle</mat-icon>
-            <mat-icon *ngIf="entry.state == 'fail'" (click)="entry.state = 'none'" class="fail">cancel</mat-icon>
-            <document-label matRipple
-                            [matRippleColor]="'#00000020'"
-                            class="clickable"
-                            *ngIf="entry.suggested"
-                            [document]="entry.suggested"
-                            [mat-menu-trigger-for]="menu"></document-label>
-            <div matRipple
-                 [matRippleColor]="'#00000020'"
-                 class="clickable"
-                 *ngIf="!entry.suggested"
-                 [mat-menu-trigger-for]="menu"
-                 [matTooltip]="entry.source">{{entry.source}}</div>
-            <document-label matRipple
-                            [matRippleColor]="'#00000020'"
-                            class="clickable"
-                            *ngIf="entry.existed"
-                            [document]="entry.existed"
-                            (click)="viewDocument(entry.existed)"></document-label>
-            <div *ngIf="!entry.existed"></div>
-            <mat-menu #menu>
-              <button mat-menu-item (click)="viewDocument(entry)" *ngIf="entry.suggested">View</button>
-              <button mat-menu-item (click)="createDocument(entry, 'expense')">Expense</button>
-              <button mat-menu-item (click)="createDocument(entry, 'income')">Income</button>
-              <button mat-menu-item (click)="createDocument(entry, 'exchange')">Exchange</button>
-            </mat-menu>
-          </div>
-        </mat-list-item>
+        <ng-container *ngFor="let entry of dateGroup.entries">
+          <mat-list-item *ngIf="hideImported && !(entry.suggested && entry.existed)">
+            <div matLine class="line">
+              <mat-checkbox *ngIf="entry.state == 'none'" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
+              <mat-icon *ngIf="entry.state == 'success'" (click)="entry.state = 'none'" class="success">check_circle</mat-icon>
+              <mat-icon *ngIf="entry.state == 'fail'" (click)="entry.state = 'none'" class="fail">cancel</mat-icon>
+              <document-label matRipple
+                              [matRippleColor]="'#00000020'"
+                              class="clickable"
+                              *ngIf="entry.suggested"
+                              [document]="entry.suggested"
+                              [mat-menu-trigger-for]="menu"></document-label>
+              <div matRipple
+                   [matRippleColor]="'#00000020'"
+                   class="clickable"
+                   *ngIf="!entry.suggested"
+                   [mat-menu-trigger-for]="menu"
+                   [matTooltip]="entry.source">{{entry.source}}</div>
+              <document-label matRipple
+                              [matRippleColor]="'#00000020'"
+                              class="clickable"
+                              *ngIf="entry.existed"
+                              [document]="entry.existed"
+                              (click)="viewDocument(entry.existed)"></document-label>
+              <div *ngIf="!entry.existed"></div>
+              <mat-menu #menu>
+                <button mat-menu-item (click)="viewDocument(entry)" *ngIf="entry.suggested">View</button>
+                <button mat-menu-item (click)="createDocument(entry, 'expense')">Expense</button>
+                <button mat-menu-item (click)="createDocument(entry, 'income')">Income</button>
+                <button mat-menu-item (click)="createDocument(entry, 'exchange')">Exchange</button>
+              </mat-menu>
+            </div>
+          </mat-list-item>
+        </ng-container>
       </ng-container>
     </mat-list>
 
