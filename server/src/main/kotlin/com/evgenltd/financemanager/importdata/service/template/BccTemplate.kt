@@ -1,26 +1,24 @@
 package com.evgenltd.financemanager.importdata.service.template
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.document.entity.Document
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.entity.DocumentIncome
 import com.evgenltd.financemanager.importdata.entity.DocumentEntry
 import com.evgenltd.financemanager.reference.record.ReferencePattern
 import com.evgenltd.financemanager.reference.service.ExpenseCategoryService
 import com.evgenltd.financemanager.reference.service.IncomeCategoryService
-import com.evgenltd.financemanager.transaction.entity.Direction
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.springframework.stereotype.Component
+import java.io.File
 import java.math.BigDecimal
-import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.math.absoluteValue
 
 @Component
-@ImportDataTemplate.Info("Tinkoff Black Card")
-class TinkoffTemplate(
+@ImportDataTemplate.Info("Bank CenterCredit")
+class BccTemplate(
         private val expenseCategoryService: ExpenseCategoryService,
         private val incomeCategoryService: IncomeCategoryService
 ) : ImportDataTemplate {
@@ -29,35 +27,38 @@ class TinkoffTemplate(
         val expensePatterns = expenseCategoryService.patterns()
         val incomePatterns = incomeCategoryService.patterns()
         var id = 1L
-        return Files.readAllLines(path)
-                .filterIndexed { index, _ -> index > 0 }
+        return Jsoup.parse(File(path.toString()))
+                .select(".history__list__item")
                 .map {
-                    val parts = it.split(";")
+                    val descriptionNode = it.childNode(1).childNode(1)
+                    val description = descriptionNode.childNode(0).childNode(0).toString().clean()
+                    val date = descriptionNode.childNode(1).childNode(0).toString().clean()
+                    val sign = it.sign()
+                    val amount = it.childNode(3).childNode(0).childNode(3).toString().clean()
                     Record(
-                            it,
-                            parts[0].date(),
-                            parts[3].clean(),
-                            parts[6].amount(),
-                            parts[9].clean(),
-                            parts[11].clean()
+                            "$date $sign$amount $description",
+                            date.date(),
+                            sign,
+                            amount.amount(),
+                            description
                     )
                 }
-                .filter { it.amount.compareTo(BigDecimal.ZERO) != 0 && it.status == "OK" }
+                .filter { it.amount.compareTo(BigDecimal.ZERO) != 0}
                 .map {
 
                     val amountValue = it.amount
                             .multiply(BigDecimal(10000))
                             .setScale(0)
-                            .toLong()
+                            .toLong() * (if (it.sign == "-") -1 else 1)
 
-                    val expenseCategory = expensePatterns.matches(it.category + "|" + it.description)
-                    val incomeCategory = incomePatterns.matches(it.category + "|" + it.description)
+                    val expenseCategory = expensePatterns.matches(it.description)
+                    val incomeCategory = incomePatterns.matches(it.description)
                     val document = if (expenseCategory != null) {
                         DocumentExpense(
                                 null,
                                 it.date,
                                 "",
-                                Amount(-amountValue, "RUB"),
+                                Amount(-amountValue, "KZT"),
                                 account,
                                 expenseCategory
                         )
@@ -66,7 +67,7 @@ class TinkoffTemplate(
                                 null,
                                 it.date,
                                 "",
-                                Amount(amountValue, "RUB"),
+                                Amount(amountValue, "KZT"),
                                 account,
                                 incomeCategory
                         )
@@ -82,27 +83,38 @@ class TinkoffTemplate(
                 }
     }
 
-    private fun String.clean(): String = replace("\"", "").trim()
+    private fun String.clean(): String = trim()
 
-    private fun String.date(): LocalDate = LocalDateTime.parse(clean(), DATE_TIME_PATTERN).toLocalDate()
+    private fun String.date(): LocalDate = LocalDate.parse(clean(), DATE_TIME_PATTERN)
 
+    private fun Element.sign(): String {
+        val root = childNode(3).childNode(0)
+        val first = root.childNode(1)
+        val second = root.childNode(2)
+        return if (first.childNodeSize() > 0) {
+            first.childNode(0).toString().clean()
+        } else {
+            second.childNode(0).toString().clean()
+        }
+    }
     private fun String.amount(): BigDecimal = clean()
-            .replace(",", ".")
+            .replace("₸", "")
+            .replace(" ", "")
             .toBigDecimal()
 
     private fun List<ReferencePattern>.matches(value: String): String? = find { it.pattern.containsMatchIn(value) }?.id
 
     private companion object {
-        val DATE_TIME_PATTERN: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
+        val DATE_TIME_PATTERN: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     }
 
     private data class Record(
             val raw: String,
             val date: LocalDate,
-            val status: String,
+            val sign: String,
             val amount: BigDecimal,
-            val category: String,
             val description: String
     )
+
 
 }

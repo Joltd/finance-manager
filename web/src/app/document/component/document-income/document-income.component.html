@@ -40,6 +40,14 @@
       <amount-input formControlName="amount"></amount-input>
     </mat-form-field>
 
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea matInput
+                formControlName="description"
+                cdkTextareaAutosize
+                #autosize="cdkTextareaAutosize"></textarea>
+    </mat-form-field>
+
   </form>
 
 </mat-card>
