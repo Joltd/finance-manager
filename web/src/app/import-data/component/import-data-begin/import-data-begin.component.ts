@@ -12,31 +12,32 @@ import {Observable} from "rxjs";
 })
 export class ImportDataBeginComponent {
 
-  importData: FormGroup = new FormGroup({
+  form: FormGroup = new FormGroup({
     account: new FormControl(null, Validators.required),
     template: new FormControl(null, Validators.required),
     file: new FormControl(null, Validators.required)
   })
-  save: () => Observable<void> = () => this.doSave()
 
   constructor(
     private router: Router,
     private importDataService: ImportDataService
   ) {}
 
-  private doSave(): Observable<void> {
-    let formValue = this.importData.value
+  save() {
+    let formValue = this.form.value
     let importData = new ImportData()
     importData.account = formValue.account
     importData.template = formValue.template
-    let eventEmitter = new EventEmitter()
     this.importDataService.uploadFile(formValue.file)
       .subscribe(result => {
         importData.file = result.filename
         this.importDataService.create(importData)
-          .subscribe(() => eventEmitter.emit())
+          .subscribe(() => this.close())
       })
-    return eventEmitter
+  }
+
+  close() {
+    this.router.navigate(['import-data']).then()
   }
 
 }

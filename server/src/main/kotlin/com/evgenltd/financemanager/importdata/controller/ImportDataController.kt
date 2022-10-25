@@ -30,6 +30,9 @@ class ImportDataController(
     @PostMapping("/import-data")
     fun create(@RequestBody record: ImportDataRecord) = importDataService.create(record)
 
+    @PostMapping("/import-data/{id}")
+    fun reCreate(@PathVariable("id") id: String) = importDataService.reCreate(id)
+
     @PostMapping("/import-data/file")
     fun uploadFile(@RequestParam("file") file: MultipartFile): ImportDataFilerResponse =
             ImportDataFilerResponse(importDataService.uploadFile(file))

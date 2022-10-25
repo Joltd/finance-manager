@@ -116,9 +116,13 @@ export class ImportDataViewComponent {
     this.create = false
   }
 
+  reCreate() {
+    this.importDataService.reCreate(this.id)
+      .subscribe(() => this.load())
+  }
+
   save() {
     let nodes = this.asLinkList()
-    console.log(nodes.length)
     if (nodes.length > 0) {
       this.performImport(nodes[0])
     }

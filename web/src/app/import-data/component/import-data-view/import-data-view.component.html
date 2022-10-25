@@ -2,6 +2,9 @@
 
   <mat-card class="toolbar">
     <div class="title">Import</div>
+    <button mat-icon-button (click)="reCreate()">
+      <mat-icon></mat-icon>
+    </button>
     <button mat-icon-button (click)="save()">
       <mat-icon>done</mat-icon>
     </button>
@@ -14,7 +17,7 @@
 
     <mat-form-field>
       <mat-label>Account</mat-label>
-      <input matInput [value]="importData.account" readonly>
+      <reference-input api="/account/reference" [value]="importData.account" readonly></reference-input>
     </mat-form-field>
 
     <mat-form-field>

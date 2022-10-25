@@ -14,6 +14,7 @@ import com.evgenltd.financemanager.importdata.record.*
 import com.evgenltd.financemanager.importdata.repository.ImportDataRepository
 import com.evgenltd.financemanager.importdata.service.template.ImportDataTemplate
 import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
@@ -26,7 +27,8 @@ class ImportDataService(
         private val importDataProperties: ImportDataProperties,
         private val importDataRepository: ImportDataRepository,
         private val importDataTemplates: List<ImportDataTemplate>,
-        private val documentService: DocumentService
+        private val documentService: DocumentService,
+        private val accountRepository: AccountRepository
 ) : Loggable() {
 
     @PostConstruct
@@ -42,17 +44,19 @@ class ImportDataService(
         )
     }
     
-    fun list(): List<ImportDataRecord> =
-            importDataRepository.findAll().map {
-                ImportDataRecord(
-                        id = it.id,
-                        account = it.account,
-                        template = it.template,
-                        file = it.file,
-                        documents = listOf(),
-                        other = listOf()
-                )
-            }
+    fun list(): List<ImportDataRecord> {
+        val accounts = accountRepository.findAll().associateBy { it.id }
+        return importDataRepository.findAll().map {
+            ImportDataRecord(
+                    id = it.id,
+                    account = accounts[it.account]?.name ?: it.account,
+                    template = it.template,
+                    file = it.file,
+                    documents = listOf(),
+                    other = listOf()
+            )
+        }
+    }
 
     fun byId(id: String): ImportDataRecord {
 
@@ -99,7 +103,15 @@ class ImportDataService(
 
     fun create(record: ImportDataRecord) {
         val entity = record.toEntity()
+        create(entity)
+    }
 
+    fun reCreate(id: String) {
+        val importData = importDataRepository.find(id)
+        create(importData)
+    }
+
+    private fun create(entity: ImportData) {
         val path = Paths.get(importDataProperties.directory, entity.file)
         entity.documents = importDataTemplates.first { it.javaClass.simpleName == entity.template }
                 .convert(entity.account, path)

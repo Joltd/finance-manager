@@ -31,6 +31,10 @@ export class ImportDataService {
     return this.http.post<void>('/import-data', importData)
   }
 
+  reCreate(id: string): Observable<void> {
+    return this.http.post<void>('/import-data/' + id, null)
+  }
+
   updateDocumentEntry(id: string, entry: DocumentEntry): Observable<void> {
     return this.http.patch<void>('/import-data/' + id, entry)
   }
