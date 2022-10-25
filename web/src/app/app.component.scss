@@ -5,11 +5,17 @@
 }
 
 .app-title {
-  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  &:visited {
+    text-decoration: none;
+  }
 }
 
 .app-version {
-  margin-left: 1em;
+  font-size: 0.5em;
+  margin-bottom: 1em;
+  margin-left: 0.5em;
 }
 
 .loading {

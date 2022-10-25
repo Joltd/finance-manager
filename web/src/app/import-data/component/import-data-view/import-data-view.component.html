@@ -72,7 +72,7 @@
                               (click)="viewDocument(entry.existed)"></document-label>
               <div *ngIf="!entry.existed"></div>
               <mat-menu #menu>
-                <button mat-menu-item (click)="viewDocument(entry)" *ngIf="entry.suggested">View</button>
+                <button mat-menu-item (click)="viewEntry(entry)" *ngIf="entry.suggested">View</button>
                 <button mat-menu-item (click)="createDocument(entry, 'expense')">Expense</button>
                 <button mat-menu-item (click)="createDocument(entry, 'income')">Income</button>
                 <button mat-menu-item (click)="createDocument(entry, 'exchange')">Exchange</button>

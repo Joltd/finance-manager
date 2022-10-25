@@ -96,18 +96,17 @@ export class ImportDataViewComponent {
     return dateGroup
   }
 
-  viewDocument(entry: DocumentEntry | DocumentTyped) {
-    if (entry instanceof DocumentTyped) {
-      this.document = entry
-      this.create = false
-      return
-    }
-
+  viewEntry(entry: DocumentEntry) {
     if (!entry.suggested) {
       return
     }
     this.entry = entry
     this.document = entry.suggested
+    this.create = false
+  }
+
+  viewDocument(document: DocumentTyped) {
+    this.document = document
     this.create = false
   }
 
@@ -193,6 +192,9 @@ export class ImportDataViewComponent {
     this.toggleSelectionState = !this.toggleSelectionState
     for (let dateGroup of this.dateGroups) {
       for (let entry of dateGroup.entries) {
+        if (this.hideImported && entry.suggested && entry.existed) {
+          continue
+        }
         if (entry.suggested) {
           entry.state = 'none'
           entry.selected = this.toggleSelectionState
