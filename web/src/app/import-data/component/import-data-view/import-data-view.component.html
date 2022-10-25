@@ -37,6 +37,7 @@
       <span *ngIf="!this.toggleSelectionState">Select all</span>
       <span *ngIf="this.toggleSelectionState">Deselect all</span>
     </button>
+    <mat-slide-toggle [(ngModel)]="hideImported">Hide imported</mat-slide-toggle>
     <p>Suggested documents: {{suggestedDocumentCount}} / {{allDocumentCount}}</p>
   </mat-card>
 
@@ -46,7 +47,7 @@
       <ng-container *ngFor="let dateGroup of dateGroups">
         <h2 matSubheader>{{dateGroup.date}}</h2>
         <mat-list-item *ngFor="let entry of dateGroup.entries">
-          <div matLine class="line">
+          <div matLine class="line" *ngIf="hideImported && !(entry.suggested && entry.existed)">
             <mat-checkbox *ngIf="entry.state == 'none'" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
             <mat-icon *ngIf="entry.state == 'success'" (click)="entry.state = 'none'" class="success">check_circle</mat-icon>
             <mat-icon *ngIf="entry.state == 'fail'" (click)="entry.state = 'none'" class="fail">cancel</mat-icon>

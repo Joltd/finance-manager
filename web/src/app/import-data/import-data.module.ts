@@ -16,6 +16,7 @@ import {MatInputModule} from "@angular/material/input";
 import {DocumentModule} from "../document/document.module";
 import {MatRippleModule} from "@angular/material/core";
 import {MatTooltipModule} from "@angular/material/tooltip";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import {MatTooltipModule} from "@angular/material/tooltip";
         DocumentModule,
         MatRippleModule,
         FormsModule,
-        MatTooltipModule
+        MatTooltipModule,
+        MatSlideToggleModule
     ],
   exports: [
     ImportDataViewComponent,

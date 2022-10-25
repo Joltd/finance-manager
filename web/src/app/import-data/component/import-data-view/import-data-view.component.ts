@@ -20,6 +20,7 @@ export class ImportDataViewComponent {
   suggestedDocumentCount: number = 0
   allDocumentCount: number = 0
   toggleSelectionState: boolean = false
+  hideImported: boolean = false
 
   constructor(
     private router: Router,
