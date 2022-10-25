@@ -50,8 +50,8 @@ class TinkoffTemplate(
                             .setScale(0)
                             .toLong()
 
-                    val expenseCategory = expensePatterns.matches(it.description)
-                    val incomeCategory = incomePatterns.matches(it.description)
+                    val expenseCategory = expensePatterns.matches(it.category + "|" + it.description)
+                    val incomeCategory = incomePatterns.matches(it.category + "|" + it.description)
                     val document = if (expenseCategory != null) {
                         DocumentExpense(
                                 null,
