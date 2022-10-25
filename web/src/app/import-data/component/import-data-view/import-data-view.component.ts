@@ -95,7 +95,13 @@ export class ImportDataViewComponent {
     return dateGroup
   }
 
-  viewDocument(entry: DocumentEntry) {
+  viewDocument(entry: DocumentEntry | DocumentTyped) {
+    if (entry instanceof DocumentTyped) {
+      this.document = entry
+      this.create = false
+      return
+    }
+
     if (!entry.suggested) {
       return
     }

@@ -1,4 +1,4 @@
-<ng-container *ngIf="entry == null || document == null">
+<ng-container *ngIf="document == null">
 
   <mat-card class="toolbar">
     <div class="title">Import</div>
@@ -52,17 +52,22 @@
             <mat-icon *ngIf="entry.state == 'fail'" (click)="entry.state = 'none'" class="fail">cancel</mat-icon>
             <document-label matRipple
                             [matRippleColor]="'#00000020'"
-                            class="suggested"
+                            class="clickable"
                             *ngIf="entry.suggested"
                             [document]="entry.suggested"
                             [mat-menu-trigger-for]="menu"></document-label>
             <div matRipple
                  [matRippleColor]="'#00000020'"
-                 class="suggested"
+                 class="clickable"
                  *ngIf="!entry.suggested"
                  [mat-menu-trigger-for]="menu"
                  [matTooltip]="entry.source">{{entry.source}}</div>
-            <document-label *ngIf="entry.existed" [document]="entry.existed"></document-label>
+            <document-label matRipple
+                            [matRippleColor]="'#00000020'"
+                            class="clickable"
+                            *ngIf="entry.existed"
+                            [document]="entry.existed"
+                            (click)="viewDocument(entry.existed)"></document-label>
             <div *ngIf="!entry.existed"></div>
             <mat-menu #menu>
               <button mat-menu-item (click)="viewDocument(entry)" *ngIf="entry.suggested">View</button>
@@ -78,9 +83,9 @@
   </mat-card>
 </ng-container>
 
-<document-view *ngIf="entry != null && document != null"
+<document-view *ngIf="document != null"
                [type]="document.type"
                [document]="document.value"
-               [hint]="entry.source"
+               [hint]="entry?.source || null"
                (onSave)="saveDocument($event)"
                (onClose)="closeDocument()"></document-view>
