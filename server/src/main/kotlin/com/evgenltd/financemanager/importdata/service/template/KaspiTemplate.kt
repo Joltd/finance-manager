@@ -27,7 +27,6 @@ class KaspiTemplate(
         val incomePatterns = incomeCategoryService.patterns()
         var id = 1L
         return Files.readAllLines(path)
-                .filterIndexed { index, _ -> index > 0 }
                 .map {
                     val parts = it.split(";")
                     Record(
