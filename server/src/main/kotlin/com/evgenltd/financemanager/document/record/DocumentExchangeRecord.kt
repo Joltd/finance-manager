@@ -12,8 +12,8 @@ class DocumentExchangeRecord(
         val amountFrom: Amount,
         val accountTo: String,
         val amountTo: Amount,
-        val commissionExpenseCategory: String,
-        val commissionAmount: Amount
+        val commissionExpenseCategory: String?,
+        val commissionAmount: Amount?
 ) : DocumentRecord {
 
     fun toEntity(): DocumentExchange = DocumentExchange(

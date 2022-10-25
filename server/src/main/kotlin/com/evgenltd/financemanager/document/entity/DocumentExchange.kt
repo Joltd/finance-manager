@@ -14,8 +14,8 @@ class DocumentExchange(
         var amountFrom: Amount,
         var accountTo: String,
         var amountTo: Amount,
-        var commissionExpenseCategory: String,
-        var commissionAmount: Amount
+        var commissionExpenseCategory: String?,
+        var commissionAmount: Amount?
 ) : Document(id, date, description) {
 
     fun toRecord(): DocumentExchangeRecord = DocumentExchangeRecord(

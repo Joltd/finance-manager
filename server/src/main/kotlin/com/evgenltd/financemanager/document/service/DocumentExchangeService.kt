@@ -25,9 +25,11 @@ class DocumentExchangeService(
         ExchangeTransaction(null, entity.date, Direction.IN, entity.amountFrom, entity.id!!).also { transactionService.save(it) }
         AccountTransaction(null, entity.date, Direction.OUT, entity.amountFrom, entity.id!!, entity.accountFrom).also { transactionService.save(it) }
 
-        if (entity.commissionAmount.value != 0L) {
-            ExpenseTransaction(null, entity.date, Direction.IN, entity.commissionAmount, entity.id!!, entity.commissionExpenseCategory).also { transactionService.save(it) }
-            AccountTransaction(null, entity.date, Direction.OUT, entity.commissionAmount, entity.id!!, entity.accountFrom).also { transactionService.save(it) }
+        val commissionAmount = entity.commissionAmount
+        val commissionExpenseCategory = entity.commissionExpenseCategory
+        if (commissionAmount != null && commissionExpenseCategory != null) {
+            ExpenseTransaction(null, entity.date, Direction.IN, commissionAmount, entity.id!!, commissionExpenseCategory).also { transactionService.save(it) }
+            AccountTransaction(null, entity.date, Direction.OUT, commissionAmount, entity.id!!, entity.accountFrom).also { transactionService.save(it) }
         }
 
         AccountTransaction(null, entity.date, Direction.IN, entity.amountTo, entity.id!!, entity.accountTo).also { transactionService.save(it) }
