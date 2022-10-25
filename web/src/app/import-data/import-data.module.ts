@@ -15,6 +15,7 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatInputModule} from "@angular/material/input";
 import {DocumentModule} from "../document/document.module";
 import {MatRippleModule} from "@angular/material/core";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -22,23 +23,24 @@ import {MatRippleModule} from "@angular/material/core";
     ImportDataBeginComponent,
     ImportDataBrowserComponent
   ],
-  imports: [
-    MatCardModule,
-    MatListModule,
-    MatFormFieldModule,
-    CommonModule,
-    MatIconModule,
-    NgIf,
-    ReactiveFormsModule,
-    MatButtonModule,
-    NgForOf,
-    MatMenuModule,
-    MatCheckboxModule,
-    MatInputModule,
-    DocumentModule,
-    MatRippleModule,
-    FormsModule
-  ],
+    imports: [
+        MatCardModule,
+        MatListModule,
+        MatFormFieldModule,
+        CommonModule,
+        MatIconModule,
+        NgIf,
+        ReactiveFormsModule,
+        MatButtonModule,
+        NgForOf,
+        MatMenuModule,
+        MatCheckboxModule,
+        MatInputModule,
+        DocumentModule,
+        MatRippleModule,
+        FormsModule,
+        MatTooltipModule
+    ],
   exports: [
     ImportDataViewComponent,
     ImportDataBrowserComponent

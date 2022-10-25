@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.importdata.service.template
 
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.document.entity.Document
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.entity.DocumentIncome
 import com.evgenltd.financemanager.importdata.entity.DocumentEntry
@@ -48,17 +49,29 @@ class TinkoffTemplate(
                             .multiply(BigDecimal(10000))
                             .setScale(0)
                             .toLong()
-                    val direction = if (amountValue < 0) Direction.OUT else Direction.IN
-                    val amount = Amount(amountValue.absoluteValue, "RUB")
 
-                    val document = if (direction == Direction.OUT) {
-                        expensePatterns.matches(it.description)?.let { category ->
-                            DocumentExpense(null, it.date, "", amount, account, category)
-                        }
+                    val expenseCategory = expensePatterns.matches(it.description)
+                    val incomeCategory = incomePatterns.matches(it.description)
+                    val document = if (expenseCategory != null) {
+                        DocumentExpense(
+                                null,
+                                it.date,
+                                "",
+                                Amount(amountValue.inv(), "RUB"),
+                                account,
+                                expenseCategory
+                        )
+                    } else if (incomeCategory != null) {
+                        DocumentIncome(
+                                null,
+                                it.date,
+                                "",
+                                Amount(amountValue, "RUB"),
+                                account,
+                                incomeCategory
+                        )
                     } else {
-                        incomePatterns.matches(it.description)?.let { category ->
-                            DocumentIncome(null, it.date, "", amount, account, category)
-                        }
+                        null
                     }
 
                     DocumentEntry(
@@ -67,6 +80,10 @@ class TinkoffTemplate(
                             document
                     )
                 }
+    }
+
+    private fun Record.toDocument() {
+
     }
 
     private fun String.clean(): String = replace("\"", "").trim()

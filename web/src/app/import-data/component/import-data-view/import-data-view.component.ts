@@ -19,6 +19,7 @@ export class ImportDataViewComponent {
   create: boolean = false
   suggestedDocumentCount: number = 0
   allDocumentCount: number = 0
+  toggleSelectionState: boolean = false
 
   constructor(
     private router: Router,
@@ -36,6 +37,8 @@ export class ImportDataViewComponent {
     this.dateGroups = []
     this.entry = null
     this.document = null
+    this.suggestedDocumentCount = 0
+    this.allDocumentCount = 0
     this.importDataService.byId(this.id)
       .subscribe(result => {
         this.importData = result
@@ -69,9 +72,15 @@ export class ImportDataViewComponent {
           this.dateGroups.push(dateGroup)
         }
         this.dateGroups.sort((left,right) => {
-          let leftDate = left.date == 'Other' ? '_' : left.date
-          let rightDate = right.date == 'Other' ? '_' : right.date
-          return leftDate > rightDate ? 1 : -1;
+          if (left.date == 'Other') {
+            return -1
+          } else if (right.date == 'Other') {
+            return 1
+          } else if (left.date > right.date) {
+            return 1
+          } else {
+            return -1
+          }
         })
       })
   }
@@ -171,6 +180,18 @@ export class ImportDataViewComponent {
 
   close() {
     this.router.navigate(['import-data']).then()
+  }
+
+  toggleSelection() {
+    this.toggleSelectionState = !this.toggleSelectionState
+    for (let dateGroup of this.dateGroups) {
+      for (let entry of dateGroup.entries) {
+        if (entry.suggested) {
+          entry.state = 'none'
+          entry.selected = this.toggleSelectionState
+        }
+      }
+    }
   }
 
 }

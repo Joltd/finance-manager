@@ -32,10 +32,12 @@
 
   </mat-card>
 
-  <mat-card>
-    <mat-card-content>
-      <p>Suggested documents: {{suggestedDocumentCount}} / {{allDocumentCount}}</p>
-    </mat-card-content>
+  <mat-card class="help-card">
+    <button mat-raised-button color="primary" (click)="toggleSelection()">
+      <span *ngIf="!this.toggleSelectionState">Select all</span>
+      <span *ngIf="this.toggleSelectionState">Deselect all</span>
+    </button>
+    <p>Suggested documents: {{suggestedDocumentCount}} / {{allDocumentCount}}</p>
   </mat-card>
 
   <mat-card class="import-data-entries">
@@ -58,7 +60,8 @@
                  [matRippleColor]="'#00000020'"
                  class="suggested"
                  *ngIf="!entry.suggested"
-                 [mat-menu-trigger-for]="menu">{{entry.source}}</div>
+                 [mat-menu-trigger-for]="menu"
+                 [matTooltip]="entry.source">{{entry.source}}</div>
             <document-label *ngIf="entry.existed" [document]="entry.existed"></document-label>
             <div *ngIf="!entry.existed"></div>
             <mat-menu #menu>
