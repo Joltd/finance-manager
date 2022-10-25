@@ -23,7 +23,7 @@ export class AccountBrowserComponent implements OnInit {
 
   private load() {
     this.accountService.list()
-      .subscribe(result => this.accounts = result.sort((left,right) => left.name > right.name ? -1 : 1))
+      .subscribe(result => this.accounts = result.sort((left,right) => left.name > right.name ? 1 : -1))
   }
 
   add() {

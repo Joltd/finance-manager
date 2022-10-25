@@ -23,7 +23,7 @@ export class IncomeCategoryBrowserComponent implements OnInit {
 
   private load() {
     this.incomeCategoryService.list()
-      .subscribe(result => this.incomeCategories = result.sort((left,right) => left.name > right.name ? -1 : 1))
+      .subscribe(result => this.incomeCategories = result.sort((left,right) => left.name > right.name ? 1 : -1))
   }
 
   add() {

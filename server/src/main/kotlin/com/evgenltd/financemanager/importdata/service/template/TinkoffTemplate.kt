@@ -57,7 +57,7 @@ class TinkoffTemplate(
                                 null,
                                 it.date,
                                 "",
-                                Amount(amountValue.inv(), "RUB"),
+                                Amount(-amountValue, "RUB"),
                                 account,
                                 expenseCategory
                         )
