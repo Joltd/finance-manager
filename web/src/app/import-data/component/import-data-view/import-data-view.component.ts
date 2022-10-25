@@ -17,6 +17,8 @@ export class ImportDataViewComponent {
   entry: DocumentEntry | null = null
   document: DocumentTyped | null = null
   create: boolean = false
+  suggestedDocumentCount: number = 0
+  allDocumentCount: number = 0
 
   constructor(
     private router: Router,
@@ -48,6 +50,11 @@ export class ImportDataViewComponent {
           dateGroupEntry.suggested = document.suggested
           dateGroupEntry.existed = document.existed
           dateGroup.entries.push(dateGroupEntry)
+
+          if (document.suggested) {
+            this.suggestedDocumentCount++
+          }
+          this.allDocumentCount++
         }
 
         for (let document of result.other) {
@@ -61,7 +68,11 @@ export class ImportDataViewComponent {
         for (let dateGroup of dateGroups.values()) {
           this.dateGroups.push(dateGroup)
         }
-        this.dateGroups.sort((left,right) => left.date > right.date ? 1 : -1)
+        this.dateGroups.sort((left,right) => {
+          let leftDate = left.date == 'Other' ? '_' : left.date
+          let rightDate = right.date == 'Other' ? '_' : right.date
+          return leftDate > rightDate ? 1 : -1;
+        })
       })
   }
 
