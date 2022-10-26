@@ -10,7 +10,7 @@ class DocumentIncomeRecord(
         val description: String,
         val amount: Amount,
         val account: String,
-        val accountName: String,
+        val accountName: String?,
         val incomeCategory: String,
-        val incomeCategoryName: String
+        val incomeCategoryName: String?
 ) : DocumentRecord

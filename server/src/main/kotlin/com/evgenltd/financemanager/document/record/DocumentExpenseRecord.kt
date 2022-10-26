@@ -10,7 +10,7 @@ class DocumentExpenseRecord(
         val description: String,
         val amount: Amount,
         val account: String,
-        val accountName: String,
+        val accountName: String?,
         val expenseCategory: String,
-        val expenseCategoryName: String
+        val expenseCategoryName: String?
 ) : DocumentRecord
