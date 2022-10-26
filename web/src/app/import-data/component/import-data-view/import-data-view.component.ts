@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {ImportData, DocumentEntry} from "../../model/import-data";
 import {ImportDataService} from "../../service/import-data.service";
 import {DocumentTyped} from "../../../document/model/document-typed";
+import {Document} from "../../../document/model/document";
 
 @Component({
   selector: 'import-data-view',
@@ -115,7 +116,7 @@ export class ImportDataViewComponent {
     this.document = new DocumentTyped()
     this.document.type = type
     this.document.value = {
-      id: '',
+      id: null,
       date: ''
     }
     this.create = true

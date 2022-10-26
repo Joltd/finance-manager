@@ -1,7 +1,7 @@
 import {Amount} from "../../common/model/amount";
 
 export interface Document {
-  id: string
+  id: string | null
   date: string
 }
 

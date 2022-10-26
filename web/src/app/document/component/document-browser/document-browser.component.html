@@ -46,8 +46,8 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu>
-          <button mat-menu-item (click)="edit(document.value.id)">Edit</button>
-          <button mat-menu-item (click)="delete(document.value.id)">Delete</button>
+          <button mat-menu-item (click)="edit(document.value.id!)">Edit</button>
+          <button mat-menu-item (click)="delete(document.value.id!)">Delete</button>
         </mat-menu>
       </div>
     </mat-list-item>

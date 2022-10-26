@@ -90,7 +90,7 @@ export class DocumentBrowserComponent implements OnInit {
       }
 
       return true
-    })
+    }).sort((left,right) => left.value.date > right.value.date ? -1 : 1)
   }
 
   select() {
