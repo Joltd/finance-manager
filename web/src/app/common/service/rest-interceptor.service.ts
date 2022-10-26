@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   HTTP_INTERCEPTORS,
   HttpEvent,
@@ -13,17 +13,17 @@ import {ErrorService} from "./error.service";
 import {plainToClass} from "class-transformer";
 import {TypeUtils} from "./type-utils";
 import {environment} from "../../../environments/environment";
-import {APP_BASE_HREF, Location} from "@angular/common";
+import {Location} from "@angular/common";
+import {LoadingService} from "./loading.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestInterceptorService implements HttpInterceptor {
 
-  loading: boolean = false
-
   constructor(
     private errorService: ErrorService,
+    private loadingService: LoadingService,
     private location: Location
   ) {}
 
@@ -37,17 +37,17 @@ export class RestInterceptorService implements HttpInterceptor {
       url = this.location.prepareExternalUrl(url)
     }
     req = req.clone({url: url})
-    this.loading = true
+    this.loadingService.startLoading()
 
     return next.handle(req)
       .pipe(
         map(event => {
 
-          this.loading = false
-
           if (!(event instanceof HttpResponse)) {
             return event
           }
+
+          this.loadingService.endLoading()
 
           let responseBody = event.body as ResponseBody
           if (!responseBody.body && !responseBody.error) {
@@ -69,7 +69,7 @@ export class RestInterceptorService implements HttpInterceptor {
 
         }),
         catchError(error => {
-          this.loading = false
+          this.loadingService.endLoading()
           let message: string
           if (error.statusText) {
             message = error.statusText

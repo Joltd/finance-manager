@@ -10,7 +10,6 @@ import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {ReferenceSelectComponent} from "./component/reference-select/reference-select.component";
 import {MatListModule} from "@angular/material/list";
 import {MatDialogModule} from "@angular/material/dialog";
-import {EditToolbarComponent} from "./component/edit-toolbar/edit-toolbar.component";
 import {MatCardModule} from "@angular/material/card";
 import {FileInputComponent} from "./component/file-input/file-input.component";
 import {AmountPipe} from "./model/amount";
@@ -20,7 +19,6 @@ import {AmountPipe} from "./model/amount";
     AmountInputComponent,
     ReferenceInputComponent,
     ReferenceSelectComponent,
-    EditToolbarComponent,
     FileInputComponent,
     AmountPipe
   ],
@@ -39,7 +37,6 @@ import {AmountPipe} from "./model/amount";
   exports: [
     AmountInputComponent,
     ReferenceInputComponent,
-    EditToolbarComponent,
     FileInputComponent,
     AmountPipe
   ]

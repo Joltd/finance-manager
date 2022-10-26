@@ -50,7 +50,7 @@ export class DocumentEditorComponent {
   }
 
   close() {
-    this.router.navigate(['import-data']).then()
+    this.router.navigate(['document']).then()
   }
 
 }

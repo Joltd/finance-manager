@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {environment} from "../environments/environment";
 import {RestInterceptorService} from "./common/service/rest-interceptor.service";
+import {LoadingService} from "./common/service/loading.service";
 
 @Component({
   selector: 'app-root',
@@ -10,11 +11,12 @@ import {RestInterceptorService} from "./common/service/rest-interceptor.service"
 export class AppComponent {
 
   version: string = environment.version
+  loading: boolean = false
 
-  constructor(private restInterceptorService: RestInterceptorService) {}
-
-  loading(): boolean {
-    return this.restInterceptorService.loading
+  constructor(public loadingService: LoadingService) {
+    this.loadingService.onLoading.subscribe(result => {
+      setTimeout(() => this.loading = result)
+    })
   }
 
 }

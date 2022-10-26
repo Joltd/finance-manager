@@ -15,6 +15,13 @@
 <ng-container *ngIf="documentExchange">
   <mat-icon class="exchange">sync</mat-icon>
   <span *ngIf="!hideDate">{{documentExchange.date}}</span>
+  <ng-container *ngIf="!exchangeAmountSame() && !exchangeAccountSame()">
+    <span>{{documentExchange.amountFrom | format}}</span>
+    <span>{{documentExchange.accountFromName}}</span>
+    <mat-icon>arrow_right_alt</mat-icon>
+    <span>{{documentExchange.amountTo | format}}</span>
+    <span>{{documentExchange.accountToName}}</span>
+  </ng-container>
   <ng-container *ngIf="exchangeAmountSame()">
     <span>{{documentExchange.amountFrom | format}}</span>
     <span>{{documentExchange.accountFromName}}</span>
