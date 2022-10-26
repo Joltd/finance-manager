@@ -1,8 +1,27 @@
 import {Pipe, PipeTransform} from "@angular/core";
 
+const decimals = 4
+
 export class Amount {
   value!: number
   currency!: string
+}
+
+export function toFractional(value: number): number {
+  let text = ''+value
+  while (text.length < decimals + 1) {
+    text = '0' + text
+  }
+
+  text = text.substring(0, text.length - decimals) + '.' + text.substring(text.length - decimals)
+
+  return +text
+}
+
+export function fromFractional(value: number): number {
+  return +value.toFixed(decimals)
+    .replace(',', '')
+    .replace('.', '')
 }
 
 @Pipe({
@@ -11,7 +30,7 @@ export class Amount {
 export class AmountPipe implements PipeTransform {
 
   transform(amount: Amount): string {
-    return `${amount.value / 10000} ${amount.currency}`
+    return `${toFractional(amount.value)} ${amount.currency}`
   }
 
 }

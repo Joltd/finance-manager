@@ -46,7 +46,7 @@ class TinkoffTemplate(
                 .map {
 
                     val amountValue = it.amount
-                            .multiply(BigDecimal(10000))
+                            .movePointRight(4)
                             .setScale(0)
                             .toLong()
 

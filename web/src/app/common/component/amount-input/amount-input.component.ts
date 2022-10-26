@@ -1,5 +1,5 @@
 import {Component, ElementRef, HostBinding, Input, OnDestroy, Optional, Self, ViewChild} from "@angular/core";
-import {Amount} from "../../model/amount";
+import {Amount, fromFractional, toFractional} from "../../model/amount";
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl, Validators} from "@angular/forms";
 import {MatFormFieldControl} from "@angular/material/form-field";
 import {Subject} from "rxjs";
@@ -72,12 +72,12 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
       return null
     }
     let amount = new Amount()
-    amount.value = value * 10000
+    amount.value = fromFractional(value)
     amount.currency = currency
     return amount
   }
   set value(amount: Amount | null) {
-    let value = amount ? amount.value / 10000 : ''
+    let value = amount ? toFractional(amount.value) : ''
     let currency = amount ? amount.currency : ''
     this.amount.setValue({
       value: value,
