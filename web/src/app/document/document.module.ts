@@ -18,6 +18,9 @@ import {DocumentExchangeComponent} from "./component/document-exchange/document-
 import {DocumentEditorComponent} from "./component/document-editor/document-editor.component";
 import {DocumentViewComponent} from "./component/document-view/document-view.component";
 import {DocumentLabelComponent} from "./component/document-label/document-label.component";
+import {MatExpansionModule} from "@angular/material/expansion";
+import {MatSelectModule} from "@angular/material/select";
+import {MatMomentDateModule} from "@angular/material-moment-adapter";
 
 @NgModule({
   declarations: [
@@ -42,16 +45,18 @@ import {DocumentLabelComponent} from "./component/document-label/document-label.
     CommonModule,
     ReactiveFormsModule,
     MatMenuModule,
-    NgIf
+    NgIf,
+    MatExpansionModule,
+    MatSelectModule
   ],
   providers: [
     MatDatepickerModule
   ],
-    exports: [
-        DocumentBrowserComponent,
-        DocumentEditorComponent,
-        DocumentLabelComponent,
-        DocumentViewComponent
-    ]
+  exports: [
+    DocumentBrowserComponent,
+    DocumentEditorComponent,
+    DocumentLabelComponent,
+    DocumentViewComponent
+  ]
 })
 export class DocumentModule {}

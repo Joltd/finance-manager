@@ -5,6 +5,9 @@ import {Router} from "@angular/router";
 import {MatMenuTrigger} from "@angular/material/menu";
 import {trigger} from "@angular/animations";
 import {DocumentTyped} from "../../model/document-typed";
+import {FormControl, FormGroup} from "@angular/forms";
+import {DocumentExchange, DocumentExpense, DocumentIncome} from "../../model/document";
+import * as moment from "moment";
 
 @Component({
   selector: 'document-browser',
@@ -14,19 +17,80 @@ import {DocumentTyped} from "../../model/document-typed";
 export class DocumentBrowserComponent implements OnInit {
 
   documents: DocumentTyped[] = []
+  filteredDocuments: DocumentTyped[] = []
   selection: boolean = false
+
+  types = [
+    {label: '[Empty]', value: null},
+    {label: 'Expense', value: 'expense'},
+    {label: 'Income', value: 'income'},
+    {label: 'Exchange', value: 'exchange'}
+  ]
+  filter: FormGroup = new FormGroup({
+    dateFrom: new FormControl(null),
+    dateTo: new FormControl(null),
+    type: new FormControl(null),
+    account: new FormControl(null)
+  })
 
   constructor(
     private router: Router,
     private documentService: DocumentService
-  ) {}
+  ) {
+    this.filter.valueChanges.subscribe(() => this.filterOut())
+  }
 
   ngOnInit(): void {
     this.load()
   }
 
   private load() {
-    this.documentService.list().subscribe(result => this.documents = result)
+    this.documentService.list().subscribe(result => {
+      this.documents = result
+      this.filterOut()
+    })
+  }
+
+  private filterOut() {
+    let filter = this.filter.value
+    this.filteredDocuments = this.documents.filter(document => {
+      if (filter.type != null && document.type != filter.type) {
+        return false
+      }
+
+      if (filter.account != null) {
+        if (document.type == 'expense') {
+          let documentExpense = document.value as DocumentExpense
+          if (documentExpense.account != filter.account) {
+            return false
+          }
+        } else if (document.type == 'income') {
+          let documentIncome = document.value as DocumentIncome
+          if (documentIncome.account != filter.account) {
+            return false
+          }
+        } else if (document.type == 'exchange') {
+          let documentExchange = document.value as DocumentExchange
+          if (documentExchange.accountFrom != filter.account && documentExchange.accountTo != filter.account) {
+            return false
+          }
+        }
+      }
+
+      if (filter.dateFrom != null) {
+        if (moment(document.value.date).isBefore(filter.dateFrom, 'day')) {
+          return false
+        }
+      }
+
+      if (filter.dateTo != null) {
+        if (moment(document.value.date).isAfter(filter.dateTo, 'day')) {
+          return false
+        }
+      }
+
+      return true
+    })
   }
 
   select() {
