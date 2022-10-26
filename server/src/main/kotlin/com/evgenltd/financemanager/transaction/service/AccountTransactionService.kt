@@ -12,10 +12,4 @@ class AccountTransactionService(
     fun findTransactionByAccount(account: String): List<AccountTransaction> =
             accountTransactionRepository.findByAccount(account)
 
-    fun createTransactions(transactions: List<AccountTransaction>) {
-        for (transaction in transactions) {
-            accountTransactionRepository.save(transaction)
-        }
-    }
-
 }

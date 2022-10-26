@@ -5,11 +5,19 @@ import {DocumentRow} from "../model/document-row";
 import {TypeUtils} from "../../common/service/type-utils";
 import {map} from "rxjs/operators";
 import {DocumentTyped} from "../model/document-typed";
+import {FormControl, FormGroup} from "@angular/forms";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DocumentService {
+
+  filter: FormGroup = new FormGroup({
+    dateFrom: new FormControl(null),
+    dateTo: new FormControl(null),
+    type: new FormControl(null),
+    account: new FormControl(null)
+  })
 
   constructor(private http: HttpClient) {}
 

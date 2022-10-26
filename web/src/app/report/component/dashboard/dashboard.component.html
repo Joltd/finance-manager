@@ -1,3 +1,12 @@
-<mat-card>
-  <h1>Dashboard</h1>
-</mat-card>
+<div class="balances">
+  <mat-card *ngFor="let accountBalance of dashboard.balances">
+    <mat-card-title>{{accountBalance.account}}</mat-card-title>
+    <mat-card-content>
+      <mat-action-list>
+        <button mat-list-item *ngFor="let balance of accountBalance.balances">
+          {{balance | format}}
+        </button>
+      </mat-action-list>
+    </mat-card-content>
+  </mat-card>
+</div>

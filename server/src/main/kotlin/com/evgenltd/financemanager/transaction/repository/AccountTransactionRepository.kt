@@ -7,4 +7,6 @@ interface AccountTransactionRepository : MongoRepository<AccountTransaction, Str
 
     fun findByAccount(account: String): List<AccountTransaction>
 
+    fun findByAccountNotNull(): List<AccountTransaction>
+
 }

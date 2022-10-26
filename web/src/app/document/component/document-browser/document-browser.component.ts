@@ -26,22 +26,20 @@ export class DocumentBrowserComponent implements OnInit {
     {label: 'Income', value: 'income'},
     {label: 'Exchange', value: 'exchange'}
   ]
-  filter: FormGroup = new FormGroup({
-    dateFrom: new FormControl(null),
-    dateTo: new FormControl(null),
-    type: new FormControl(null),
-    account: new FormControl(null)
-  })
 
   constructor(
     private router: Router,
     private documentService: DocumentService
   ) {
-    this.filter.valueChanges.subscribe(() => this.filterOut())
+    this.filter().valueChanges.subscribe(() => this.filterOut())
   }
 
   ngOnInit(): void {
     this.load()
+  }
+
+  filter(): FormGroup {
+    return this.documentService.filter
   }
 
   private load() {
@@ -52,7 +50,7 @@ export class DocumentBrowserComponent implements OnInit {
   }
 
   private filterOut() {
-    let filter = this.filter.value
+    let filter = this.filter().value
     this.filteredDocuments = this.documents.filter(document => {
       if (filter.type != null && document.type != filter.type) {
         return false
