@@ -22,7 +22,7 @@ export class DocumentService {
   }
 
   update(document: DocumentTyped): Observable<void> {
-    return this.http.post<void>('/document/' + document.type, document.value)
+    return this.http.post<void>('/document', document)
   }
 
   delete(id: string): Observable<void> {
