@@ -21,10 +21,12 @@ export class DocumentBrowserComponent implements OnInit {
   selection: boolean = false
 
   types = [
-    {label: '[Empty]', value: null},
     {label: 'Expense', value: 'expense'},
     {label: 'Income', value: 'income'},
     {label: 'Exchange', value: 'exchange'}
+  ]
+  currencies = [
+    "RUB", "EUR", "USD", "KZT", "TRY", "RSD", "USDT", "TRX"
   ]
 
   constructor(
@@ -32,10 +34,13 @@ export class DocumentBrowserComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private documentService: DocumentService
   ) {
-    this.activatedRoute.queryParams.subscribe(queryParams => {
-
+    this.activatedRoute.queryParams.subscribe(params => {
+      this.filter().patchValue({
+        currency: params['currency'],
+        account: params['account']
+      })
+      this.filter().valueChanges.subscribe(() => this.filterOut())
     })
-    this.filter().valueChanges.subscribe(() => this.filterOut())
   }
 
   ngOnInit(): void {
@@ -74,6 +79,25 @@ export class DocumentBrowserComponent implements OnInit {
         } else if (document.type == 'exchange') {
           let documentExchange = document.value as DocumentExchange
           if (documentExchange.accountFrom != filter.account && documentExchange.accountTo != filter.account) {
+            return false
+          }
+        }
+      }
+
+      if (filter.currency != null) {
+        if (document.type == 'expense') {
+          let documentExpense = document.value as DocumentExpense
+          if (documentExpense.amount.currency != filter.currency) {
+            return false
+          }
+        } else if (document.type == 'income') {
+          let documentIncome = document.value as DocumentIncome
+          if (documentIncome.amount.currency != filter.currency) {
+            return false
+          }
+        } else if (document.type == 'exchange') {
+          let documentExchange = document.value as DocumentExchange
+          if (documentExchange.amountFrom.currency != filter.currency && documentExchange.amountTo.currency != filter.currency) {
             return false
           }
         }

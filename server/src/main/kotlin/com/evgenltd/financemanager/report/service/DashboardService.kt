@@ -21,8 +21,10 @@ class DashboardService(
                 accountTransactionRepository.findByAccountNotNull()
                         .groupBy { it.account }
                         .map {
+                            val account = accountIndex[it.key]
                             AccountBalanceRecord(
-                                    accountIndex[it.key]?.name ?: "Unknown",
+                                    account?.id,
+                                    account?.name ?: "Unknown",
                                     it.value.sumByCurrency()
                             )
                         }

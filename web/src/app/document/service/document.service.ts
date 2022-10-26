@@ -3,7 +3,6 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {DocumentRow} from "../model/document-row";
 import {TypeUtils} from "../../common/service/type-utils";
-import {map} from "rxjs/operators";
 import {DocumentTyped} from "../model/document-typed";
 import {FormControl, FormGroup} from "@angular/forms";
 
@@ -16,7 +15,8 @@ export class DocumentService {
     dateFrom: new FormControl(null),
     dateTo: new FormControl(null),
     type: new FormControl(null),
-    account: new FormControl(null)
+    account: new FormControl(null),
+    currency: new FormControl(null)
   })
 
   constructor(private http: HttpClient) {}

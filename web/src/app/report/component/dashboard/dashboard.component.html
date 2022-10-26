@@ -1,9 +1,11 @@
 <div class="balances">
   <mat-card *ngFor="let accountBalance of dashboard.balances">
-    <mat-card-title>{{accountBalance.account}}</mat-card-title>
+    <mat-card-title>{{accountBalance.accountName}}</mat-card-title>
     <mat-card-content>
       <mat-action-list>
-        <button mat-list-item *ngFor="let balance of accountBalance.balances">
+        <button mat-list-item
+                *ngFor="let balance of accountBalance.balances"
+                (click)="viewDocuments(accountBalance.account, balance.currency)">
           {{balance | format}}
         </button>
       </mat-action-list>

@@ -25,6 +25,7 @@
     <mat-form-field>
       <mat-label>Type</mat-label>
       <mat-select formControlName="type">
+        <mat-option [value]="null">[Empty]</mat-option>
         <mat-option *ngFor="let type of types" [value]="type.value">{{type.label}}</mat-option>
       </mat-select>
     </mat-form-field>
@@ -32,6 +33,14 @@
     <mat-form-field>
       <mat-label>Account</mat-label>
       <reference-input api="/account/reference" formControlName="account"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Currency</mat-label>
+      <mat-select formControlName="currency">
+        <mat-option [value]="null">[Empty]</mat-option>
+        <mat-option *ngFor="let currency of currencies" [value]="currency">{{currency}}</mat-option>
+      </mat-select>
     </mat-form-field>
   </form>
 
