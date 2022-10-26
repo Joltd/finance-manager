@@ -1,4 +1,30 @@
-<mat-icon class="income" *ngIf="document.type == 'income'">arrow_downward</mat-icon>
-<mat-icon class="expense" *ngIf="document.type == 'expense'">arrow_upward</mat-icon>
-<mat-icon class="exchange" *ngIf="document.type == 'exchange'">sync</mat-icon>
-<div>{{document.value.description}}</div>
+<ng-container *ngIf="documentExpense">
+  <mat-icon class="expense">arrow_upward</mat-icon>
+  <span *ngIf="!hideDate">{{documentExpense.date}}</span>
+  <span *ngIf="!hideAccount">{{documentExpense.accountName}}</span>
+  <span>{{documentExpense.amount | format}}</span>
+  <span>{{documentExpense.expenseCategoryName}}</span>
+</ng-container>
+<ng-container *ngIf="documentIncome">
+  <mat-icon class="income">arrow_downward</mat-icon>
+  <span *ngIf="!hideDate">{{documentIncome.date}}</span>
+  <span *ngIf="!hideAccount">{{documentIncome.accountName}}</span>
+  <span>{{documentIncome.amount | format}}</span>
+  <span>{{documentIncome.incomeCategoryName}}</span>
+</ng-container>
+<ng-container *ngIf="documentExchange">
+  <mat-icon class="exchange">sync</mat-icon>
+  <span *ngIf="!hideDate">{{documentExchange.date}}</span>
+  <ng-container *ngIf="exchangeAmountSame()">
+    <span>{{documentExchange.amountFrom | format}}</span>
+    <span>{{documentExchange.accountFromName}}</span>
+    <mat-icon>arrow_right_alt</mat-icon>
+    <span>{{documentExchange.accountToName}}</span>
+  </ng-container>
+  <ng-container *ngIf="exchangeAccountSame()">
+    <span>{{documentExchange.accountFromName}}</span>
+    <span>{{documentExchange.amountFrom | format}}</span>
+    <mat-icon>arrow_right_alt</mat-icon>
+    <span>{{documentExchange.amountTo | format}}</span>
+  </ng-container>
+</ng-container>

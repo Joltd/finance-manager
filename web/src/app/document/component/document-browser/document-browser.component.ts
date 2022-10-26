@@ -4,6 +4,7 @@ import {DocumentRow} from "../../model/document-row";
 import {Router} from "@angular/router";
 import {MatMenuTrigger} from "@angular/material/menu";
 import {trigger} from "@angular/animations";
+import {DocumentTyped} from "../../model/document-typed";
 
 @Component({
   selector: 'document-browser',
@@ -12,7 +13,7 @@ import {trigger} from "@angular/animations";
 })
 export class DocumentBrowserComponent implements OnInit {
 
-  documents: DocumentRow[] = []
+  documents: DocumentTyped[] = []
   selection: boolean = false
 
   constructor(

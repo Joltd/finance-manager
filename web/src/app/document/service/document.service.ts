@@ -13,8 +13,8 @@ export class DocumentService {
 
   constructor(private http: HttpClient) {}
 
-  list(): Observable<DocumentRow[]> {
-    return this.http.get<DocumentRow[]>('/document')
+  list(): Observable<DocumentTyped[]> {
+    return this.http.get<DocumentTyped[]>('/document', TypeUtils.of(DocumentTyped))
   }
 
   byId(id: string): Observable<DocumentTyped> {

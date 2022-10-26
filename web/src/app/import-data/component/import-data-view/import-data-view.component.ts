@@ -115,8 +115,8 @@ export class ImportDataViewComponent {
     this.document = new DocumentTyped()
     this.document.type = type
     this.document.value = {
-      date: '',
-      description: ''
+      id: '',
+      date: ''
     }
     this.create = true
   }

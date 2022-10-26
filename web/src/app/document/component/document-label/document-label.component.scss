@@ -1,6 +1,6 @@
 :host {
   display: grid;
-  grid-template-columns: 2.5em 1fr;
+  grid-template-columns: 2.5em repeat(6, min-content);
   grid-gap: 0.5em;
   height: 2.5em;
   align-items: center;

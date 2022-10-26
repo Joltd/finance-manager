@@ -3,7 +3,6 @@ import {Pipe, PipeTransform} from "@angular/core";
 export class Amount {
   value!: number
   currency!: string
-
 }
 
 @Pipe({
