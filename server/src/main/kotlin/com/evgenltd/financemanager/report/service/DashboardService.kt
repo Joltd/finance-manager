@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.reference.repository.AccountRepository
 import com.evgenltd.financemanager.report.record.AccountBalanceRecord
 import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.transaction.entity.AccountTransaction
+import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.repository.AccountTransactionRepository
 import org.springframework.stereotype.Service
 
@@ -22,16 +23,21 @@ class DashboardService(
                         .map {
                             AccountBalanceRecord(
                                     accountIndex[it.key]?.name ?: "Unknown",
-                                    it.value.sum()
+                                    it.value.sumByCurrency()
                             )
                         }
         )
     }
 
-    private fun List<AccountTransaction>.sum(): List<Amount> = this.map { it.amount }
-            .groupBy { it.currency }
+    private fun List<AccountTransaction>.sumByCurrency(): List<Amount> = this.groupBy { it.amount.currency }
             .map { Amount(it.value.sum(), it.key) }
 
-    private fun List<Amount>.sum() = sumOf { it.value }
+    private fun List<AccountTransaction>.sum() = sumOf {
+        if (it.direction == Direction.IN) {
+            it.amount.value
+        } else {
+            -it.amount.value
+        }
+    }
 
 }

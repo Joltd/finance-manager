@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from "@angular/core";
 import {DocumentService} from "../../service/document.service";
 import {DocumentRow} from "../../model/document-row";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {MatMenuTrigger} from "@angular/material/menu";
 import {trigger} from "@angular/animations";
 import {DocumentTyped} from "../../model/document-typed";
@@ -29,8 +29,12 @@ export class DocumentBrowserComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private activatedRoute: ActivatedRoute,
     private documentService: DocumentService
   ) {
+    this.activatedRoute.queryParams.subscribe(queryParams => {
+
+    })
     this.filter().valueChanges.subscribe(() => this.filterOut())
   }
 
