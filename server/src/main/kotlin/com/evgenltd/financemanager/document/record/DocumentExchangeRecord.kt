@@ -9,23 +9,12 @@ class DocumentExchangeRecord(
         val date: LocalDate,
         val description: String,
         val accountFrom: String,
+        val accountFromName: String,
         val amountFrom: Amount,
         val accountTo: String,
+        val accountToName: String,
         val amountTo: Amount,
         val commissionExpenseCategory: String?,
+        val commissionExpenseCategoryName: String?,
         val commissionAmount: Amount?
-) : DocumentRecord {
-
-    fun toEntity(): DocumentExchange = DocumentExchange(
-            id = id,
-            date = date,
-            description = description,
-            accountFrom = accountFrom,
-            amountFrom = amountFrom,
-            accountTo = accountTo,
-            amountTo = amountTo,
-            commissionExpenseCategory = commissionExpenseCategory,
-            commissionAmount = commissionAmount
-    )
-
-}
+) : DocumentRecord

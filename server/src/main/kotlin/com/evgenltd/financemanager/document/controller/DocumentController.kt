@@ -18,7 +18,7 @@ class DocumentController(
 ) {
 
     @GetMapping("/document")
-    fun list(): List<DocumentRowRecord> = documentService.list()
+    fun list(): List<DocumentTypedRecord> = documentService.list()
 
     @GetMapping("/document/{id}")
     fun byId(@PathVariable("id") id: String): DocumentTypedRecord = documentService.byId(id)

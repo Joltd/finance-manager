@@ -13,15 +13,4 @@ class DocumentExpense(
         var amount: Amount,
         var account: String,
         var expenseCategory: String
-) : Document(id, date, description) {
-
-    fun toRecord(): DocumentExpenseRecord = DocumentExpenseRecord(
-            id = id,
-            date = date,
-            description = description,
-            amount = amount,
-            account = account,
-            expenseCategory = expenseCategory
-    )
-    
-}
+) : Document(id, date, description)

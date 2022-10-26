@@ -63,20 +63,21 @@ class ImportDataService(
         val dataImport = importDataRepository.find(id)
 
         val existedDocuments = documentService.findDocumentByAccount(dataImport.account)
-                .asIndex()
+                .asIndex(dataImport.account)
                 .toMutableMap()
 
         val generator = IdGenerator()
-        val documents = dataImport.documents.map {
-            val existed = it.suggested?.let { suggested ->
-                val hash = generator.next(suggested.hash())
-                existedDocuments.remove(hash)?.toTypedRecord()
+        val documents = dataImport.documents.map { document ->
+            val suggested = document.suggested?.let(documentService::toTypedRecord)
+            val existed = suggested?.let {
+                val hash = generator.next(documentService.hash(it.value, dataImport.account))
+                existedDocuments.remove(hash)
             }
 
             DocumentEntryRecord(
-                    it.id,
-                    it.source,
-                    it.suggested?.toTypedRecord(),
+                    document.id,
+                    document.source,
+                    suggested,
                     existed
             )
         }
@@ -87,7 +88,7 @@ class ImportDataService(
                 template = dataImport.template,
                 file = dataImport.file,
                 documents = documents,
-                other = existedDocuments.values.map { it.toTypedRecord() }
+                other = existedDocuments.values.toList()
         )
 
     }
@@ -115,12 +116,6 @@ class ImportDataService(
         val path = Paths.get(importDataProperties.directory, entity.file)
         entity.documents = importDataTemplates.first { it.javaClass.simpleName == entity.template }
                 .convert(entity.account, path)
-                .onEach {
-                    val suggested = it.suggested
-                    if (suggested != null) {
-                        suggested.description = generateDescription(suggested)
-                    }
-                }
 
         importDataRepository.save(entity)
     }
@@ -130,9 +125,8 @@ class ImportDataService(
         importData.documents
                 .find { it.id == entryRecord.id }
                 ?.let {
-                    it.suggested = entryRecord.suggested?.toEntity()
-                    it.suggested?.let { suggested ->
-                        suggested.description = generateDescription(suggested)
+                    it.suggested = entryRecord.suggested?.let {
+                        suggested -> documentService.toEntity(suggested.value)
                     }
                 }
         importDataRepository.save(importData)
@@ -156,23 +150,9 @@ class ImportDataService(
             documents = emptyList()
     )
 
-    private fun generateDescription(document: Document): String = when (document) {
-        is DocumentExpense -> "${document.amount}"
-        is DocumentIncome -> "${document.amount}"
-        is DocumentExchange -> "${document.amountFrom} -> ${document.amountTo}"
-        else -> throw IllegalStateException("Unknown document type ${document::class}")
-    }
-
-    private fun Document.hash(): String = when (this) {
-        is DocumentExpense -> "$date-$amount-$account-$expenseCategory"
-        is DocumentIncome -> "$date-$amount-$account-$incomeCategory"
-        is DocumentExchange -> "$date-$amountFrom"
-        else -> id ?: System.currentTimeMillis().toString()
-    }
-
-    private fun List<Document>.asIndex(): Map<String,Document> {
+    private fun List<DocumentTypedRecord>.asIndex(account: String): Map<String,DocumentTypedRecord> {
         val generator = IdGenerator()
-        return this.associateBy { generator.next(it.hash()) }
+        return this.associateBy { generator.next(documentService.hash(it.value, account)) }
     }
 
 }

@@ -10,16 +10,7 @@ class DocumentIncomeRecord(
         val description: String,
         val amount: Amount,
         val account: String,
-        val incomeCategory: String
-) : DocumentRecord {
-
-    fun toEntity(): DocumentIncome = DocumentIncome(
-            id = id,
-            date = date,
-            description = description,
-            amount = amount,
-            account = account,
-            incomeCategory = incomeCategory
-    )
-
-}
+        val accountName: String,
+        val incomeCategory: String,
+        val incomeCategoryName: String
+) : DocumentRecord

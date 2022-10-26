@@ -13,15 +13,4 @@ class DocumentIncome(
         var amount: Amount,
         var account: String,
         var incomeCategory: String
-) : Document(id, date, description) {
-    
-    fun toRecord(): DocumentIncomeRecord = DocumentIncomeRecord(
-            id = id,
-            date = date,
-            description = description,
-            amount = amount,
-            account = account,
-            incomeCategory = incomeCategory
-    )
-    
-}
+) : Document(id, date, description)
