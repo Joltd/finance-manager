@@ -34,9 +34,9 @@ class DocumentIncomeService(
         val entity = toEntity(record)
         documentIncomeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-        AccountTransaction(null, entity.date, Direction.OUT, entity.amount, entity.id!!, entity.account)
+        AccountTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.account)
                 .also { transactionService.save(it) }
-        IncomeTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.incomeCategory)
+        IncomeTransaction(null, entity.date, Direction.OUT, entity.amount, entity.id!!, entity.incomeCategory)
                 .also { transactionService.save(it) }
     }
 
