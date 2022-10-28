@@ -14,7 +14,7 @@ class DocumentExchangeRecord(
         val accountTo: String,
         val accountToName: String?,
         val amountTo: Amount,
-        val commissionExpenseCategory: String?,
-        val commissionExpenseCategoryName: String?,
-        val commissionAmount: Amount?
+        val commissionExpenseCategory: String? = null,
+        val commissionExpenseCategoryName: String? = null,
+        val commissionAmount: Amount? = null
 ) : DocumentRecord

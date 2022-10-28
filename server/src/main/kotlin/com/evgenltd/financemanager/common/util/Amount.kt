@@ -38,5 +38,18 @@ data class Amount(val value: Long, val currency: String) {
     override fun toString(): String = value.toBigDecimal()
             .movePointLeft(4)
             .stripTrailingZeros()
-            .toPlainString() + currency
+            .toPlainString() + " " + currency
+
+}
+
+fun fromFractionalString(value: String, currency: String): Amount {
+    return Amount(
+            BigDecimal(value.replace(",",".")).movePointRight(4).toLong(),
+            currency
+    )
+}
+
+fun String.parseAmount(): Amount {
+    val parts = this.split(" ")
+    return fromFractionalString(parts[0], parts[1])
 }

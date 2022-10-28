@@ -12,6 +12,7 @@ import {AccountEditorComponent} from "./reference/component/account-editor/accou
 import {AccountBrowserComponent} from "./reference/component/account-browser/account-browser.component";
 import {IncomeCategoryBrowserComponent} from "./reference/component/income-category-browser/income-category-browser.component";
 import {IncomeCategoryEditorComponent} from "./reference/component/income-category-editor/income-category-editor.component";
+import {ExportDataBeginComponent} from "./export-data/component/export-data-begin/export-data-begin.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: 'import-data', component: ImportDataBrowserComponent },
   { path: 'import-data/new', component: ImportDataBeginComponent },
   { path: 'import-data/:id', component: ImportDataViewComponent },
+  { path: 'export-data', component: ExportDataBeginComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];

@@ -28,15 +28,16 @@ export class RestInterceptorService implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (req.responseType != 'json') {
-      return next.handle(req);
-    }
-
     let url = environment.backend + req.url
     if (environment.production) {
       url = this.location.prepareExternalUrl(url)
     }
     req = req.clone({url: url})
+
+    if (req.responseType != 'json') {
+      return next.handle(req);
+    }
+
     this.loadingService.startLoading()
 
     return next.handle(req)

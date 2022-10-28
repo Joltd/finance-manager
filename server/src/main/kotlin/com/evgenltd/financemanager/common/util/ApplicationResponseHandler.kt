@@ -1,7 +1,9 @@
 package com.evgenltd.financemanager.common.util
 
 import org.springframework.core.MethodParameter
+import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
@@ -26,7 +28,7 @@ class ApplicationResponseHandler : ResponseBodyAdvice<Any>, Loggable() {
         selectedConverterType: Class<out HttpMessageConverter<*>>,
         request: ServerHttpRequest,
         response: ServerHttpResponse
-    ): Any? = if (request.uri.toString().contains("/actuator") || body is Response) {
+    ): Any? = if (request.uri.toString().contains("/actuator") || body is Response || body is Resource) {
         body
     } else {
         Response(true, body, null)

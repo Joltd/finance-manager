@@ -1,0 +1,22 @@
+<mat-card class="toolbar">
+  <div class="title">Export</div>
+  <button mat-icon-button (click)="save()" [disabled]="!form.valid">
+    <mat-icon>done</mat-icon>
+  </button>
+  <button mat-icon-button (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-card>
+
+<mat-card>
+
+  <form [formGroup]="form">
+
+    <mat-form-field>
+      <mat-label>Account</mat-label>
+      <reference-input api="/account/reference" formControlName="account"></reference-input>
+    </mat-form-field>
+
+  </form>
+
+</mat-card>

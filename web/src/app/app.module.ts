@@ -27,6 +27,7 @@ import {ReportModule} from "./report/report.module";
 import {MatListModule} from "@angular/material/list";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
+import {ExportDataModule} from "./export-data/export-data.module";
 
 @NgModule({
   declarations: [
@@ -58,7 +59,8 @@ import {MatButtonModule} from "@angular/material/button";
     ReportModule,
     MatListModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    ExportDataModule
   ],
   providers: [
     restInterceptorProvider,
