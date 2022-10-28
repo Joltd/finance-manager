@@ -22,7 +22,7 @@ import {coerceBooleanProperty} from "@angular/cdk/coercion";
 export class AmountInputComponent implements MatFormFieldControl<Amount>, ControlValueAccessor, OnDestroy {
 
   private static nextId = 0
-  currencies: string[] = ['RUB','USD','EUR','KZT','TRY','USDT','TRX']
+  currencies: string[] = ['RUB','USD','EUR','KZT','TRY','RSD','USDT','TRX']
 
   @ViewChild('value')
   valueInput!: HTMLInputElement
