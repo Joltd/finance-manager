@@ -2,6 +2,6 @@
   <input #value class="simple-input" formControlName="value" type="number" (input)="this.onInput()">
   <select #currency class="simple-input" formControlName="currency" [class.hide]="!shouldLabelFloat" (change)="this.onInput()">
     <option [ngValue]="''"></option>
-    <option *ngFor="let currency of currencies" [ngValue]="currency">{{currency}}</option>
+    <option *ngFor="let currency of settingsService.settings.currencies" [ngValue]="currency">{{currency}}</option>
   </select>
 </div>

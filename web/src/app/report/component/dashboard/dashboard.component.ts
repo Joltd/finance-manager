@@ -64,7 +64,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private buildFlowChart() {
-    this.chart.setOption({
+    let option = {
       xAxis: {
         data: this.dashboard.flowChart.dates
       },
@@ -87,7 +87,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       },
       legend: {}
-    })
+    }
+    // console.log(option)
+    this.chart.setOption(option)
   }
 
 }

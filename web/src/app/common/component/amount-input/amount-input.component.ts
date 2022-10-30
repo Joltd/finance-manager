@@ -4,6 +4,7 @@ import {ControlValueAccessor, FormBuilder, FormGroup, NgControl, Validators} fro
 import {MatFormFieldControl} from "@angular/material/form-field";
 import {Subject} from "rxjs";
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
+import {SettingsService} from "../../../settings/service/settings.service";
 
 @Component({
   selector: 'amount-input',
@@ -22,7 +23,6 @@ import {coerceBooleanProperty} from "@angular/cdk/coercion";
 export class AmountInputComponent implements MatFormFieldControl<Amount>, ControlValueAccessor, OnDestroy {
 
   private static nextId = 0
-  currencies: string[] = ['RUB','USD','EUR','KZT','TRY','RSD','USDT','TRX']
 
   @ViewChild('value')
   valueInput!: HTMLInputElement
@@ -45,6 +45,7 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
   onTouched = () => {}
 
   constructor(
+    public settingsService: SettingsService,
     private elementRef: ElementRef<HTMLElement>,
     private fb: FormBuilder,
     @Optional()

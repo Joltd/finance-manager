@@ -13,6 +13,12 @@ import {AccountBrowserComponent} from "./reference/component/account-browser/acc
 import {IncomeCategoryBrowserComponent} from "./reference/component/income-category-browser/income-category-browser.component";
 import {IncomeCategoryEditorComponent} from "./reference/component/income-category-editor/income-category-editor.component";
 import {ExportDataBeginComponent} from "./export-data/component/export-data-begin/export-data-begin.component";
+import {
+  ExchangeRateBrowserComponent
+} from "./exchangerate/component/exchange-rate-browser/exchange-rate-browser.component";
+import {
+  ExchangeRateEditorComponent
+} from "./exchangerate/component/exchange-rate-editor/exchange-rate-editor.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -28,6 +34,8 @@ const routes: Routes = [
   { path: 'import-data/:id', component: ImportDataViewComponent },
   { path: 'export-data', component: ExportDataBeginComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
+  { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];
 

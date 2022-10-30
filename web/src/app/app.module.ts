@@ -28,6 +28,8 @@ import {MatListModule} from "@angular/material/list";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {ExportDataModule} from "./export-data/export-data.module";
+import {ExchangeRateModule} from "./exchangerate/exchange-rate.module";
+import {SettingsModule} from "./settings/settings.module";
 
 @NgModule({
   declarations: [
@@ -60,7 +62,9 @@ import {ExportDataModule} from "./export-data/export-data.module";
     MatListModule,
     MatIconModule,
     MatButtonModule,
-    ExportDataModule
+    ExportDataModule,
+    ExchangeRateModule,
+    SettingsModule
   ],
   providers: [
     restInterceptorProvider,

@@ -31,7 +31,7 @@ export class AccountEditorComponent {
   }
 
   private load() {
-    this.accountService.bytId(this.form.value.id)
+    this.accountService.byId(this.form.value.id)
       .subscribe(result => {
         this.form.patchValue(result)
       })

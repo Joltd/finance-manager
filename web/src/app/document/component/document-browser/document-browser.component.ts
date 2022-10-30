@@ -8,6 +8,7 @@ import {DocumentTyped} from "../../model/document-typed";
 import {FormControl, FormGroup} from "@angular/forms";
 import {DocumentExchange, DocumentExpense, DocumentIncome} from "../../model/document";
 import * as moment from "moment";
+import {SettingsService} from "../../../settings/service/settings.service";
 
 @Component({
   selector: 'document-browser',
@@ -25,14 +26,12 @@ export class DocumentBrowserComponent implements OnInit {
     {label: 'Income', value: 'income'},
     {label: 'Exchange', value: 'exchange'}
   ]
-  currencies = [
-    "RUB", "EUR", "USD", "KZT", "TRY", "RSD", "USDT", "TRX"
-  ]
 
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private documentService: DocumentService
+    private documentService: DocumentService,
+    public settingsService: SettingsService
   ) {
     this.activatedRoute.queryParams.subscribe(params => {
       this.filter().patchValue({

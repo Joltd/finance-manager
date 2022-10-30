@@ -63,9 +63,11 @@ class DashboardService(
 
     private fun loadFlowChart(): FlowRecord {
 
-        val currency = "RUB"
+        val currency = "USD"
         val expenses = expenseTransactionRepository.findByExpenseCategoryNotNull()
+                .filter { it.date.monthValue > 8 }
         val incomes = incomeTransactionRepository.findByIncomeCategoryNotNull()
+                .filter { it.date.monthValue > 8 }
 
         val dates = buildDateDimension(expenses, incomes)
 

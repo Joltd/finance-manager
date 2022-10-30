@@ -56,14 +56,14 @@ class ExchangeRateService(
             return BigDecimal.ONE
         }
         val rate = exchangeRateRepository.findByDateLessThanEqual(date)
-                .filter { (it.from == from && it.to == to) || (it.from == to || it.to == it.from) }
+                .filter { (it.from == from && it.to == to) || (it.from == to && it.to == from) }
                 .maxByOrNull { it.date }
                 ?: throw IllegalStateException("No rate for $from/$to $date")
 
         return if (rate.from == from && rate.to == to) {
-            rate.value
+            BigDecimal.ONE.divide(rate.value, 8, RoundingMode.HALF_DOWN)
         } else {
-            BigDecimal.ONE.divide(rate.value, 4, RoundingMode.HALF_DOWN)
+            rate.value
         }
     }
 

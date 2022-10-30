@@ -15,7 +15,7 @@ export class AccountService {
     return this.http.get<Account[]>('/account', TypeUtils.of(Account))
   }
 
-  bytId(id: string): Observable<Account> {
+  byId(id: string): Observable<Account> {
     return this.http.get<Account>('/account/' + id, TypeUtils.of(Account))
   }
 
