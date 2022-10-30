@@ -3,3 +3,12 @@
   grid-template-columns: 1fr 1fr 1fr;
   grid-gap: 1em;
 }
+
+.expenses {
+  margin-top: 1em;
+  margin-bottom: 1em;
+
+  div {
+    height: 20em;
+  }
+}

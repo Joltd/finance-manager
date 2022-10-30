@@ -20,9 +20,12 @@ data class Amount(val value: Long, val currency: String) {
         return Amount(value + other.value, currency)
     }
 
-    operator fun times(other: Number): Amount = Amount(value * other.toLong(), currency)
+    operator fun times(other: BigDecimal): Amount = Amount(
+            toBigDecimal().multiply(other).toLong(),
+            currency
+    )
 
-    operator fun div(other: Number): Amount = Amount(value / other.toLong(), currency)
+//    operator fun div(other: Number): Amount = Amount(value / other.toLong(), currency)
 
     operator fun compareTo(other: Amount): Int {
         checkCurrencySame(other)
@@ -35,12 +38,16 @@ data class Amount(val value: Long, val currency: String) {
         }
     }
 
-    override fun toString(): String = value.toBigDecimal()
+    fun toBigDecimal(): BigDecimal = value.toBigDecimal()
             .movePointLeft(4)
+
+    override fun toString(): String = toBigDecimal()
             .stripTrailingZeros()
             .toPlainString() + " " + currency
 
 }
+
+fun BigDecimal.toAmountValue(): Long = movePointRight(4).toLong()
 
 fun fromFractionalString(value: String, currency: String): Amount {
     return Amount(

@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.DocumentExchange
 import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.repository.DocumentExchangeRepository
+import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import com.evgenltd.financemanager.reference.repository.name
@@ -20,7 +21,8 @@ class DocumentExchangeService(
         private val documentExchangeRepository: DocumentExchangeRepository,
         private val transactionService: TransactionService,
         private val accountRepository: AccountRepository,
-        private val expenseCategoryRepository: ExpenseCategoryRepository
+        private val expenseCategoryRepository: ExpenseCategoryRepository,
+        private val exchangeRateService: ExchangeRateService
 ) : DocumentTypedService<DocumentExchange, DocumentExchangeRecord> {
 
     override fun hash(record: DocumentExchangeRecord, account: String): String = when (account) {
@@ -46,6 +48,8 @@ class DocumentExchangeService(
 
         AccountTransaction(null, entity.date, Direction.IN, entity.amountTo, entity.id!!, entity.accountTo).also { transactionService.save(it) }
         ExchangeTransaction(null, entity.date, Direction.OUT, entity.amountTo, entity.id!!).also { transactionService.save(it) }
+
+        exchangeRateService.saveRate(entity.date, entity.amountFrom, entity.amountTo)
     }
 
     override fun toRecord(entity: DocumentExchange): DocumentExchangeRecord = DocumentExchangeRecord(

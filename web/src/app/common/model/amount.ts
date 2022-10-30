@@ -7,8 +7,8 @@ export class Amount {
   currency!: string
 }
 
-export function toFractional(value: number): number {
-  let text = ''+value
+export function toFractional(amount: Amount): number {
+  let text = ''+amount.value
   while (text.length < decimals + 1) {
     text = '0' + text
   }
@@ -30,7 +30,7 @@ export function fromFractional(value: number): number {
 export class AmountPipe implements PipeTransform {
 
   transform(amount: Amount): string {
-    return `${toFractional(amount.value)} ${amount.currency}`
+    return `${toFractional(amount)} ${amount.currency}`
   }
 
 }
