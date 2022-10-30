@@ -20,6 +20,7 @@ class ExchangeRateService(
 
     @PostConstruct
     fun postConstruct() {
+        exchangeRateRepository.deleteAll()
         documentExchangeRepository.findByAccountFromNotNull()
                 .onEach { saveRate(it.date, it.amountFrom, it.amountTo) }
     }
@@ -47,7 +48,7 @@ class ExchangeRateService(
         entity.date = date
         entity.from = from.currency
         entity.to = to.currency
-        entity.value = from.toBigDecimal().div(to.toBigDecimal())
+        entity.value = to.toBigDecimal().div(from.toBigDecimal())
         exchangeRateRepository.save(entity)
     }
 
@@ -61,9 +62,9 @@ class ExchangeRateService(
                 ?: throw IllegalStateException("No rate for $from/$to $date")
 
         return if (rate.from == from && rate.to == to) {
-            BigDecimal.ONE.divide(rate.value, 8, RoundingMode.HALF_DOWN)
-        } else {
             rate.value
+        } else {
+            BigDecimal.ONE.divide(rate.value, 8, RoundingMode.HALF_DOWN)
         }
     }
 
