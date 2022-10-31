@@ -1,18 +1,16 @@
 <div class="balances">
   <mat-card *ngFor="let accountBalance of dashboard.balances">
-    <mat-card-title>{{accountBalance.accountName}}</mat-card-title>
+    <mat-card-subtitle>{{accountBalance.accountName}}</mat-card-subtitle>
     <mat-card-content>
-      <mat-action-list>
-        <button mat-list-item
-                *ngFor="let balance of accountBalance.balances"
-                (click)="viewDocuments(accountBalance.account, balance.currency)">
-          {{balance | format}}
-        </button>
-      </mat-action-list>
+      <mat-chip-list>
+        <mat-chip *ngFor="let balance of accountBalance.balances"
+                  (click)="viewDocuments(accountBalance.account, balance.currency)">
+          <amount-label [amount]="balance"></amount-label>
+        </mat-chip>
+      </mat-chip-list>
     </mat-card-content>
   </mat-card>
+  <mat-card class="expenses">
+    <div #chart></div>
+  </mat-card>
 </div>
-
-<mat-card class="expenses">
-  <div #chart></div>
-</mat-card>

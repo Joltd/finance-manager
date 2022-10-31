@@ -20,9 +20,9 @@ class ExchangeRateService(
 
     @PostConstruct
     fun postConstruct() {
-        exchangeRateRepository.deleteAll()
-        documentExchangeRepository.findByAccountFromNotNull()
-                .onEach { saveRate(it.date, it.amountFrom, it.amountTo) }
+//        exchangeRateRepository.deleteAll()
+//        documentExchangeRepository.findByAccountFromNotNull()
+//                .onEach { saveRate(it.date, it.amountFrom, it.amountTo) }
     }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }

@@ -81,14 +81,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }),
       tooltip: {
-        trigger: 'axis',
+        trigger: 'item',
         axisPointer: {
           type: 'shadow'
         }
       },
       legend: {}
     }
-    // console.log(option)
     this.chart.setOption(option)
   }
 

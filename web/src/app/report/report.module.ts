@@ -4,17 +4,19 @@ import {MatCardModule} from "@angular/material/card";
 import {NgForOf} from "@angular/common";
 import {CommonModule} from "../common/common.module";
 import {MatListModule} from "@angular/material/list";
+import {MatChipsModule} from "@angular/material/chips";
 
 @NgModule({
   declarations: [
     DashboardComponent
   ],
-  imports: [
-    MatCardModule,
-    NgForOf,
-    CommonModule,
-    MatListModule
-  ],
+    imports: [
+        MatCardModule,
+        NgForOf,
+        CommonModule,
+        MatListModule,
+        MatChipsModule
+    ],
   exports: [
     DashboardComponent
   ]

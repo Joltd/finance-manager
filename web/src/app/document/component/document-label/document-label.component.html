@@ -2,36 +2,36 @@
   <mat-icon class="expense">arrow_upward</mat-icon>
   <span *ngIf="!hideDate">{{documentExpense.date}}</span>
   <span *ngIf="!hideAccount">{{documentExpense.accountName}}</span>
-  <span>{{documentExpense.amount | format}}</span>
+  <amount-label [amount]="documentExpense.amount"></amount-label>
   <span>{{documentExpense.expenseCategoryName}}</span>
 </ng-container>
 <ng-container *ngIf="documentIncome">
   <mat-icon class="income">arrow_downward</mat-icon>
   <span *ngIf="!hideDate">{{documentIncome.date}}</span>
   <span *ngIf="!hideAccount">{{documentIncome.accountName}}</span>
-  <span>{{documentIncome.amount | format}}</span>
+  <amount-label [amount]="documentIncome.amount"></amount-label>
   <span>{{documentIncome.incomeCategoryName}}</span>
 </ng-container>
 <ng-container *ngIf="documentExchange">
   <mat-icon class="exchange">sync</mat-icon>
   <span *ngIf="!hideDate">{{documentExchange.date}}</span>
   <ng-container *ngIf="!exchangeAmountSame() && !exchangeAccountSame()">
-    <span>{{documentExchange.amountFrom | format}}</span>
+    <amount-label [amount]="documentExchange.amountFrom"></amount-label>
     <span>{{documentExchange.accountFromName}}</span>
     <mat-icon>arrow_right_alt</mat-icon>
-    <span>{{documentExchange.amountTo | format}}</span>
+    <amount-label [amount]="documentExchange.amountTo"></amount-label>
     <span>{{documentExchange.accountToName}}</span>
   </ng-container>
   <ng-container *ngIf="exchangeAmountSame()">
-    <span>{{documentExchange.amountFrom | format}}</span>
+    <amount-label [amount]="documentExchange.amountFrom"></amount-label>
     <span>{{documentExchange.accountFromName}}</span>
     <mat-icon>arrow_right_alt</mat-icon>
     <span>{{documentExchange.accountToName}}</span>
   </ng-container>
   <ng-container *ngIf="exchangeAccountSame()">
     <span>{{documentExchange.accountFromName}}</span>
-    <span>{{documentExchange.amountFrom | format}}</span>
+    <amount-label [amount]="documentExchange.amountFrom"></amount-label>
     <mat-icon>arrow_right_alt</mat-icon>
-    <span>{{documentExchange.amountTo | format}}</span>
+    <amount-label [amount]="documentExchange.amountTo"></amount-label>
   </ng-container>
 </ng-container>

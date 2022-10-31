@@ -30,6 +30,8 @@
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+              "./node_modules/flag-icons/css/flag-icons.min.css",
+              "./node_modules/@cryptofonts/cryptofont/cryptofont.min.css",
               "src/styles.scss"
             ],
             "scripts": [],
