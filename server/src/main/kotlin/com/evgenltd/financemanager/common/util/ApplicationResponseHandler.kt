@@ -37,7 +37,7 @@ class ApplicationResponseHandler : ResponseBodyAdvice<Any>, Loggable() {
     @ExceptionHandler(Throwable::class)
     fun handle(throwable: Throwable?): Response {
         log.error("", throwable)
-        return Response(false, null, "Server error")
+        return Response(false, null, throwable?.message ?: "Server error")
     }
 
     data class Response(val success: Boolean, val body: Any?, val error: String?)

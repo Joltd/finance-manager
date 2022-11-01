@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {environment} from "../environments/environment";
 import {RestInterceptorService} from "./common/service/rest-interceptor.service";
 import {LoadingService} from "./common/service/loading.service";
+import {BreakpointObserver} from "@angular/cdk/layout";
 
 @Component({
   selector: 'app-root',
@@ -12,11 +13,17 @@ export class AppComponent {
 
   version: string = environment.version
   loading: boolean = false
+  wide: boolean = false
 
-  constructor(public loadingService: LoadingService) {
+  constructor(
+    public loadingService: LoadingService,
+    private breakpointObserver: BreakpointObserver
+  ) {
     this.loadingService.onLoading.subscribe(result => {
       setTimeout(() => this.loading = result)
     })
+    this.breakpointObserver.observe(['(min-width: 40em)'])
+      .subscribe(state => this.wide = state.matches)
   }
 
 }

@@ -1,9 +1,24 @@
 :host {
-  display: grid;
-  grid-template-columns: 2.5em repeat(6, min-content);
-  grid-gap: 0.5em;
-  height: 2.5em;
   align-items: center;
+  display: flex;
+  gap: 1em;
+}
+
+.multiline {
+  display: flex;
+  flex-direction: column;
+  gap: .5em;
+}
+
+.line {
+  display: flex;
+  gap: .5em;
+}
+
+.exchange-row {
+  display: grid;
+  grid-template-columns: min-content min-content;
+  grid-template-rows: min-content min-content;
 }
 
 mat-icon {

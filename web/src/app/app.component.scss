@@ -31,11 +31,21 @@
 }
 
 .left-side {
-  width: 30vw;
+  width: 100%;
+}
+
+.left-side-narrow {
+  width: 30em;
 }
 
 .content {
   background-color: #bdbdbd;
+  width: 100%;
   padding: 1em;
   box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.content-wide {
+  padding: 1em calc((100vw - 40em)/2)!important;
 }

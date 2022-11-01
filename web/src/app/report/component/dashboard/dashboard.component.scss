@@ -1,11 +1,10 @@
-.balances {
+:host {
   display: grid;
   grid-gap: 1em;
   grid-auto-flow: row;
 }
 
 .expenses {
-  //margin-top: 1em;
 
   div {
     min-height: 30em;

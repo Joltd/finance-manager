@@ -4,7 +4,7 @@
   <div class="app-version">{{version}}</div>
 </mat-toolbar>
 <mat-sidenav-container>
-  <mat-sidenav #left position="start" class="left-side">
+  <mat-sidenav #left position="start" class="left-side" [class.left-side-narrow]="wide">
     <mat-nav-list>
       <mat-divider></mat-divider>
       <a mat-list-item [routerLink]="['account']" (click)="left.close()">Account</a>
@@ -18,7 +18,7 @@
       <a mat-list-item [routerLink]="['exchange-rate']" (click)="left.close()">Exchange rates</a>
     </mat-nav-list>
   </mat-sidenav>
-  <mat-sidenav-content class="content">
+  <mat-sidenav-content class="content" [class.content-wide]="wide">
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

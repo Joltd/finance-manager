@@ -15,9 +15,9 @@ import * as moment from "moment";
 })
 export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild('chart')
-  chartContainer!: ElementRef
-  chart!: ECharts
+  // @ViewChild('chart')
+  // chartContainer!: ElementRef
+  // chart!: ECharts
 
   dashboard: Dashboard = new Dashboard()
 
@@ -31,16 +31,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.chart = echarts.init(this.chartContainer.nativeElement)
-    let chart = this.chart
-    window.onresize = function () {
-      chart.resize()
-    }
+    // this.chart = echarts.init(this.chartContainer.nativeElement)
+    // let chart = this.chart
+    // window.onresize = function () {
+    //   chart.resize()
+    // }
     this.load()
   }
 
   ngOnDestroy(): void {
-    this.chart.dispose()
+    // this.chart.dispose()
   }
 
   private load() {
@@ -88,7 +88,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       legend: {}
     }
-    this.chart.setOption(option)
+    // this.chart.setOption(option)
   }
 
 }
