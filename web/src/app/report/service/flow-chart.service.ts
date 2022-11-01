@@ -12,6 +12,7 @@ import {TypeUtils} from "../../common/service/type-utils";
 export class FlowChartService {
 
   settings: FormGroup = new FormGroup({
+    type: new FormControl('expense'),
     dateFrom: new FormControl(moment().subtract(6, 'month').format('yyyy-MM-DD')),
     dateTo: new FormControl(moment().format('yyyy-MM-DD')),
     currency: new FormControl('USD'),

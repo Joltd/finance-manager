@@ -4,6 +4,16 @@
   </mat-expansion-panel-header>
 
   <form [formGroup]="filter()">
+
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="'total'">Total</mat-option>
+        <mat-option [value]="'expense'">Expenses</mat-option>
+        <mat-option [value]="'income'">Incomes</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <mat-form-field>
       <mat-label>From</mat-label>
       <input formControlName="dateFrom" matInput [matDatepicker]="from" readonly (click)="from.open()">

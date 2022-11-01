@@ -43,27 +43,23 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
 
   private refreshChart() {
 
-    let totalExpense = this.seriesOptions(this.flowChartService.data.totalExpense, 'totalExpense')
-    totalExpense.barWidth = 10
-
     let option = {
       xAxis: {
-        type: 'category',
-        data: this.flowChartService.data.dates
-      },
-      yAxis: {
         type: 'value'
       },
-      series: [
-        totalExpense,
-        ...this.flowChartService.data.expenses.map(series => this.seriesOptions(series, 'expense')),
-        ...this.flowChartService.data.incomes.map(series => this.seriesOptions(series, 'income'))
-      ],
+      yAxis: {
+        type: 'category',
+        axisLabel: {
+          rotate: 90
+        },
+        data: this.flowChartService.data.dates
+      },
+      series: this.flowChartService.data.flows.map(series => this.seriesOptions(series)),
       grid: {
-        left: '3%',
-        right: '3%',
-        bottom: '3%',
-        top: '25%',
+        left: '2%',
+        right: '6%',
+        bottom: '2%',
+        top: '10%',
         containLabel: true
       },
       tooltip: {
@@ -72,20 +68,30 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
           type: 'shadow'
         }
       },
-      legend: {}
+      legend: {
+        type: 'scroll',
+        left: '3%',
+        top: '3%',
+        // right: '15%',
+        // bottom: '15%'
+      }
     }
     this.chart.resize()
+    this.chart.clear()
     this.chart.setOption(option)
   }
 
-  private seriesOptions(series: FlowChartSeries, type: string): any {
+  private seriesOptions(series: FlowChartSeries): any {
     return {
       name: series.category,
       type: 'bar',
       emphasis: {
         focus: 'series'
       },
-      stack: type,
+      label: {
+        show: true,
+        position: 'right'
+      },
       data: series.amounts.map(amount => toFractional(amount))
     }
   }

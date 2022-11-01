@@ -26,23 +26,57 @@ class FlowChartService(
         private val exchangeRateService: ExchangeRateService
 ) {
 
-    fun load(settings: FlowSettingsRecord): FlowRecord {
+    fun load(settings: FlowSettingsRecord): FlowRecord = when (settings.type) {
+        "expense" -> loadExpensesChart(settings)
+        "income" -> loadIncomesChart(settings)
+        else -> loadTotalChart(settings)
+    }
 
+    private fun loadTotalChart(settings: FlowSettingsRecord): FlowRecord {
         val expenses = expenseTransactionRepository.findByExpenseCategoryNotNull()
                 .filter { !it.date.isBefore(settings.dateFrom) && !it.date.isAfter(settings.dateTo) }
         val incomes = incomeTransactionRepository.findByIncomeCategoryNotNull()
                 .filter { !it.date.isBefore(settings.dateFrom) && !it.date.isAfter(settings.dateTo) }
 
-        val dates = buildDateDimension(settings.groupBy, expenses, incomes)
+        val dates = (expenses.map { it.date } + incomes.map { it.date }).buildDateDimension(settings.groupBy)
 
-        //
+        val expenseByDate = expenses.groupBy { it.date.grouped(settings.groupBy) }
+                .entries
+                .map { it.key to it.value.sumExpenses(settings.currency) }
+                .associate { it }
+
+        val incomeByDate = incomes.groupBy { it.date.grouped(settings.groupBy) }
+                .entries
+                .map { it.key to it.value.sumIncomes(settings.currency) }
+                .associate { it }
+
+        return FlowRecord(
+                dates,
+                listOf(
+                        FlowSeriesRecord(
+                                "Expense",
+                                dates.map { date -> expenseByDate[date] ?: Amount(0, settings.currency) }
+                        ),
+                        FlowSeriesRecord(
+                                "Income",
+                                dates.map { date -> incomeByDate[date] ?: Amount(0, settings.currency) }
+                        )
+                )
+        )
+    }
+
+    private fun loadExpensesChart(settings: FlowSettingsRecord): FlowRecord {
+        val expenses = expenseTransactionRepository.findByExpenseCategoryNotNull()
+                .filter { !it.date.isBefore(settings.dateFrom) && !it.date.isAfter(settings.dateTo) }
+
+        val dates = expenses.map { it.date }.buildDateDimension(settings.groupBy)
 
         val expenseIndex = referenceService.expenseCategoryIndex()
         val expenseByDateAndCategory = expenses.groupBy { FlowGroup(it.date.grouped(settings.groupBy), expenseIndex.expenseName(it.expenseCategory)) }
                 .entries
                 .map { it.key to it.value.sumExpenses(settings.currency) }
                 .associate { it }
-        val expenseSeries = expenses.map { expenseIndex.expenseName(it.expenseCategory) }
+        val incomeSeries = expenses.map { expenseIndex.expenseName(it.expenseCategory) }
                 .toSet()
                 .map {
                     FlowSeriesRecord(
@@ -50,19 +84,17 @@ class FlowChartService(
                             dates.map { date -> expenseByDateAndCategory[FlowGroup(date, it)] ?: Amount(0, settings.currency) }
                     )
                 }
-
-        //
-
-        val expenseByDate = expenses.groupBy { it.date.grouped(settings.groupBy) }
-                .entries
-                .map { it.key to it.value.sumExpenses(settings.currency) }
-                .associate { it }
-        val totalExpense = FlowSeriesRecord(
-                "Total",
-                dates.map { date -> expenseByDate[date] ?: Amount(0, settings.currency) }
+        return FlowRecord(
+                dates,
+                incomeSeries
         )
+    }
 
-        //
+    private fun loadIncomesChart(settings: FlowSettingsRecord): FlowRecord {
+        val incomes = incomeTransactionRepository.findByIncomeCategoryNotNull()
+                .filter { !it.date.isBefore(settings.dateFrom) && !it.date.isAfter(settings.dateTo) }
+
+        val dates = incomes.map { it.date }.buildDateDimension(settings.groupBy)
 
         val incomeIndex = referenceService.incomeCategoryIndex()
         val incomeByDateAndCategory = incomes.groupBy { FlowGroup(it.date.grouped(settings.groupBy), incomeIndex.incomeName(it.incomeCategory)) }
@@ -77,22 +109,14 @@ class FlowChartService(
                             dates.map { date -> incomeByDateAndCategory[FlowGroup(date, it)] ?: Amount(0, settings.currency) }
                     )
                 }
-
         return FlowRecord(
                 dates,
-                expenseSeries,
-                totalExpense,
                 incomeSeries
         )
     }
 
-    private fun buildDateDimension(
-            group: String,
-            expenses: List<ExpenseTransaction>,
-            incomes: List<IncomeTransaction>
-    ): List<LocalDate> {
-        val flowDates = (expenses.map { it.date.grouped(group) } + incomes.map { it.date.grouped(group) })
-                .toSet()
+    private fun List<LocalDate>.buildDateDimension(group: String): List<LocalDate> {
+        val flowDates = map { it.grouped(group) }.toSet()
         if (flowDates.isEmpty()) {
             return emptyList()
         }
