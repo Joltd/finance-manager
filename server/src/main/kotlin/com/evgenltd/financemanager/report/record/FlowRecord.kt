@@ -4,5 +4,7 @@ import java.time.LocalDate
 
 class FlowRecord(
         val dates: List<LocalDate>,
-        val series: List<FlowSeriesRecord>
+        val expenses: List<FlowSeriesRecord>,
+        val totalExpense: FlowSeriesRecord,
+        val incomes: List<FlowSeriesRecord>
 )

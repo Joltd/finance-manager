@@ -50,7 +50,7 @@
   <mat-list>
     <mat-list-item *ngFor="let document of filteredDocuments">
       <div matLine class="mat-line-with-menu">
-        <document-label [document]="document"></document-label>
+        <document-label [document]="document" [hideDate]="true"></document-label>
         <button mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>
         </button>

@@ -3,8 +3,6 @@ import {AccountBalance} from "../../model/account-balance";
 import {Dashboard} from "../../model/dashboard";
 import {DashboardService} from "../../service/dashboard.service";
 import {Router} from "@angular/router";
-import * as echarts from "echarts";
-import {ECharts} from "echarts";
 import {toFractional} from "../../../common/model/amount";
 import * as moment from "moment";
 
@@ -13,11 +11,7 @@ import * as moment from "moment";
   templateUrl: 'dashboard.component.html',
   styleUrls: ['dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
-
-  // @ViewChild('chart')
-  // chartContainer!: ElementRef
-  // chart!: ECharts
+export class DashboardComponent implements OnInit {
 
   dashboard: Dashboard = new Dashboard()
 
@@ -27,20 +21,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-
-  }
-
-  ngAfterViewInit(): void {
-    // this.chart = echarts.init(this.chartContainer.nativeElement)
-    // let chart = this.chart
-    // window.onresize = function () {
-    //   chart.resize()
-    // }
     this.load()
-  }
-
-  ngOnDestroy(): void {
-    // this.chart.dispose()
   }
 
   private load() {
@@ -64,31 +45,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private buildFlowChart() {
-    let option = {
-      xAxis: {
-        data: this.dashboard.flowChart.dates
-      },
-      yAxis: {},
-      series: this.dashboard.flowChart.series.map(series => {
-        return {
-          name: series.category,
-          type: 'bar',
-          emphasis: {
-            focus: 'series'
-          },
-          stack: series.type,
-          data: series.amounts.map(amount => toFractional(amount))
-        }
-      }),
-      tooltip: {
-        trigger: 'item',
-        axisPointer: {
-          type: 'shadow'
-        }
-      },
-      legend: {}
-    }
-    // this.chart.setOption(option)
+
   }
 
 }

@@ -74,8 +74,8 @@ export class RestInterceptorService implements HttpInterceptor {
           let message: string
           if (error.statusText) {
             message = error.statusText
-          } else if (typeof error == 'string') {
-            message = error
+          } else if (error?.message) {
+            message = error?.message
           } else {
             message = "Unknown error"
           }
