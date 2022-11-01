@@ -13,8 +13,7 @@ export class ExpenseCategoryEditorComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
-    name: new FormControl(null, Validators.required),
-    patterns: new FormControl(null)
+    name: new FormControl(null, Validators.required)
   })
 
   constructor(
@@ -34,19 +33,12 @@ export class ExpenseCategoryEditorComponent {
   private load() {
     this.expenseCategoryService.bytId(this.form.value.id)
       .subscribe(result => {
-        this.form.patchValue({
-          name: result.name,
-          patterns: result.patterns.join('\n')
-        })
+        this.form.patchValue(result)
       })
   }
 
   save() {
-    let expenseCategory = new ExpenseCategory()
-    expenseCategory.id = this.form.value.id
-    expenseCategory.name = this.form.value.name
-    expenseCategory.patterns = this.form.value.patterns?.split('\n') || []
-    this.expenseCategoryService.update(expenseCategory)
+    this.expenseCategoryService.update(this.form.value)
       .subscribe(() => this.close())
   }
 

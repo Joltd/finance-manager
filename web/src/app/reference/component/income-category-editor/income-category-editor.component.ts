@@ -13,8 +13,7 @@ export class IncomeCategoryEditorComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
-    name: new FormControl(null, Validators.required),
-    patterns: new FormControl(null)
+    name: new FormControl(null, Validators.required)
   })
 
   constructor(
@@ -33,20 +32,11 @@ export class IncomeCategoryEditorComponent {
 
   private load() {
     this.incomeCategoryService.bytId(this.form.value.id)
-      .subscribe(result => {
-        this.form.patchValue({
-          name: result.name,
-          patterns: result.patterns.join('\n')
-        })
-      })
+      .subscribe(result => this.form.patchValue(result))
   }
 
   save() {
-    let incomeCategory = new IncomeCategory()
-    incomeCategory.id = this.form.value.id
-    incomeCategory.name = this.form.value.name
-    incomeCategory.patterns = this.form.value.patterns?.split('\n') || []
-    this.incomeCategoryService.update(incomeCategory)
+    this.incomeCategoryService.update(this.form.value)
       .subscribe(() => this.close())
   }
 

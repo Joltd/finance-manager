@@ -37,7 +37,4 @@ export interface DocumentExchange extends Document {
   accountTo: string
   accountToName: string
   amountTo: Amount
-  commissionExpenseCategory: string | null
-  commissionExpenseCategoryName: string | null
-  commissionAmount: Amount | null
 }

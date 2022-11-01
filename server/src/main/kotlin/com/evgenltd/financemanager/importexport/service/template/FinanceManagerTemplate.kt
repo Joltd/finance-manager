@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Component
@@ -61,9 +60,7 @@ class FinanceManagerTemplate(
                                 accountFrom = it.accountFromName.resolveAccount(accountIndex),
                                 amountFrom = it.amountFrom.amount(),
                                 accountTo = it.accountToName.resolveAccount(accountIndex),
-                                amountTo = it.amountTo.amount(),
-                                commissionExpenseCategory = null,
-                                commissionAmount = null
+                                amountTo = it.amountTo.amount()
                         )
                         else -> null
                     }

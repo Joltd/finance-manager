@@ -1,18 +1,14 @@
 package com.evgenltd.financemanager.document.service
 
-import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.DocumentExchange
 import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.repository.DocumentExchangeRepository
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.reference.repository.AccountRepository
-import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import com.evgenltd.financemanager.reference.repository.name
-import com.evgenltd.financemanager.reference.repository.nameOrNull
 import com.evgenltd.financemanager.transaction.entity.AccountTransaction
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.ExchangeTransaction
-import com.evgenltd.financemanager.transaction.entity.ExpenseTransaction
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 
@@ -21,7 +17,6 @@ class DocumentExchangeService(
         private val documentExchangeRepository: DocumentExchangeRepository,
         private val transactionService: TransactionService,
         private val accountRepository: AccountRepository,
-        private val expenseCategoryRepository: ExpenseCategoryRepository,
         private val exchangeRateService: ExchangeRateService
 ) : DocumentTypedService<DocumentExchange, DocumentExchangeRecord> {
 
@@ -39,13 +34,6 @@ class DocumentExchangeService(
         ExchangeTransaction(null, entity.date, Direction.IN, entity.amountFrom, entity.id!!).also { transactionService.save(it) }
         AccountTransaction(null, entity.date, Direction.OUT, entity.amountFrom, entity.id!!, entity.accountFrom).also { transactionService.save(it) }
 
-        val commissionAmount = entity.commissionAmount
-        val commissionExpenseCategory = entity.commissionExpenseCategory
-        if (commissionAmount != null && commissionExpenseCategory != null) {
-            ExpenseTransaction(null, entity.date, Direction.IN, commissionAmount, entity.id!!, commissionExpenseCategory).also { transactionService.save(it) }
-            AccountTransaction(null, entity.date, Direction.OUT, commissionAmount, entity.id!!, entity.accountFrom).also { transactionService.save(it) }
-        }
-
         AccountTransaction(null, entity.date, Direction.IN, entity.amountTo, entity.id!!, entity.accountTo).also { transactionService.save(it) }
         ExchangeTransaction(null, entity.date, Direction.OUT, entity.amountTo, entity.id!!).also { transactionService.save(it) }
 
@@ -61,10 +49,7 @@ class DocumentExchangeService(
             amountFrom = entity.amountFrom,
             accountTo = entity.accountTo,
             accountToName = accountRepository.name(entity.accountTo),
-            amountTo = entity.amountTo,
-            commissionExpenseCategory = entity.commissionExpenseCategory,
-            commissionExpenseCategoryName = expenseCategoryRepository.nameOrNull(entity.commissionExpenseCategory),
-            commissionAmount = entity.commissionAmount
+            amountTo = entity.amountTo
     )
 
     override fun toEntity(record: DocumentExchangeRecord): DocumentExchange = DocumentExchange(
@@ -74,8 +59,6 @@ class DocumentExchangeService(
             accountFrom = record.accountFrom,
             amountFrom = record.amountFrom,
             accountTo = record.accountTo,
-            amountTo = record.amountTo,
-            commissionExpenseCategory = record.commissionExpenseCategory,
-            commissionAmount = record.commissionAmount
+            amountTo = record.amountTo
     )
 }

@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.document.record
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.document.entity.DocumentIncome
 import java.time.LocalDate
 
 class DocumentIncomeRecord(

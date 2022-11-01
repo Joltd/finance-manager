@@ -12,8 +12,7 @@ export class AccountEditorComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
-    name: new FormControl(null, Validators.required),
-    patterns: new FormControl(null)
+    name: new FormControl(null, Validators.required)
   })
 
   constructor(

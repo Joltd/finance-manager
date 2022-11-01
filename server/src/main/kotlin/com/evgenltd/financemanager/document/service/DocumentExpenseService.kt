@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.document.service
 
-import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
 import com.evgenltd.financemanager.document.repository.DocumentExpenseRepository
@@ -11,7 +10,6 @@ import com.evgenltd.financemanager.transaction.entity.AccountTransaction
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.ExpenseTransaction
 import com.evgenltd.financemanager.transaction.service.TransactionService
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service

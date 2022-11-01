@@ -16,10 +16,7 @@ export class DocumentExchangeComponent {
     accountFrom: new FormControl(null, Validators.required),
     amountFrom: new FormControl(null, Validators.required),
     accountTo: new FormControl(null, Validators.required),
-    amountTo: new FormControl(null, Validators.required),
-    commissionExpenseCategory: new FormControl(null),
-    commissionAmount: new FormControl(null),
-    description: new FormControl('')
+    amountTo: new FormControl(null, Validators.required)
   })
 
   @Input()

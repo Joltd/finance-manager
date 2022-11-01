@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.document.entity
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import java.time.LocalDate
 import org.springframework.data.mongodb.core.mapping.Document as Entity
 
@@ -13,7 +12,5 @@ class DocumentExchange(
         var accountFrom: String,
         var amountFrom: Amount,
         var accountTo: String,
-        var amountTo: Amount,
-        var commissionExpenseCategory: String?,
-        var commissionAmount: Amount?
+        var amountTo: Amount
 ) : Document(id, date, description)

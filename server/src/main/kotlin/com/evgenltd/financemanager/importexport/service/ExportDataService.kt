@@ -1,15 +1,12 @@
 package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
-import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importexport.component.FIELDS
 import com.evgenltd.financemanager.importexport.component.exportDocument
 import com.evgenltd.financemanager.importexport.record.ExportDataResult
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.stereotype.Service
-import kotlin.reflect.full.declaredMemberProperties
 
 @Service
 class ExportDataService(

@@ -4,8 +4,6 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.Document
 import com.evgenltd.financemanager.document.record.*
 import com.evgenltd.financemanager.document.repository.DocumentRepository
-import com.evgenltd.financemanager.reference.repository.AccountRepository
-import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service

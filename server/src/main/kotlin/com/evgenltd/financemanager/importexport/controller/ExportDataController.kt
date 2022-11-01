@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.importexport.controller
 
-import com.evgenltd.financemanager.importexport.record.ExportDataResult
 import com.evgenltd.financemanager.importexport.service.ExportDataService
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource

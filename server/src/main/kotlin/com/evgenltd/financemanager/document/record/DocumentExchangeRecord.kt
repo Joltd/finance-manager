@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.document.record
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.document.entity.DocumentExchange
 import java.time.LocalDate
 
 class DocumentExchangeRecord(
@@ -13,8 +12,5 @@ class DocumentExchangeRecord(
         val amountFrom: Amount,
         val accountTo: String,
         val accountToName: String?,
-        val amountTo: Amount,
-        val commissionExpenseCategory: String? = null,
-        val commissionExpenseCategoryName: String? = null,
-        val commissionAmount: Amount? = null
+        val amountTo: Amount
 ) : DocumentRecord

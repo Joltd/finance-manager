@@ -1,8 +1,5 @@
 package com.evgenltd.financemanager.common.util
 
-import com.evgenltd.financemanager.transaction.entity.Direction
-import java.time.LocalDate
-
 class IdGenerator {
 
     private val ids: MutableMap<String,Int> = mutableMapOf()
