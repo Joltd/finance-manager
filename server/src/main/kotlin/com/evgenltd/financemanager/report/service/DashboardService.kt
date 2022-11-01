@@ -52,6 +52,7 @@ class DashboardService(
 
     private fun List<AccountTransaction>.sumByCurrency(): List<Amount> = this.groupBy { it.amount.currency }
             .map { Amount(it.value.sum(), it.key) }
+            .filter { it.value != 0L }
 
     private fun List<AccountTransaction>.sum() = sumOf {
         if (it.direction == Direction.IN) {
