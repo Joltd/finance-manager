@@ -5,10 +5,12 @@ import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
 import com.evgenltd.financemanager.document.record.DocumentIncomeRecord
 import com.evgenltd.financemanager.document.record.DocumentTypedRecord
+import com.evgenltd.financemanager.importexport.component.rulemanager.Hint
+import com.evgenltd.financemanager.importexport.component.rulemanager.buildRuleManager
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 
-fun mapData(account: String, input: List<RawDataRecord>, rules: String): MapDataResult {
-    val ruleManager = readRules(rules)
+fun mapData(account: String, input: List<RawDataRecord>, rulesPath: String): MapDataResult {
+    val ruleManager = buildRuleManager(rulesPath)
 
     val documents = mutableListOf<DocumentTypedRecord>()
     val skipped = mutableListOf<RawDataRecord>()
@@ -60,9 +62,9 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                 incomeCategory = ""
         )
         "exchange" -> {
-            val oppositeAccount = if (hint.oppositeAccount == "~") account else hint.oppositeAccount
+            val oppositeAccount = if (hint.account == "~") account else hint.account
             if (record.amount.value < 0) {
-                val oppositeAmount = if (hint.oppositeAmount == "~") -record.amount else hint.oppositeAmount.parseAmount()
+                val oppositeAmount = if (hint.amount == "~") -record.amount else hint.amount.parseAmount()
                 DocumentExchangeRecord(
                         id = null,
                         date = record.date,
@@ -75,7 +77,7 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                         accountTo = "",
                 )
             } else {
-                val oppositeAmount = if (hint.oppositeAmount == "~") record.amount else hint.oppositeAmount.parseAmount()
+                val oppositeAmount = if (hint.amount == "~") record.amount else hint.amount.parseAmount()
                 DocumentExchangeRecord(
                         id = null,
                         date = record.date,

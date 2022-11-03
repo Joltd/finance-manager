@@ -24,8 +24,8 @@ data class Row(
         private val cells: Map<String,String>
 ) {
 
-    operator fun get(name: String): String = cells[name] ?: throw IllegalArgumentException("Unknown field [$name]")
+    operator fun get(name: String): String = cells[name] ?: ""
 
-    operator fun get(index: Int): String = values[index]
+    operator fun get(index: Int): String = if (index >= values.size) "" else values[index]
 
 }
