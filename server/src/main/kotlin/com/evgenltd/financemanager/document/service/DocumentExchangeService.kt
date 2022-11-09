@@ -26,8 +26,7 @@ class DocumentExchangeService(
         else -> "${record.date}-${record.accountFrom}-${record.amountFrom}-${record.accountTo}-${record.amountTo}"
     }
 
-    override fun update(record: DocumentExchangeRecord) {
-        val entity = toEntity(record)
+    override fun update(entity: DocumentExchange) {
         documentExchangeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
 

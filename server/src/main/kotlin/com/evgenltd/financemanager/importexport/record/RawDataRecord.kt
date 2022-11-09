@@ -7,4 +7,7 @@ data class RawDataRecord(
         val date: LocalDate,
         val amount: Amount,
         val description: String
-)
+) {
+
+    override fun toString(): String = "$date $amount $description"
+}

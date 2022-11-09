@@ -28,7 +28,13 @@ class DocumentService(
 
     fun byId(id: String): DocumentTypedRecord = documentRepository.find(id).let(::toTypedRecord)
 
-    fun update(record: DocumentTypedRecord) = resolveService(record.value).update(record.value)
+    fun update(record: DocumentTypedRecord) {
+        val service = resolveService(record.value)
+        val entity = service.toEntity(record.value)
+        service.update(entity)
+    }
+
+    fun update(entity: Document) = resolveService(entity).update(entity)
 
     fun delete(id: String) {
         transactionService.deleteByDocument(id)

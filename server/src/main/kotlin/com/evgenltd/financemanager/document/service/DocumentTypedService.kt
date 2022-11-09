@@ -11,6 +11,6 @@ interface DocumentTypedService<E : Document, R : DocumentRecord> {
 
     fun toEntity(record: R): E
 
-    fun update(record: R)
+    fun update(entity: E)
 
 }

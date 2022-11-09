@@ -1,0 +1,16 @@
+type,category,oppositeAccount,oppositeAmount,date,amount,description
+exchange,,~,96225 RUB,2016-06-08,,Перевод между счетами
+exchange,,~,32900 RUB,2016-06-19,,Перевод между счетами
+exchange,,~,64900 RUB,2016-07-13,,Перевод между счетами
+exchange,,Tinkoff Black Card,78.95 RUB,2020-03-20,,Перевод между счетами
+expense,Другое,,,2020-03-18,,Плата за оповещения об операциях
+expense,Подписки,,,2022-03-07,,Валютный перевод
+expense,Подписки,,,2022-04-18,,Валютный перевод
+exchange,,Binance,944.28 USDT,2022-10-10,,Самсон Е
+exchange,,Binance,919.11 USDT,2022-10-05,,Абделрахман М
+exchange,,Binance,889.67 USDT,2022-09-29,,Абделрахман М
+exchange,,Tinkoff Депозит,~,,,Пополнение вклада
+exchange,,Tinkoff Депозит,~,,,Частичное изъятие вклада
+exchange,,Tinkoff Депозит,~,,,Закрытие вклада
+exchange,,Наличка,~,,,Снятие в банкомате
+exchange,,Tinkoff Инвестиции (Основной),~,,,Вывод с брокерского счета

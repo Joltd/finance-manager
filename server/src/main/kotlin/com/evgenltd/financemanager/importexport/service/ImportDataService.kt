@@ -138,6 +138,20 @@ class ImportDataService(
         ImportDataResult(false)
     }
 
+    fun instantImport(record: ImportDataRecord): ImportDataResult = try {
+        val path = Paths.get(importDataProperties.directory, record.file)
+        val documents = importDataTemplates.first { it.javaClass.simpleName == record.template }
+                .convert(record.account, path)
+        for (document in documents) {
+            document.suggested
+            documentService.update(document.suggested!!)
+        }
+        ImportDataResult(true)
+    } catch (e: Exception) {
+        log.error("Unable to perform instant import ${record.account} ${record.file}", e)
+        ImportDataResult(false)
+    }
+
     fun delete(id: String) = importDataRepository.deleteById(id)
 
     private fun ImportDataRecord.toEntity(): ImportData = ImportData(

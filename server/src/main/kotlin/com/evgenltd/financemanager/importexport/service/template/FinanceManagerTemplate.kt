@@ -62,7 +62,7 @@ class FinanceManagerTemplate(
                                 accountTo = it.accountToName.resolveAccount(accountIndex),
                                 amountTo = it.amountTo.amount()
                         )
-                        else -> null
+                        else -> throw IllegalArgumentException("Unknown document type [${it.type}]")
                     }
 
                     DocumentEntry(

@@ -43,6 +43,10 @@ export class ImportDataService {
     return this.http.patch<ImportDataResult>('/import-data', document, TypeUtils.of(ImportDataResult))
   }
 
+  instantImport(importData: ImportData): Observable<ImportDataResult> {
+    return this.http.post<ImportDataResult>('/import-data/instant', importData, TypeUtils.of(ImportDataResult))
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>('/import-data/' + id)
   }

@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.component
 
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.parseAmount
 import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
@@ -8,6 +9,7 @@ import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.importexport.component.rulemanager.Hint
 import com.evgenltd.financemanager.importexport.component.rulemanager.buildRuleManager
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
+import java.time.LocalDate
 
 fun mapData(account: String, input: List<RawDataRecord>, rulesPath: String): MapDataResult {
     val ruleManager = buildRuleManager(rulesPath)
@@ -24,19 +26,36 @@ fun mapData(account: String, input: List<RawDataRecord>, rulesPath: String): Map
         val hint = ruleManager.find(record)
         if (hint == null) {
             skipped.add(record)
-            continue
+//            val document = makeSkipDocument(account, record.date, record.amount)
+//            documents.add(document)
+        } else {
+            val document = makeDocument(account, record, hint)
+            documents.add(document)
         }
-
-        val document = makeDocument(account, record, hint)
-        documents.add(document)
 
     }
 
     return MapDataResult(
+            input,
             documents,
             skipped
     )
 }
+
+private fun makeSkipDocument(account: String, date: LocalDate, amount: Amount): DocumentTypedRecord =
+        DocumentTypedRecord(
+                type = "expense",
+                value = DocumentExpenseRecord(
+                        id = null,
+                        date = date,
+                        amount = -amount,
+                        accountName = account,
+                        expenseCategoryName = "Нераспределенное",
+                        description = "",
+                        account = "",
+                        expenseCategory = ""
+                )
+        )
 
 private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): DocumentTypedRecord {
 
@@ -47,7 +66,7 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                 amount = -record.amount,
                 accountName = account,
                 expenseCategoryName = hint.category,
-                description = "",
+                description = record.description,
                 account = "",
                 expenseCategory = ""
         )
@@ -57,7 +76,7 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                 amount = record.amount,
                 accountName = account,
                 incomeCategoryName = hint.category,
-                description = "",
+                description = record.description,
                 account = "",
                 incomeCategory = ""
         )
@@ -72,7 +91,7 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                         amountFrom = -record.amount,
                         accountToName = oppositeAccount,
                         amountTo = oppositeAmount,
-                        description = "",
+                        description = record.description,
                         accountFrom = "",
                         accountTo = "",
                 )
@@ -101,6 +120,7 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
 }
 
 data class MapDataResult(
+        val raw: List<RawDataRecord>,
         val documents: List<DocumentTypedRecord>,
         val skipped: List<RawDataRecord>
 )

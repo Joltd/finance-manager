@@ -1,0 +1,32 @@
+type,category,oppositeAccount,oppositeAmount,date,amount,description,source
+expense,Развлечения,,,,,,../expense/entertainment.csv
+expense,Авиабилеты,,,,,,../expense/avia.csv
+expense,Мобильная связь,,,,,,../expense/mobile.csv
+expense,Аренда квартиры,,,,,,../expense/rent.csv
+expense,Подписки,,,,,,../expense/subscription.csv
+expense,Такси,,,,,,../expense/taxi.csv
+expense,Одежда,,,,,,../expense/clothes.csv
+expense,Поездки,,,,,,../expense/trip.csv
+expense,Техника,,,,,,../expense/device.csv
+expense,Интернет,,,,,,../expense/internet.csv
+expense,Медицина,,,,,,../expense/medicine.csv
+expense,Общественный транспорт,,,,,,../expense/transport.csv
+expense,Самокат,,,,,,../expense/scooter.csv
+expense,Доставка еды,,,,,,../expense/delivery.csv
+expense,Коммуналка,,,,,,../expense/communal.csv
+expense,Для дома,,,,,,../expense/forhome.csv
+expense,Хобби,,,,,,../expense/hobby.csv
+expense,Семейный фонд,,,,,,../expense/family.csv
+expense,Налоги,,,,,,../expense/tax.csv
+expense,Отдых,,,,,,../expense/relax.csv
+expense,Супермаркеты,,,,,,../expense/supermarket.csv
+expense,Кафе и рестораны,,,,,,../expense/cafe.csv
+expense,Другое,,,,,,../expense/other.csv
+income,Зарплата,,,,,,../income/salary.csv
+income,Кэшбэк,,,,,,../income/cashback.csv
+income,Проценты,,,,,,../income/percent.csv
+income,Налоговый вычет,,,,,,../income/tax.csv
+,,,,,,,../exchange/cash.csv
+,,,,,,,../exchange/p2p.csv
+,,,,,,,../exchange/transfer.csv
+expense,Кафе и рестораны,,,,,,../exchange/asexpense.csv

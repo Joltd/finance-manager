@@ -23,7 +23,7 @@ export class ImportDataBeginComponent {
     private importDataService: ImportDataService
   ) {}
 
-  save() {
+  save(instant: boolean) {
     let formValue = this.form.value
     let importData = new ImportData()
     importData.account = formValue.account
@@ -31,8 +31,13 @@ export class ImportDataBeginComponent {
     this.importDataService.uploadFile(formValue.file)
       .subscribe(result => {
         importData.file = result.filename
-        this.importDataService.create(importData)
-          .subscribe(() => this.close())
+        if (instant) {
+          this.importDataService.instantImport(importData)
+            .subscribe(() => this.close())
+        } else {
+          this.importDataService.create(importData)
+            .subscribe(() => this.close())
+        }
       })
   }
 

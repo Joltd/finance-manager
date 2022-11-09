@@ -10,7 +10,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 class DocumentTypedRecord(
         val type: String,
         val value: DocumentRecord
-)
+) {
+    override fun toString(): String = when (value) {
+        is DocumentExchangeRecord -> "${value.date} ${value.amountFrom} ${value.accountFromName} -> ${value.amountTo} ${value.accountToName}"
+        is DocumentExpenseRecord -> "${value.date} ${value.amount} ${value.expenseCategoryName}"
+        is DocumentIncomeRecord -> "${value.date} ${value.amount} ${value.incomeCategoryName}"
+        else -> throw IllegalStateException("Unknown type $type")
+    }
+}
 
 class DocumentTypedRecordDeserializer : JsonDeserializer<DocumentTypedRecord>() {
 

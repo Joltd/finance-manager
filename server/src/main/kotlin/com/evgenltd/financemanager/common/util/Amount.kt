@@ -58,5 +58,8 @@ fun fromFractionalString(value: String, currency: String): Amount {
 
 fun String.parseAmount(): Amount {
     val parts = this.split(" ")
+    if (parts.size != 2) {
+        throw IllegalArgumentException("Unable to parse amount [$this]")
+    }
     return fromFractionalString(parts[0], parts[1])
 }

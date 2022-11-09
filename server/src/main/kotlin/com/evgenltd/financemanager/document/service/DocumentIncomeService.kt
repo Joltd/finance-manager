@@ -26,8 +26,7 @@ class DocumentIncomeService(
         "${record.date}-${record.account}-${record.amount}-${record.incomeCategory}"
     }
 
-    override fun update(record: DocumentIncomeRecord) {
-        val entity = toEntity(record)
+    override fun update(entity: DocumentIncome) {
         documentIncomeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
         AccountTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.account)

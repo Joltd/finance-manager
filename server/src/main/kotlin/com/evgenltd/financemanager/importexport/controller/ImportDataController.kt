@@ -46,6 +46,9 @@ class ImportDataController(
     @PatchMapping("/import-data")
     fun performImport(@RequestBody document: DocumentTypedRecord): ImportDataResult = importDataService.performImport(document)
 
+    @PostMapping("/import-data/instant")
+    fun instantImport(@RequestBody record: ImportDataRecord): ImportDataResult = importDataService.instantImport(record)
+
     @DeleteMapping("/import-data/{id}")
     fun delete(@PathVariable("id") id: String) = importDataService.delete(id)
 
