@@ -7,10 +7,7 @@ import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.stereotype.Service
 
 @Service
-class ExportDataService(
-        private val accountRepository: AccountRepository,
-        private val documentService: DocumentService
-) {
+class ExportDataService(private val documentService: DocumentService) {
 
     fun performExport(account: String?): ByteArray {
         val tag = "data-${System.currentTimeMillis()}.csv"

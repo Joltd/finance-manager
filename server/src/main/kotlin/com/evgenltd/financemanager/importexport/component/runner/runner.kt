@@ -6,10 +6,9 @@ import com.evgenltd.financemanager.importexport.record.RawDataRecord
 import java.math.BigDecimal
 
 fun main() {
-    println(BigDecimal("0.001").movePointLeft(-18))
-//    val result = tinkoffBlackCardUsd()
-//    result.documents.export("""2022-11-09\tinkoff-black-card-usd.csv""")
-//    println()
+    val result = bccKzt()
+    result.documents.export("""2022-11-09\bcc-kzt.csv""")
+    println()
 }
 
 private fun List<RawDataRecord>.total(): Amount {

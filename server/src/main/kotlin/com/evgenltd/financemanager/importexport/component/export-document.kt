@@ -22,7 +22,9 @@ val FIELDS = listOf(
 fun exportDocument(document: DocumentTypedRecord): String {
     val row = document.value::class.declaredMemberProperties
             .associate {
-                it.name to it.getter.call(document.value).toString().replace(",", "")
+                it.name to it.getter.call(document.value).toString()
+                        .replace(",", "")
+                        .replace("null", "")
             } + mapOf("type" to document.type)
 
     return FIELDS.map { row[it] }.joinToString(",")

@@ -34,10 +34,12 @@ export class DocumentBrowserComponent implements OnInit {
     public settingsService: SettingsService
   ) {
     this.activatedRoute.queryParams.subscribe(params => {
-      this.filter().patchValue({
-        currency: params['currency'],
-        account: params['account']
-      })
+      if (params['currency']) {
+        this.filter().patchValue({currency: params['currency']})
+      }
+      if (params['account']) {
+        this.filter().patchValue({account: params['account']})
+      }
       this.filter().valueChanges.subscribe(() => this.load())
     })
   }

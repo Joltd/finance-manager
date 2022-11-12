@@ -1,0 +1,8 @@
+type,category,oppositeAccount,oppositeAmount,date,amount,description
+exchange,,Наличка,~,,,ATB
+exchange,,~,50000 RUB,2022-11-03,,Пополнение
+exchange,,~,50000 RUB,2022-10-21,,Перевод
+exchange,,Tinkoff Black Card,52411.5 RUB,2022-10-09,375000 KZT,Перевод на карту .0940
+exchange,,Tinkoff Black Card,64269 RUB,2022-10-09,460000 KZT,Перевод на карту .0940
+exchange,,Tinkoff Black Card,30396 RUB,2022-10-06,209262 KZT,Перевод на карту .0940
+exchange,,Binance,300 USDT,2022-10-06,141900 KZT,Павел Е.
