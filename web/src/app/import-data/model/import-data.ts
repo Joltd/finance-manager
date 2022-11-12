@@ -5,6 +5,7 @@ export class ImportData {
   file!: string
   description!: string
   documents: DocumentEntry[] = []
+  currentProgress!: number
 }
 
 export class DocumentEntry {
@@ -12,19 +13,10 @@ export class DocumentEntry {
   source!: string
   suggested!: DocumentTyped
   existed!: DocumentTyped
+  result!: boolean
+  message!: string
 }
 
 export class ImportDataFileResponse {
   filename!: string
-}
-
-export class ImportDataResult {
-  id!: string
-  entries: DocumentEntryResult[] = []
-}
-
-export class DocumentEntryResult {
-  id!: string
-  result!: boolean
-  message!: string
 }

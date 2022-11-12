@@ -3,7 +3,6 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {ImportData, DocumentEntry} from "../../model/import-data";
 import {ImportDataService} from "../../service/import-data.service";
 import {DocumentTyped} from "../../../document/model/document-typed";
-import {Document} from "../../../document/model/document";
 import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
@@ -58,6 +57,9 @@ export class ImportDataViewComponent {
           dateGroupEntry.source = document.source
           dateGroupEntry.suggested = document.suggested
           dateGroupEntry.existed = document.existed
+          dateGroupEntry.state = document.result
+          dateGroupEntry.message = document.message
+          dateGroupEntry.entry = document
           dateGroup.entries.push(dateGroupEntry)
 
           if (document.suggested) {
@@ -152,19 +154,7 @@ export class ImportDataViewComponent {
       .filter(entry => entry.selected)
       .map(entry => entry.id)
     this.importDataService.performImport(this.id, documents)
-      .subscribe(result => {
-        this.shortMessageService.show("Done")
-        let index = new Map<string,DateGroupEntry>()
-        this.dateGroups.flatMap(dateGroup => dateGroup.entries)
-          .forEach(dateGroupEntry => index.set(dateGroupEntry.id, dateGroupEntry))
-        for (let entry of result.entries) {
-          let dateGroupEntry = index.get(entry.id)
-          if (dateGroupEntry) {
-            dateGroupEntry.state = entry.result ? 'success' : 'fail'
-            dateGroupEntry.message = entry.message
-          }
-        }
-      })
+      .subscribe(() => this.shortMessageService.show("Done"))
   }
 
   close() {
@@ -179,7 +169,7 @@ export class ImportDataViewComponent {
           continue
         }
         if (entry.suggested) {
-          entry.state = 'none'
+          entry.state = null
           entry.selected = this.toggleSelectionState
         }
       }
@@ -196,9 +186,10 @@ class DateGroup {
 class DateGroupEntry {
   id!: string
   selected: boolean = false
-  state: 'none' | 'success' | 'fail' = 'none'
+  state: boolean | null = null
   message!: string
   source!: string
   suggested!: DocumentTyped
   existed!: DocumentTyped
+  entry!: DocumentEntry
 }

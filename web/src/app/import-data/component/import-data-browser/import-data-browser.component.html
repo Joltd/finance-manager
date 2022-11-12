@@ -1,15 +1,15 @@
 <mat-card *ngIf="importData.length > 0">
   <mat-list>
-    <mat-list-item *ngFor="let data of importData">
-      <div mat-line class="mat-line-with-menu">
+    <mat-list-item *ngFor="let data of importData" [matMenuTriggerFor]="menu">
+      <div matLine>
         {{data.description}}
-        <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
-        <mat-menu #menu>
-          <button mat-menu-item (click)="edit(data.id)">Edit</button>
-          <button mat-menu-item (click)="delete(data.id)">Delete</button>
-          <button mat-menu-item (click)="instantImport(data.id)">Instant import</button>
-        </mat-menu>
       </div>
+      <mat-progress-bar matLine *ngIf="data.currentProgress > 0 && data.currentProgress < 1" [value]="data.currentProgress * 100"></mat-progress-bar>
+      <mat-menu #menu>
+        <button mat-menu-item (click)="edit(data.id)">Edit</button>
+        <button mat-menu-item (click)="delete(data.id)">Delete</button>
+        <button mat-menu-item (click)="instantImport(data.id)">Instant import</button>
+      </mat-menu>
     </mat-list-item>
   </mat-list>
 </mat-card>

@@ -46,6 +46,6 @@ class ImportDataController(
     fun performImport(
             @PathVariable("id") id: String,
             @RequestBody documents: List<String>
-    ): ImportDataResult = importDataService.performImport(id, documents)
+    ) = importDataService.performImport(id, documents)
 
 }

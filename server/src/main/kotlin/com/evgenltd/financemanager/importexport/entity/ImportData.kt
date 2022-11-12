@@ -12,5 +12,7 @@ class ImportData(
 class DocumentEntry(
         var id: String,
         var source: String,
-        var suggested: Document?
+        var suggested: Document?,
+        var result: Boolean? = null,
+        var message: String? = null
 )

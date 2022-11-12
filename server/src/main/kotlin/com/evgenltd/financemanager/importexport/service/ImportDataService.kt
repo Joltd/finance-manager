@@ -7,11 +7,9 @@ import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.record.DocumentEntryRecord
-import com.evgenltd.financemanager.importexport.record.DocumentEntryResult
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
-import com.evgenltd.financemanager.importexport.record.ImportDataResult
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.reference.repository.AccountRepository
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
@@ -34,11 +32,13 @@ class ImportDataService(
     }
     
     fun list(): List<ImportDataRecord> = importDataRepository.findAll().map {
+        val done = it.documents.count { it.result != null }
         ImportDataRecord(
                 id = it.id,
                 file = it.file,
                 description = it.description,
-                documents = listOf()
+                documents = listOf(),
+                currentProgress = 1.0 * done / it.documents.size
         )
     }
 
@@ -59,10 +59,12 @@ class ImportDataService(
             }
 
             DocumentEntryRecord(
-                    document.id,
-                    document.source,
-                    suggested,
-                    existed
+                    id = document.id,
+                    source = document.source,
+                    suggested = suggested,
+                    existed = existed,
+                    result = document.result,
+                    message = document.message
             )
         }
 
@@ -118,41 +120,48 @@ class ImportDataService(
         importDataRepository.save(importData)
     }
 
-    fun performImport(id: String, documents: List<String>): ImportDataResult {
+    @Async
+    fun performImport(id: String, documents: List<String>) {
         val entity = importDataRepository.find(id)
-        val suggestedIndex = entity.documents
-                .filter { it.suggested != null }
-                .associate { it.id to it.suggested!! }
+        val forImport = documents.toSet()
 
-        val forImport = documents.ifEmpty { entity.documents.map { it.id } }
-
-        val entries = mutableListOf<DocumentEntryResult>()
-        for (document in forImport) {
-            val suggested = suggestedIndex[document]
-            if (suggested == null) {
-                entries.add(DocumentEntryResult(document, false, "Not found"))
+        var counter = 0
+        for (document in entity.documents) {
+            document.result = null
+            document.message = null
+            if (forImport.isNotEmpty() && !forImport.contains(document.id)) {
                 continue
             }
 
+            val suggested = document.suggested ?: continue
+
             try {
                 documentService.update(suggested)
-                entries.add(DocumentEntryResult(document, true, "Done"))
+                document.result = true
             } catch (e: Exception) {
                 log.error("Unable to store document", e)
-                entries.add(DocumentEntryResult(document, false, e.message ?: e::class.simpleName ?: "Unknown error"))
+                document.result = false
+                document.message = e.message ?: e::class.simpleName ?: "Unknown error"
             }
+
+            if (counter % 100 == 0) {
+                importDataRepository.save(entity)
+            }
+            counter++
         }
 
-        return ImportDataResult(
-                entity.id!!,
-                entries
-        )
+        importDataRepository.save(entity)
     }
 
     fun deleteAllFiles() {
         for (path in Paths.get(importDataProperties.directory)) {
-            path.deleteIfExists()
+            try {
+                path.deleteIfExists()
+            } catch (e: Exception) {
+                log.error("Unable to delete file $path", e)
+            }
         }
+        Files.createDirectories(Paths.get(importDataProperties.directory))
     }
 
     private fun ImportDataRecord.toEntity(): ImportData = ImportData(id = id, file = file, description = description, documents = emptyList())

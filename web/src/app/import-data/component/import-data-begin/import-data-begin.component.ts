@@ -13,7 +13,7 @@ export class ImportDataBeginComponent {
 
   form: FormGroup = new FormGroup({
     file: new FormControl(null, Validators.required),
-    description: new FormControl(null)
+    description: new FormControl('')
   })
 
   constructor(

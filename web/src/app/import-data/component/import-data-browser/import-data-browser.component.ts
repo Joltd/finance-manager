@@ -25,7 +25,10 @@ export class ImportDataBrowserComponent implements OnInit {
 
   load() {
     this.importDataService.list()
-      .subscribe(result => this.importData = result)
+      .subscribe(result => {
+        this.importData = result
+        this.checkProgress()
+      })
   }
 
   add() {
@@ -45,7 +48,18 @@ export class ImportDataBrowserComponent implements OnInit {
 
   instantImport(id: string) {
     this.importDataService.performImport(id, [])
-      .subscribe(() => this.shortMessageService.show("Done"))
+      .subscribe(() => {
+        this.shortMessageService.show("Import started")
+        this.load()
+      })
+  }
+
+  private checkProgress() {
+    if (this.importData.find(entry => entry.currentProgress > 0 && entry.currentProgress < 1)) {
+      setTimeout(() => {
+        this.load()
+      }, 1000)
+    }
   }
 
 }
