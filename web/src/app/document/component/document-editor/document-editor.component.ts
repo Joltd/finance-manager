@@ -25,10 +25,6 @@ export class DocumentEditorComponent {
         let id = params['id']
         if (id == 'expense' || id == 'income' || id == 'exchange') {
           this.type = id
-          // this.document = {
-          //   date: '',
-          //   description: ''
-          // }
         } else {
           this.id = id
           this.load()

@@ -44,6 +44,10 @@ export class DashboardComponent implements OnInit {
     ).then()
   }
 
+  fastExpense() {
+    this.router.navigate(['fast-expense']).then()
+  }
+
   private buildFlowChart() {
 
   }

@@ -54,17 +54,12 @@
 
 <mat-card class="browser" *ngIf="documentPage().documents.length > 0">
   <mat-list>
-    <mat-list-item *ngFor="let document of documentPage().documents">
-      <div matLine class="mat-line-with-menu">
-        <document-label [document]="document"></document-label>
-        <button mat-icon-button [matMenuTriggerFor]="menu">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #menu>
-          <button mat-menu-item (click)="edit(document.value.id!)">Edit</button>
-          <button mat-menu-item (click)="delete(document.value.id!)">Delete</button>
-        </mat-menu>
-      </div>
+    <mat-list-item *ngFor="let document of documentPage().documents" [matMenuTriggerFor]="menu">
+      <document-label [document]="document"></document-label>
+      <mat-menu #menu>
+        <button mat-menu-item (click)="edit(document.value.id!)">Edit</button>
+        <button mat-menu-item (click)="delete(document.value.id!)">Delete</button>
+      </mat-menu>
     </mat-list-item>
   </mat-list>
 </mat-card>

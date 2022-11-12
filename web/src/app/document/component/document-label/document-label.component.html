@@ -1,34 +1,64 @@
+<div class="marker"
+     [class.expense]="documentExpense"
+     [class.income]="documentIncome"
+     [class.exchange]="documentExchange"></div>
+<date-label *ngIf="!hideDate" [date]="document.value.date"></date-label>
+
 <ng-container *ngIf="documentExpense">
-  <mat-icon class="expense">arrow_upward</mat-icon>
-  <date-label *ngIf="!hideDate" [date]="documentExpense.date"></date-label>
-  <div class="multiline">
-    <div class="line">
-      <amount-label [amount]="documentExpense.amount"></amount-label>
-      <span *ngIf="!hideAccount">{{documentExpense.accountName}}</span>
-    </div>
-    <div class="line">{{documentExpense.expenseCategoryName}}</div>
+  <div class="vertical">
+    <amount-label [amount]="documentExpense.amount"></amount-label>
+    <div class="sub-title" *ngIf="!hideAccount">{{documentExpense.accountName}}</div>
+    <div class="sub-title">{{documentExpense.expenseCategoryName}}</div>
   </div>
 </ng-container>
+
 <ng-container *ngIf="documentIncome">
-  <mat-icon class="income">arrow_downward</mat-icon>
-  <date-label *ngIf="!hideDate" [date]="documentIncome.date"></date-label>
-  <div class="multiline">
-    <div class="line">
-      <amount-label [amount]="documentIncome.amount"></amount-label>
-      <span *ngIf="!hideAccount">{{documentIncome.accountName}}</span>
-    </div>
-    <div class="line">{{documentIncome.incomeCategoryName}}</div>
+  <div class="vertical">
+    <amount-label [amount]="documentIncome.amount"></amount-label>
+    <div class="sub-title" *ngIf="!hideAccount">{{documentIncome.accountName}}</div>
+    <div class="sub-title">{{documentIncome.incomeCategoryName}}</div>
   </div>
 </ng-container>
+
 <ng-container *ngIf="documentExchange">
-  <mat-icon class="exchange">sync</mat-icon>
-  <date-label *ngIf="!hideDate" [date]="documentExchange.date"></date-label>
-  <div class="multiline">
-    <amount-label [amount]="documentExchange.amountFrom"></amount-label>
-    <amount-label [amount]="documentExchange.amountTo" *ngIf="documentExchange.amountFrom.value != documentExchange.amountTo.value"></amount-label>
+
+  <div class="horizontal">
+    <div class="vertical">
+      <amount-label [amount]="documentExchange.amountFrom"></amount-label>
+      <div class="sub-title">{{documentExchange.accountFromName}}</div>
+    </div>
+    <mat-icon>arrow_right</mat-icon>
+    <div class="vertical">
+      <amount-label [amount]="documentExchange.amountTo" *ngIf="documentExchange.amountFrom.value != documentExchange.amountTo.value"></amount-label>
+      <div class="sub-title" *ngIf="documentExchange.accountFrom != documentExchange.accountTo">{{documentExchange.accountToName}}</div>
+    </div>
   </div>
-  <div class="multiline">
-    <span>{{documentExchange.accountFromName}}</span>
-    <span *ngIf="documentExchange.accountFromName != documentExchange.accountToName">{{documentExchange.accountToName}}</span>
-  </div>
+
+<!--  -->
+<!--  -->
+<!--  <ng-container *ngSwitchCase="">-->
+<!--    <div>amount same</div>-->
+<!--  </ng-container>-->
+
+<!--  <ng-container *ngSwitchCase="documentExchange.accountFrom == documentExchange.accountTo">-->
+<!--    <div>account same</div>-->
+<!--  </ng-container>-->
+
+<!--  <ng-container *ngSwitchDefault>-->
+<!--    <div>Other</div>-->
+<!--  </ng-container>-->
 </ng-container>
+
+
+
+
+
+<!--  <div class="multiline">-->
+<!--    <amount-label [amount]="documentExchange.amountFrom"></amount-label>-->
+<!--    <amount-label [amount]="documentExchange.amountTo" *ngIf="documentExchange.amountFrom.value != documentExchange.amountTo.value"></amount-label>-->
+<!--  </div>-->
+<!--  <div class="multiline">-->
+<!--    <span>{{documentExchange.accountFromName}}</span>-->
+<!--    <span *ngIf="documentExchange.accountFromName != documentExchange.accountToName">{{documentExchange.accountToName}}</span>-->
+<!--  </div>-->
+<!--</ng-container>-->

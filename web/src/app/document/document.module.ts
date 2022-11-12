@@ -1,7 +1,7 @@
 import {NgModule} from "@angular/core";
 import {DocumentBrowserComponent} from "./component/document-browser/document-browser.component";
 import {MatListModule} from "@angular/material/list";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {DocumentExpenseComponent} from "./component/document-expense/document-expense.component";
@@ -22,6 +22,7 @@ import {MatExpansionModule} from "@angular/material/expansion";
 import {MatSelectModule} from "@angular/material/select";
 import {MatMomentDateModule} from "@angular/material-moment-adapter";
 import {MatPaginatorModule} from "@angular/material/paginator";
+import {FastExpenseComponent} from "./component/fast-expense/fast-expense.component";
 
 @NgModule({
   declarations: [
@@ -31,26 +32,30 @@ import {MatPaginatorModule} from "@angular/material/paginator";
     DocumentExchangeComponent,
     DocumentEditorComponent,
     DocumentViewComponent,
-    DocumentLabelComponent
+    DocumentLabelComponent,
+    FastExpenseComponent
   ],
-    imports: [
-        MatListModule,
-        NgForOf,
-        MatButtonModule,
-        MatIconModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        CommonModule,
-        ReactiveFormsModule,
-        MatMenuModule,
-        NgIf,
-        MatExpansionModule,
-        MatSelectModule,
-        MatPaginatorModule
-    ],
+  imports: [
+    MatListModule,
+    NgForOf,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    CommonModule,
+    ReactiveFormsModule,
+    MatMenuModule,
+    NgIf,
+    MatExpansionModule,
+    MatSelectModule,
+    MatPaginatorModule,
+    NgSwitchCase,
+    NgSwitchDefault,
+    NgSwitch
+  ],
   providers: [
     MatDatepickerModule
   ],
@@ -58,7 +63,8 @@ import {MatPaginatorModule} from "@angular/material/paginator";
     DocumentBrowserComponent,
     DocumentEditorComponent,
     DocumentLabelComponent,
-    DocumentViewComponent
+    DocumentViewComponent,
+    FastExpenseComponent
   ]
 })
 export class DocumentModule {}

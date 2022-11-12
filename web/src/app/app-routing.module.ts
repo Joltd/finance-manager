@@ -17,6 +17,7 @@ import {ExchangeRateBrowserComponent} from "./exchangerate/component/exchange-ra
 import {ExchangeRateEditorComponent} from "./exchangerate/component/exchange-rate-editor/exchange-rate-editor.component";
 import {FlowChartComponent} from "./report/component/flow-chart/flow-chart.component";
 import {SettingsEditorComponent} from "./settings/component/settings-editor.component";
+import {FastExpenseComponent} from "./document/component/fast-expense/fast-expense.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -32,6 +33,7 @@ const routes: Routes = [
   { path: 'import-data/:id', component: ImportDataViewComponent },
   { path: 'export-data', component: ExportDataBeginComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'fast-expense', component: FastExpenseComponent },
   { path: 'flow-chart', component: FlowChartComponent },
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },

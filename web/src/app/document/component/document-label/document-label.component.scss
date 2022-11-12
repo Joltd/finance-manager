@@ -2,38 +2,38 @@
   align-items: center;
   display: flex;
   gap: 1em;
-  height: 5em;
 }
 
-.multiline {
+.vertical {
   display: flex;
   flex-direction: column;
-  gap: .5em;
 }
 
-.line {
+.horizontal {
   display: flex;
-  gap: .5em;
+  flex-direction: row;
+  align-items: center;
 }
 
-.exchange-row {
-  display: grid;
-  grid-template-columns: min-content min-content;
-  grid-template-rows: min-content min-content;
+.sub-title {
+  font-size: 10px;
+  line-height: 14px;
 }
 
-mat-icon {
-  justify-self: center;
+.marker {
+  width: .2em;
+  height: 3em;
+  border-radius: .2em;
 }
 
 .income {
-  color: green;
+  background-color: #66bb6a;
 }
 
 .expense {
-  color: red;
+  background-color: #ef5350;
 }
 
 .exchange {
-  color: blue;
+  background-color: #1e88e5;
 }
