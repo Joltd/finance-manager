@@ -16,18 +16,13 @@
   <mat-card class="import-data">
 
     <mat-form-field>
-      <mat-label>Account</mat-label>
-      <reference-input api="/account/reference" [value]="importData.account" readonly></reference-input>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Template</mat-label>
-      <input matInput [value]="importData.template" readonly>
-    </mat-form-field>
-
-    <mat-form-field>
       <mat-label>File</mat-label>
       <input matInput [value]="importData.file" readonly>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <input matInput [value]="importData.description" readonly>
     </mat-form-field>
 
   </mat-card>
@@ -38,10 +33,10 @@
       <span *ngIf="this.toggleSelectionState">Deselect all</span>
     </button>
     <mat-slide-toggle [(ngModel)]="hideImported">Hide imported</mat-slide-toggle>
-    <p>Suggested documents: {{suggestedDocumentCount}} / {{allDocumentCount}}</p>
+    <p>Suggested: {{suggestedDocumentCount}} Imported: {{importedDocumentCount}} Total: {{allDocumentCount}}</p>
   </mat-card>
 
-  <mat-card class="import-data-entries">
+  <mat-card class="import-data-entries" *ngIf="dateGroups.length > 0">
 
     <mat-list>
       <ng-container *ngFor="let dateGroup of dateGroups">
@@ -50,8 +45,14 @@
           <mat-list-item *ngIf="!hideImported || !(entry.suggested && entry.existed)">
             <div matLine class="line">
               <mat-checkbox *ngIf="entry.state == 'none'" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
-              <mat-icon *ngIf="entry.state == 'success'" (click)="entry.state = 'none'" class="success">check_circle</mat-icon>
-              <mat-icon *ngIf="entry.state == 'fail'" (click)="entry.state = 'none'" class="fail">cancel</mat-icon>
+              <mat-icon *ngIf="entry.state == 'success'"
+                        (click)="entry.state = 'none'"
+                        [matTooltip]="entry.message"
+                        class="success">check_circle</mat-icon>
+              <mat-icon *ngIf="entry.state == 'fail'"
+                        (click)="entry.state = 'none'"
+                        [matTooltip]="entry.message"
+                        class="fail">cancel</mat-icon>
               <document-label [hideAccount]="true"
                               [hideDate]="true"
                               [document]="entry.suggested"
@@ -66,14 +67,11 @@
                    *ngIf="!entry.suggested"
                    [mat-menu-trigger-for]="menu"
                    [matTooltip]="entry.source">{{entry.source}}</div>
-              <document-label [hideAccount]="true"
-                              [hideDate]="true"
-                              [document]="entry.existed"
-                              matRipple
-                              [matRippleColor]="'#00000020'"
-                              class="clickable"
-                              *ngIf="entry.existed"
-                              (click)="viewDocument(entry.existed)"></document-label>
+              <button mat-icon-button
+                      *ngIf="entry.existed"
+                      (click)="viewDocument(entry.existed)">
+                <mat-icon>task</mat-icon>
+              </button>
               <div *ngIf="!entry.existed"></div>
               <mat-menu #menu>
                 <button mat-menu-item (click)="viewEntry(entry)" *ngIf="entry.suggested">View</button>
@@ -85,6 +83,7 @@
           </mat-list-item>
         </ng-container>
       </ng-container>
+
     </mat-list>
 
   </mat-card>

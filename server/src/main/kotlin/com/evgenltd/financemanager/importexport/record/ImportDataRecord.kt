@@ -4,11 +4,9 @@ import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 
 class ImportDataRecord(
         val id: String?,
-        val account: String,
-        val template: String,
         val file: String,
-        val documents: List<DocumentEntryRecord>,
-        val other: List<DocumentTypedRecord>
+        val description: String,
+        val documents: List<DocumentEntryRecord>
 )
 
 class DocumentEntryRecord(

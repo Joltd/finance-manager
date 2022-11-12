@@ -1,0 +1,69 @@
+<mat-card class="toolbar">
+  <div class="title">Settings</div>
+  <button mat-icon-button (click)="save()" [disabled]="!valid()">
+    <mat-icon>done</mat-icon>
+  </button>
+</mat-card>
+
+<mat-card>
+
+  <mat-card-title>Currencies</mat-card-title>
+
+  <mat-card-content>
+
+    <form>
+
+      <mat-form-field>
+        <mat-chip-list #currencyChipList>
+          <mat-chip *ngFor="let currency of currencies" (removed)="removeCurrency(currency)">
+            {{currency}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+        </mat-chip-list>
+        <input [matChipInputFor]="currencyChipList"
+               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+               [matChipInputAddOnBlur]="true"
+               (matChipInputTokenEnd)="addCurrency($event)">
+      </mat-form-field>
+
+    </form>
+
+  </mat-card-content>
+
+</mat-card>
+
+<mat-card>
+
+  <mat-card-title>Fast expense document</mat-card-title>
+
+  <mat-card-content>
+
+    <form [formGroup]="fastExpense">
+
+      <mat-form-field>
+        <mat-label>Account</mat-label>
+        <reference-input api="/account/reference" formControlName="account"></reference-input>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Currency</mat-label>
+        <mat-select formControlName="currency">
+          <mat-option [value]="null">[Empty]</mat-option>
+          <mat-option *ngFor="let currency of settingsService.settings.currencies" [value]="currency">{{currency}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+    </form>
+
+  </mat-card-content>
+
+</mat-card>
+
+<mat-card>
+  <mat-card-title>Management</mat-card-title>
+  <mat-card-content>
+    <button mat-raised-button color="primary" (click)="clearDatabase()">Clear database</button>
+  </mat-card-content>
+</mat-card>

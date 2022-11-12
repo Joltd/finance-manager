@@ -16,6 +16,7 @@ import {ExportDataBeginComponent} from "./export-data/component/export-data-begi
 import {ExchangeRateBrowserComponent} from "./exchangerate/component/exchange-rate-browser/exchange-rate-browser.component";
 import {ExchangeRateEditorComponent} from "./exchangerate/component/exchange-rate-editor/exchange-rate-editor.component";
 import {FlowChartComponent} from "./report/component/flow-chart/flow-chart.component";
+import {SettingsEditorComponent} from "./settings/component/settings-editor.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -34,6 +35,7 @@ const routes: Routes = [
   { path: 'flow-chart', component: FlowChartComponent },
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
+  { path: 'settings', component: SettingsEditorComponent },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];
 

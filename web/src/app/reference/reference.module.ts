@@ -9,11 +9,12 @@ import {MatCardModule} from "@angular/material/card";
 import {ReactiveFormsModule} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
-import {NgForOf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
 import {IncomeCategoryBrowserComponent} from "./component/income-category-browser/income-category-browser.component";
 import {IncomeCategoryEditorComponent} from "./component/income-category-editor/income-category-editor.component";
 import {AccountBrowserComponent} from "./component/account-browser/account-browser.component";
 import {AccountEditorComponent} from "./component/account-editor/account-editor.component";
+import {CommonModule} from "../common/common.module";
 
 @NgModule({
   declarations: [
@@ -24,17 +25,19 @@ import {AccountEditorComponent} from "./component/account-editor/account-editor.
     AccountBrowserComponent,
     AccountEditorComponent
   ],
-  imports: [
-    MatListModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatIconModule,
-    MatCardModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    NgForOf
-  ],
+    imports: [
+        MatListModule,
+        MatButtonModule,
+        MatMenuModule,
+        MatIconModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        NgForOf,
+        NgIf,
+        CommonModule
+    ],
   exports: [
     ExpenseCategoryBrowserComponent,
     ExpenseCategoryEditorComponent,

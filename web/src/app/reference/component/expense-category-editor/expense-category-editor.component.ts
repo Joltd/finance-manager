@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ExpenseCategoryService} from "../../service/expense-category.service";
-import {ExpenseCategory} from "../../module/expense-category";
+import {ExpenseCategory} from "../../model/expense-category";
 
 @Component({
   selector: 'expense-category-editor',

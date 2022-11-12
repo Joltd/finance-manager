@@ -1,4 +1,4 @@
-package com.evgenltd.financemanager.importexport.service.template
+package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.fromFractionalString
@@ -12,21 +12,20 @@ import com.evgenltd.financemanager.reference.entity.IncomeCategory
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import com.evgenltd.financemanager.reference.repository.IncomeCategoryRepository
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@Component
-@ImportDataTemplate.Info("Finance Manager")
-class FinanceManagerTemplate(
+@Service
+class ImportDataConverter(
         private val accountRepository: AccountRepository,
         private val expenseCategoryRepository: ExpenseCategoryRepository,
         private val incomeCategoryRepository: IncomeCategoryRepository
-) : ImportDataTemplate {
+) {
 
-    override fun convert(account: String, path: Path): List<DocumentEntry> {
+    fun convert(path: Path): List<DocumentEntry> {
         val accountIndex = accountRepository.findAll().associateBy { it.name }.toMutableMap()
         val expenseCategoryIndex = expenseCategoryRepository.findAll().associateBy { it.name }.toMutableMap()
         val incomeCategoryIndex = incomeCategoryRepository.findAll().associateBy { it.name }.toMutableMap()

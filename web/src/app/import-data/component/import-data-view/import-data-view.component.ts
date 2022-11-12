@@ -4,6 +4,7 @@ import {ImportData, DocumentEntry} from "../../model/import-data";
 import {ImportDataService} from "../../service/import-data.service";
 import {DocumentTyped} from "../../../document/model/document-typed";
 import {Document} from "../../../document/model/document";
+import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
   selector: 'import-data-view',
@@ -19,6 +20,7 @@ export class ImportDataViewComponent {
   document: DocumentTyped | null = null
   create: boolean = false
   suggestedDocumentCount: number = 0
+  importedDocumentCount: number = 0
   allDocumentCount: number = 0
   toggleSelectionState: boolean = false
   hideImported: boolean = false
@@ -26,7 +28,8 @@ export class ImportDataViewComponent {
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private importDataService: ImportDataService
+    private importDataService: ImportDataService,
+    private shortMessageService: ShortMessageService
   ) {
     this.activatedRoute.params
       .subscribe(params => {
@@ -40,6 +43,7 @@ export class ImportDataViewComponent {
     this.entry = null
     this.document = null
     this.suggestedDocumentCount = 0
+    this.importedDocumentCount = 0
     this.allDocumentCount = 0
     this.importDataService.byId(this.id)
       .subscribe(result => {
@@ -59,15 +63,10 @@ export class ImportDataViewComponent {
           if (document.suggested) {
             this.suggestedDocumentCount++
           }
+          if (document.existed) {
+            this.importedDocumentCount++
+          }
           this.allDocumentCount++
-        }
-
-        for (let document of result.other) {
-          let date = document.value.date;
-          let dateGroup = this.dateGroup(dateGroups, date)
-          let dateGroupEntry = new DateGroupEntry()
-          dateGroupEntry.existed = document
-          dateGroup.entries.push(dateGroupEntry)
         }
 
         for (let dateGroup of dateGroups.values()) {
@@ -149,40 +148,23 @@ export class ImportDataViewComponent {
   }
 
   save() {
-    let nodes = this.asLinkList()
-    if (nodes.length > 0) {
-      this.performImport(nodes[0])
-    }
-  }
-
-  private performImport(node: DocumentNode) {
-    this.importDataService.performImport(node.entry.suggested)
+    let documents = this.dateGroups.flatMap(dateGroup => dateGroup.entries)
+      .filter(entry => entry.selected)
+      .map(entry => entry.id)
+    this.importDataService.performImport(this.id, documents)
       .subscribe(result => {
-        node.entry.state = result.result ? 'success' : 'fail'
-        if (node.next != null) {
-          this.performImport(node.next)
-        } else {
-          this.load()
+        this.shortMessageService.show("Done")
+        let index = new Map<string,DateGroupEntry>()
+        this.dateGroups.flatMap(dateGroup => dateGroup.entries)
+          .forEach(dateGroupEntry => index.set(dateGroupEntry.id, dateGroupEntry))
+        for (let entry of result.entries) {
+          let dateGroupEntry = index.get(entry.id)
+          if (dateGroupEntry) {
+            dateGroupEntry.state = entry.result ? 'success' : 'fail'
+            dateGroupEntry.message = entry.message
+          }
         }
       })
-  }
-
-  private asLinkList(): DocumentNode[] {
-    let nodes = this.dateGroups.flatMap(dateGroup => dateGroup.entries)
-      .filter(entry => entry.selected)
-      .map(entry => {
-        let node = new DocumentNode()
-        node.entry = entry
-        return node
-      })
-
-    for (let index = 0; index < nodes.length; index++) {
-      let node = nodes[index]
-      if (index < nodes.length - 1) {
-        node.next = nodes[index + 1]
-      }
-    }
-    return nodes
   }
 
   close() {
@@ -215,12 +197,8 @@ class DateGroupEntry {
   id!: string
   selected: boolean = false
   state: 'none' | 'success' | 'fail' = 'none'
+  message!: string
   source!: string
   suggested!: DocumentTyped
   existed!: DocumentTyped
-}
-
-class DocumentNode {
-  entry!: DateGroupEntry
-  next!: DocumentNode | null
 }

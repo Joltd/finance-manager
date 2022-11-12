@@ -7,28 +7,31 @@ import {MatButtonModule} from "@angular/material/button";
 import {ReactiveFormsModule} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
 import {MatSelectModule} from "@angular/material/select";
-import {NgForOf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatListModule} from "@angular/material/list";
 import {MatMenuModule} from "@angular/material/menu";
+import {CommonModule} from "../common/common.module";
 
 @NgModule({
   declarations: [
     ExchangeRateBrowserComponent,
     ExchangeRateEditorComponent
   ],
-  imports: [
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatSelectModule,
-    NgForOf,
-    MatDatepickerModule,
-    MatListModule,
-    MatMenuModule
-  ],
+    imports: [
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatSelectModule,
+        NgForOf,
+        MatDatepickerModule,
+        MatListModule,
+        MatMenuModule,
+        NgIf,
+        CommonModule
+    ],
   exports: [
     ExchangeRateBrowserComponent,
     ExchangeRateEditorComponent

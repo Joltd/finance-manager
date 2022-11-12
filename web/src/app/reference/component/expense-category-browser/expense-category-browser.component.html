@@ -1,4 +1,4 @@
-<mat-card>
+<mat-card *ngIf="expenseCategories.length > 0">
   <mat-list>
     <mat-list-item *ngFor="let expenseCategory of expenseCategories">
       <div matLine class="mat-line-with-menu">
@@ -7,6 +7,7 @@
         <mat-menu #menu>
           <button mat-menu-item (click)="edit(expenseCategory.id)">Edit</button>
           <button mat-menu-item (click)="delete(expenseCategory.id)">Remove</button>
+          <button mat-menu-item (click)="usage(expenseCategory.id)">Usage</button>
         </mat-menu>
       </div>
     </mat-list-item>

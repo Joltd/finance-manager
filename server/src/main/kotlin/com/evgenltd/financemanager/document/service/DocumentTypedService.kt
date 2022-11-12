@@ -5,7 +5,7 @@ import com.evgenltd.financemanager.document.record.DocumentRecord
 
 interface DocumentTypedService<E : Document, R : DocumentRecord> {
 
-    fun hash(record: R, account: String): String
+    fun hash(record: R): String
 
     fun toRecord(entity: E): R
 

@@ -4,9 +4,8 @@ import com.evgenltd.financemanager.document.entity.Document
 
 class ImportData(
         var id: String?,
-        var account: String,
-        var template: String,
         var file: String,
+        var description: String,
         var documents: List<DocumentEntry>
 )
 

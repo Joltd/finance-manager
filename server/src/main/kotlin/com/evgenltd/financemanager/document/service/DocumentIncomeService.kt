@@ -20,11 +20,8 @@ class DocumentIncomeService(
         private val incomeCategoryRepository: IncomeCategoryRepository
 ) : DocumentTypedService<DocumentIncome, DocumentIncomeRecord> {
 
-    override fun hash(record: DocumentIncomeRecord, account: String): String = if (record.account == account) {
-        "${record.date}-${record.amount}-${record.incomeCategory}"
-    } else {
-        "${record.date}-${record.account}-${record.amount}-${record.incomeCategory}"
-    }
+    override fun hash(record: DocumentIncomeRecord): String =
+            "${record.date}-${record.account}-${record.amount}-${record.incomeCategory}"
 
     override fun update(entity: DocumentIncome) {
         documentIncomeRepository.save(entity)

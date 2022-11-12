@@ -21,6 +21,7 @@ import {DocumentLabelComponent} from "./component/document-label/document-label.
 import {MatExpansionModule} from "@angular/material/expansion";
 import {MatSelectModule} from "@angular/material/select";
 import {MatMomentDateModule} from "@angular/material-moment-adapter";
+import {MatPaginatorModule} from "@angular/material/paginator";
 
 @NgModule({
   declarations: [
@@ -32,23 +33,24 @@ import {MatMomentDateModule} from "@angular/material-moment-adapter";
     DocumentViewComponent,
     DocumentLabelComponent
   ],
-  imports: [
-    MatListModule,
-    NgForOf,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    CommonModule,
-    ReactiveFormsModule,
-    MatMenuModule,
-    NgIf,
-    MatExpansionModule,
-    MatSelectModule
-  ],
+    imports: [
+        MatListModule,
+        NgForOf,
+        MatButtonModule,
+        MatIconModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        CommonModule,
+        ReactiveFormsModule,
+        MatMenuModule,
+        NgIf,
+        MatExpansionModule,
+        MatSelectModule,
+        MatPaginatorModule
+    ],
   providers: [
     MatDatepickerModule
   ],

@@ -1,7 +1,8 @@
 import {Component, OnInit} from "@angular/core";
 import {ExpenseCategoryService} from "../../service/expense-category.service";
 import {Router} from "@angular/router";
-import {ExpenseCategory} from "../../module/expense-category";
+import {ExpenseCategory} from "../../model/expense-category";
+import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
   selector: 'expense-category-browser',
@@ -14,7 +15,8 @@ export class ExpenseCategoryBrowserComponent implements OnInit {
 
   constructor(
     private expenseCategoryService: ExpenseCategoryService,
-    private router: Router
+    private router: Router,
+    private shortMessageService: ShortMessageService
   ) {}
 
   ngOnInit(): void {
@@ -37,6 +39,11 @@ export class ExpenseCategoryBrowserComponent implements OnInit {
   delete(id: string) {
     this.expenseCategoryService.delete(id)
       .subscribe(() => this.load())
+  }
+
+  usage(id: string) {
+    this.expenseCategoryService.usage(id)
+      .subscribe(result => this.shortMessageService.show(`Used in ${result.value}`))
   }
 
 }

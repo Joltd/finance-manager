@@ -1,0 +1,26 @@
+type,accountName,amount,date,description,expenseCategoryName,incomeCategoryName,accountFromName,accountToName,amountFrom,amountTo
+exchange,null,null,2022-10-10,Переводы/иб|Самсон Е.,null,null,Tinkoff Black Card,Binance,1000 USD,944.28 USDT
+exchange,null,null,2022-10-05,Переводы/иб|Абделрахман М.,null,null,Tinkoff Black Card,Binance,1000 USD,919.11 USDT
+exchange,null,null,2022-09-29,Переводы/иб|Абделрахман М.,null,null,Tinkoff Black Card,Binance,1000 USD,889.67 USDT
+exchange,null,null,2022-09-29,,null,null,Tinkoff Инвестиции (Основной),Tinkoff Black Card,1000 USD,1000 USD
+exchange,null,null,2022-09-29,,null,null,Tinkoff Инвестиции (Основной),Tinkoff Black Card,3000 USD,3000 USD
+expense,Tinkoff Black Card,33.71 USD,2022-04-18,Переводы/иб|Валютный перевод,Подписки,null,null,null,null,null
+exchange,null,null,2022-04-05,Наличные|Снятие в банкомате Тинькофф,null,null,Tinkoff Black Card,Наличка,1000 USD,1000 USD
+exchange,null,null,2022-04-05,,null,null,Tinkoff Депозит,Tinkoff Black Card,1033.71 USD,1033.71 USD
+exchange,null,null,2022-03-31,Наличные|Снятие в банкомате Тинькофф,null,null,Tinkoff Black Card,Наличка,2000 USD,2000 USD
+exchange,null,null,2022-03-31,,null,null,Tinkoff Депозит,Tinkoff Black Card,2000 USD,2000 USD
+exchange,null,null,2022-03-31,Наличные|Снятие в банкомате Тинькофф,null,null,Tinkoff Black Card,Наличка,300 USD,300 USD
+exchange,null,null,2022-03-31,,null,null,Tinkoff Депозит,Tinkoff Black Card,150 USD,150 USD
+exchange,null,null,2022-03-30,Наличные|Снятие в банкомате Тинькофф,null,null,Tinkoff Black Card,Наличка,1200 USD,1200 USD
+expense,Tinkoff Black Card,7 USD,2022-03-07,Переводы/иб|Валютный перевод,Подписки,null,null,null,null,null
+exchange,null,null,2022-03-03,,null,null,Tinkoff Инвестиции (Основной),Tinkoff Black Card,1357 USD,1357 USD
+exchange,null,null,2020-03-26,Переводы/иб|Пополнение вклада,null,null,Tinkoff Black Card,Tinkoff Депозит,1000 USD,1000 USD
+exchange,null,null,2020-03-20,,null,null,Tinkoff Black Card,Tinkoff Black Card,78.95 RUB,1 USD
+expense,Tinkoff Black Card,1 USD,2020-03-18,Другое|Плата за оповещения об операциях,Другое,null,null,null,null,null
+exchange,null,null,2020-03-18,,null,null,Tinkoff Депозит,Tinkoff Black Card,1000 USD,1000 USD
+exchange,null,null,2016-07-13,Переводы/иб|Пополнение вклада,null,null,Tinkoff Black Card,Tinkoff Депозит,1000 USD,1000 USD
+exchange,null,null,2016-07-13,,null,null,Tinkoff Black Card,Tinkoff Black Card,64900 RUB,1000 USD
+exchange,null,null,2016-06-19,Переводы/иб|Пополнение вклада,null,null,Tinkoff Black Card,Tinkoff Депозит,500 USD,500 USD
+exchange,null,null,2016-06-19,,null,null,Tinkoff Black Card,Tinkoff Black Card,32900 RUB,500 USD
+exchange,null,null,2016-06-08,Переводы/иб|Пополнение вклада,null,null,Tinkoff Black Card,Tinkoff Депозит,1500 USD,1500 USD
+exchange,null,null,2016-06-08,,null,null,Tinkoff Black Card,Tinkoff Black Card,96225 RUB,1500 USD

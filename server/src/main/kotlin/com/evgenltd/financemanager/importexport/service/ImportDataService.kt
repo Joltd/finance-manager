@@ -7,11 +7,10 @@ import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.record.DocumentEntryRecord
+import com.evgenltd.financemanager.importexport.record.DocumentEntryResult
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataResult
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.importexport.service.template.ImportDataTemplate
-import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -19,14 +18,14 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import javax.annotation.PostConstruct
+import kotlin.io.path.deleteIfExists
 
 @Service
 class ImportDataService(
         private val importDataProperties: ImportDataProperties,
         private val importDataRepository: ImportDataRepository,
-        private val importDataTemplates: List<ImportDataTemplate>,
         private val documentService: DocumentService,
-        private val accountRepository: AccountRepository
+        private val importDataConverter: ImportDataConverter
 ) : Loggable() {
 
     @PostConstruct
@@ -34,41 +33,28 @@ class ImportDataService(
         Files.createDirectories(Paths.get(importDataProperties.directory))
     }
     
-    fun listReference(): List<Reference> = importDataTemplates.map {
-        Reference(
-                id = it.javaClass.simpleName,
-                name = it.javaClass.simpleName,
-                deleted = false
+    fun list(): List<ImportDataRecord> = importDataRepository.findAll().map {
+        ImportDataRecord(
+                id = it.id,
+                file = it.file,
+                description = it.description,
+                documents = listOf()
         )
-    }
-    
-    fun list(): List<ImportDataRecord> {
-        val accounts = accountRepository.findAll().associateBy { it.id }
-        return importDataRepository.findAll().map {
-            ImportDataRecord(
-                    id = it.id,
-                    account = accounts[it.account]?.name ?: it.account,
-                    template = it.template,
-                    file = it.file,
-                    documents = listOf(),
-                    other = listOf()
-            )
-        }
     }
 
     fun byId(id: String): ImportDataRecord {
 
         val dataImport = importDataRepository.find(id)
 
-        val existedDocuments = documentService.findDocumentByAccount(dataImport.account)
-                .asIndex(dataImport.account)
+        val existedDocuments = documentService.list()
+                .asIndex()
                 .toMutableMap()
 
         val generator = IdGenerator()
         val documents = dataImport.documents.map { document ->
             val suggested = document.suggested?.let(documentService::toTypedRecord)
             val existed = suggested?.let {
-                val hash = generator.next(documentService.hash(it.value, dataImport.account))
+                val hash = generator.next(documentService.hash(it.value))
                 existedDocuments.remove(hash)
             }
 
@@ -82,13 +68,17 @@ class ImportDataService(
 
         return ImportDataRecord(
                 id = dataImport.id,
-                account = dataImport.account,
-                template = dataImport.template,
                 file = dataImport.file,
-                documents = documents,
-                other = existedDocuments.values.toList()
+                description = dataImport.description,
+                documents = documents
         )
 
+    }
+
+    fun delete(id: String) {
+        val entity = importDataRepository.find(id)
+        Paths.get(importDataProperties.directory, entity.file).deleteIfExists()
+        importDataRepository.delete(entity)
     }
 
     fun uploadFile(file: MultipartFile): String {
@@ -112,9 +102,7 @@ class ImportDataService(
 
     private fun create(entity: ImportData) {
         val path = Paths.get(importDataProperties.directory, entity.file)
-        entity.documents = importDataTemplates.first { it.javaClass.simpleName == entity.template }
-                .convert(entity.account, path)
-
+        entity.documents = importDataConverter.convert(path)
         importDataRepository.save(entity)
     }
 
@@ -130,41 +118,48 @@ class ImportDataService(
         importDataRepository.save(importData)
     }
 
-    fun performImport(document: DocumentTypedRecord): ImportDataResult = try {
-        documentService.update(document)
-        ImportDataResult(true)
-    } catch (e: Exception) {
-        log.error("Unable to import document $document", e)
-        ImportDataResult(false)
-    }
+    fun performImport(id: String, documents: List<String>): ImportDataResult {
+        val entity = importDataRepository.find(id)
+        val suggestedIndex = entity.documents
+                .filter { it.suggested != null }
+                .associate { it.id to it.suggested!! }
 
-    fun instantImport(record: ImportDataRecord): ImportDataResult = try {
-        val path = Paths.get(importDataProperties.directory, record.file)
-        val documents = importDataTemplates.first { it.javaClass.simpleName == record.template }
-                .convert(record.account, path)
-        for (document in documents) {
-            document.suggested
-            documentService.update(document.suggested!!)
+        val forImport = documents.ifEmpty { entity.documents.map { it.id } }
+
+        val entries = mutableListOf<DocumentEntryResult>()
+        for (document in forImport) {
+            val suggested = suggestedIndex[document]
+            if (suggested == null) {
+                entries.add(DocumentEntryResult(document, false, "Not found"))
+                continue
+            }
+
+            try {
+                documentService.update(suggested)
+                entries.add(DocumentEntryResult(document, true, "Done"))
+            } catch (e: Exception) {
+                log.error("Unable to store document", e)
+                entries.add(DocumentEntryResult(document, false, e.message ?: e::class.simpleName ?: "Unknown error"))
+            }
         }
-        ImportDataResult(true)
-    } catch (e: Exception) {
-        log.error("Unable to perform instant import ${record.account} ${record.file}", e)
-        ImportDataResult(false)
+
+        return ImportDataResult(
+                entity.id!!,
+                entries
+        )
     }
 
-    fun delete(id: String) = importDataRepository.deleteById(id)
+    fun deleteAllFiles() {
+        for (path in Paths.get(importDataProperties.directory)) {
+            path.deleteIfExists()
+        }
+    }
 
-    private fun ImportDataRecord.toEntity(): ImportData = ImportData(
-            id = id,
-            account = account,
-            template = template,
-            file = file,
-            documents = emptyList()
-    )
+    private fun ImportDataRecord.toEntity(): ImportData = ImportData(id = id, file = file, description = description, documents = emptyList())
 
-    private fun List<DocumentTypedRecord>.asIndex(account: String): Map<String,DocumentTypedRecord> {
+    private fun List<DocumentTypedRecord>.asIndex(): Map<String,DocumentTypedRecord> {
         val generator = IdGenerator()
-        return this.associateBy { generator.next(documentService.hash(it.value, account)) }
+        return this.associateBy { generator.next(documentService.hash(it.value)) }
     }
 
 }

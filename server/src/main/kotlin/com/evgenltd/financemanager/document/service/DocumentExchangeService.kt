@@ -20,11 +20,8 @@ class DocumentExchangeService(
         private val exchangeRateService: ExchangeRateService
 ) : DocumentTypedService<DocumentExchange, DocumentExchangeRecord> {
 
-    override fun hash(record: DocumentExchangeRecord, account: String): String = when (account) {
-        record.accountFrom -> "${record.date}-${record.accountTo}-${record.amountTo}"
-        record.accountTo -> "${record.date}-${record.accountFrom}-${record.amountFrom}"
-        else -> "${record.date}-${record.accountFrom}-${record.amountFrom}-${record.accountTo}-${record.amountTo}"
-    }
+    override fun hash(record: DocumentExchangeRecord): String =
+            "${record.date}-${record.accountFrom}-${record.amountFrom}-${record.accountTo}-${record.amountTo}"
 
     override fun update(entity: DocumentExchange) {
         documentExchangeRepository.save(entity)

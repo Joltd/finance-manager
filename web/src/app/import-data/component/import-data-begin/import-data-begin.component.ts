@@ -1,9 +1,8 @@
-import {Component, EventEmitter} from "@angular/core";
+import {Component} from "@angular/core";
 import {ImportDataService} from "../../service/import-data.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ImportData} from "../../model/import-data";
 import {Router} from "@angular/router";
-import {Observable} from "rxjs";
 
 @Component({
   selector: 'import-data-begin',
@@ -13,9 +12,8 @@ import {Observable} from "rxjs";
 export class ImportDataBeginComponent {
 
   form: FormGroup = new FormGroup({
-    account: new FormControl(null, Validators.required),
-    template: new FormControl(null, Validators.required),
-    file: new FormControl(null, Validators.required)
+    file: new FormControl(null, Validators.required),
+    description: new FormControl(null)
   })
 
   constructor(
@@ -23,21 +21,15 @@ export class ImportDataBeginComponent {
     private importDataService: ImportDataService
   ) {}
 
-  save(instant: boolean) {
+  save() {
     let formValue = this.form.value
     let importData = new ImportData()
-    importData.account = formValue.account
-    importData.template = formValue.template
     this.importDataService.uploadFile(formValue.file)
       .subscribe(result => {
         importData.file = result.filename
-        if (instant) {
-          this.importDataService.instantImport(importData)
-            .subscribe(() => this.close())
-        } else {
-          this.importDataService.create(importData)
-            .subscribe(() => this.close())
-        }
+        importData.description = formValue.description
+        this.importDataService.create(importData)
+          .subscribe(() => this.close())
       })
   }
 

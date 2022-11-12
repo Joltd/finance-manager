@@ -2,7 +2,8 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {TypeUtils} from "../../common/service/type-utils";
-import {IncomeCategory} from "../module/income-category";
+import {IncomeCategory} from "../model/income-category";
+import {Usage} from "../model/usage";
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,10 @@ export class IncomeCategoryService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>('/income/' + id)
+  }
+
+  usage(id: string): Observable<Usage> {
+    return this.http.get<Usage>('/transaction/usage/expense/' + id)
   }
 
 }

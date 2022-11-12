@@ -1,7 +1,8 @@
 import {Component, OnInit} from "@angular/core";
 import {IncomeCategoryService} from "../../service/income-category.service";
 import {Router} from "@angular/router";
-import {IncomeCategory} from "../../module/income-category";
+import {IncomeCategory} from "../../model/income-category";
+import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
   selector: 'income-category-browser',
@@ -14,7 +15,8 @@ export class IncomeCategoryBrowserComponent implements OnInit {
 
   constructor(
     private incomeCategoryService: IncomeCategoryService,
-    private router: Router
+    private router: Router,
+    private shortMessageService: ShortMessageService
   ) {}
 
   ngOnInit(): void {
@@ -37,6 +39,11 @@ export class IncomeCategoryBrowserComponent implements OnInit {
   delete(id: string) {
     this.incomeCategoryService.delete(id)
       .subscribe(() => this.load())
+  }
+
+  usage(id: string) {
+    this.incomeCategoryService.usage(id)
+      .subscribe(result => this.shortMessageService.show(`Used in ${result.value}`))
   }
 
 }

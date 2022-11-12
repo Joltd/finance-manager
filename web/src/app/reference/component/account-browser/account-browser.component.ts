@@ -1,7 +1,8 @@
 import {Component, OnInit} from "@angular/core";
 import {AccountService} from "../../service/account.service";
 import {Router} from "@angular/router";
-import {Account} from "../../module/account";
+import {Account} from "../../model/account";
+import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
   selector: 'account-browser',
@@ -14,7 +15,8 @@ export class AccountBrowserComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private router: Router
+    private router: Router,
+    private shortMessageService: ShortMessageService
   ) {}
 
   ngOnInit(): void {
@@ -37,6 +39,16 @@ export class AccountBrowserComponent implements OnInit {
   delete(id: string) {
     this.accountService.delete(id)
       .subscribe(() => this.load())
+  }
+
+  usage(id: string) {
+    this.accountService.usage(id)
+      .subscribe(result => this.shortMessageService.show(`Used in ${result.value}`))
+  }
+
+  deleteDocuments(id: string) {
+    this.accountService.deleteDocuments(id)
+      .subscribe(() => this.shortMessageService.show("Done"))
   }
 
 }

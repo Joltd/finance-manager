@@ -7,4 +7,6 @@ interface ExpenseTransactionRepository : MongoRepository<ExpenseTransaction, Str
 
     fun findByExpenseCategoryNotNull(): List<ExpenseTransaction>
 
+    fun findByExpenseCategory(expenseCategory: String): List<ExpenseTransaction>
+
 }

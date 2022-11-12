@@ -26,8 +26,8 @@ fun sberCard0234(): MapDataResult {
 }
 
 fun sberPayAccount(): MapDataResult {
-val raw = readTxt("""$FILES_ROOT\sber-pay-account.txt""")
-    return mapData("Сбер Платежный счет", raw, """$RULES_ROOT\sber\main.csv""")
+    val raw = readTxt("""$FILES_ROOT\sber-pay-account.txt""")
+    return mapData("Сбер Платежный Счет", raw, """$RULES_ROOT\sber\main.csv""")
 }
 
 private fun readHtml(path: String): List<RawDataRecord> {

@@ -16,6 +16,7 @@ import {AmountPipe} from "./model/amount";
 import {AmountLabelComponent} from "./component/amount-label/amount-label.component";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {CurrencyLabelComponent} from "./component/currency-label/currency-label.component";
+import {DateLabelComponent} from "./component/date-label/date-label.component";
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import {CurrencyLabelComponent} from "./component/currency-label/currency-label.
     FileInputComponent,
     AmountPipe,
     AmountLabelComponent,
-    CurrencyLabelComponent
+    CurrencyLabelComponent,
+    DateLabelComponent
   ],
   imports: [
     ReactiveFormsModule,
@@ -46,7 +48,8 @@ import {CurrencyLabelComponent} from "./component/currency-label/currency-label.
     ReferenceInputComponent,
     FileInputComponent,
     AmountPipe,
-    AmountLabelComponent
+    AmountLabelComponent,
+    DateLabelComponent
   ]
 })
 export class CommonModule {}

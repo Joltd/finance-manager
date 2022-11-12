@@ -21,6 +21,12 @@ export class ImportDataService {
     return this.http.get<ImportData>('/import-data/' + id, TypeUtils.of(ImportData))
   }
 
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>('/import-data/' + id)
+  }
+
+  //
+
   uploadFile(file: File): Observable<ImportDataFileResponse> {
     let formData = new FormData()
     formData.append('file', file)
@@ -39,16 +45,8 @@ export class ImportDataService {
     return this.http.patch<void>('/import-data/' + id, entry)
   }
 
-  performImport(document: DocumentTyped): Observable<ImportDataResult> {
-    return this.http.patch<ImportDataResult>('/import-data', document, TypeUtils.of(ImportDataResult))
-  }
-
-  instantImport(importData: ImportData): Observable<ImportDataResult> {
-    return this.http.post<ImportDataResult>('/import-data/instant', importData, TypeUtils.of(ImportDataResult))
-  }
-
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>('/import-data/' + id)
+  performImport(id: string, documents: string[]): Observable<ImportDataResult> {
+    return this.http.put<ImportDataResult>('/import-data/' + id, documents, TypeUtils.of(ImportDataResult))
   }
 
 }

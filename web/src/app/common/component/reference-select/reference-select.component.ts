@@ -19,6 +19,9 @@ export class ReferenceSelectComponent {
     private http: HttpClient,
     @Inject(MAT_DIALOG_DATA) api: string
   ) {
+    if (!api) {
+      throw 'API URL is not specified'
+    }
     this.http.get<Reference[]>(api, TypeUtils.of(Reference))
       .subscribe(result => this.references = result.sort((a,b) => a.name.localeCompare(b.name)))
   }

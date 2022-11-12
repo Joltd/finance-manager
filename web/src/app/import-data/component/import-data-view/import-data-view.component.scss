@@ -36,9 +36,13 @@
   opacity: .5;
 }
 
+.mat-list-item {
+  height: auto;
+}
+
 .line {
   display: grid!important;
-  grid-template-columns: 2.5em minmax(0,50%) 50%;
+  grid-template-columns: 2.5em 1fr min-content;
   align-items: center;
 
   mat-checkbox {

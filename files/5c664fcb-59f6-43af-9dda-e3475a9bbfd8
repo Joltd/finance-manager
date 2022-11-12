@@ -1,0 +1,18 @@
+type,accountName,amount,date,description,expenseCategoryName,incomeCategoryName,accountFromName,accountToName,amountFrom,amountTo
+exchange,null,null,2022-10-03,6804RUB -> 50000KZT,null,null,Tinkoff Black Card,Kaspi Банк,6804 RUB,50000 KZT
+expense,Kaspi Банк,60000 KZT,2022-09-29,60000KZT,Аренда квартиры,null,null,null,null,null
+expense,Kaspi Банк,11230 KZT,2022-09-29,11230KZT,Другое,null,null,null,null,null
+exchange,null,null,2022-09-29,555USDT -> 269286KZT,null,null,Binance,Kaspi Банк,555 USDT,269286 KZT
+exchange,null,null,2022-09-29,63.24USDT -> 30839.43KZT,null,null,Binance,Kaspi Банк,63.24 USDT,30839.43 KZT
+expense,Kaspi Банк,6163 KZT,2022-09-30,6163KZT,Супермаркеты,null,null,null,null,null
+expense,Kaspi Банк,3737 KZT,2022-09-30,3737KZT,Кафе и рестораны,null,null,null,null,null
+expense,Kaspi Банк,9350 KZT,2022-10-01,9350KZT,Кафе и рестораны,null,null,null,null,null
+expense,Kaspi Банк,3500 KZT,2022-10-01,3500KZT,Кафе и рестораны,null,null,null,null,null
+expense,Kaspi Банк,11055 KZT,2022-10-02,11055KZT,Кафе и рестораны,null,null,null,null,null
+expense,Kaspi Банк,4408 KZT,2022-10-03,4408KZT,Супермаркеты,null,null,null,null,null
+expense,Kaspi Банк,6530 KZT,2022-10-03,6530KZT,Кафе и рестораны,null,null,null,null,null
+expense,Kaspi Банк,10000 KZT,2022-10-04,10000KZT,Другое,null,null,null,null,null
+expense,Kaspi Банк,15917 KZT,2022-10-04,15917KZT,Кафе и рестораны,null,null,null,null,null
+expense,Kaspi Банк,169990 KZT,2022-10-06,169990KZT,Техника,null,null,null,null,null
+expense,Kaspi Банк,12000 KZT,2022-10-07,12000KZT,Мобильная связь,null,null,null,null,null
+expense,Kaspi Банк,6000 KZT,2022-10-09,6000KZT,Мобильная связь,null,null,null,null,null

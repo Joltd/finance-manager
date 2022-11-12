@@ -1,8 +1,8 @@
-<mat-card>
+<mat-card *ngIf="exchangeRates.length > 0">
   <mat-list>
     <mat-list-item *ngFor="let exchangeRate of exchangeRates">
       <div matLine class="mat-line-with-menu">
-        <span>{{exchangeRate.date}}</span>
+        <date-label [date]="exchangeRate.date"></date-label>
         <span>{{exchangeRate.from}}/{{exchangeRate.to}}</span>
         <span>{{exchangeRate.value}}</span>
         <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>

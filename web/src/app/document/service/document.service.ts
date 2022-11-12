@@ -5,6 +5,7 @@ import {DocumentRow} from "../model/document-row";
 import {TypeUtils} from "../../common/service/type-utils";
 import {DocumentTyped} from "../model/document-typed";
 import {FormControl, FormGroup} from "@angular/forms";
+import {DocumentPage} from "../model/document-page";
 
 @Injectable({
   providedIn: 'root'
@@ -18,11 +19,16 @@ export class DocumentService {
     account: new FormControl(null),
     currency: new FormControl(null)
   })
+  documentPage: DocumentPage = new DocumentPage()
 
   constructor(private http: HttpClient) {}
 
-  list(): Observable<DocumentTyped[]> {
-    return this.http.get<DocumentTyped[]>('/document', TypeUtils.of(DocumentTyped))
+  list() {
+    let filter = {...this.filter.value}
+    filter.page = this.documentPage.page
+    filter.size = this.documentPage.size
+    this.http.post<DocumentPage>('/document/filter', filter, TypeUtils.of(DocumentPage))
+      .subscribe(result => this.documentPage = result)
   }
 
   byId(id: string): Observable<DocumentTyped> {

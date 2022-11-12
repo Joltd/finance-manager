@@ -1,13 +1,10 @@
-import {Amount} from "../../common/model/amount";
 import {DocumentTyped} from "../../document/model/document-typed";
 
 export class ImportData {
   id!: string
-  account!: string
-  template!: string
   file!: string
+  description!: string
   documents: DocumentEntry[] = []
-  other: DocumentTyped[] = []
 }
 
 export class DocumentEntry {
@@ -22,5 +19,12 @@ export class ImportDataFileResponse {
 }
 
 export class ImportDataResult {
-  result: boolean = false
+  id!: string
+  entries: DocumentEntryResult[] = []
+}
+
+export class DocumentEntryResult {
+  id!: string
+  result!: boolean
+  message!: string
 }

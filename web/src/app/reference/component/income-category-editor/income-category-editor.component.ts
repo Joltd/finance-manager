@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {IncomeCategoryService} from "../../service/income-category.service";
-import {IncomeCategory} from "../../module/income-category";
+import {IncomeCategory} from "../../model/income-category";
 
 @Component({
   selector: 'income-category-editor',

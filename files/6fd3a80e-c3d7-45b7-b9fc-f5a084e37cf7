@@ -1,0 +1,15 @@
+type,accountName,amount,date,description,expenseCategoryName,incomeCategoryName,accountFromName,accountToName,amountFrom,amountTo
+exchange,null,null,2022-09-29,,null,null,Binance,Kaspi Банк,555 USDT,269286 KZT
+exchange,null,null,2022-09-29,,null,null,Binance,Kaspi Банк,63.24 USDT,30839.43 KZT
+exchange,null,null,2022-09-29,,null,null,Tinkoff Black Card,Binance,4000 RUB,63.25 USDT
+exchange,null,null,2022-10-06,,null,null,Tinkoff Black Card,Binance,10000 RUB,157.48 USDT
+exchange,null,null,2022-09-29,,null,null,Tinkoff Black Card,Binance,1000 USD,889.67 USDT
+exchange,null,null,2022-10-05,,null,null,Tinkoff Black Card,Binance,1000 USD,919.11 USDT
+exchange,null,null,2022-10-05,,null,null,Binance,Банк ЦентрКредит,300 USDT,141900 KZT
+exchange,null,null,2022-10-10,,null,null,Tinkoff Black Card,Binance,1000 USD,944.28 USDT
+exchange,null,null,2022-09-30,,null,null,Binance,TrustWallet,333.88 USDT,333.88 USDT
+exchange,null,null,2022-10-06,,null,null,Binance,TrustWallet,618.31 USDT,618.31 USDT
+exchange,null,null,2022-10-10,,null,null,Binance,TrustWallet,943.48 USDT,943.48 USDT
+exchange,null,null,2022-10-06,,null,null,Binance,TrustWallet,2519.5556 TRX,2519.5556 TRX
+exchange,null,null,2022-10-06,,null,null,Binance,Binance,157.48 USDT,2519.5556 TRX
+expense,Binance,2.4 USDT,2022-10-10,,Другое,null,null,null,null,null

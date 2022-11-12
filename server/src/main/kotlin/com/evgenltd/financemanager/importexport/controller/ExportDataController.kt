@@ -17,17 +17,14 @@ class ExportDataController(
 ) {
 
     @GetMapping("/export-data")
-    fun download(@RequestParam("account") account: String): ResponseEntity<Resource> {
+    fun download(@RequestParam("account", required = false) account: String?): ResponseEntity<Resource> {
         val result = exportDataService.performExport(account)
-        val stream = ByteArrayInputStream(result.data)
+        val stream = ByteArrayInputStream(result)
         val file = InputStreamResource(stream)
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${result.fileName}")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment")
                 .contentType(MediaType.parseMediaType("application/csv"))
                 .body(file)
     }
-
-//    @GetMapping("/export-data")
-//    fun download(@RequestParam("account") account: String): ExportDataResult = exportDataService.performExport(account)
 
 }

@@ -13,10 +13,14 @@ export class ExportDataService {
   ) {}
 
   exportData(account: string): Observable<Blob> {
-    return this.http.get('/export-data', {
-      params: {account},
-      responseType: 'blob'
-    })
+    return account
+      ? this.http.get('/export-data', {
+        params: {account},
+        responseType: 'blob'
+      })
+      : this.http.get('/export-data', {
+        responseType: 'blob'
+      })
   }
 
 }

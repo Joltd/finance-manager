@@ -2,6 +2,7 @@ import {Component, OnInit} from "@angular/core";
 import {ImportDataService} from "../../service/import-data.service";
 import {ImportData} from "../../model/import-data";
 import {Router} from "@angular/router";
+import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
   selector: 'import-data-browser',
@@ -14,7 +15,8 @@ export class ImportDataBrowserComponent implements OnInit {
 
   constructor(
     private importDataService: ImportDataService,
-    private router: Router
+    private router: Router,
+    private shortMessageService: ShortMessageService
   ) {}
 
   ngOnInit(): void {
@@ -39,6 +41,11 @@ export class ImportDataBrowserComponent implements OnInit {
   delete(id: string) {
     this.importDataService.delete(id)
       .subscribe(() => this.load())
+  }
+
+  instantImport(id: string) {
+    this.importDataService.performImport(id, [])
+      .subscribe(() => this.shortMessageService.show("Done"))
   }
 
 }

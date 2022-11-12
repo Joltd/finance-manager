@@ -1,0 +1,30 @@
+:host {
+  display: grid;
+  grid-template-rows: min-content 1fr min-content;
+  justify-items: center;
+  align-items: center;
+  width: 38px;
+  height: 38px;
+  background-color: #ebf0f3;
+  border-radius: 4px;
+}
+
+.day {
+  font-size: 18px;
+}
+
+.month {
+  font-size: 7px;
+  border-radius: 4px 4px 0 0;
+  background-color: #e56353;
+  color: white;
+  width: 100%;
+  text-align: center;
+  line-height: 10px;
+}
+
+.year {
+  font-size: 6px;
+  border-radius: 0 0 4px 4px;
+  line-height: 8px;
+}

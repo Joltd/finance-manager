@@ -1,9 +1,6 @@
 <mat-card class="toolbar">
   <div class="title">Import</div>
-  <button mat-icon-button (click)="save(true)" [disabled]="!form.valid">
-    <mat-icon>system_update_alt</mat-icon>
-  </button>
-  <button mat-icon-button (click)="save(false)" [disabled]="!form.valid">
+  <button mat-icon-button (click)="save()" [disabled]="!form.valid">
     <mat-icon>done</mat-icon>
   </button>
   <button mat-icon-button (click)="close()">
@@ -16,18 +13,13 @@
   <form [formGroup]="form">
 
     <mat-form-field>
-      <mat-label>Account</mat-label>
-      <reference-input api="/account/reference" formControlName="account"></reference-input>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Template</mat-label>
-      <reference-input api="/import-data/reference" formControlName="template"></reference-input>
-    </mat-form-field>
-
-    <mat-form-field>
       <mat-label>File</mat-label>
       <file-input formControlName="file"></file-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <input matInput formControlName="description">
     </mat-form-field>
 
   </form>

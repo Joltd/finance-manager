@@ -3,6 +3,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ExportDataService} from "../../service/export-data.service";
 import {Router} from "@angular/router";
 import {saveAs} from 'file-saver';
+import * as moment from "moment";
 
 @Component({
   selector: 'export-data-begin',
@@ -12,7 +13,7 @@ import {saveAs} from 'file-saver';
 export class ExportDataBeginComponent {
 
   form: FormGroup = new FormGroup({
-    account: new FormControl(null, Validators.required)
+    account: new FormControl(null)
   })
 
   constructor(
@@ -26,7 +27,8 @@ export class ExportDataBeginComponent {
     }
     this.exportDataService.exportData(this.form.value.account)
       .subscribe(result => {
-        saveAs(result, "export-data.csv")
+        let date = moment().format("yyyy-MM-DD")
+        saveAs(result, `data-${date}.csv`)
       })
   }
 

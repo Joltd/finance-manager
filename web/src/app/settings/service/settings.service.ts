@@ -1,7 +1,10 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Settings} from "../model/settings";
 import {TypeUtils} from "../../common/service/type-utils";
+import {Settings} from "../model/settings";
+import {ShortMessageService} from "../../common/service/short-message.service";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +14,23 @@ export class SettingsService {
   settings: Settings = new Settings()
 
   constructor(private http: HttpClient) {
-    this.http.get<Settings>('/settings', TypeUtils.of(Settings))
-      .subscribe(result => this.settings = result)
+    this.load().subscribe()
+  }
+
+  load(): Observable<Settings> {
+    return this.http.get<Settings>('/settings', TypeUtils.of(Settings))
+      .pipe(map(result => {
+        this.settings = result
+        return result
+      }))
+  }
+
+  update(settings: Settings): Observable<void> {
+    return this.http.post<void>('/settings', settings)
+  }
+
+  clearDatabase(): Observable<void> {
+    return this.http.delete<void>('/settings/database')
   }
 
 }

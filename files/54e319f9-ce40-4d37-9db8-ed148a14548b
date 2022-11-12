@@ -1,0 +1,85 @@
+type,accountName,amount,date,description,expenseCategoryName,incomeCategoryName,accountFromName,accountToName,amountFrom,amountTo
+expense,Сбер Платежный Счет,150 RUB,2022-11-06,3801 Плата за обслуживание|Прочие операции,Другое,null,null,null,null,null
+expense,Сбер Платежный Счет,150 RUB,2022-11-06,3801 Плата за обслуживание|Прочие операции,Другое,null,null,null,null,null
+exchange,null,null,2022-11-06,,null,null,Сбер Платежный Счет,Сбер Платежный Счет,265.29 RUB,265.29 RUB
+expense,Сбер Платежный Счет,204 RUB,2022-09-02,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,162 RUB,2022-09-01,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,174 RUB,2022-08-31,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,168 RUB,2022-08-25,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,150 RUB,2022-08-25,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,138 RUB,2022-08-24,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,90 RUB,2022-08-20,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,499 RUB,2022-08-09,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,126 RUB,2022-08-05,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,156 RUB,2022-08-04,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,138 RUB,2022-08-03,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,156 RUB,2022-08-02,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,144 RUB,2022-08-01,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,228 RUB,2022-07-28,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,126 RUB,2022-07-27,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,144 RUB,2022-07-23,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,180 RUB,2022-07-22,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,144 RUB,2022-07-21,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,2950 RUB,2022-07-17,Сбербанк Онлайн перевод на карту 5469****8481 Б. СНЕЖАНА ВЛАДИМИРОВНА|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,132 RUB,2022-07-14,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,132 RUB,2022-07-13,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,12 RUB,2022-07-13,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,150 RUB,2022-07-13,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,56 RUB,2022-07-12,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,144 RUB,2022-07-12,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,234 RUB,2022-07-11,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,499 RUB,2022-07-10,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,150 RUB,2022-07-09,3801 Плата за обслуживание|Прочие операции,Другое,null,null,null,null,null
+expense,Сбер Платежный Счет,1290 RUB,2022-07-07,Сбербанк Онлайн перевод на карту 4817****4270|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,108 RUB,2022-07-06,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,156 RUB,2022-07-01,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,1745 RUB,2022-06-26,Сбербанк Онлайн перевод на карту 5469****3467|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,150 RUB,2022-06-24,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,300 RUB,2022-06-18,Сбербанк Онлайн перевод на карту 4817****6312|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,156 RUB,2022-06-17,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,198 RUB,2022-06-17,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,222 RUB,2022-06-16,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,150 RUB,2022-06-16,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,4090 RUB,2022-06-15,Сбербанк Онлайн перевод на карту 5469****8481 Б. СНЕЖАНА ВЛАДИМИРОВНА|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,45 RUB,2022-06-15,Сбербанк Онлайн перевод на карту 4817****8857|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,138 RUB,2022-06-15,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,180 RUB,2022-06-14,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,96 RUB,2022-06-14,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,1935 RUB,2022-06-13,Сбербанк Онлайн перевод на карту 5469****5864|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,1100 RUB,2022-06-13,Сбербанк Онлайн перевод на карту 2202****0147 К. ЕКАТЕРИНА ВЛАДИМИРОВНА|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,1149 RUB,2022-06-11,Sportmaster-SberPay Gorod Moskva RUS|Одежда и аксессуары,Одежда,null,null,null,null,null
+exchange,null,null,2022-06-11,,null,null,Сбер Платежный Счет,Сбер Платежный Счет,4523 RUB,4523 RUB
+expense,Сбер Платежный Счет,1250 RUB,2022-06-10,Сбербанк Онлайн перевод на карту 5469****7799|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,396 RUB,2022-06-10,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,1390 RUB,2022-06-10,Сбербанк Онлайн перевод на карту 4274****2805|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,502 RUB,2022-06-09,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,196 RUB,2022-06-09,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,130 RUB,2022-06-09,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,302 RUB,2022-06-04,Сбербанк Онлайн перевод на карту 2202****7735|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,249 RUB,2022-06-02,whoosh.bike MOSKVA RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,226 RUB,2022-05-26,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,328 RUB,2022-05-26,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,214 RUB,2022-05-26,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,2240 RUB,2022-05-22,Сбербанк Онлайн перевод на карту 5469****3080|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,300 RUB,2022-05-21,Сбербанк Онлайн перевод на карту 5469****0324|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,54 RUB,2022-05-18,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,42 RUB,2022-05-18,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,90 RUB,2022-05-18,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,192 RUB,2022-05-18,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,4304.54 RUB,2022-05-08,Сбербанк Онлайн перевод на карту 5336****0475|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,600 RUB,2022-05-05,Сбербанк Онлайн перевод на карту 4006****7113 Н. ТИМУР СЕРГЕЕВИЧ|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,96 RUB,2022-05-03,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,570 RUB,2022-05-03,Сбербанк Онлайн перевод на карту 5336****8821|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,383 RUB,2022-05-02,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,371 RUB,2022-05-02,Whoosh.bike Moskva RUS|Отдых и развлечения,Самокат,null,null,null,null,null
+expense,Сбер Платежный Счет,775 RUB,2022-05-01,FUDZHI Samara RUS|Рестораны и кафе,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,1450 RUB,2022-05-01,Сбербанк Онлайн перевод на карту 5469****3080|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,1000 RUB,2022-04-28,Сбербанк Онлайн перевод на карту 2202****9890|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,30 RUB,2022-04-12,Сбербанк Онлайн перевод на карту 4817****8857|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,3505 RUB,2022-04-01,Сбербанк Онлайн перевод на карту 5469****3080|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,1617 RUB,2022-03-27,FUDZHI Samara RUS|Рестораны и кафе,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,3070 RUB,2022-03-18,Сбербанк Онлайн перевод на карту 5469****3080|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,199 RUB,2022-03-13,STR SAVUSHKINA 126 B Gorod Sankt- RUS|Отдых и развлечения,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,149 RUB,2022-03-12,STR SAVUSHKINA 126 B Gorod Sankt- RUS|Отдых и развлечения,Кафе и рестораны,null,null,null,null,null
+expense,Сбер Платежный Счет,3780 RUB,2022-03-11,Сбербанк Онлайн перевод на карту 5469****3080|Перевод с карты,Кафе и рестораны,null,null,null,null,null
+exchange,null,null,2022-03-09,,null,null,Сбер Платежный Счет,Сбер Платежный Счет,46306.25 RUB,46306.25 RUB

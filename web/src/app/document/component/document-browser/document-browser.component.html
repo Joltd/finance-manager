@@ -44,13 +44,19 @@
     </mat-form-field>
   </form>
 
+  <mat-paginator [hidePageSize]="true"
+                 [showFirstLastButtons]="true"
+                 [pageIndex]="documentPage().page"
+                 [length]="documentPage().total"
+                 (page)="onPage($event)"></mat-paginator>
+
 </mat-expansion-panel>
 
-<mat-card class="browser">
+<mat-card class="browser" *ngIf="documentPage().documents.length > 0">
   <mat-list>
-    <mat-list-item *ngFor="let document of filteredDocuments">
+    <mat-list-item *ngFor="let document of documentPage().documents">
       <div matLine class="mat-line-with-menu">
-        <document-label [document]="document" [hideDate]="true"></document-label>
+        <document-label [document]="document"></document-label>
         <button mat-icon-button [matMenuTriggerFor]="menu">
           <mat-icon>more_vert</mat-icon>
         </button>
