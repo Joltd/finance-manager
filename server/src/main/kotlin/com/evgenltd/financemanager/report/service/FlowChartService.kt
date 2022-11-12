@@ -26,16 +26,12 @@ class FlowChartService(
         private val exchangeRateService: ExchangeRateService
 ) {
 
-    fun load(settings: FlowSettingsRecord): FlowRecord = when (settings.type) {
-        "expense" -> loadExpensesChart(settings)
-        "income" -> loadIncomesChart(settings)
-        else -> loadTotalChart(settings)
-    }
+    fun load(settings: FlowSettingsRecord): FlowRecord = loadTotalChart(settings)
 
     private fun loadTotalChart(settings: FlowSettingsRecord): FlowRecord {
-        val expenses = expenseTransactionRepository.findByExpenseCategoryNotNull()
+        val expenses = expenseTransactionRepository.findByExpenseCategoryIn(settings.expenseCategories)
                 .filter { !it.date.isBefore(settings.dateFrom) && !it.date.isAfter(settings.dateTo) }
-        val incomes = incomeTransactionRepository.findByIncomeCategoryNotNull()
+        val incomes = incomeTransactionRepository.findByIncomeCategoryIn(settings.incomeCategories)
                 .filter { !it.date.isBefore(settings.dateFrom) && !it.date.isAfter(settings.dateTo) }
 
         val dates = (expenses.map { it.date } + incomes.map { it.date }).buildDateDimension(settings.groupBy)

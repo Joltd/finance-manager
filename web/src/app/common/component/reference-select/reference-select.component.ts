@@ -3,6 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {Reference} from "../../model/reference";
 import {HttpClient} from "@angular/common/http";
 import {TypeUtils} from "../../service/type-utils";
+import {ReferenceService} from "../../service/reference.service";
 
 @Component({
   selector: 'reference-select',
@@ -16,14 +17,11 @@ export class ReferenceSelectComponent {
 
   constructor(
     private dialogRef: MatDialogRef<ReferenceSelectComponent>,
-    private http: HttpClient,
+    private referenceService: ReferenceService,
     @Inject(MAT_DIALOG_DATA) api: string
   ) {
-    if (!api) {
-      throw 'API URL is not specified'
-    }
-    this.http.get<Reference[]>(api, TypeUtils.of(Reference))
-      .subscribe(result => this.references = result.sort((a,b) => a.name.localeCompare(b.name)))
+    this.referenceService.list(api)
+      .subscribe(result => this.references = result)
   }
 
   select(id: string | null) {

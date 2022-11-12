@@ -6,6 +6,8 @@ import * as echarts from "echarts";
 import {ECharts} from "echarts";
 import {toFractional} from "../../../common/model/amount";
 import {FlowChartSeries} from "../../model/flow-chart-series";
+import {ReferenceService} from "../../../common/service/reference.service";
+import {Reference} from "../../../common/model/reference";
 
 @Component({
   selector: 'flow-chart',
@@ -18,10 +20,27 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   chartContainer!: ElementRef
   chart!: ECharts
 
+  expenseCategories: Reference[] = []
+  incomeCategories: Reference[] = []
+
+  averages: Total[] = []
+
   constructor(
     private flowChartService: FlowChartService,
-    public settingsService: SettingsService
-  ) {}
+    public settingsService: SettingsService,
+    private referenceService: ReferenceService
+  ) {
+    this.referenceService.list('/expense/reference')
+      .subscribe(result => {
+        this.expenseCategories = result
+        this.allExpenseCategories()
+      })
+    this.referenceService.list('/income/reference')
+      .subscribe(result => {
+        this.incomeCategories = result
+        this.allIncomeCategories()
+      })
+  }
 
   ngAfterViewInit(): void {
     let chart = echarts.init(this.chartContainer.nativeElement)
@@ -41,8 +60,20 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     return this.flowChartService.settings
   }
 
-  private refreshChart() {
+  allExpenseCategories() {
+    this.filter().patchValue({
+      expenseCategories: this.expenseCategories.map(category => category.id)
+    })
+  }
 
+  allIncomeCategories() {
+    this.filter().patchValue({
+      incomeCategories: this.incomeCategories.map(category => category.id)
+    })
+  }
+
+  private refreshChart() {
+    this.averages = []
     let option = {
       xAxis: {
         type: 'value'
@@ -74,6 +105,11 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         top: '3%',
         // right: '15%',
         // bottom: '15%'
+      },
+      color: ['#ef5350', '#66bb6a'],
+      dataZoom: {
+        type: 'inside',
+        orient: 'vertical'
       }
     }
     this.chart.resize()
@@ -82,6 +118,14 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   }
 
   private seriesOptions(series: FlowChartSeries): any {
+    let data = series.amounts.map(amount => toFractional(amount))
+    let average = data.length > 0
+      ? data.reduce((previous, current) => previous + current) / data.length
+      : 0
+    this.averages.push({
+      category: series.category,
+      amount: Math.floor(average)
+    })
     return {
       name: series.category,
       type: 'bar',
@@ -92,8 +136,13 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         show: true,
         position: 'right'
       },
-      data: series.amounts.map(amount => toFractional(amount))
+      data: data
     }
   }
 
+}
+
+interface Total {
+  category: string
+  amount: number
 }

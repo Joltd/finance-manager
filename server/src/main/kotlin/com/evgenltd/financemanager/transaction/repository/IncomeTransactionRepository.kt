@@ -7,6 +7,8 @@ interface IncomeTransactionRepository : MongoRepository<IncomeTransaction, Strin
 
     fun findByIncomeCategoryNotNull(): List<IncomeTransaction>
 
+    fun findByIncomeCategoryIn(categories: List<String>): List<IncomeTransaction>
+
     fun findByIncomeCategory(incomeCategory: String): List<IncomeTransaction>
 
 }

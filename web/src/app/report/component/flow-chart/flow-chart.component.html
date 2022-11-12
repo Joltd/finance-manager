@@ -6,15 +6,6 @@
   <form [formGroup]="filter()">
 
     <mat-form-field>
-      <mat-label>Type</mat-label>
-      <mat-select formControlName="type">
-        <mat-option [value]="'total'">Total</mat-option>
-        <mat-option [value]="'expense'">Expenses</mat-option>
-        <mat-option [value]="'income'">Incomes</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field>
       <mat-label>From</mat-label>
       <input formControlName="dateFrom" matInput [matDatepicker]="from" readonly (click)="from.open()">
       <mat-datepicker touchUi #from></mat-datepicker>
@@ -24,6 +15,22 @@
       <mat-label>To</mat-label>
       <input formControlName="dateTo" matInput [matDatepicker]="to" readonly (click)="to.open()">
       <mat-datepicker touchUi #to></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Expenses</mat-label>
+      <mat-select formControlName="expenseCategories" multiple>
+        <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
+      </mat-select>
+      <button matSuffix mat-icon-button (click)="allExpenseCategories()"><mat-icon>checklist</mat-icon></button>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Incomes</mat-label>
+      <mat-select formControlName="incomeCategories" multiple>
+        <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
+      </mat-select>
+      <button matSuffix mat-icon-button (click)="allIncomeCategories()"><mat-icon>checklist</mat-icon></button>
     </mat-form-field>
 
     <mat-form-field>
@@ -43,6 +50,10 @@
 
   </form>
 </mat-expansion-panel>
+
+<mat-card>
+  <div *ngFor="let average of averages">{{average.category}}: {{average.amount}}</div>
+</mat-card>
 
 <mat-card class="chart-card">
   <div #chart class="chart"></div>
