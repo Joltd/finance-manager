@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class AccountService(
@@ -22,7 +23,7 @@ class AccountService(
         } else {
             accountRepository.findAll()
         }
-        return list.map { Reference(it.id!!, it.name!!, it.deleted ?: false) }
+        return list.map { Reference(it.id!!, it.name, it.deleted) }
     }
 
     fun list(): List<AccountRecord> =
@@ -33,21 +34,36 @@ class AccountService(
 
     fun update(record: AccountRecord) {
         val entity = record.toEntity()
+        entity.id
+                ?.let { accountRepository.findById(it).orElse(null) }
+                ?.let { entity.actualOn = it.actualOn }
         accountRepository.save(entity)
     }
 
     fun delete(id: String) = accountRepository.deleteById(id)
 
+    fun updateActualOn(id: String, date: LocalDate) {
+        accountRepository.findById(id)
+                .ifPresent {
+                    if (it.track && it.actualOn?.isBefore(date) != false) {
+                        it.actualOn = date
+                        accountRepository.save(it)
+                    }
+                }
+    }
+
     private fun Account.toRecord(): AccountRecord = AccountRecord(
-            id,
-            name,
-            deleted
+            id = id,
+            name = name,
+            deleted = deleted,
+            track = track
     )
 
     private fun AccountRecord.toEntity(): Account = Account(
-            id,
-            name,
-            deleted
+            id = id,
+            name = name,
+            deleted = deleted,
+            track = track,
     )
     
 }

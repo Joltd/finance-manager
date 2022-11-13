@@ -4,9 +4,11 @@
   grid-auto-flow: row;
 }
 
-.expenses {
+mat-card-subtitle {
+  display: grid;
+  grid-template-columns: 1fr min-content;
 
-  div {
-    min-height: 30em;
+  .actual-on {
+    white-space: nowrap;
   }
 }

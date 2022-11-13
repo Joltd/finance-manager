@@ -9,21 +9,6 @@ form {
   gap: 1em;
 }
 
-.select {
-  position: fixed;
-  top: 0;
-  left: 0;
-  display: grid;
-  width: 100%;
-  height: 100%;
-  background-color: #00000070;
-
-  mat-card {
-    justify-self: center;
-    align-self: center;
-  }
-}
-
 .browser {
   mat-list-item {
     height: 4em;

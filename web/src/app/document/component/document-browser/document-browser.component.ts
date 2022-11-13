@@ -11,6 +11,7 @@ import * as moment from "moment";
 import {SettingsService} from "../../../settings/service/settings.service";
 import {PageEvent} from "@angular/material/paginator";
 import {DocumentPage} from "../../model/document-page";
+import {Reference} from "../../../common/model/reference";
 
 @Component({
   selector: 'document-browser',
@@ -19,12 +20,10 @@ import {DocumentPage} from "../../model/document-page";
 })
 export class DocumentBrowserComponent implements OnInit {
 
-  selection: boolean = false
-
-  types = [
-    {label: 'Expense', value: 'expense'},
-    {label: 'Income', value: 'income'},
-    {label: 'Exchange', value: 'exchange'}
+  types: Reference[] = [
+    new Reference('expense', 'Expense'),
+    new Reference('income', 'Income'),
+    new Reference('exchange', 'Exchange')
   ]
 
   constructor(
@@ -124,10 +123,6 @@ export class DocumentBrowserComponent implements OnInit {
     //
     //   return true
     // }).sort((left,right) => left.value.date > right.value.date ? -1 : 1)
-  }
-
-  select() {
-    this.selection = true
   }
 
   add(type: string) {

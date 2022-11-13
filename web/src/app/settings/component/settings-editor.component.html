@@ -49,10 +49,7 @@
 
       <mat-form-field>
         <mat-label>Currency</mat-label>
-        <mat-select formControlName="currency">
-          <mat-option [value]="null">[Empty]</mat-option>
-          <mat-option *ngFor="let currency of settingsService.settings.currencies" [value]="currency">{{currency}}</mat-option>
-        </mat-select>
+        <currency-input formControlName="currency"></currency-input>
       </mat-form-field>
 
     </form>

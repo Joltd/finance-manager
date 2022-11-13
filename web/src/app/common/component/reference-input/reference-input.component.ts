@@ -1,13 +1,21 @@
-import {Component, ElementRef, Input, OnDestroy, Optional, Self} from "@angular/core";
+import {
+  AfterContentInit,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  Optional,
+  Self,
+  ViewChild
+} from "@angular/core";
 import {MatFormFieldControl} from "@angular/material/form-field";
-import {ControlValueAccessor, FormControl, NgControl} from "@angular/forms";
-import {debounceTime, Observable, startWith, Subject, switchMap} from "rxjs";
+import {ControlValueAccessor, NgControl, Validators} from "@angular/forms";
+import {Subject} from "rxjs";
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
 import {Reference} from "../../model/reference";
-import {HttpClient} from "@angular/common/http";
-import {TypeUtils} from "../../service/type-utils";
-import {MatDialog} from "@angular/material/dialog";
-import {ReferenceSelectComponent} from "../reference-select/reference-select.component";
+import {ReferenceService} from "../../service/reference.service";
+import {EntrySelectComponent} from "../entry-select/entry-select.component";
 
 @Component({
   selector: 'reference-input',
@@ -27,9 +35,11 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
 
   private static nextId = 0
 
-  @Input()
-  api!: string
+  @ViewChild(EntrySelectComponent)
+  entrySelect!: EntrySelectComponent
 
+  @Input()
+  references: Reference[] = []
   private _value: string | null = null
   name: string = '-'
 
@@ -37,7 +47,7 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   private _placeholder!: string
   id = `reference-input-${ReferenceInputComponent.nextId++}`
   focused: boolean = false
-  // touched: boolean = false
+  touched: boolean = false
   private _required: boolean = false
   _disabled: boolean = false
   controlType = 'reference-input'
@@ -45,12 +55,10 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   onTouched = () => {}
 
   constructor(
-    private http: HttpClient,
-    private elementRef: ElementRef<HTMLElement>,
+    private referenceService: ReferenceService,
     @Optional()
     @Self()
-    public ngControl: NgControl,
-    private dialog: MatDialog
+    public ngControl: NgControl
   ) {
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this
@@ -59,6 +67,15 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
 
   ngOnDestroy(): void {
     this.stateChanges.complete()
+  }
+
+  @Input()
+  set api(api: string) {
+    this.referenceService.list(api)
+      .subscribe(result => {
+        this.references = result
+        this.setupName()
+      })
   }
 
   @Input()
@@ -73,15 +90,8 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
       return
     }
 
-    this.byId(value)
-      .subscribe(result => {
-        if (result.length == 0) {
-          this.name = `Unknown (${value})`
-        } else {
-          this.name = result[0].name
-        }
-        this.stateChanges.next()
-      })
+    this.stateChanges.next()
+    this.setupName()
   }
 
   @Input()
@@ -91,22 +101,6 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   set placeholder(placeholder: string) {
     this._placeholder = placeholder
     this.stateChanges.next()
-  }
-
-  onFocusIn(event: FocusEvent) {
-    if (!this.focused) {
-      this.focused = true
-      this.stateChanges.next()
-    }
-  }
-
-  onFocusOut(event: FocusEvent) {
-    if (!this.elementRef.nativeElement.contains(event.relatedTarget as Element)) {
-      //   this.touched = true;
-      this.focused = false;
-      this.onTouched();
-      this.stateChanges.next();
-    }
   }
 
   get empty() {
@@ -119,7 +113,7 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
 
   @Input()
   get required() {
-    return this._required
+    return this._required || this.ngControl?.control?.hasValidator(Validators.required) || false
   }
   set required(required: any) {
     this._required = coerceBooleanProperty(required)
@@ -132,22 +126,21 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   }
   set disabled(disabled: any) {
     this._disabled = coerceBooleanProperty(disabled)
-    // if (this._disabled) { todo
-    //   this.name.disable()
-    // } else {
-    //   this.name.enable()
-    // }
     this.stateChanges.next()
   }
 
   get errorState() {
-    return false
+    return this.touched && !this.entrySelect.visible && (this.ngControl?.invalid || false)
   }
 
   setDescribedByIds(ids: string[]) {}
 
   onContainerClick(event: MouseEvent) {
-    this.select()
+    if (!this._disabled) {
+      this.entrySelect.show()
+      this.touched = true
+      this.onTouched()
+    }
   }
 
   registerOnChange(fn: any) {
@@ -166,27 +159,18 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
     this.value = value
   }
 
-  select() {
-    this.dialog.open(ReferenceSelectComponent, {data: this.api})
-      .afterClosed()
-      .subscribe(result => {
-        if (!result) {
-          return
-        }
-
-        if (result == ReferenceSelectComponent.NULL_RESULT) {
-          this.value = null
-        } else {
-          this.value = result
-        }
-
-        this.onChange(this.value)
-      })
+  selectEntry(value: string | null) {
+    this.value = value
+    this.onChange(this.value)
   }
 
-  private byId(id: string): Observable<Reference[]> {
-    return this.http.get<Reference[]>(this.api + '?id=' + id, TypeUtils.of(Reference))
+  private setupName() {
+    let found = this.references.find(reference => reference.id == this.value)
+    if (found) {
+      this.name = found.name
+    } else {
+      this.name = `Unknown (${this.value})`
+    }
   }
-
 }
 

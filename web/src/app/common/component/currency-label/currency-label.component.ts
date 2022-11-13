@@ -10,6 +10,9 @@ export class CurrencyLabelComponent {
   @Input()
   currency: string | null = null
 
+  @Input()
+  full: boolean = false
+
   isCrypto(): boolean {
     return this.currency != null && (this.currency == 'USDT' || this.currency == 'TRX')
   }

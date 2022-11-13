@@ -1,6 +1,9 @@
 <ng-container *ngFor="let accountBalance of dashboard.balances">
   <mat-card *ngIf="accountBalance.balances.length > 0">
-    <mat-card-subtitle>{{accountBalance.accountName}}</mat-card-subtitle>
+    <mat-card-subtitle>
+      {{accountBalance.accountName}}
+      <span class="actual-on" *ngIf="accountBalance.daysElapsed > 0">{{accountBalance.daysElapsed}} days</span>
+    </mat-card-subtitle>
     <mat-card-content>
       <mat-chip-list>
         <mat-chip *ngFor="let balance of accountBalance.balances"

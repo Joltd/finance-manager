@@ -15,6 +15,8 @@ import {IncomeCategoryEditorComponent} from "./component/income-category-editor/
 import {AccountBrowserComponent} from "./component/account-browser/account-browser.component";
 import {AccountEditorComponent} from "./component/account-editor/account-editor.component";
 import {CommonModule} from "../common/common.module";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {MatCheckboxModule} from "@angular/material/checkbox";
 
 @NgModule({
   declarations: [
@@ -25,19 +27,21 @@ import {CommonModule} from "../common/common.module";
     AccountBrowserComponent,
     AccountEditorComponent
   ],
-    imports: [
-        MatListModule,
-        MatButtonModule,
-        MatMenuModule,
-        MatIconModule,
-        MatCardModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        NgForOf,
-        NgIf,
-        CommonModule
-    ],
+  imports: [
+    MatListModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatIconModule,
+    MatCardModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    NgForOf,
+    NgIf,
+    CommonModule,
+    MatSlideToggleModule,
+    MatCheckboxModule
+  ],
   exports: [
     ExpenseCategoryBrowserComponent,
     ExpenseCategoryEditorComponent,

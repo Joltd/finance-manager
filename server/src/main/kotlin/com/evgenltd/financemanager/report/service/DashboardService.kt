@@ -8,6 +8,9 @@ import com.evgenltd.financemanager.transaction.entity.AccountTransaction
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.repository.AccountTransactionRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.Period
+import java.time.temporal.ChronoUnit
 
 @Service
 class DashboardService(
@@ -26,6 +29,8 @@ class DashboardService(
                     AccountBalanceRecord(
                             account?.id,
                             account?.name ?: "Unknown",
+                            account?.actualOn
+                                    ?.let { actualOn -> ChronoUnit.DAYS.between(actualOn, LocalDate.now()) },
                             it.value.sumByCurrency()
                     )
                 }

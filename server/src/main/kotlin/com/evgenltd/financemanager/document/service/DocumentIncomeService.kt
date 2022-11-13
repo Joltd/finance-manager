@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.reference.repository.name
 import com.evgenltd.financemanager.transaction.entity.AccountTransaction
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.IncomeTransaction
+import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 
@@ -17,7 +18,8 @@ class DocumentIncomeService(
         private val documentIncomeRepository: DocumentIncomeRepository,
         private val transactionService: TransactionService,
         private val accountRepository: AccountRepository,
-        private val incomeCategoryRepository: IncomeCategoryRepository
+        private val incomeCategoryRepository: IncomeCategoryRepository,
+        private val accountTransactionService: AccountTransactionService
 ) : DocumentTypedService<DocumentIncome, DocumentIncomeRecord> {
 
     override fun hash(record: DocumentIncomeRecord): String =
@@ -26,8 +28,7 @@ class DocumentIncomeService(
     override fun update(entity: DocumentIncome) {
         documentIncomeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-        AccountTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.account)
-                .also { transactionService.save(it) }
+        with(entity) { accountTransactionService.input(date, amount, id!!, account) }
         IncomeTransaction(null, entity.date, Direction.OUT, entity.amount, entity.id!!, entity.incomeCategory)
                 .also { transactionService.save(it) }
     }

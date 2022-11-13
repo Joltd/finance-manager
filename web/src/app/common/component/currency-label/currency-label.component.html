@@ -1,2 +1,3 @@
 <span *ngIf="!isCrypto()" class="fi" [ngClass]="formatCurrency()"></span>
 <i *ngIf="isCrypto()" class="cf" [ngClass]="formatCryptoCurrency()"></i>
+<span class="label" *ngIf="full">{{currency}}</span>

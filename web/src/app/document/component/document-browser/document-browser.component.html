@@ -24,10 +24,7 @@
 
     <mat-form-field>
       <mat-label>Type</mat-label>
-      <mat-select formControlName="type">
-        <mat-option [value]="null">[Empty]</mat-option>
-        <mat-option *ngFor="let type of types" [value]="type.value">{{type.label}}</mat-option>
-      </mat-select>
+      <reference-input formControlName="type" [references]="types"></reference-input>
     </mat-form-field>
 
     <mat-form-field>
@@ -37,10 +34,7 @@
 
     <mat-form-field>
       <mat-label>Currency</mat-label>
-      <mat-select formControlName="currency">
-        <mat-option [value]="null">[Empty]</mat-option>
-        <mat-option *ngFor="let currency of settingsService.settings.currencies" [value]="currency">{{currency}}</mat-option>
-      </mat-select>
+      <currency-input formControlName="currency"></currency-input>
     </mat-form-field>
   </form>
 
@@ -64,16 +58,12 @@
   </mat-list>
 </mat-card>
 
-<button class="fab" mat-fab (click)="select()">
+<button class="fab" mat-fab (click)="select.show()">
   <mat-icon>add</mat-icon>
 </button>
 
-<div class="select" *ngIf="selection" (click)="selection = false">
-  <mat-card (click)="$event.stopPropagation()">
-    <mat-action-list>
-      <button mat-list-item (click)="add('expense')">Expense</button>
-      <button mat-list-item (click)="add('income')">Income</button>
-      <button mat-list-item (click)="add('exchange')">Exchange</button>
-    </mat-action-list>
-  </mat-card>
-</div>
+<entry-select #select (select)="add($event)">
+  <entry-item [value]="'expense'">Expense</entry-item>
+  <entry-item [value]="'income'">Income</entry-item>
+  <entry-item [value]="'exchange'">Exchange</entry-item>
+</entry-select>

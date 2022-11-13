@@ -21,7 +21,6 @@ export class DocumentExpenseComponent {
 
   @Input()
   set document(document: Document) {
-    console.log(document)
     this.form.patchValue(document)
   }
 

@@ -1,39 +1,44 @@
 import {Component, ElementRef, Input, OnDestroy, Optional, Self, ViewChild} from "@angular/core";
-import {Subject} from "rxjs";
-import {ControlValueAccessor, NgControl, Validators} from "@angular/forms";
-import {coerceBooleanProperty} from "@angular/cdk/coercion";
+import {ControlValueAccessor, FormControl, NgControl, Validators} from "@angular/forms";
 import {MatFormFieldControl} from "@angular/material/form-field";
+import {Subject} from "rxjs";
+import {ReferenceService} from "../../service/reference.service";
+import {coerceBooleanProperty} from "@angular/cdk/coercion";
+import {CurrencySelectComponent} from "../currency-select/currency-select.component";
 
 @Component({
-  selector: 'file-input',
-  templateUrl: 'file-input.component.html',
-  styleUrls: ['file-input.component.scss'],
+  selector: 'currency-input',
+  templateUrl: 'currency-input.component.html',
+  styleUrls: ['currency-input.component.scss'],
   providers: [
     {
       provide: MatFormFieldControl,
-      useExisting: FileInputComponent
+      useExisting: CurrencyInputComponent
     }
   ],
   host: {
     '[id]': 'id',
   }
 })
-export class FileInputComponent implements MatFormFieldControl<File>, ControlValueAccessor, OnDestroy {
+export class CurrencyInputComponent implements MatFormFieldControl<string>, ControlValueAccessor, OnDestroy {
 
   private static nextId = 0
 
-  @ViewChild('fileInput')
-  fileInput!: ElementRef
-  private _value: File | null = null
-  name: string = '-'
+  currency: FormControl = new FormControl(null)
+
+  @ViewChild(CurrencySelectComponent)
+  currencySelect!: CurrencySelectComponent
+
+  private _value: string | null = null
+
   stateChanges = new Subject<void>()
   private _placeholder!: string
-  id = `file-input-${FileInputComponent.nextId++}`
+  id = `currency-input-${CurrencyInputComponent.nextId++}`
   focused: boolean = false
   touched: boolean = false
   private _required: boolean = false
   _disabled: boolean = false
-  controlType = 'file-input'
+  controlType = 'currency-input'
   onChange = (_: any) => {}
   onTouched = () => {}
 
@@ -45,6 +50,9 @@ export class FileInputComponent implements MatFormFieldControl<File>, ControlVal
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this
     }
+    this.currency.valueChanges.subscribe(value => {
+      this.onChange(value)
+    })
   }
 
   ngOnDestroy(): void {
@@ -52,16 +60,12 @@ export class FileInputComponent implements MatFormFieldControl<File>, ControlVal
   }
 
   @Input()
-  get value(): File | null {
+  get value(): string | null {
     return this._value
   }
-  set value(value: File | null) {
+  set value(value: string | null) {
     this._value = value
-    if (!value) {
-      this.name = '-'
-    } else {
-      this.name = value.name
-    }
+    this.currency.setValue(value)
     this.stateChanges.next()
   }
 
@@ -79,7 +83,7 @@ export class FileInputComponent implements MatFormFieldControl<File>, ControlVal
   }
 
   get shouldLabelFloat() {
-    return this.focused || !this.empty
+    return !this.empty
   }
 
   @Input()
@@ -97,21 +101,24 @@ export class FileInputComponent implements MatFormFieldControl<File>, ControlVal
   }
   set disabled(disabled: any) {
     this._disabled = coerceBooleanProperty(disabled)
+    if (this._disabled) {
+      this.currency.disable()
+    } else {
+      this.currency.enable()
+    }
     this.stateChanges.next()
   }
 
   get errorState() {
-    return this.touched && (this.ngControl?.invalid || false)
+    return this.touched && !this.currencySelect.visible() && (this.ngControl?.invalid || false)
   }
 
   setDescribedByIds(ids: string[]) {}
 
   onContainerClick(event: MouseEvent) {
-    if (!this._disabled) {
-      this.fileInput.nativeElement.click()
-      this.touched = true
-      this.onTouched()
-    }
+    this.currencySelect.showCurrencySelect()
+    this.touched = true
+    this.onTouched()
   }
 
   registerOnChange(fn: any) {
@@ -126,18 +133,8 @@ export class FileInputComponent implements MatFormFieldControl<File>, ControlVal
     this.disabled = isDisabled
   }
 
-  writeValue(value: File | null) {
+  writeValue(value: string | null) {
     this.value = value
-  }
-
-  fileSelect(event: any) {
-    let file = event.target.files[0]
-    if (file) {
-      this.value = file
-    } else {
-      this.value = null
-    }
-    this.onChange(this.value)
   }
 
 }

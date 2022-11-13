@@ -1,0 +1,6 @@
+<mat-card>
+  <mat-action-list>
+    <entry-item *ngIf="nullable" (select)="select.emit(null)">Nothing</entry-item>
+    <ng-content></ng-content>
+  </mat-action-list>
+</mat-card>

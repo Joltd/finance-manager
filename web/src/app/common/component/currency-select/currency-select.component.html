@@ -1,0 +1,6 @@
+<currency-label [currency]="currency" [full]="true" (click)="showCurrencySelect()"></currency-label>
+<entry-select #currencySelect [nullable]="true" (select)="select($event)">
+  <entry-item *ngFor="let currency of settingsService.settings.currencies" [value]="currency">
+    <currency-label [currency]="currency" [full]="true"></currency-label>
+  </entry-item>
+</entry-select>

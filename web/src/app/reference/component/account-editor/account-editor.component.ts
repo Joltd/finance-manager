@@ -12,7 +12,8 @@ export class AccountEditorComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
-    name: new FormControl(null, Validators.required)
+    name: new FormControl(null, Validators.required),
+    track: new FormControl(false)
   })
 
   constructor(

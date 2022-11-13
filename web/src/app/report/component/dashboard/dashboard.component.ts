@@ -26,10 +26,7 @@ export class DashboardComponent implements OnInit {
 
   private load() {
     this.dashboardService.load()
-      .subscribe(result => {
-        this.dashboard = result
-        this.buildFlowChart()
-      })
+      .subscribe(result => this.dashboard = result)
   }
 
   viewDocuments(account: string, currency: string) {
@@ -46,10 +43,6 @@ export class DashboardComponent implements OnInit {
 
   fastExpense() {
     this.router.navigate(['fast-expense']).then()
-  }
-
-  private buildFlowChart() {
-
   }
 
 }

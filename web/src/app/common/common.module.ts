@@ -7,7 +7,6 @@ import {MatButtonModule} from "@angular/material/button";
 import {ReferenceInputComponent} from "./component/reference-input/reference-input.component";
 import {MatInputModule} from "@angular/material/input";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
-import {ReferenceSelectComponent} from "./component/reference-select/reference-select.component";
 import {MatListModule} from "@angular/material/list";
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatCardModule} from "@angular/material/card";
@@ -17,17 +16,24 @@ import {AmountLabelComponent} from "./component/amount-label/amount-label.compon
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {CurrencyLabelComponent} from "./component/currency-label/currency-label.component";
 import {DateLabelComponent} from "./component/date-label/date-label.component";
+import {EntrySelectComponent} from "./component/entry-select/entry-select.component";
+import {EntryItemComponent} from "./component/entry-item/entry-item.component";
+import {CurrencySelectComponent} from "./component/currency-select/currency-select.component";
+import {CurrencyInputComponent} from "./component/currency-input/currency-input.component";
 
 @NgModule({
   declarations: [
     AmountInputComponent,
     ReferenceInputComponent,
-    ReferenceSelectComponent,
     FileInputComponent,
     AmountPipe,
     AmountLabelComponent,
     CurrencyLabelComponent,
-    DateLabelComponent
+    CurrencySelectComponent,
+    CurrencyInputComponent,
+    DateLabelComponent,
+    EntrySelectComponent,
+    EntryItemComponent
   ],
   imports: [
     ReactiveFormsModule,
@@ -49,7 +55,12 @@ import {DateLabelComponent} from "./component/date-label/date-label.component";
     FileInputComponent,
     AmountPipe,
     AmountLabelComponent,
-    DateLabelComponent
+    CurrencyLabelComponent,
+    CurrencySelectComponent,
+    CurrencyInputComponent,
+    DateLabelComponent,
+    EntrySelectComponent,
+    EntryItemComponent
   ]
 })
 export class CommonModule {}

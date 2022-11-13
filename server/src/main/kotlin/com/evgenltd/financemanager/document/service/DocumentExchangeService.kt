@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.reference.repository.name
 import com.evgenltd.financemanager.transaction.entity.AccountTransaction
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.ExchangeTransaction
+import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 
@@ -17,7 +18,8 @@ class DocumentExchangeService(
         private val documentExchangeRepository: DocumentExchangeRepository,
         private val transactionService: TransactionService,
         private val accountRepository: AccountRepository,
-        private val exchangeRateService: ExchangeRateService
+        private val exchangeRateService: ExchangeRateService,
+        private val accountTransactionService: AccountTransactionService
 ) : DocumentTypedService<DocumentExchange, DocumentExchangeRecord> {
 
     override fun hash(record: DocumentExchangeRecord): String =
@@ -28,9 +30,9 @@ class DocumentExchangeService(
         transactionService.deleteByDocument(entity.id!!)
 
         ExchangeTransaction(null, entity.date, Direction.IN, entity.amountFrom, entity.id!!).also { transactionService.save(it) }
-        AccountTransaction(null, entity.date, Direction.OUT, entity.amountFrom, entity.id!!, entity.accountFrom).also { transactionService.save(it) }
+        with(entity) { accountTransactionService.output(date, amountFrom, id!!, accountFrom) }
 
-        AccountTransaction(null, entity.date, Direction.IN, entity.amountTo, entity.id!!, entity.accountTo).also { transactionService.save(it) }
+        with(entity) { accountTransactionService.input(date, amountTo, id!!, accountTo) }
         ExchangeTransaction(null, entity.date, Direction.OUT, entity.amountTo, entity.id!!).also { transactionService.save(it) }
 
         exchangeRateService.saveRate(entity.date, entity.amountFrom, entity.amountTo)

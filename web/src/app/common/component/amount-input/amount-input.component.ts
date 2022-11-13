@@ -1,10 +1,11 @@
 import {Component, ElementRef, Input, OnDestroy, Optional, Self, ViewChild} from "@angular/core";
 import {Amount, fromFractional, toFractional} from "../../model/amount";
-import {ControlValueAccessor, FormBuilder, FormGroup, NgControl, Validators} from "@angular/forms";
+import {ControlValueAccessor, FormControl, FormGroup, NgControl, Validators} from "@angular/forms";
 import {MatFormFieldControl} from "@angular/material/form-field";
 import {Subject} from "rxjs";
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
 import {SettingsService} from "../../../settings/service/settings.service";
+import {CurrencySelectComponent} from "../currency-select/currency-select.component";
 
 @Component({
   selector: 'amount-input',
@@ -24,20 +25,18 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
 
   private static nextId = 0
 
-  @ViewChild('value')
-  valueInput!: HTMLInputElement
-  @ViewChild('currency')
-  currencySelect!: HTMLSelectElement
+  @ViewChild(CurrencySelectComponent)
+  currencySelect!: CurrencySelectComponent
 
-  amount: FormGroup = this.fb.group({
-    value: ['', [Validators.required, Validators.min(0), Validators.pattern(/\d*\.?\d{1,4}/)]],
-    currency: ['', Validators.required]
+  amount: FormGroup = new FormGroup({
+    value: new FormControl(null, [Validators.min(0), Validators.pattern(/\d*\.?\d{1,4}/)]),
+    currency: new FormControl(null)
   })
   stateChanges = new Subject<void>()
   private _placeholder!: string
   id = `amount-input-${AmountInputComponent.nextId++}`
   focused: boolean = false
-  // touched: boolean = false
+  touched: boolean = false
   private _required: boolean = false
   _disabled: boolean = false
   controlType = 'amount-input'
@@ -45,20 +44,17 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
   onTouched = () => {}
 
   constructor(
-    public settingsService: SettingsService,
     private elementRef: ElementRef<HTMLElement>,
-    private fb: FormBuilder,
     @Optional()
     @Self()
     public ngControl: NgControl
   ) {
-    this.amount = fb.group({
-      'value': null,
-      'currency': null
-    })
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this
     }
+    this.amount.valueChanges.subscribe(value => {
+      this.onInput()
+    })
   }
 
   ngOnDestroy(): void {
@@ -78,9 +74,9 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
     return amount
   }
   set value(amount: Amount | null) {
-    let value = amount ? toFractional(amount) : ''
-    let currency = amount ? amount.currency : ''
-    this.amount.setValue({
+    let value = amount != null ? toFractional(amount) : ''
+    let currency = amount != null ? amount.currency : ''
+    this.amount.patchValue({
       value: value,
       currency: currency
     })
@@ -105,7 +101,7 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
 
   onFocusOut(event: FocusEvent) {
     if (!this.elementRef.nativeElement.contains(event.relatedTarget as Element)) {
-    //   this.touched = true;
+      this.touched = true;
       this.focused = false;
       this.onTouched();
       this.stateChanges.next();
@@ -122,7 +118,7 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
 
   @Input()
   get required() {
-    return this._required
+    return this._required || this.ngControl?.control?.hasValidator(Validators.required) || false
   }
   set required(required: any) {
     this._required = coerceBooleanProperty(required)
@@ -131,7 +127,7 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
 
   @Input()
   get disabled() {
-    return this._disabled
+    return this.ngControl?.disabled || this._disabled
   }
   set disabled(disabled: any) {
     this._disabled = coerceBooleanProperty(disabled)
@@ -144,17 +140,12 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
   }
 
   get errorState() {
-    return this.amount.invalid
+    return this.touched && !this.currencySelect.visible() && (this.ngControl?.invalid || false)
   }
 
   setDescribedByIds(ids: string[]) {}
 
-  onContainerClick(event: MouseEvent) {
-    // todo focus on value input
-    // if ((event.target as Element).tagName.toLowerCase() != 'input') {
-    //   this._elementRef.nativeElement.querySelector('input').focus();
-    // }
-  }
+  onContainerClick(event: MouseEvent) {}
 
   registerOnChange(fn: any) {
     this.onChange = fn
@@ -174,6 +165,11 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
 
   onInput() {
     this.onChange(this.value)
+  }
+
+  onOpenCurrencySelect() {
+    this.touched = true
+    this.onTouched()
   }
 
 }

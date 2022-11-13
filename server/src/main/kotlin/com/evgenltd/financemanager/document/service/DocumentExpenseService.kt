@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.reference.repository.name
 import com.evgenltd.financemanager.transaction.entity.AccountTransaction
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.ExpenseTransaction
+import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 
@@ -17,7 +18,8 @@ class DocumentExpenseService(
         private val documentExpenseRepository: DocumentExpenseRepository,
         private val transactionService: TransactionService,
         private val accountRepository: AccountRepository,
-        private val expenseCategoryRepository: ExpenseCategoryRepository
+        private val expenseCategoryRepository: ExpenseCategoryRepository,
+        private val accountTransactionService: AccountTransactionService
 ) : DocumentTypedService<DocumentExpense, DocumentExpenseRecord> {
 
     override fun hash(record: DocumentExpenseRecord): String = "${record.date}-${record.account}-${record.amount}-${record.expenseCategory}"
@@ -25,8 +27,7 @@ class DocumentExpenseService(
     override fun update(entity: DocumentExpense) {
         documentExpenseRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-        AccountTransaction(null, entity.date, Direction.OUT, entity.amount, entity.id!!, entity.account)
-                .also { transactionService.save(it) }
+        with(entity) { accountTransactionService.output(date, amount, id!!, account) }
         ExpenseTransaction(null, entity.date, Direction.IN, entity.amount, entity.id!!, entity.expenseCategory)
                 .also { transactionService.save(it) }
     }
