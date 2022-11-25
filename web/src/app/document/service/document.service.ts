@@ -6,6 +6,11 @@ import {TypeUtils} from "../../common/service/type-utils";
 import {DocumentTyped} from "../model/document-typed";
 import {FormControl, FormGroup} from "@angular/forms";
 import {DocumentPage} from "../model/document-page";
+import {ReferenceService} from "../../common/service/reference.service";
+import {Total} from "../../report/model/total";
+import {DocumentExpense, DocumentIncome} from "../model/document";
+import {toFractional} from "../../common/model/amount";
+import * as moment from "moment/moment";
 
 @Injectable({
   providedIn: 'root'
@@ -13,15 +18,34 @@ import {DocumentPage} from "../model/document-page";
 export class DocumentService {
 
   filter: FormGroup = new FormGroup({
+    // dateFrom: new FormControl(moment().subtract(6, 'month').format('yyyy-MM-DD')),
+    // dateTo: new FormControl(moment().format('yyyy-MM-DD')),
     dateFrom: new FormControl(null),
     dateTo: new FormControl(null),
     type: new FormControl(null),
+    expenseCategories: new FormControl([]),
+    incomeCategories: new FormControl([]),
     account: new FormControl(null),
     currency: new FormControl(null)
   })
   documentPage: DocumentPage = new DocumentPage()
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient
+  ) {}
+
+  updateFilter(filter: any) {
+    let empty = {
+      dateFrom: null,
+      dateTo: null,
+      type: null,
+      expenseCategories: [],
+      incomeCategories: [],
+      account: null,
+      currency: null
+    }
+    this.filter.setValue({...empty, ...filter})
+  }
 
   list() {
     let filter = {...this.filter.value}

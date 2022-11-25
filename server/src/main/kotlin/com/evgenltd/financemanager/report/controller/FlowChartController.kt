@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.report.controller
 
-import com.evgenltd.financemanager.report.record.FlowRecord
-import com.evgenltd.financemanager.report.record.FlowSettingsRecord
+import com.evgenltd.financemanager.report.record.FlowChartRecord
+import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
 import com.evgenltd.financemanager.report.service.FlowChartService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -13,6 +13,6 @@ class FlowChartController(
 ) {
 
     @PostMapping("/flow-chart")
-    fun load(@RequestBody record: FlowSettingsRecord): FlowRecord = flowChartService.load(record)
+    fun load(@RequestBody record: FlowChartSettingsRecord): FlowChartRecord = flowChartService.load(record)
 
 }

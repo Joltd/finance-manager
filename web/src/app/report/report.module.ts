@@ -13,11 +13,13 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
+import {CategoryChartComponent} from "./component/category-chart/category-chart.component";
 
 @NgModule({
   declarations: [
     DashboardComponent,
-    FlowChartComponent
+    FlowChartComponent,
+    CategoryChartComponent
   ],
   imports: [
     MatCardModule,
@@ -36,7 +38,8 @@ import {MatIconModule} from "@angular/material/icon";
   ],
   exports: [
     DashboardComponent,
-    FlowChartComponent
+    FlowChartComponent,
+    CategoryChartComponent
   ]
 })
 export class ReportModule {}

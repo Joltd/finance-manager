@@ -34,5 +34,7 @@ fun List<DocumentTypedRecord>.export(path: String) {
     val data = joinToString("\n") { exportDocument(it) }
     val header = FIELDS.joinToString(",")
     val all = "$header\n$data"
-    File("""$DESTINATION_PATH\$path""").writeText(all)
+    val file = File("""$DESTINATION_PATH\$path""")
+    file.parentFile.mkdirs()
+    file.writeText(all)
 }

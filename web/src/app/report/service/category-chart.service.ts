@@ -2,25 +2,24 @@ import {EventEmitter, Injectable} from "@angular/core";
 import {FormControl, FormGroup} from "@angular/forms";
 import * as moment from "moment";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
-import {FlowChart} from "../model/flow-chart";
 import {TypeUtils} from "../../common/service/type-utils";
+import {CategoryChart} from "../model/category-chart";
 import {ReferenceService} from "../../common/service/reference.service";
 
 @Injectable({
   providedIn: 'root'
 })
-export class FlowChartService {
+export class CategoryChartService {
 
   settings: FormGroup = new FormGroup({
     dateFrom: new FormControl(moment().subtract(6, 'month').format('yyyy-MM-DD')),
     dateTo: new FormControl(moment().format('yyyy-MM-DD')),
-    groupBy: new FormControl('month'),
+    groupBy: new FormControl('expense'),
     expenseCategories: new FormControl([]),
     incomeCategories: new FormControl([]),
     currency: new FormControl('RUB')
   })
-  data!: FlowChart
+  data!: CategoryChart
   onLoad: EventEmitter<void> = new EventEmitter<void>()
 
   constructor(
@@ -35,7 +34,7 @@ export class FlowChartService {
   }
 
   load() {
-    this.http.post<FlowChart>('/flow-chart', this.settings.value, TypeUtils.of(FlowChart))
+    this.http.post<CategoryChart>('/category-chart', this.settings.value, TypeUtils.of(CategoryChart))
       .subscribe(result => {
         this.data = result
         this.onLoad.emit()

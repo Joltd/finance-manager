@@ -28,6 +28,22 @@
     </mat-form-field>
 
     <mat-form-field>
+      <mat-label>Expenses</mat-label>
+      <mat-select formControlName="expenseCategories" multiple>
+        <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
+      </mat-select>
+      <button matSuffix mat-icon-button (click)="allExpenseCategories()"><mat-icon>checklist</mat-icon></button>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Incomes</mat-label>
+      <mat-select formControlName="incomeCategories" multiple>
+        <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
+      </mat-select>
+      <button matSuffix mat-icon-button (click)="allIncomeCategories()"><mat-icon>checklist</mat-icon></button>
+    </mat-form-field>
+
+    <mat-form-field>
       <mat-label>Account</mat-label>
       <reference-input api="/account/reference" formControlName="account"></reference-input>
     </mat-form-field>

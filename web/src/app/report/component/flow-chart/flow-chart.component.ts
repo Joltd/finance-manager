@@ -1,5 +1,4 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, ViewChild} from "@angular/core";
-import {SettingsService} from "../../../settings/service/settings.service";
 import {FlowChartService} from "../../service/flow-chart.service";
 import {FormGroup} from "@angular/forms";
 import * as echarts from "echarts";
@@ -8,6 +7,10 @@ import {toFractional} from "../../../common/model/amount";
 import {FlowChartSeries} from "../../model/flow-chart-series";
 import {ReferenceService} from "../../../common/service/reference.service";
 import {Reference} from "../../../common/model/reference";
+import * as moment from "moment";
+import {CategoryChartService} from "../../service/category-chart.service";
+import {Router} from "@angular/router";
+import {Total} from "../../model/total";
 
 @Component({
   selector: 'flow-chart',
@@ -23,23 +26,18 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   expenseCategories: Reference[] = []
   incomeCategories: Reference[] = []
 
-  averages: Total[] = []
+  totals: Total[] = []
 
   constructor(
     private flowChartService: FlowChartService,
-    public settingsService: SettingsService,
-    private referenceService: ReferenceService
+    private categoryChartService: CategoryChartService,
+    private referenceService: ReferenceService,
+    private router: Router
   ) {
     this.referenceService.list('/expense/reference')
-      .subscribe(result => {
-        this.expenseCategories = result
-        this.allExpenseCategories()
-      })
+      .subscribe(result => this.expenseCategories = result)
     this.referenceService.list('/income/reference')
-      .subscribe(result => {
-        this.incomeCategories = result
-        this.allIncomeCategories()
-      })
+      .subscribe(result => this.incomeCategories = result)
   }
 
   ngAfterViewInit(): void {
@@ -47,6 +45,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     window.onresize = function () {
       chart.resize()
     }
+    chart.on('click', params => this.drillDown(params))
     this.chart = chart
     this.flowChartService.onLoad.subscribe(() => this.refreshChart())
     this.flowChartService.load()
@@ -73,7 +72,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   }
 
   private refreshChart() {
-    this.averages = []
+    this.totals = []
     let option = {
       xAxis: {
         type: 'value'
@@ -97,7 +96,8 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         trigger: 'item',
         axisPointer: {
           type: 'shadow'
-        }
+        },
+        valueFormatter: (value: number) => value
       },
       legend: {
         type: 'scroll',
@@ -118,11 +118,9 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   }
 
   private seriesOptions(series: FlowChartSeries): any {
-    let data = series.amounts.map(amount => toFractional(amount))
-    let average = data.length > 0
-      ? data.reduce((previous, current) => previous + current) / data.length
-      : 0
-    this.averages.push({
+    let data = series.amounts.map(amount => Math.floor(toFractional(amount)))
+    let average = data.reduce((previous, current) => previous + current, 0) / data.length
+    this.totals.push({
       category: series.category,
       amount: Math.floor(average)
     })
@@ -140,9 +138,17 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-}
+  private drillDown(params: any) {
+    let groupBy = this.flowChartService.settings.value.groupBy
+    let date = this.flowChartService.data.dates[params.dataIndex]
+    this.categoryChartService.settings.patchValue({
+      dateFrom: moment(date).format('yyyy-MM-DD'),
+      dateTo: moment(date).add(1, groupBy).format('yyyy-MM-DD'),
+      expenseCategories: this.flowChartService.settings.value.expenseCategories,
+      incomeCategories: this.flowChartService.settings.value.incomeCategories,
+      groupBy: params.seriesIndex == 0 ? 'expense' : 'income'
+    })
+    this.router.navigate(['category-chart']).then()
+  }
 
-interface Total {
-  category: string
-  amount: number
 }

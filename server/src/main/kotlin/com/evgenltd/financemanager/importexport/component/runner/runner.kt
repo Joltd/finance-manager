@@ -7,7 +7,7 @@ import java.math.BigDecimal
 
 fun main() {
     val result = bccKzt()
-    result.documents.export("""2022-11-09\bcc-kzt.csv""")
+    result.documents.export("""2022-11-24\bcc-kzt.csv""")
     println()
 }
 

@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.report.record
 
 import java.time.LocalDate
 
-class FlowRecord(
+class FlowChartRecord(
         val dates: List<LocalDate>,
-        val flows: List<FlowSeriesRecord>
+        val flows: List<FlowChartSeriesRecord>
 )

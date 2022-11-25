@@ -29,8 +29,6 @@ export class CurrencyInputComponent implements MatFormFieldControl<string>, Cont
   @ViewChild(CurrencySelectComponent)
   currencySelect!: CurrencySelectComponent
 
-  private _value: string | null = null
-
   stateChanges = new Subject<void>()
   private _placeholder!: string
   id = `currency-input-${CurrencyInputComponent.nextId++}`
@@ -51,7 +49,7 @@ export class CurrencyInputComponent implements MatFormFieldControl<string>, Cont
       this.ngControl.valueAccessor = this
     }
     this.currency.valueChanges.subscribe(value => {
-      this.onChange(value)
+      this.onChange(this.value)
     })
   }
 
@@ -61,10 +59,9 @@ export class CurrencyInputComponent implements MatFormFieldControl<string>, Cont
 
   @Input()
   get value(): string | null {
-    return this._value
+    return this.currency.value
   }
   set value(value: string | null) {
-    this._value = value
     this.currency.setValue(value)
     this.stateChanges.next()
   }
@@ -79,7 +76,7 @@ export class CurrencyInputComponent implements MatFormFieldControl<string>, Cont
   }
 
   get empty() {
-    return this._value == null
+    return !this.currency.value
   }
 
   get shouldLabelFloat() {

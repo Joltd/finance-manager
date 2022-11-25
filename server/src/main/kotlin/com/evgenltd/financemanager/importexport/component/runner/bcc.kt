@@ -9,7 +9,7 @@ private const val RULES_ROOT = """C:\Users\lebed\IdeaProjects\finance-manager\se
 private const val SOURCE_ROOT = """C:\Users\lebed\Dropbox\Diary\Home\finance\budgets"""
 
 fun bccKzt(): MapDataResult {
-    val raw = readHtml("bcc.html", "KZT")
+    val raw = readHtml("bcc-2022-11-24.html", "KZT")
     return mapData("Банк ЦентрКредит", raw, """$RULES_ROOT\bcc\main.csv""")
 }
 

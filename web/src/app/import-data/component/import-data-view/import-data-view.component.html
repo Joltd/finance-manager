@@ -44,12 +44,12 @@
         <ng-container *ngFor="let entry of dateGroup.entries">
           <mat-list-item *ngIf="!hideImported || !(entry.suggested && entry.existed)">
             <div matLine class="line">
-              <mat-checkbox *ngIf="entry.state" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
-              <mat-icon *ngIf="entry.state"
+              <mat-checkbox *ngIf="entry.state == null" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
+              <mat-icon *ngIf="entry.state == true"
                         (click)="entry.state = null"
                         [matTooltip]="entry.message"
                         class="success">check_circle</mat-icon>
-              <mat-icon *ngIf="!entry.state"
+              <mat-icon *ngIf="entry.state == false"
                         (click)="entry.state = null"
                         [matTooltip]="entry.message"
                         class="fail">cancel</mat-icon>

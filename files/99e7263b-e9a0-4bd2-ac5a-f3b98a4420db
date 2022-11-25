@@ -1,0 +1,39 @@
+type,accountName,amount,date,description,expenseCategoryName,incomeCategoryName,accountFromName,accountToName,amountFrom,amountTo
+expense,Банк ЦентрКредит,14722.5 KZT,2022-11-24,RESTORAN DI PALMA,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,2827.5 KZT,2022-11-24,BONACA,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,718.93 KZT,2022-11-24,IDEA CENTAR KASA 1,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,6658.5 KZT,2022-11-24,KANTINA 65,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,4771.84 KZT,2022-11-23,GOOGLE *YOUTUBEPREMIUM,Подписки,null,null,null,null,null
+expense,Банк ЦентрКредит,6277.32 KZT,2022-11-21,IDEA CENTAR KASA 2,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,12014.25 KZT,2022-11-21,KANTINA 65,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,2880 KZT,2022-11-20,SPLENDIDO,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,13488 KZT,2022-11-20,PIZZERIA TWINS,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,1113.6 KZT,2022-11-19,SKORPION,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,4135.56 KZT,2022-11-19,CITY 22,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,1147.2 KZT,2022-11-19,SKORPION,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,5263.44 KZT,2022-11-18,CITY 22,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,3277.6 KZT,2022-11-17,PIZZERIA FORTE,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,3427.02 KZT,2022-11-17,IDEA IGALO KASA 3,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,4868.2 KZT,2022-11-17,RAFFAELO,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,95691.64 KZT,2022-11-17,AIRBNB * HMJQPTE9TS,Аренда квартиры,null,null,null,null,null
+expense,Банк ЦентрКредит,5109.2 KZT,2022-11-17,KONOBA KRUSO,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,5880.4 KZT,2022-11-17,PETER'S PIE &amp; COFFEE,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,2024.4 KZT,2022-11-16,SPLENDIDO,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,814.58 KZT,2022-11-16,SKORPION DOOBRACE GRAKA,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,333413.45 KZT,2022-11-16,AIRBNB * HMQ9YBTDTZ,Аренда квартиры,null,null,null,null,null
+expense,Банк ЦентрКредит,873.26 KZT,2022-11-15,GOOGLE *GOOGLE STORAGE,Подписки,null,null,null,null,null
+expense,Банк ЦентрКредит,16108.29 KZT,2022-11-15,IDEA CENTAR KASA 1,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,14834.7 KZT,2022-11-15,BIFE BEOGRAD,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,2028.6 KZT,2022-11-13,SPLENDIDO,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,2315.36 KZT,2022-11-13,SPOTIFY AB,Подписки,null,null,null,null,null
+expense,Банк ЦентрКредит,17019.2 KZT,2022-11-12,KONOBA KRUSO,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,9408.91 KZT,2022-11-12,IDEA IGALO KASA 4,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,7155.8 KZT,2022-11-11,CASA,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,4536.25 KZT,2022-11-11,PIZZERIA BOKA,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,7401.25 KZT,2022-11-11,PIZZERIA BOKA,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,478.67 KZT,2022-11-11,IDEA CENTAR KASA 1,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,452.67 KZT,2022-11-11,CITY 22,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,676.9 KZT,2022-11-11,SPLENDIDO,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,2239.55 KZT,2022-11-10,PIZZERIA BOKA,Кафе и рестораны,null,null,null,null,null
+expense,Банк ЦентрКредит,3244.28 KZT,2022-11-10,IDEA CENTAR KASA 2,Супермаркеты,null,null,null,null,null
+expense,Банк ЦентрКредит,8577 KZT,2022-11-09,BONACA,Кафе и рестораны,null,null,null,null,null

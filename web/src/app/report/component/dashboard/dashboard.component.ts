@@ -3,8 +3,7 @@ import {AccountBalance} from "../../model/account-balance";
 import {Dashboard} from "../../model/dashboard";
 import {DashboardService} from "../../service/dashboard.service";
 import {Router} from "@angular/router";
-import {toFractional} from "../../../common/model/amount";
-import * as moment from "moment";
+import {DocumentService} from "../../../document/service/document.service";
 
 @Component({
   selector: 'dashboard',
@@ -17,6 +16,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private dashboardService: DashboardService,
+    private documentService: DocumentService,
     private router: Router
   ) {}
 
@@ -33,12 +33,8 @@ export class DashboardComponent implements OnInit {
     if (!account) {
       return
     }
-    this.router.navigate(
-      ['document'],
-      {
-        queryParams: {account, currency}
-      }
-    ).then()
+    this.documentService.updateFilter({account, currency})
+    this.router.navigate(['document']).then()
   }
 
   fastExpense() {

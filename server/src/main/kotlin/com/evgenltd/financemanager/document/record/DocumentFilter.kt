@@ -8,6 +8,8 @@ class DocumentFilter(
         val dateFrom: LocalDate?,
         val dateTo: LocalDate?,
         val type: String?,
+        val expenseCategories: List<String>,
+        val incomeCategories: List<String>,
         val currency: String?,
         val account: String?
 )
