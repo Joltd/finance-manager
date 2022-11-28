@@ -106,7 +106,7 @@ jobs:
           source: ./web/dist/${{ env.PROJECT_NAME }}
           target: /var/www/${{ secrets.HOST }}/html/${{ env.PROJECT_NAME }}
           rm: true
-          strip_components: 3
+          strip_components: 4
 
   notify:
     name: Notification
