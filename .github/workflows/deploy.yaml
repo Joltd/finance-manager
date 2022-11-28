@@ -104,7 +104,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           source: ./web/dist/${{ env.PROJECT_NAME }}
-          target: /var/www/${{ secrets.HOST }}/html
+          target: /var/www/${{ secrets.HOST }}/html/${{ env.PROJECT_NAME }}
           rm: true
           strip_components: 3
 
