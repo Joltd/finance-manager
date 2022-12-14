@@ -44,7 +44,6 @@ class SettingsService(
     fun clearDatabase() {
         mongoDatabaseFactory.mongoDatabase.drop()
         saveDefaultCurrencies()
-        importDataService.deleteAllFiles()
     }
 
     private fun saveDefaultCurrencies() {

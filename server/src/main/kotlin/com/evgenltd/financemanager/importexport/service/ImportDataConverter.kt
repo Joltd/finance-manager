@@ -5,7 +5,7 @@ import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.document.entity.DocumentExchange
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.entity.DocumentIncome
-import com.evgenltd.financemanager.importexport.entity.DocumentEntry
+import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.ExpenseCategory
 import com.evgenltd.financemanager.reference.entity.IncomeCategory
@@ -25,7 +25,7 @@ class ImportDataConverter(
         private val incomeCategoryRepository: IncomeCategoryRepository
 ) {
 
-    fun convert(path: Path): List<DocumentEntry> {
+    fun convert(path: Path): List<ImportDataEntry> {
         val accountIndex = accountRepository.findAll().associateBy { it.name }.toMutableMap()
         val expenseCategoryIndex = expenseCategoryRepository.findAll().associateBy { it.name }.toMutableMap()
         val incomeCategoryIndex = incomeCategoryRepository.findAll().associateBy { it.name }.toMutableMap()
@@ -64,7 +64,7 @@ class ImportDataConverter(
                         else -> throw IllegalArgumentException("Unknown document type [${it.type}]")
                     }
 
-                    DocumentEntry(
+                    ImportDataEntry(
                             (id++).toString(),
                             it.toString(),
                             document

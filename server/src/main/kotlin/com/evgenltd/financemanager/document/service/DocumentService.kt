@@ -98,6 +98,15 @@ class DocumentService(
         return Query().addCriteria(Criteria().andOperator(criteriaList))
     }
 
+    fun listDaily(filter: DocumentDailyFilter): List<DocumentTypedRecord> {
+        val query = DocumentFilter(
+            dateFrom = filter.date,
+            dateTo = filter.date.plusDays(1L),
+            account = filter.account
+        ).query()
+        return mongoTemplate.find(query, Document::class.java).map(::toTypedRecord)
+    }
+
     fun byId(id: String): DocumentTypedRecord = documentRepository.find(id).let(::toTypedRecord)
 
     fun update(record: DocumentTypedRecord) {
@@ -128,8 +137,6 @@ class DocumentService(
                 .map { it.document }
                 .onEach { delete(it) }
     }
-
-    fun hash(record: DocumentRecord): String = resolveService(record).hash(record)
 
     fun toEntity(record: DocumentRecord): Document = resolveService(record).toEntity(record)
 

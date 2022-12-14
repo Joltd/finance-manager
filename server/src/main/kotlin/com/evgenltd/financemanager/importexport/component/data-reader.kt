@@ -2,20 +2,10 @@ package com.evgenltd.financemanager.importexport.component
 
 import com.evgenltd.financemanager.common.component.readCsv
 import com.evgenltd.financemanager.common.util.parseAmount
-import com.evgenltd.financemanager.document.entity.DocumentExchange
-import com.evgenltd.financemanager.document.entity.DocumentExpense
-import com.evgenltd.financemanager.document.entity.DocumentIncome
 import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
 import com.evgenltd.financemanager.document.record.DocumentIncomeRecord
 import com.evgenltd.financemanager.document.record.DocumentTypedRecord
-import com.evgenltd.financemanager.importexport.entity.DocumentEntry
-import com.evgenltd.financemanager.importexport.record.RawDataRecord
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Node
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
 
 
 fun readFinance(path: String): List<DocumentTypedRecord> = readCsv(path)
@@ -28,8 +18,8 @@ fun readFinance(path: String): List<DocumentTypedRecord> = readCsv(path)
                         amount = row["amount"].parseAmount(),
                         accountName = row["accountName"],
                         expenseCategoryName = row["expenseCategoryName"],
-                        account = "",
-                        expenseCategory = ""
+                        account = null,
+                        expenseCategory = null
                 )
                 "income" -> DocumentIncomeRecord(
                         id = null,
@@ -38,8 +28,8 @@ fun readFinance(path: String): List<DocumentTypedRecord> = readCsv(path)
                         amount = row["amount"].parseAmount(),
                         accountName = row["accountName"],
                         incomeCategoryName = row["incomeCategoryName"],
-                        account = "",
-                        incomeCategory = ""
+                        account = null,
+                        incomeCategory = null
                 )
                 "exchange" -> DocumentExchangeRecord(
                         id = null,
@@ -49,8 +39,8 @@ fun readFinance(path: String): List<DocumentTypedRecord> = readCsv(path)
                         amountFrom = row["amountFrom"].parseAmount(),
                         accountToName = row["accountToName"],
                         amountTo = row["amountTo"].parseAmount(),
-                        accountFrom = "",
-                        accountTo = ""
+                        accountFrom = null,
+                        accountTo = null
                 )
                 else -> throw IllegalArgumentException("Unknown type ${row["type"]}")
             }

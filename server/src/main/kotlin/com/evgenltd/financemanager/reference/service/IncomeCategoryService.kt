@@ -1,10 +1,12 @@
 package com.evgenltd.financemanager.reference.service
 
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.IncomeCategory
 import com.evgenltd.financemanager.reference.record.IncomeCategoryRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.IncomeCategoryRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -37,6 +39,14 @@ class IncomeCategoryService(
     }
 
     fun delete(id: String) = incomeCategoryRepository.deleteById(id)
+
+    fun findOrCreate(id: String?, name: String?): IncomeCategory = id
+        ?.let { incomeCategoryRepository.findByIdOrNull(it) }
+        ?: name?.let { incomeCategoryRepository.findByName(it) }
+        ?: name?.let { incomeCategoryRepository.save(IncomeCategory(null, it)) }
+        ?: throw IllegalArgumentException("Id or Name should be specified")
+
+    fun name(id: String): String = incomeCategoryRepository.findByIdOrNull(id)?.name ?: id
 
     private fun IncomeCategory.toRecord(): IncomeCategoryRecord = IncomeCategoryRecord(
             id = id,

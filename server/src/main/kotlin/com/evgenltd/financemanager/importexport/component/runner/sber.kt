@@ -10,25 +10,25 @@ import java.time.LocalDate
 
 private const val RULES_ROOT = """C:\Users\lebed\IdeaProjects\finance-manager\server\src\main\resources\rules"""
 private const val FILES_ROOT = """C:\Users\lebed\Dropbox\Diary\Home\finance\budgets\sber"""
-
-fun sberCard0050(): MapDataResult {
-    val raw = readHtml("""$FILES_ROOT\0050 - 2018-2019.html""") +
-            readHtml("""$FILES_ROOT\0050 - 2019-2020.html""") +
-            readHtml("""$FILES_ROOT\0050 - 2020-2021.html""") +
-            listOf(RawDataRecord(LocalDate.of(2019,10,11), "130".amount("RUB"), "Прочие операции|SBOL перевод 5336****5289 К. СЕРГЕЙ ГЕННАДЬЕВИЧ"))
-    return mapData("Сбер Карта (0050)", raw, """$RULES_ROOT\sber\main.csv""")
-}
-
-fun sberCard0234(): MapDataResult {
-    val raw = readHtml("""$FILES_ROOT\0234 - 2021.html""") +
-            readHtml("""$FILES_ROOT\0234 - 2021-2022.html""")
-    return mapData("Сбер Карта (0234)", raw, """$RULES_ROOT\sber\main.csv""")
-}
-
-fun sberPayAccount(): MapDataResult {
-    val raw = readTxt("""$FILES_ROOT\sber-pay-account.txt""")
-    return mapData("Сбер Платежный Счет", raw, """$RULES_ROOT\sber\main.csv""")
-}
+//
+//fun sberCard0050(): MapDataResult {
+//    val raw = readHtml("""$FILES_ROOT\0050 - 2018-2019.html""") +
+//            readHtml("""$FILES_ROOT\0050 - 2019-2020.html""") +
+//            readHtml("""$FILES_ROOT\0050 - 2020-2021.html""") +
+//            listOf(RawDataRecord(LocalDate.of(2019,10,11), "130".amount("RUB"), "Прочие операции|SBOL перевод 5336****5289 К. СЕРГЕЙ ГЕННАДЬЕВИЧ"))
+//    return mapData("Сбер Карта (0050)", raw, """$RULES_ROOT\sber\main.csv""")
+//}
+//
+//fun sberCard0234(): MapDataResult {
+//    val raw = readHtml("""$FILES_ROOT\0234 - 2021.html""") +
+//            readHtml("""$FILES_ROOT\0234 - 2021-2022.html""")
+//    return mapData("Сбер Карта (0234)", raw, """$RULES_ROOT\sber\main.csv""")
+//}
+//
+//fun sberPayAccount(): MapDataResult {
+//    val raw = readTxt("""$FILES_ROOT\sber-pay-account.txt""")
+//    return mapData("Сбер Платежный Счет", raw, """$RULES_ROOT\sber\main.csv""")
+//}
 
 private fun readHtml(path: String): List<RawDataRecord> {
 

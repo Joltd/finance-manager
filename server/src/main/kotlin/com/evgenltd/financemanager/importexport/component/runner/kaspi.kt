@@ -10,10 +10,10 @@ import com.evgenltd.financemanager.importexport.record.RawDataRecord
 private const val RULES_ROOT = """C:\Users\lebed\IdeaProjects\finance-manager\server\src\main\resources\rules"""
 private const val SOURCE_ROOT = """C:\Users\lebed\Dropbox\Diary\Home\finance\budgets"""
 
-fun kaspi(): MapDataResult {
-    val raw = read("kaspi.csv")
-    return mapData("Kaspi Банк", raw, """$RULES_ROOT\kaspi\main.csv""")
-}
+//fun kaspi(): MapDataResult {
+//    val raw = read("kaspi.csv")
+//    return mapData("Kaspi Банк", raw, """$RULES_ROOT\kaspi\main.csv""")
+//}
 
 private fun read(path: String): List<RawDataRecord> = readCsv("""$SOURCE_ROOT\$path""")
         .map {

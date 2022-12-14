@@ -1,14 +1,10 @@
 package com.evgenltd.financemanager.importexport.controller
 
-import com.evgenltd.financemanager.document.record.DocumentTypedRecord
-import com.evgenltd.financemanager.importexport.record.DocumentEntryRecord
-import com.evgenltd.financemanager.importexport.record.ImportDataFilerResponse
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryForRemoveRecord
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
-import com.evgenltd.financemanager.importexport.record.ImportDataResult
 import com.evgenltd.financemanager.importexport.service.ImportDataService
-import com.evgenltd.financemanager.reference.record.Reference
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
 
 @RestController
 class ImportDataController(
@@ -21,31 +17,45 @@ class ImportDataController(
     @GetMapping("/import-data/{id}")
     fun byId(@PathVariable("id") id: String): ImportDataRecord = importDataService.byId(id)
 
+    @GetMapping("/import-data/{id}/entry/{entryId}")
+    fun entryById(
+        @PathVariable("id") id: String,
+        @PathVariable("entryId") entryId: String
+    ): ImportDataEntryRecord = importDataService.entryById(id, entryId)
+
+    @GetMapping("/import-data/{id}/entry/{entryId}/for-remove")
+    fun forRemove(
+        @PathVariable("id") id: String,
+        @PathVariable("entryId") entryId: String
+    ): ImportDataEntryForRemoveRecord = importDataService.forRemove(id, entryId)
+
+    @PostMapping("/import-data")
+    fun update(@RequestBody record: ImportDataRecord): ImportDataRecord = importDataService.update(record)
+
+    @PutMapping("/import-data/{id}")
+    fun append(
+        @PathVariable("id") id: String,
+        @RequestBody entries: List<ImportDataEntryRecord>
+    ) = importDataService.append(id, entries)
+
+    @PatchMapping("/import-data/{id}/entry/{entryId}")
+    fun entryUpdate(
+        @PathVariable("id") id: String,
+        @PathVariable("entryId") entryId: String,
+        @RequestBody entry: ImportDataEntryRecord
+    ) = importDataService.entryUpdate(id, entryId, entry)
+
+    @PatchMapping("/import-data/{id}/entry/{entryId}/for-remove")
+    fun forRemoveUpdate(
+        @PathVariable("id") id: String,
+        @PathVariable("entryId") entryId: String,
+        @RequestBody forRemove: ImportDataEntryForRemoveRecord
+    ) = importDataService.forRemoveUpdate(id, entryId, forRemove)
+
     @DeleteMapping("/import-data/{id}")
     fun delete(@PathVariable("id") id: String) = importDataService.delete(id)
 
-    //
-
-    @PostMapping("/import-data/file")
-    fun uploadFile(@RequestParam("file") file: MultipartFile): ImportDataFilerResponse =
-            ImportDataFilerResponse(importDataService.uploadFile(file))
-
-    @PostMapping("/import-data")
-    fun create(@RequestBody record: ImportDataRecord) = importDataService.create(record)
-
     @PostMapping("/import-data/{id}")
-    fun reCreate(@PathVariable("id") id: String) = importDataService.reCreate(id)
-
-    @PatchMapping("/import-data/{id}")
-    fun updateDocumentEntry(
-            @PathVariable("id") id: String,
-            @RequestBody record: DocumentEntryRecord
-    ) = importDataService.updateDocumentEntry(id, record)
-
-    @PutMapping("/import-data/{id}")
-    fun performImport(
-            @PathVariable("id") id: String,
-            @RequestBody documents: List<String>
-    ) = importDataService.performImport(id, documents)
+    fun performImport(@PathVariable("id") id: String) = importDataService.performImport(id)
 
 }

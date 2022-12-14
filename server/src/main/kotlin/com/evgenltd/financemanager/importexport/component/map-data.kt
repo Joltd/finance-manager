@@ -11,13 +11,13 @@ import com.evgenltd.financemanager.importexport.component.rulemanager.buildRuleM
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 import java.time.LocalDate
 
-fun mapData(account: String, input: List<RawDataRecord>, rulesPath: String): MapDataResult {
-    val ruleManager = buildRuleManager(rulesPath)
+fun List<RawDataRecord>.mapData(account: String, rules: String): MapDataResult {
+    val ruleManager = buildRuleManager(rules)
 
-    val documents = mutableListOf<DocumentTypedRecord>()
+    val documents = mutableListOf<DocumentEntry>()
     val skipped = mutableListOf<RawDataRecord>()
 
-    for (record in input) {
+    for (record in this) {
 
         if (record.amount.value == 0L) {
             continue
@@ -26,17 +26,17 @@ fun mapData(account: String, input: List<RawDataRecord>, rulesPath: String): Map
         val hint = ruleManager.find(record)
         if (hint == null) {
             skipped.add(record)
-//            val document = makeSkipDocument(account, record.date, record.amount)
-//            documents.add(document)
         } else {
-            val document = makeDocument(account, record, hint)
-            documents.add(document)
+            documents.add(DocumentEntry(
+                record.toString(),
+                makeDocument(account, record, hint)
+            ))
         }
 
     }
 
     return MapDataResult(
-            input,
+            this,
             documents,
             skipped
     )
@@ -66,9 +66,9 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                 amount = -record.amount,
                 accountName = account,
                 expenseCategoryName = hint.category,
-                description = record.description,
-                account = "",
-                expenseCategory = ""
+                description = record.toString(),
+                account = null,
+                expenseCategory = null
         )
         "income" -> DocumentIncomeRecord(
                 id = null,
@@ -76,9 +76,9 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                 amount = record.amount,
                 accountName = account,
                 incomeCategoryName = hint.category,
-                description = record.description,
-                account = "",
-                incomeCategory = ""
+                description = record.toString(),
+                account = null,
+                incomeCategory = null
         )
         "exchange" -> {
             val oppositeAccount = if (hint.account == "~") account else hint.account
@@ -91,9 +91,9 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                         amountFrom = -record.amount,
                         accountToName = oppositeAccount,
                         amountTo = oppositeAmount,
-                        description = record.description,
-                        accountFrom = "",
-                        accountTo = "",
+                        description = record.toString(),
+                        accountFrom = null,
+                        accountTo = null,
                 )
             } else {
                 val oppositeAmount = if (hint.amount == "~") record.amount else hint.amount.parseAmount()
@@ -104,9 +104,9 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
                         amountFrom = oppositeAmount,
                         accountToName = account,
                         amountTo = record.amount,
-                        description = "",
-                        accountFrom = "",
-                        accountTo = ""
+                        description = record.toString(),
+                        accountFrom = null,
+                        accountTo = null
                 )
             }
         }
@@ -121,6 +121,8 @@ private fun makeDocument(account: String, record: RawDataRecord, hint: Hint): Do
 
 data class MapDataResult(
         val raw: List<RawDataRecord>,
-        val documents: List<DocumentTypedRecord>,
+        val documents: List<DocumentEntry>,
         val skipped: List<RawDataRecord>
 )
+
+data class DocumentEntry(val raw: String, val document: DocumentTypedRecord)

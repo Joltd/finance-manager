@@ -8,8 +8,10 @@ class DocumentExpenseRecord(
         val date: LocalDate,
         val description: String,
         val amount: Amount,
-        val account: String,
+        val account: String?,
         val accountName: String?,
-        val expenseCategory: String,
+        val expenseCategory: String?,
         val expenseCategoryName: String?
-) : DocumentRecord
+) : DocumentRecord {
+        override fun id(): String? = id
+}

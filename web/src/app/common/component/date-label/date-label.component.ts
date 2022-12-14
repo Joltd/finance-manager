@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, HostBinding, Input} from "@angular/core";
 import * as moment from "moment";
 
 @Component({
@@ -7,6 +7,10 @@ import * as moment from "moment";
   styleUrls: ['date-label.component.scss']
 })
 export class DateLabelComponent {
+
+  @Input()
+  @HostBinding('class.disabled')
+  disabled: boolean = false
 
   day!: string
   month!: string

@@ -4,11 +4,11 @@ import com.evgenltd.financemanager.common.component.Row
 import com.evgenltd.financemanager.common.component.readCsv
 import java.io.File
 
-fun buildRuleManager(path: String): RuleManager {
-    return RuleManager(readRules(path))
+fun buildRuleManager(rules: String): RuleManager {
+    return RuleManager(readRules(rules))
 }
 
-private fun readRules(path: String): Map<Template, Hint> = readCsv(path)
+private fun readRules(rules: String): Map<Template, Hint> = readCsv("./server/src/main/resources/rules$rules")
         .flatMap { row ->
             val hint = row.toHint()
             val template = row.toTemplate()
@@ -16,11 +16,11 @@ private fun readRules(path: String): Map<Template, Hint> = readCsv(path)
 
             if (source.isNotEmpty()) {
                 if (hint.type.isNotEmpty()) {
-                    readRules(path + File.separator + source)
+                    readRules(rules + File.separator + source)
                             .keys
                             .map { it to hint }
                 } else {
-                    readRules(path + File.separator + source).map { it.key to it.value }
+                    readRules(rules + File.separator + source).map { it.key to it.value }
                 }
             } else {
                 listOf(template to hint)

@@ -2,6 +2,8 @@
   align-items: center;
   display: flex;
   gap: 1em;
+  cursor: default;
+  user-select: none;
 }
 
 .vertical {
@@ -36,4 +38,8 @@
 
 .exchange {
   background-color: #1e88e5;
+}
+
+:host.disabled {
+  filter: grayscale(1);
 }

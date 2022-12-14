@@ -13,6 +13,9 @@ class DocumentController(
     @PostMapping("/document/filter")
     fun list(@RequestBody filter: DocumentFilter): DocumentPage = documentService.list(filter)
 
+    @PostMapping("/document/daily")
+    fun listDaily(@RequestBody filter: DocumentDailyFilter): List<DocumentTypedRecord> = documentService.listDaily(filter)
+
     @GetMapping("/document/{id}")
     fun byId(@PathVariable("id") id: String): DocumentTypedRecord = documentService.byId(id)
 

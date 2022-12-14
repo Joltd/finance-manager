@@ -4,15 +4,16 @@ import com.evgenltd.financemanager.document.entity.Document
 
 class ImportData(
         var id: String?,
-        var file: String,
         var description: String,
-        var documents: List<DocumentEntry>
+        var entries: List<ImportDataEntry>
 )
 
-class DocumentEntry(
+class ImportDataEntry(
         var id: String,
-        var source: String,
+        var raw: String,
         var suggested: Document?,
+        var skip: Boolean = false,
         var result: Boolean? = null,
-        var message: String? = null
+        var message: String? = null,
+        var forRemove: Set<String> = emptySet()
 )

@@ -1,6 +1,6 @@
 import {Component, OnInit} from "@angular/core";
 import {ImportDataService} from "../../service/import-data.service";
-import {ImportData} from "../../model/import-data";
+import {ImportData} from "../../model/import-data-old";
 import {Router} from "@angular/router";
 import {ShortMessageService} from "../../../common/service/short-message.service";
 
@@ -47,7 +47,7 @@ export class ImportDataBrowserComponent implements OnInit {
   }
 
   instantImport(id: string) {
-    this.importDataService.performImport(id, [])
+    this.importDataService.performImport(id)
       .subscribe(() => {
         this.shortMessageService.show("Import started")
         this.load()
@@ -55,7 +55,7 @@ export class ImportDataBrowserComponent implements OnInit {
   }
 
   private checkProgress() {
-    if (this.importData.find(entry => entry.currentProgress > 0 && entry.currentProgress < 1)) {
+    if (this.importData.find(entry => entry.progress > 0 && entry.progress < 1)) {
       setTimeout(() => {
         this.load()
       }, 1000)

@@ -8,8 +8,6 @@ interface ExpenseCategoryRepository : MongoRepository<ExpenseCategory,String> {
 
     fun findByNameLike(name: String): List<ExpenseCategory>
 
+    fun findByName(name: String): ExpenseCategory?
+
 }
-
-fun ExpenseCategoryRepository.name(id: String): String = findByIdOrNull(id)?.name ?: id
-
-fun ExpenseCategoryRepository.nameOrNull(id: String?): String? = id?.let(::findByIdOrNull)?.name

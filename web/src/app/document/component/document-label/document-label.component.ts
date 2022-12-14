@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {Component, HostBinding, Input, OnInit} from "@angular/core";
 import {DocumentTyped} from "../../model/document-typed";
 import {DocumentExchange, DocumentExpense, DocumentIncome} from "../../model/document";
 
@@ -8,6 +8,10 @@ import {DocumentExchange, DocumentExpense, DocumentIncome} from "../../model/doc
   styleUrls: ['document-label.component.scss']
 })
 export class DocumentLabelComponent implements OnInit {
+
+  @Input()
+  @HostBinding('class.disabled')
+  disabled: boolean = false
 
   @Input()
   hideDate: boolean = false

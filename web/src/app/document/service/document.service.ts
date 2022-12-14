@@ -55,6 +55,10 @@ export class DocumentService {
       .subscribe(result => this.documentPage = result)
   }
 
+  listDaily(date: string, account: string): Observable<DocumentTyped[]> {
+    return this.http.post<DocumentTyped[]>('/document/daily', {date, account}, TypeUtils.of(DocumentTyped))
+  }
+
   byId(id: string): Observable<DocumentTyped> {
     return this.http.get<DocumentTyped>('/document/' + id, TypeUtils.of(DocumentTyped))
   }

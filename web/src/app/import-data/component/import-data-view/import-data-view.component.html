@@ -1,97 +1,109 @@
-<ng-container *ngIf="document == null">
+<mat-card class="toolbar">
+  <div class="title">Import</div>
+  <button mat-icon-button (click)="save()">
+    <mat-icon>done</mat-icon>
+  </button>
+  <button mat-icon-button (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-card>
 
-  <mat-card class="toolbar">
-    <div class="title">Import</div>
-    <button mat-icon-button (click)="reCreate()">
-      <mat-icon>refresh</mat-icon>
-    </button>
-    <button mat-icon-button (click)="save()">
-      <mat-icon>done</mat-icon>
-    </button>
-    <button mat-icon-button (click)="close()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-card>
+<mat-card *ngIf="importData">
+  <mat-list>
+    <mat-list-item *ngFor="let entry of importData.entries">
 
-  <mat-card class="import-data">
+      <mat-icon *ngIf="entry.result == true">success</mat-icon>
+      <mat-icon *ngIf="entry.result == false">failed</mat-icon>
 
-    <mat-form-field>
-      <mat-label>File</mat-label>
-      <input matInput [value]="importData.file" readonly>
-    </mat-form-field>
+      <document-label [document]="entry.suggested"
+                      [disabled]="entry.skip"
+                      matRipple
+                      [matRippleColor]="'#00000020'"
+                      class="clickable"
+                      (click)="openEntry(entry)"></document-label>
 
-    <mat-form-field>
-      <mat-label>Description</mat-label>
-      <input matInput [value]="importData.description" readonly>
-    </mat-form-field>
+    </mat-list-item>
+  </mat-list>
+</mat-card>
 
-  </mat-card>
+<!--<ng-container *ngIf="document == null">-->
 
-  <mat-card class="help-card">
-    <button mat-raised-button color="primary" (click)="toggleSelection()">
-      <span *ngIf="!this.toggleSelectionState">Select all</span>
-      <span *ngIf="this.toggleSelectionState">Deselect all</span>
-    </button>
-    <mat-slide-toggle [(ngModel)]="hideImported">Hide imported</mat-slide-toggle>
-    <p>Suggested: {{suggestedDocumentCount}} Imported: {{importedDocumentCount}} Total: {{allDocumentCount}}</p>
-  </mat-card>
 
-  <mat-card class="import-data-entries" *ngIf="dateGroups.length > 0">
 
-    <mat-list>
-      <ng-container *ngFor="let dateGroup of dateGroups">
-        <h2 matSubheader>{{dateGroup.date}}</h2>
-        <ng-container *ngFor="let entry of dateGroup.entries">
-          <mat-list-item *ngIf="!hideImported || !(entry.suggested && entry.existed)">
-            <div matLine class="line">
-              <mat-checkbox *ngIf="entry.state == null" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>
-              <mat-icon *ngIf="entry.state == true"
-                        (click)="entry.state = null"
-                        [matTooltip]="entry.message"
-                        class="success">check_circle</mat-icon>
-              <mat-icon *ngIf="entry.state == false"
-                        (click)="entry.state = null"
-                        [matTooltip]="entry.message"
-                        class="fail">cancel</mat-icon>
-              <document-label [hideAccount]="true"
-                              [hideDate]="true"
-                              [document]="entry.suggested"
-                              matRipple
-                              [matRippleColor]="'#00000020'"
-                              class="clickable"
-                              *ngIf="entry.suggested"
-                              [mat-menu-trigger-for]="menu"></document-label>
-              <div matRipple
-                   [matRippleColor]="'#00000020'"
-                   class="clickable"
-                   *ngIf="!entry.suggested"
-                   [mat-menu-trigger-for]="menu"
-                   [matTooltip]="entry.source">{{entry.source}}</div>
-              <button mat-icon-button
-                      *ngIf="entry.existed"
-                      (click)="viewDocument(entry.existed)">
-                <mat-icon>task</mat-icon>
-              </button>
-              <div *ngIf="!entry.existed"></div>
-              <mat-menu #menu>
-                <button mat-menu-item (click)="viewEntry(entry.entry)" *ngIf="entry.suggested">View</button>
-                <button mat-menu-item (click)="createDocument(entry.entry, 'expense')">Expense</button>
-                <button mat-menu-item (click)="createDocument(entry.entry, 'income')">Income</button>
-                <button mat-menu-item (click)="createDocument(entry.entry, 'exchange')">Exchange</button>
-              </mat-menu>
-            </div>
-          </mat-list-item>
-        </ng-container>
-      </ng-container>
+<!--  <mat-card class="import-data">-->
 
-    </mat-list>
+<!--    <mat-form-field>-->
+<!--      <mat-label>File</mat-label>-->
+<!--      <input matInput [value]="importData.file" readonly>-->
+<!--    </mat-form-field>-->
 
-  </mat-card>
-</ng-container>
+<!--    <mat-form-field>-->
+<!--      <mat-label>Description</mat-label>-->
+<!--      <input matInput [value]="importData.description" readonly>-->
+<!--    </mat-form-field>-->
 
-<document-view *ngIf="document != null"
-               [type]="document.type"
-               [document]="document.value"
-               [hint]="entry?.source || null"
-               (onSave)="saveDocument($event)"
-               (onClose)="closeDocument()"></document-view>
+<!--  </mat-card>-->
+
+<!--  <mat-card class="help-card">-->
+<!--    <button mat-raised-button color="primary" (click)="toggleSelection()">-->
+<!--      <span *ngIf="!this.toggleSelectionState">Select all</span>-->
+<!--      <span *ngIf="this.toggleSelectionState">Deselect all</span>-->
+<!--    </button>-->
+<!--    <mat-slide-toggle [(ngModel)]="hideImported">Hide imported</mat-slide-toggle>-->
+<!--    <p>Suggested: {{suggestedDocumentCount}} Imported: {{importedDocumentCount}} Total: {{allDocumentCount}}</p>-->
+<!--  </mat-card>-->
+
+<!--  <mat-card class="import-data-entries" *ngIf="dateGroups.length > 0">-->
+
+<!--    <mat-list>-->
+<!--      <ng-container *ngFor="let dateGroup of dateGroups">-->
+<!--        <h2 matSubheader>{{dateGroup.date}}</h2>-->
+<!--        <ng-container *ngFor="let entry of dateGroup.entries">-->
+<!--          <mat-list-item *ngIf="!hideImported || !(entry.suggested && entry.existed)">-->
+<!--            <div matLine class="line">-->
+<!--              <mat-checkbox *ngIf="entry.state == null" [(ngModel)]="entry.selected" [disabled]="!entry.suggested"></mat-checkbox>-->
+<!--              <mat-icon *ngIf="entry.state == true"-->
+<!--                        (click)="entry.state = null"-->
+<!--                        [matTooltip]="entry.message"-->
+<!--                        class="success">check_circle</mat-icon>-->
+<!--              <mat-icon *ngIf="entry.state == false"-->
+<!--                        (click)="entry.state = null"-->
+<!--                        [matTooltip]="entry.message"-->
+<!--                        class="fail">cancel</mat-icon>-->
+<!--              <document-label [hideAccount]="true"-->
+<!--                              [hideDate]="true"-->
+<!--                              [document]="entry.suggested"-->
+<!--                              matRipple-->
+<!--                              [matRippleColor]="'#00000020'"-->
+<!--                              class="clickable"-->
+<!--                              *ngIf="entry.suggested"-->
+<!--                              [mat-menu-trigger-for]="menu"></document-label>-->
+<!--              <div matRipple-->
+<!--                   [matRippleColor]="'#00000020'"-->
+<!--                   class="clickable"-->
+<!--                   *ngIf="!entry.suggested"-->
+<!--                   [mat-menu-trigger-for]="menu"-->
+<!--                   [matTooltip]="entry.source">{{entry.source}}</div>-->
+<!--              <button mat-icon-button-->
+<!--                      *ngIf="entry.existed"-->
+<!--                      (click)="viewDocument(entry.existed)">-->
+<!--                <mat-icon>task</mat-icon>-->
+<!--              </button>-->
+<!--              <div *ngIf="!entry.existed"></div>-->
+
+<!--            </div>-->
+<!--          </mat-list-item>-->
+<!--        </ng-container>-->
+<!--      </ng-container>-->
+
+<!--    </mat-list>-->
+
+<!--  </mat-card>-->
+<!--</ng-container>-->
+
+<!--<document-view *ngIf="document != null"-->
+<!--               [type]="document.type"-->
+<!--               [document]="document.value"-->
+<!--               [hint]="entry?.source || null"-->
+<!--               (onSave)="saveDocument($event)"-->
+<!--               (onClose)="closeDocument()"></document-view>-->

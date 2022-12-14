@@ -4,19 +4,18 @@ import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 
 class ImportDataRecord(
         val id: String?,
-        val file: String,
         val description: String,
-        val documents: List<DocumentEntryRecord>,
-        val currentProgress: Double? = null
+        val entries: List<ImportDataEntryRecord> = emptyList()
 )
 
-class DocumentEntryRecord(
-        val id: String,
-        val source: String,
+class ImportDataEntryRecord(
+        val id: String?,
+        val raw: String,
         val suggested: DocumentTypedRecord?,
-        val existed: DocumentTypedRecord?,
+        val skip: Boolean,
         val result: Boolean?,
-        val message: String?
+        val message: String?,
+        val forRemove: List<DocumentTypedRecord> = emptyList()
 )
 
-data class ImportDataFilerResponse(val filename: String)
+class ImportDataEntryForRemoveRecord(val documents: Set<String>)

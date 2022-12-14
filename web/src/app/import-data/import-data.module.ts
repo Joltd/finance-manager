@@ -19,34 +19,40 @@ import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {ImportDataEntryViewComponent} from "./component/import-data-entry-view/import-data-entry-view.component";
+import {ImportDataSelectDocument} from "./component/import-data-select-document/import-data-select-document";
+import {MatDatepickerModule} from "@angular/material/datepicker";
 
 @NgModule({
   declarations: [
     ImportDataViewComponent,
+    ImportDataEntryViewComponent,
+    ImportDataSelectDocument,
     ImportDataBeginComponent,
     ImportDataBrowserComponent
   ],
-  imports: [
-    MatCardModule,
-    MatListModule,
-    MatFormFieldModule,
-    CommonModule,
-    MatIconModule,
-    NgIf,
-    ReactiveFormsModule,
-    MatButtonModule,
-    NgForOf,
-    MatMenuModule,
-    MatCheckboxModule,
-    MatInputModule,
-    DocumentModule,
-    MatRippleModule,
-    FormsModule,
-    MatTooltipModule,
-    MatSlideToggleModule,
-    MatProgressSpinnerModule,
-    MatProgressBarModule
-  ],
+    imports: [
+        MatCardModule,
+        MatListModule,
+        MatFormFieldModule,
+        CommonModule,
+        MatIconModule,
+        NgIf,
+        ReactiveFormsModule,
+        MatButtonModule,
+        NgForOf,
+        MatMenuModule,
+        MatCheckboxModule,
+        MatInputModule,
+        DocumentModule,
+        MatRippleModule,
+        FormsModule,
+        MatTooltipModule,
+        MatSlideToggleModule,
+        MatProgressSpinnerModule,
+        MatProgressBarModule,
+        MatDatepickerModule
+    ],
   exports: [
     ImportDataViewComponent,
     ImportDataBrowserComponent

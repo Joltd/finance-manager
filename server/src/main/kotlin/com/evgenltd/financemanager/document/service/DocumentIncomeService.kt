@@ -3,10 +3,8 @@ package com.evgenltd.financemanager.document.service
 import com.evgenltd.financemanager.document.entity.DocumentIncome
 import com.evgenltd.financemanager.document.record.DocumentIncomeRecord
 import com.evgenltd.financemanager.document.repository.DocumentIncomeRepository
-import com.evgenltd.financemanager.reference.repository.AccountRepository
-import com.evgenltd.financemanager.reference.repository.IncomeCategoryRepository
-import com.evgenltd.financemanager.reference.repository.name
-import com.evgenltd.financemanager.transaction.entity.AccountTransaction
+import com.evgenltd.financemanager.reference.service.AccountService
+import com.evgenltd.financemanager.reference.service.IncomeCategoryService
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.IncomeTransaction
 import com.evgenltd.financemanager.transaction.service.AccountTransactionService
@@ -17,13 +15,10 @@ import org.springframework.stereotype.Service
 class DocumentIncomeService(
         private val documentIncomeRepository: DocumentIncomeRepository,
         private val transactionService: TransactionService,
-        private val accountRepository: AccountRepository,
-        private val incomeCategoryRepository: IncomeCategoryRepository,
+        private val accountService: AccountService,
+        private val incomeCategoryService: IncomeCategoryService,
         private val accountTransactionService: AccountTransactionService
 ) : DocumentTypedService<DocumentIncome, DocumentIncomeRecord> {
-
-    override fun hash(record: DocumentIncomeRecord): String =
-            "${record.date}-${record.account}-${record.amount}-${record.incomeCategory}"
 
     override fun update(entity: DocumentIncome) {
         documentIncomeRepository.save(entity)
@@ -39,9 +34,9 @@ class DocumentIncomeService(
             description = entity.description,
             amount = entity.amount,
             account = entity.account,
-            accountName = accountRepository.name(entity.account),
+            accountName = accountService.name(entity.account),
             incomeCategory = entity.incomeCategory,
-            incomeCategoryName = incomeCategoryRepository.name(entity.incomeCategory)
+            incomeCategoryName = incomeCategoryService.name(entity.incomeCategory)
     )
 
     override fun toEntity(record: DocumentIncomeRecord): DocumentIncome = DocumentIncome(
@@ -49,8 +44,8 @@ class DocumentIncomeService(
             date = record.date,
             description = record.description,
             amount = record.amount,
-            account = record.account,
-            incomeCategory = record.incomeCategory
+            account = accountService.findOrCreate(record.account, record.accountName).id!!,
+            incomeCategory = incomeCategoryService.findOrCreate(record.incomeCategory, record.incomeCategoryName).id!!
     )
 
 }

@@ -1,0 +1,56 @@
+<ng-container *ngIf="entry && !document">
+
+  <mat-card class="toolbar">
+    <div class="title">Import entry</div>
+    <button mat-icon-button (click)="save()">
+      <mat-icon>done</mat-icon>
+    </button>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-subtitle>Raw</mat-card-subtitle>
+    <mat-card-content>{{entry.raw}}</mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-subtitle class="card-title">
+      Suggested document
+      <mat-slide-toggle [(ngModel)]="entry.skip">Skip/do not import</mat-slide-toggle>
+    </mat-card-subtitle>
+    <mat-card-content class="suggested">
+      <document-label [document]="entry.suggested" [disabled]="entry.skip" [mat-menu-trigger-for]="menu"></document-label>
+    </mat-card-content>
+    <mat-menu #menu>
+      <button mat-menu-item (click)="viewDocument(entry.suggested)" *ngIf="entry.suggested">View</button>
+      <button mat-menu-item (click)="createDocument('expense')">Expense</button>
+      <button mat-menu-item (click)="createDocument('income')">Income</button>
+      <button mat-menu-item (click)="createDocument('exchange')">Exchange</button>
+    </mat-menu>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-subtitle class="card-title">
+      Remove before import
+      <button mat-raised-button color="primary" (click)="selectForRemove()">Select</button>
+      <button mat-button (click)="clearForRemove()">Clear all</button>
+    </mat-card-subtitle>
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item *ngFor="let documentForRemove of entry.forRemove">
+          <document-label [document]="documentForRemove"></document-label>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+
+</ng-container>
+
+<document-view *ngIf="document != null"
+               [type]="document.type"
+               [document]="document.value"
+               [hint]="entry.raw || null"
+               (onSave)="saveDocument($event)"
+               (onClose)="closeDocument()"></document-view>

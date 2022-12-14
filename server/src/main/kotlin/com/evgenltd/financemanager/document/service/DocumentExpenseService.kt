@@ -3,10 +3,8 @@ package com.evgenltd.financemanager.document.service
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
 import com.evgenltd.financemanager.document.repository.DocumentExpenseRepository
-import com.evgenltd.financemanager.reference.repository.AccountRepository
-import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
-import com.evgenltd.financemanager.reference.repository.name
-import com.evgenltd.financemanager.transaction.entity.AccountTransaction
+import com.evgenltd.financemanager.reference.service.AccountService
+import com.evgenltd.financemanager.reference.service.ExpenseCategoryService
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.ExpenseTransaction
 import com.evgenltd.financemanager.transaction.service.AccountTransactionService
@@ -17,12 +15,10 @@ import org.springframework.stereotype.Service
 class DocumentExpenseService(
         private val documentExpenseRepository: DocumentExpenseRepository,
         private val transactionService: TransactionService,
-        private val accountRepository: AccountRepository,
-        private val expenseCategoryRepository: ExpenseCategoryRepository,
+        private val accountService: AccountService,
+        private val expenseCategoryService: ExpenseCategoryService,
         private val accountTransactionService: AccountTransactionService
 ) : DocumentTypedService<DocumentExpense, DocumentExpenseRecord> {
-
-    override fun hash(record: DocumentExpenseRecord): String = "${record.date}-${record.account}-${record.amount}-${record.expenseCategory}"
 
     override fun update(entity: DocumentExpense) {
         documentExpenseRepository.save(entity)
@@ -38,9 +34,9 @@ class DocumentExpenseService(
             description = entity.description,
             amount = entity.amount,
             account = entity.account,
-            accountName = accountRepository.name(entity.account),
+            accountName = accountService.name(entity.account),
             expenseCategory = entity.expenseCategory,
-            expenseCategoryName = expenseCategoryRepository.name(entity.expenseCategory)
+            expenseCategoryName = expenseCategoryService.name(entity.expenseCategory)
     )
 
     override fun toEntity(record: DocumentExpenseRecord): DocumentExpense = DocumentExpense(
@@ -48,7 +44,7 @@ class DocumentExpenseService(
             date = record.date,
             description = record.description,
             amount = record.amount,
-            account = record.account,
-            expenseCategory = record.expenseCategory
+            account = accountService.findOrCreate(record.account, record.accountName).id!!,
+            expenseCategory = expenseCategoryService.findOrCreate(record.expenseCategory, record.expenseCategoryName).id!!
     )
 }

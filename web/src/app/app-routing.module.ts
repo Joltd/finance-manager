@@ -19,6 +19,12 @@ import {FlowChartComponent} from "./report/component/flow-chart/flow-chart.compo
 import {SettingsEditorComponent} from "./settings/component/settings-editor.component";
 import {FastExpenseComponent} from "./document/component/fast-expense/fast-expense.component";
 import {CategoryChartComponent} from "./report/component/category-chart/category-chart.component";
+import {
+  ImportDataEntryViewComponent
+} from "./import-data/component/import-data-entry-view/import-data-entry-view.component";
+import {
+  ImportDataSelectDocument
+} from "./import-data/component/import-data-select-document/import-data-select-document";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -32,6 +38,8 @@ const routes: Routes = [
   { path: 'import-data', component: ImportDataBrowserComponent },
   { path: 'import-data/new', component: ImportDataBeginComponent },
   { path: 'import-data/:id', component: ImportDataViewComponent },
+  { path: 'import-data/:id/entry/:entryId', component: ImportDataEntryViewComponent },
+  { path: 'import-data/:id/entry/:entryId/for-remove', component: ImportDataSelectDocument },
   { path: 'export-data', component: ExportDataBeginComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'fast-expense', component: FastExpenseComponent },

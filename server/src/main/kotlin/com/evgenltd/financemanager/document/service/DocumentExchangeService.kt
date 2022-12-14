@@ -4,9 +4,7 @@ import com.evgenltd.financemanager.document.entity.DocumentExchange
 import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.repository.DocumentExchangeRepository
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.reference.repository.AccountRepository
-import com.evgenltd.financemanager.reference.repository.name
-import com.evgenltd.financemanager.transaction.entity.AccountTransaction
+import com.evgenltd.financemanager.reference.service.AccountService
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.ExchangeTransaction
 import com.evgenltd.financemanager.transaction.service.AccountTransactionService
@@ -17,13 +15,10 @@ import org.springframework.stereotype.Service
 class DocumentExchangeService(
         private val documentExchangeRepository: DocumentExchangeRepository,
         private val transactionService: TransactionService,
-        private val accountRepository: AccountRepository,
+        private val accountService: AccountService,
         private val exchangeRateService: ExchangeRateService,
         private val accountTransactionService: AccountTransactionService
 ) : DocumentTypedService<DocumentExchange, DocumentExchangeRecord> {
-
-    override fun hash(record: DocumentExchangeRecord): String =
-            "${record.date}-${record.accountFrom}-${record.amountFrom}-${record.accountTo}-${record.amountTo}"
 
     override fun update(entity: DocumentExchange) {
         documentExchangeRepository.save(entity)
@@ -43,10 +38,10 @@ class DocumentExchangeService(
             date = entity.date,
             description = entity.description,
             accountFrom = entity.accountFrom,
-            accountFromName = accountRepository.name(entity.accountFrom),
+            accountFromName = accountService.name(entity.accountFrom),
             amountFrom = entity.amountFrom,
             accountTo = entity.accountTo,
-            accountToName = accountRepository.name(entity.accountTo),
+            accountToName = accountService.name(entity.accountTo),
             amountTo = entity.amountTo
     )
 
@@ -54,9 +49,9 @@ class DocumentExchangeService(
             id = record.id,
             date = record.date,
             description = record.description,
-            accountFrom = record.accountFrom,
+            accountFrom = accountService.findOrCreate(record.accountFrom, record.accountFromName).id!!,
             amountFrom = record.amountFrom,
-            accountTo = record.accountTo,
+            accountTo = accountService.findOrCreate(record.accountTo, record.accountToName).id!!,
             amountTo = record.amountTo
     )
 }

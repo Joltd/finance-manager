@@ -8,8 +8,6 @@ interface AccountRepository : MongoRepository<Account,String> {
 
     fun findByNameLike(name: String): List<Account>
 
+    fun findByName(name: String): Account?
+
 }
-
-fun AccountRepository.name(id: String): String = findByIdOrNull(id)?.name ?: id
-
-fun AccountRepository.nameOrNull(id: String?): String? = id?.let(::findByIdOrNull)?.name

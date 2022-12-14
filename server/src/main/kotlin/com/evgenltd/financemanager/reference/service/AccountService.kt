@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -51,6 +52,14 @@ class AccountService(
                     }
                 }
     }
+
+    fun findOrCreate(id: String?, name: String?): Account = id
+        ?.let { accountRepository.findByIdOrNull(it) }
+        ?: name?.let { accountRepository.findByName(it) }
+        ?: name?.let { accountRepository.save(Account(null, it)) }
+        ?: throw IllegalArgumentException("Id or Name should be specified")
+
+    fun name(id: String): String = accountRepository.findByIdOrNull(id)?.name ?: id
 
     private fun Account.toRecord(): AccountRecord = AccountRecord(
             id = id,

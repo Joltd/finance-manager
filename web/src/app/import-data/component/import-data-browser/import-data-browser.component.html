@@ -4,7 +4,7 @@
       <div matLine>
         {{data.description}}
       </div>
-      <mat-progress-bar matLine *ngIf="data.currentProgress > 0 && data.currentProgress < 1" [value]="data.currentProgress * 100"></mat-progress-bar>
+      <mat-progress-bar matLine *ngIf="data.progress > 0 && data.progress < 1" [value]="data.progress * 100"></mat-progress-bar>
       <mat-menu #menu>
         <button mat-menu-item (click)="edit(data.id)">Edit</button>
         <button mat-menu-item (click)="delete(data.id)">Delete</button>
