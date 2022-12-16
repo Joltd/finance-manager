@@ -14,7 +14,7 @@ import {MatMenuModule} from "@angular/material/menu";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatInputModule} from "@angular/material/input";
 import {DocumentModule} from "../document/document.module";
-import {MatRippleModule} from "@angular/material/core";
+import {MatLineModule, MatRippleModule} from "@angular/material/core";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
@@ -51,7 +51,8 @@ import {MatExpansionModule} from "@angular/material/expansion";
     MatProgressSpinnerModule,
     MatProgressBarModule,
     MatDatepickerModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatLineModule
   ],
   exports: [
     ImportDataViewComponent,
