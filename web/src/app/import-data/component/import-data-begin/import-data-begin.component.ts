@@ -1,7 +1,7 @@
 import {Component} from "@angular/core";
 import {ImportDataService} from "../../service/import-data.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {ImportData} from "../../model/import-data-old";
+import {ImportData} from "../../model/import-data";
 import {Router} from "@angular/router";
 
 @Component({

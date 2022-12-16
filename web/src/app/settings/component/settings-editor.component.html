@@ -14,6 +14,7 @@
     <form>
 
       <mat-form-field>
+        <mat-label>Currencies</mat-label>
         <mat-chip-list #currencyChipList>
           <mat-chip *ngFor="let currency of currencies" (removed)="removeCurrency(currency)">
             {{currency}}

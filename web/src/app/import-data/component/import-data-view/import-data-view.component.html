@@ -9,21 +9,28 @@
 </mat-card>
 
 <mat-card *ngIf="importData">
-  <mat-list>
-    <mat-list-item *ngFor="let entry of importData.entries">
+  <mat-action-list>
+    <button mat-list-item (click)="openEntry(entry)" *ngFor="let entry of importData.entries">
 
-      <mat-icon *ngIf="entry.result == true">success</mat-icon>
-      <mat-icon *ngIf="entry.result == false">failed</mat-icon>
+      <div class="line">
 
-      <document-label [document]="entry.suggested"
-                      [disabled]="entry.skip"
-                      matRipple
-                      [matRippleColor]="'#00000020'"
-                      class="clickable"
-                      (click)="openEntry(entry)"></document-label>
+        <div *ngIf="entry.result == null"></div>
+        <mat-icon matListItemIcon class="success" *ngIf="entry.result == true">check_circle</mat-icon>
+        <mat-icon matListItemIcon class="fail" *ngIf="entry.result == false">cancel</mat-icon>
 
-    </mat-list-item>
-  </mat-list>
+        <document-label [document]="entry.suggested"
+                        [disabled]="entry.skip"></document-label>
+
+        <mat-icon *ngIf="entry.forRemove">arrow_right_alt</mat-icon>
+
+        <document-label *ngIf="entry.forRemove"
+                        [document]="entry.forRemove"
+                        [disabled]="entry.skip"></document-label>
+
+      </div>
+
+    </button>
+  </mat-action-list>
 </mat-card>
 
 <!--<ng-container *ngIf="document == null">-->

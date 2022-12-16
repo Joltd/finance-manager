@@ -15,7 +15,7 @@ export class ImportDataEntry {
   message!: string
   raw!: string
   suggested!: DocumentTyped
-  forRemove: DocumentTyped[] = []
+  forRemove!: DocumentTyped | null
 }
 
 export class ImportDataEntryForRemove {

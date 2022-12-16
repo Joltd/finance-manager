@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ImportData, ImportDataEntry} from "../../model/import-data-old";
+import {ImportData, ImportDataEntry} from "../../model/import-data";
 import {ImportDataService} from "../../service/import-data.service";
 import {ShortMessageService} from "../../../common/service/short-message.service";
 

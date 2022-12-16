@@ -31,19 +31,35 @@
     </mat-menu>
   </mat-card>
 
-  <mat-card>
-    <mat-card-subtitle class="card-title">
-      Remove before import
-      <button mat-raised-button color="primary" (click)="selectForRemove()">Select</button>
-      <button mat-button (click)="clearForRemove()">Clear all</button>
-    </mat-card-subtitle>
-    <mat-card-content>
-      <mat-list>
-        <mat-list-item *ngFor="let documentForRemove of entry.forRemove">
-          <document-label [document]="documentForRemove"></document-label>
-        </mat-list-item>
-      </mat-list>
-    </mat-card-content>
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Remove before import</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form [formGroup]="filter">
+      <mat-form-field>
+        <mat-label>Date</mat-label>
+        <input formControlName="date" matInput [matDatepicker]="date" readonly (click)="date.open()">
+        <mat-datepicker touchUi #date></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Account</mat-label>
+        <reference-input api="/account/reference" formControlName="account"></reference-input>
+      </mat-form-field>
+
+    </form>
+  </mat-expansion-panel>
+
+  <mat-card *ngIf="documents.length > 0">
+    <mat-list>
+      <mat-list-item *ngFor="let document of documents">
+        <div matLine class="entry">
+          <mat-checkbox [checked]="isDocumentSelected(document)" (change)="selectDocument(document, $event.checked)"></mat-checkbox>
+          <document-label [document]="document"></document-label>
+        </div>
+      </mat-list-item>
+    </mat-list>
   </mat-card>
 
 </ng-container>

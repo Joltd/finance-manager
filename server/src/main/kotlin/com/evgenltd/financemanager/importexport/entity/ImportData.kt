@@ -15,5 +15,5 @@ class ImportDataEntry(
         var skip: Boolean = false,
         var result: Boolean? = null,
         var message: String? = null,
-        var forRemove: Set<String> = emptySet()
+        var forRemove: String? = null
 )

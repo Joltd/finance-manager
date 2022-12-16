@@ -13,9 +13,7 @@ export class SettingsService {
 
   settings: Settings = new Settings()
 
-  constructor(private http: HttpClient) {
-    this.load().subscribe()
-  }
+  constructor(private http: HttpClient) {}
 
   load(): Observable<Settings> {
     return this.http.get<Settings>('/settings', TypeUtils.of(Settings))

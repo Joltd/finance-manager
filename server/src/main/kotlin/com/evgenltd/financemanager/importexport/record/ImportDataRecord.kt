@@ -15,7 +15,7 @@ class ImportDataEntryRecord(
         val skip: Boolean,
         val result: Boolean?,
         val message: String?,
-        val forRemove: List<DocumentTypedRecord> = emptyList()
+        val forRemove: DocumentTypedRecord?
 )
 
 class ImportDataEntryForRemoveRecord(val documents: Set<String>)

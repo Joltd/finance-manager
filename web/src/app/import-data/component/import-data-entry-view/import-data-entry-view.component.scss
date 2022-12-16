@@ -28,3 +28,18 @@ mat-list-item {
   justify-content: center;
   align-content: center;
 }
+
+form {
+  display: grid;
+  grid-gap: 1em;
+}
+
+.entry {
+  display: grid!important;
+  grid-template-columns: min-content 1fr;
+  align-items: center;
+
+  mat-checkbox {
+    margin: 0 1em;
+  }
+}

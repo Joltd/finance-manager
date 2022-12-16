@@ -23,12 +23,6 @@ class ImportDataController(
         @PathVariable("entryId") entryId: String
     ): ImportDataEntryRecord = importDataService.entryById(id, entryId)
 
-    @GetMapping("/import-data/{id}/entry/{entryId}/for-remove")
-    fun forRemove(
-        @PathVariable("id") id: String,
-        @PathVariable("entryId") entryId: String
-    ): ImportDataEntryForRemoveRecord = importDataService.forRemove(id, entryId)
-
     @PostMapping("/import-data")
     fun update(@RequestBody record: ImportDataRecord): ImportDataRecord = importDataService.update(record)
 
@@ -44,13 +38,6 @@ class ImportDataController(
         @PathVariable("entryId") entryId: String,
         @RequestBody entry: ImportDataEntryRecord
     ) = importDataService.entryUpdate(id, entryId, entry)
-
-    @PatchMapping("/import-data/{id}/entry/{entryId}/for-remove")
-    fun forRemoveUpdate(
-        @PathVariable("id") id: String,
-        @PathVariable("entryId") entryId: String,
-        @RequestBody forRemove: ImportDataEntryForRemoveRecord
-    ) = importDataService.forRemoveUpdate(id, entryId, forRemove)
 
     @DeleteMapping("/import-data/{id}")
     fun delete(@PathVariable("id") id: String) = importDataService.delete(id)

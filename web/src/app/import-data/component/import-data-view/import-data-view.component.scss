@@ -40,16 +40,6 @@
   height: 4em;
 }
 
-.line {
-  display: grid!important;
-  grid-template-columns: 2.5em 1fr min-content;
-  align-items: center;
-
-  mat-checkbox {
-    justify-self: center;
-  }
-}
-
 .clickable {
   cursor: pointer;
   user-select: none;
@@ -58,9 +48,18 @@
 .success {
   color: green;
   justify-self: center;
+  margin-right: 1em;
 }
 
 .fail {
   color: red;
   justify-self: center;
+  margin-right: 1em;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 2em 1fr min-content 1fr;
+  grid-gap: 1em;
+  align-items: center;
 }

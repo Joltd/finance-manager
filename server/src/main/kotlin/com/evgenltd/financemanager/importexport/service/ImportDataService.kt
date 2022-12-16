@@ -19,8 +19,7 @@ import javax.annotation.PostConstruct
 class ImportDataService(
         private val importDataProperties: ImportDataProperties,
         private val importDataRepository: ImportDataRepository,
-        private val documentService: DocumentService,
-        private val importDataConverter: ImportDataConverter
+        private val documentService: DocumentService
 ) : Loggable() {
 
     @PostConstruct
@@ -29,12 +28,12 @@ class ImportDataService(
     }
 
     fun list(): List<ImportDataRecord> = importDataRepository.findAll().map {
-            ImportDataRecord(
-                id = it.id,
-                description = it.description,
-                entries = emptyList()
-            )
-        }
+        ImportDataRecord(
+            id = it.id,
+            description = it.description,
+            entries = emptyList()
+        )
+    }
 
     fun byId(id: String): ImportDataRecord = importDataRepository.find(id).toRecord()
 
@@ -44,14 +43,6 @@ class ImportDataService(
             .find { it.id == entryId }
             ?.toRecord()
             ?: throw IllegalArgumentException("Entry [$entryId] not found")
-
-    fun forRemove(id: String, entryId: String): ImportDataEntryForRemoveRecord =
-        ImportDataEntryForRemoveRecord(
-            importDataRepository.find(id)
-                .entries
-                .find { it.id == entryId }
-                ?.forRemove ?: emptySet()
-        )
 
     fun update(record: ImportDataRecord): ImportDataRecord {
         val importData = record.toEntity()
@@ -65,18 +56,9 @@ class ImportDataService(
             .entries
             .find { it.id == entryId }
             ?.let {
+                it.skip = entry.skip
                 it.suggested = entry.suggested?.let { suggested -> documentService.toEntity(suggested.value) }
-                it.forRemove = entry.forRemove.mapNotNull { document -> document.value.id() }.toSet()
-                importDataRepository.save(importData)
-            }
-    }
-
-    fun forRemoveUpdate(id: String, entryId: String, forRemove: ImportDataEntryForRemoveRecord) {
-        val importData = importDataRepository.find(id)
-        importData.entries
-            .find { it.id == entryId }
-            ?.let {
-                it.forRemove = forRemove.documents
+                it.forRemove = entry.forRemove?.value?.id()
                 importDataRepository.save(importData)
             }
     }
@@ -148,7 +130,7 @@ class ImportDataService(
         skip = skip,
         result = result,
         message = message,
-        forRemove = forRemove.map { documentService.byId(it) }
+        forRemove = forRemove?.let { documentService.byId(it) }
     )
 
 }
