@@ -1,4 +1,4 @@
-<mat-expansion-panel>
+<mat-expansion-panel cdkOverlayOrigin #trigger="cdkOverlayOrigin">
   <mat-expansion-panel-header>
     <mat-panel-title>Filters</mat-panel-title>
   </mat-expansion-panel-header>
@@ -62,16 +62,16 @@
 
 </mat-expansion-panel>
 
-<mat-card class="browser" *ngIf="documentPage().documents.length > 0">
-  <mat-list>
-    <mat-list-item *ngFor="let document of documentPage().documents" [matMenuTriggerFor]="menu">
+<mat-card *ngIf="documentPage().documents.length > 0">
+  <mat-action-list>
+    <button mat-list-item [mat-menu-trigger-for]="menu" *ngFor="let document of documentPage().documents" [matMenuTriggerFor]="menu">
       <document-label [document]="document"></document-label>
       <mat-menu #menu>
         <button mat-menu-item (click)="edit(document.value.id!)">Edit</button>
         <button mat-menu-item (click)="delete(document.value.id!)">Delete</button>
       </mat-menu>
-    </mat-list-item>
-  </mat-list>
+    </button>
+  </mat-action-list>
 </mat-card>
 
 <button class="fab" mat-fab (click)="select.show()">

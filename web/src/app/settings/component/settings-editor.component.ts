@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {SettingsService} from "../service/settings.service";
 import {FormControl, FormGroup} from "@angular/forms";
 import {Settings} from "../model/settings";

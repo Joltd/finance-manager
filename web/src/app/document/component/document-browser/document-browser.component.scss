@@ -6,11 +6,8 @@
 form {
   display: flex;
   flex-direction: column;
-  gap: 1em;
 }
 
-.browser {
-  mat-list-item {
-    height: 4em;
-  }
+.mdc-list-item.mdc-list-item--with-one-line {
+  height: 4em;
 }

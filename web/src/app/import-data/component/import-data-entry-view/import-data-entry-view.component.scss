@@ -1,20 +1,5 @@
-:host {
-  display: grid;
-  grid-gap: 1em;
-}
-
-.toolbar {
-  display: grid;
-  grid-template-columns: 1fr min-content min-content;
-  align-items: center;
-
-  .title {
-    font-size: 1.5em;
-  }
-}
-
-mat-list-item {
-  height: 4em!important;
+.mdc-list-item.mdc-list-item--with-one-line {
+  height: 4em;
 }
 
 .card-title {

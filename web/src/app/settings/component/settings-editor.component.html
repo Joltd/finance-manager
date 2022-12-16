@@ -1,67 +1,69 @@
-<mat-card class="toolbar">
-  <div class="title">Settings</div>
-  <button mat-icon-button (click)="save()" [disabled]="!valid()">
-    <mat-icon>done</mat-icon>
-  </button>
-</mat-card>
+<editor title="Settings" (onSave)="save()" [closeHidden]="true" [saveDisabled]="!valid()">
 
-<mat-card>
+<!--  <mat-card>-->
 
-  <mat-card-title>Currencies</mat-card-title>
+<!--    <mat-card-header>-->
+<!--      <mat-card-subtitle>Currencies</mat-card-subtitle>-->
+<!--    </mat-card-header>-->
 
-  <mat-card-content>
+<!--    <mat-card-content class="card-content-form">-->
 
-    <form>
+<!--      <form>-->
 
-      <mat-form-field>
-        <mat-label>Currencies</mat-label>
-        <mat-chip-list #currencyChipList>
-          <mat-chip *ngFor="let currency of currencies" (removed)="removeCurrency(currency)">
-            {{currency}}
-            <button matChipRemove>
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-        </mat-chip-list>
-        <input [matChipInputFor]="currencyChipList"
-               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-               [matChipInputAddOnBlur]="true"
-               (matChipInputTokenEnd)="addCurrency($event)">
-      </mat-form-field>
+<!--        <mat-form-field>-->
+<!--          <mat-chip-grid #currencyChipList>-->
+<!--            <mat-chip-row *ngFor="let currency of currencies" (removed)="removeCurrency(currency)">-->
+<!--              {{currency}}-->
+<!--              <button matChipRemove>-->
+<!--                <mat-icon>cancel</mat-icon>-->
+<!--              </button>-->
+<!--            </mat-chip-row>-->
+<!--          </mat-chip-grid>-->
+<!--          <input [matChipInputFor]="currencyChipList"-->
+<!--                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"-->
+<!--                 [matChipInputAddOnBlur]="true"-->
+<!--                 (matChipInputTokenEnd)="addCurrency($event)">-->
+<!--        </mat-form-field>-->
 
-    </form>
+<!--      </form>-->
 
-  </mat-card-content>
+<!--    </mat-card-content>-->
 
-</mat-card>
+<!--  </mat-card>-->
 
-<mat-card>
+  <mat-card>
 
-  <mat-card-title>Fast expense document</mat-card-title>
+    <mat-card-header>
+      <mat-card-subtitle>Fast expense document</mat-card-subtitle>
+    </mat-card-header>
 
-  <mat-card-content>
+    <mat-card-content class="card-content-form">
 
-    <form [formGroup]="fastExpense">
+      <form [formGroup]="fastExpense">
 
-      <mat-form-field>
-        <mat-label>Account</mat-label>
-        <reference-input api="/account/reference" formControlName="account"></reference-input>
-      </mat-form-field>
+        <mat-form-field>
+          <mat-label>Account</mat-label>
+          <reference-input api="/account/reference" formControlName="account"></reference-input>
+        </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Currency</mat-label>
-        <currency-input formControlName="currency"></currency-input>
-      </mat-form-field>
+        <mat-form-field>
+          <mat-label>Currency</mat-label>
+          <currency-input formControlName="currency"></currency-input>
+        </mat-form-field>
 
-    </form>
+      </form>
 
-  </mat-card-content>
+    </mat-card-content>
 
-</mat-card>
+  </mat-card>
 
-<mat-card>
-  <mat-card-title>Management</mat-card-title>
-  <mat-card-content>
-    <button mat-raised-button color="primary" (click)="clearDatabase()">Clear database</button>
-  </mat-card-content>
-</mat-card>
+  <mat-card>
+    <mat-card-header>
+      <mat-card-subtitle>Management</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <button mat-raised-button color="primary" (click)="clearDatabase()">Clear database</button>
+    </mat-card-content>
+  </mat-card>
+
+</editor>

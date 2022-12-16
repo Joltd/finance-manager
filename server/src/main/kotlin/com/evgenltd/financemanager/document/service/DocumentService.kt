@@ -4,20 +4,15 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.Document
 import com.evgenltd.financemanager.document.record.*
 import com.evgenltd.financemanager.document.repository.DocumentRepository
-import com.evgenltd.financemanager.reference.repository.AccountRepository
-import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
-import com.evgenltd.financemanager.transaction.repository.TransactionRepository
 import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Service
@@ -26,10 +21,7 @@ class DocumentService(
         private val mongoTemplate: MongoTemplate,
         private val accountTransactionService: AccountTransactionService,
         private val transactionService: TransactionService,
-        private val documentTypedServices: List<DocumentTypedService<*,*>>,
-        private val transactionRepository: TransactionRepository,
-        private val expenseCategoryRepository: ExpenseCategoryRepository,
-        private val accountRepository: AccountRepository
+        private val documentTypedServices: List<DocumentTypedService<*,*>>
 ) {
 
     private lateinit var index: Map<String,DocumentTypedService<*,*>>

@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, ViewChild} from "@angular/core";
+import * as echarts from "echarts";
 import {ECharts} from "echarts";
 import {CategoryChartService} from "../../service/category-chart.service";
-import * as echarts from "echarts";
 import {FormGroup} from "@angular/forms";
 import {toFractional} from "../../../common/model/amount";
 import {Reference} from "../../../common/model/reference";

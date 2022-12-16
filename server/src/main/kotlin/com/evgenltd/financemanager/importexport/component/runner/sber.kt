@@ -1,12 +1,11 @@
 package com.evgenltd.financemanager.importexport.component.runner
 
-import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.importexport.component.*
+import com.evgenltd.financemanager.importexport.component.amount
+import com.evgenltd.financemanager.importexport.component.date
+import com.evgenltd.financemanager.importexport.component.get
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Node
 import java.io.File
-import java.time.LocalDate
 
 private const val RULES_ROOT = """C:\Users\lebed\IdeaProjects\finance-manager\server\src\main\resources\rules"""
 private const val FILES_ROOT = """C:\Users\lebed\Dropbox\Diary\Home\finance\budgets\sber"""

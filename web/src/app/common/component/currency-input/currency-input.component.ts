@@ -1,8 +1,7 @@
-import {Component, ElementRef, Input, OnDestroy, Optional, Self, ViewChild} from "@angular/core";
+import {Component, Input, OnDestroy, Optional, Self, ViewChild} from "@angular/core";
 import {ControlValueAccessor, FormControl, NgControl, Validators} from "@angular/forms";
 import {MatFormFieldControl} from "@angular/material/form-field";
 import {Subject} from "rxjs";
-import {ReferenceService} from "../../service/reference.service";
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
 import {CurrencySelectComponent} from "../currency-select/currency-select.component";
 
@@ -48,7 +47,7 @@ export class CurrencyInputComponent implements MatFormFieldControl<string>, Cont
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this
     }
-    this.currency.valueChanges.subscribe(value => {
+    this.currency.valueChanges.subscribe(() => {
       this.onChange(this.value)
     })
   }

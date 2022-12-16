@@ -1,14 +1,4 @@
-import {
-  AfterContentInit,
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Input,
-  OnDestroy,
-  Optional,
-  Self,
-  ViewChild
-} from "@angular/core";
+import {Component, Input, OnDestroy, Optional, Self, ViewChild,} from "@angular/core";
 import {MatFormFieldControl} from "@angular/material/form-field";
 import {ControlValueAccessor, NgControl, Validators} from "@angular/forms";
 import {Subject} from "rxjs";
@@ -130,7 +120,7 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   }
 
   get errorState() {
-    return this.touched && !this.entrySelect.visible && (this.ngControl?.invalid || false)
+    return this.touched && !this.entrySelect.visible() && (this.ngControl?.invalid || false)
   }
 
   setDescribedByIds(ids: string[]) {}
@@ -161,6 +151,7 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
 
   selectEntry(value: string | null) {
     this.value = value
+    this.entrySelect.close()
     this.onChange(this.value)
   }
 

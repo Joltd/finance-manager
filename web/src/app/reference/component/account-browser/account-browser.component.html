@@ -1,17 +1,14 @@
 <mat-card *ngIf="accounts.length > 0">
-  <mat-list>
-    <mat-list-item *ngFor="let account of accounts">
-      <div matLine class="mat-line-with-menu">
-        <div>{{account.name}}</div>
-        <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
-        <mat-menu #menu>
-          <button mat-menu-item (click)="edit(account.id)">Edit</button>
-          <button mat-menu-item (click)="delete(account.id)">Remove</button>
-          <button mat-menu-item (click)="usage(account.id)">Usage</button>
-          <button mat-menu-item (click)="deleteDocuments(account.id)">Remove documents</button>
-        </mat-menu>
-      </div>
-    </mat-list-item>
-  </mat-list>
+  <mat-action-list>
+    <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let account of accounts">
+      {{account.name}}
+      <mat-menu #menu>
+        <button mat-menu-item (click)="edit(account.id)">Edit</button>
+        <button mat-menu-item (click)="delete(account.id)">Remove</button>
+        <button mat-menu-item (click)="usage(account.id)">Usage</button>
+        <button mat-menu-item (click)="deleteDocuments(account.id)">Remove documents</button>
+      </mat-menu>
+    </button>
+  </mat-action-list>
 </mat-card>
 <button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>

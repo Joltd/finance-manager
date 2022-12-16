@@ -50,9 +50,13 @@
 </mat-expansion-panel>
 
 <mat-card>
-  <div *ngFor="let total of totals">{{total.category}}: {{total.amount}}</div>
+  <mat-card-content>
+    <div *ngFor="let total of totals">{{total.category}}: {{total.amount}}</div>
+  </mat-card-content>
 </mat-card>
 
 <mat-card class="chart-card">
-  <div #chart class="chart"></div>
+  <mat-card-content>
+    <div #chart class="chart"></div>
+  </mat-card-content>
 </mat-card>

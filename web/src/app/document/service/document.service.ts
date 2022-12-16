@@ -1,16 +1,10 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {DocumentRow} from "../model/document-row";
 import {TypeUtils} from "../../common/service/type-utils";
 import {DocumentTyped} from "../model/document-typed";
 import {FormControl, FormGroup} from "@angular/forms";
 import {DocumentPage} from "../model/document-page";
-import {ReferenceService} from "../../common/service/reference.service";
-import {Total} from "../../report/model/total";
-import {DocumentExpense, DocumentIncome} from "../model/document";
-import {toFractional} from "../../common/model/amount";
-import * as moment from "moment/moment";
 
 @Injectable({
   providedIn: 'root'

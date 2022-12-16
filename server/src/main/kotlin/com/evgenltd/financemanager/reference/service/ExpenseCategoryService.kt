@@ -2,7 +2,6 @@ package com.evgenltd.financemanager.reference.service
 
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.reference.entity.ExpenseCategory
-import com.evgenltd.financemanager.reference.entity.IncomeCategory
 import com.evgenltd.financemanager.reference.record.ExpenseCategoryRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
@@ -24,7 +23,7 @@ class ExpenseCategoryService(
         } else {
             expenseCategoryRepository.findAll()
         }
-        return list.map { Reference(it.id!!, it.name!!, it.deleted ?: false) }
+        return list.map { Reference(it.id!!, it.name, it.deleted) }
     }
 
     fun list(): List<ExpenseCategoryRecord> =

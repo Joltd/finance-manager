@@ -25,6 +25,7 @@ export class CurrencyLabelComponent {
       case 'KZT': return 'fi-kz'
       case 'TRY': return 'fi-tr'
       case 'RSD': return 'fi-rs'
+      case 'GEL': return 'fi-ge'
       default: return ''
     }
   }

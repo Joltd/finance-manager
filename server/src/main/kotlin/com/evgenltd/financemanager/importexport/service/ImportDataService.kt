@@ -5,7 +5,6 @@ import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryForRemoveRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
@@ -25,6 +24,7 @@ class ImportDataService(
     @PostConstruct
     fun postConstruct() {
         File(importDataProperties.directory).deleteRecursively()
+        importDataRepository.deleteAll()
     }
 
     fun list(): List<ImportDataRecord> = importDataRepository.findAll().map {

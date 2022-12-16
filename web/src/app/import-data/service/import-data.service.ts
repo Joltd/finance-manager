@@ -1,8 +1,5 @@
 import {Injectable} from "@angular/core";
-import {
-  ImportDataFileResponse,
-  ImportData, ImportDataEntry, ImportDataEntryForRemove
-} from "../model/import-data";
+import {ImportData, ImportDataEntry, ImportDataFileResponse} from "../model/import-data";
 import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {TypeUtils} from "../../common/service/type-utils";

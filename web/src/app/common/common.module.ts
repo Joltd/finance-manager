@@ -20,6 +20,9 @@ import {EntrySelectComponent} from "./component/entry-select/entry-select.compon
 import {EntryItemComponent} from "./component/entry-item/entry-item.component";
 import {CurrencySelectComponent} from "./component/currency-select/currency-select.component";
 import {CurrencyInputComponent} from "./component/currency-input/currency-input.component";
+import {EditorComponent} from "./component/editor/editor.component";
+import {OverlayModule} from "@angular/cdk/overlay";
+import {PortalModule} from "@angular/cdk/portal";
 
 @NgModule({
   declarations: [
@@ -33,7 +36,8 @@ import {CurrencyInputComponent} from "./component/currency-input/currency-input.
     CurrencyInputComponent,
     DateLabelComponent,
     EntrySelectComponent,
-    EntryItemComponent
+    EntryItemComponent,
+    EditorComponent
   ],
   imports: [
     ReactiveFormsModule,
@@ -47,7 +51,9 @@ import {CurrencyInputComponent} from "./component/currency-input/currency-input.
     MatDialogModule,
     MatCardModule,
     NgClass,
-    MatTooltipModule
+    MatTooltipModule,
+    OverlayModule,
+    PortalModule
   ],
   exports: [
     AmountInputComponent,
@@ -60,7 +66,8 @@ import {CurrencyInputComponent} from "./component/currency-input/currency-input.
     CurrencyInputComponent,
     DateLabelComponent,
     EntrySelectComponent,
-    EntryItemComponent
+    EntryItemComponent,
+    EditorComponent
   ]
 })
 export class CommonModule {}

@@ -1,38 +1,30 @@
-<mat-card class="toolbar">
-  <div class="title">Exchange rate</div>
-  <button mat-icon-button (click)="save()" [disabled]="!form.valid">
-    <mat-icon>done</mat-icon>
-  </button>
-  <button mat-icon-button (click)="close()">
-    <mat-icon>close</mat-icon>
-  </button>
-</mat-card>
+<editor title="Exchange rate" (onSave)="save()" (onClose)="close()" [saveDisabled]="!form.valid">
+  <mat-card>
+    <mat-card-content class="card-content-form">
+      <form [formGroup]="form">
 
-<mat-card>
+        <mat-form-field>
+          <mat-label>Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" (click)="picker.open()" readonly>
+          <mat-datepicker touchUi #picker></mat-datepicker>
+        </mat-form-field>
 
-  <form [formGroup]="form">
+        <mat-form-field>
+          <mat-label>From</mat-label>
+          <currency-input formControlName="from"></currency-input>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Date</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="date" (click)="picker.open()" readonly>
-      <mat-datepicker touchUi #picker></mat-datepicker>
-    </mat-form-field>
+        <mat-form-field>
+          <mat-label>To</mat-label>
+          <currency-input formControlName="to"></currency-input>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>From</mat-label>
-      <currency-input formControlName="from"></currency-input>
-    </mat-form-field>
+        <mat-form-field>
+          <mat-label>Value</mat-label>
+          <input matInput formControlName="value" type="number">
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>To</mat-label>
-      <currency-input formControlName="to"></currency-input>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Value</mat-label>
-      <input matInput formControlName="value" type="number">
-    </mat-form-field>
-
-  </form>
-
-</mat-card>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</editor>

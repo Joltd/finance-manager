@@ -1,52 +1,46 @@
-<mat-card class="toolbar">
-  <div class="title">Income</div>
-  <button mat-icon-button (click)="save()" [disabled]="!form.valid">
-    <mat-icon>done</mat-icon>
-  </button>
-  <button mat-icon-button (click)="close()">
-    <mat-icon>close</mat-icon>
-  </button>
-</mat-card>
+<editor title="Income" (onSave)="save()" (onClose)="close()" [saveDisabled]="!form.valid">
 
-<mat-card *ngIf="hint">
-  <mat-card-content>
-    <p>{{hint}}</p>
-  </mat-card-content>
-</mat-card>
+  <mat-card *ngIf="hint">
+    <mat-card-content>
+      <p>{{hint}}</p>
+    </mat-card-content>
+  </mat-card>
 
-<mat-card>
+  <mat-card>
+    <mat-card-content class="card-content-form">
+      <form [formGroup]="form">
 
-  <form [formGroup]="form">
+        <mat-form-field>
+          <mat-label>Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" (click)="picker.open()" readonly>
+          <mat-datepicker touchUi #picker></mat-datepicker>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Date</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="date" (click)="picker.open()" readonly>
-      <mat-datepicker touchUi #picker></mat-datepicker>
-    </mat-form-field>
+        <mat-form-field>
+          <mat-label>Account</mat-label>
+          <reference-input api="/account/reference" formControlName="account"></reference-input>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Account</mat-label>
-      <reference-input api="/account/reference" formControlName="account"></reference-input>
-    </mat-form-field>
+        <mat-form-field>
+          <mat-label>Income category</mat-label>
+          <reference-input api="/income/reference" formControlName="incomeCategory"></reference-input>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Income category</mat-label>
-      <reference-input api="/income/reference" formControlName="incomeCategory"></reference-input>
-    </mat-form-field>
+        <mat-form-field>
+          <mat-label>Amount</mat-label>
+          <amount-input formControlName="amount"></amount-input>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Amount</mat-label>
-      <amount-input formControlName="amount"></amount-input>
-    </mat-form-field>
+        <mat-form-field>
+          <mat-label>Description</mat-label>
+          <textarea matInput
+                    formControlName="description"
+                    cdkTextareaAutosize
+                    #autosize="cdkTextareaAutosize"></textarea>
+        </mat-form-field>
 
-    <mat-form-field>
-      <mat-label>Description</mat-label>
-      <textarea matInput
-                formControlName="description"
-                cdkTextareaAutosize
-                #autosize="cdkTextareaAutosize"></textarea>
-    </mat-form-field>
+      </form>
+    </mat-card-content>
+  </mat-card>
 
-  </form>
-
-</mat-card>
+</editor>

@@ -1,7 +1,8 @@
 package com.evgenltd.financemanager.importexport.component.runner
 
 import com.evgenltd.financemanager.common.component.readCsv
-import com.evgenltd.financemanager.importexport.component.*
+import com.evgenltd.financemanager.importexport.component.amount
+import com.evgenltd.financemanager.importexport.component.dateTime
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 
 private const val RULES_ROOT = """C:\Users\lebed\IdeaProjects\finance-manager\server\src\main\resources\rules"""

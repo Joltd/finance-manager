@@ -4,7 +4,6 @@ import {ControlValueAccessor, FormControl, FormGroup, NgControl, Validators} fro
 import {MatFormFieldControl} from "@angular/material/form-field";
 import {Subject} from "rxjs";
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
-import {SettingsService} from "../../../settings/service/settings.service";
 import {CurrencySelectComponent} from "../currency-select/currency-select.component";
 
 @Component({
@@ -52,7 +51,7 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this
     }
-    this.amount.valueChanges.subscribe(value => {
+    this.amount.valueChanges.subscribe(() => {
       this.onInput()
     })
   }

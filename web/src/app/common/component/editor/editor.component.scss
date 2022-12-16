@@ -1,0 +1,12 @@
+:host {
+  display: grid;
+  grid-gap: 1em;
+}
+
+mat-card-header {
+  padding: 16px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 1fr;
+  align-items: center;
+}

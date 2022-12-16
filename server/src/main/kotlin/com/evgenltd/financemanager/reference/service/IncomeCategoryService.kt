@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.reference.service
 
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.IncomeCategory
 import com.evgenltd.financemanager.reference.record.IncomeCategoryRecord
 import com.evgenltd.financemanager.reference.record.Reference
@@ -24,7 +23,7 @@ class IncomeCategoryService(
         } else {
             incomeCategoryRepository.findAll()
         }
-        return list.map { Reference(it.id!!, it.name, it.deleted ?: false) }
+        return list.map { Reference(it.id!!, it.name, it.deleted) }
     }
 
     fun list(): List<IncomeCategoryRecord> =

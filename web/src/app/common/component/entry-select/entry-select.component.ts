@@ -1,15 +1,17 @@
 import {
-  AfterContentInit, AfterViewInit,
-  ChangeDetectorRef,
+  AfterViewInit,
   Component,
-  ContentChildren, EventEmitter,
-  HostBinding,
-  HostListener,
-  Input, Output,
-  QueryList
+  ContentChildren,
+  EventEmitter,
+  Input,
+  Output,
+  QueryList,
+  ViewChild
 } from "@angular/core";
 import {EntryItemComponent} from "../entry-item/entry-item.component";
 import {startWith} from "rxjs";
+import {Overlay, OverlayConfig, OverlayRef} from "@angular/cdk/overlay";
+import {CdkPortal} from "@angular/cdk/portal";
 
 @Component({
   selector: 'entry-select',
@@ -27,8 +29,11 @@ export class EntrySelectComponent implements AfterViewInit {
   @ContentChildren(EntryItemComponent)
   items!: QueryList<EntryItemComponent>
 
-  @HostBinding('class.visible')
-  visible: boolean = false
+  @ViewChild(CdkPortal)
+  portal!: CdkPortal
+  ref!: OverlayRef
+
+  constructor(private overlay: Overlay) {}
 
   ngAfterViewInit(): void {
     this.items.changes
@@ -42,18 +47,24 @@ export class EntrySelectComponent implements AfterViewInit {
       })
   }
 
-  @HostListener('click', ['$event'])
-  clickOutside(event: Event) {
-    this.close()
-    event.stopPropagation()
-  }
-
   show() {
-    this.visible = true
+    let config = new OverlayConfig({
+      hasBackdrop: true,
+      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically()
+    })
+    this.ref = this.overlay.create(config)
+    this.ref.attach(this.portal)
+    this.ref.backdropClick().subscribe(() => this.close())
   }
 
   close() {
-    this.visible = false
+    if (this.ref != undefined) {
+      this.ref.detach()
+    }
+  }
+
+  visible(): boolean {
+    return this.ref?.hasAttached()
   }
 
 }

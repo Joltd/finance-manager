@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {FormControl, FormGroup} from "@angular/forms";
 import {ExportDataService} from "../../service/export-data.service";
 import {Router} from "@angular/router";
 import {saveAs} from 'file-saver';

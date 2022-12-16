@@ -1,13 +1,10 @@
 package com.evgenltd.financemanager.importexport.component.runner
 
 import com.evgenltd.financemanager.common.component.readCsv
-import com.evgenltd.financemanager.importexport.component.MapDataResult
 import com.evgenltd.financemanager.importexport.component.amount
 import com.evgenltd.financemanager.importexport.component.date
-import com.evgenltd.financemanager.importexport.component.mapData
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 
-private const val RULES_ROOT = """C:\Users\lebed\IdeaProjects\finance-manager\server\src\main\resources\rules"""
 private const val SOURCE_ROOT = """C:\Users\lebed\Dropbox\Diary\Home\finance\budgets"""
 
 //fun kaspi(): MapDataResult {

@@ -1,6 +1,9 @@
 package com.evgenltd.financemanager.importexport.component.runner
 
-import com.evgenltd.financemanager.importexport.component.*
+import com.evgenltd.financemanager.importexport.component.amount
+import com.evgenltd.financemanager.importexport.component.date
+import com.evgenltd.financemanager.importexport.component.get
+import com.evgenltd.financemanager.importexport.component.performImport
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 import org.jsoup.Jsoup
 import java.io.File

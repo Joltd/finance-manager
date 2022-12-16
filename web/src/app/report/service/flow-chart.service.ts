@@ -2,7 +2,6 @@ import {EventEmitter, Injectable} from "@angular/core";
 import {FormControl, FormGroup} from "@angular/forms";
 import * as moment from "moment";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
 import {FlowChart} from "../model/flow-chart";
 import {TypeUtils} from "../../common/service/type-utils";
 import {ReferenceService} from "../../common/service/reference.service";

@@ -1,24 +1,13 @@
-<mat-card class="toolbar">
-  <div class="title">Account</div>
-  <button mat-icon-button (click)="save()" [disabled]="!form.valid">
-    <mat-icon>done</mat-icon>
-  </button>
-  <button mat-icon-button (click)="close()">
-    <mat-icon>close</mat-icon>
-  </button>
-</mat-card>
-
-<mat-card>
-
-  <form [formGroup]="form">
-
-    <mat-form-field>
-      <mat-label>Name</mat-label>
-      <input matInput formControlName="name">
-    </mat-form-field>
-
-    <mat-slide-toggle formControlName="track">Track</mat-slide-toggle>
-
-  </form>
-
-</mat-card>
+<editor title="Account" (onSave)="save()" (onClose)="close()" [saveDisabled]="!form.valid">
+  <mat-card>
+    <mat-card-content>
+      <form [formGroup]="form">
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name">
+        </mat-form-field>
+        <mat-slide-toggle formControlName="track">Track</mat-slide-toggle>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</editor>

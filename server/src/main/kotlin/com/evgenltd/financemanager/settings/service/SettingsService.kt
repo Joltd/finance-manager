@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.settings.service
 
-import com.evgenltd.financemanager.importexport.service.ImportDataService
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.record.FastExpenseRecord
 import com.evgenltd.financemanager.settings.record.SettingsRecord
@@ -12,16 +11,12 @@ import javax.annotation.PostConstruct
 @Service
 class SettingsService(
         private val settingRepository: SettingRepository,
-        private val mongoDatabaseFactory: MongoDatabaseFactory,
-        private val importDataService: ImportDataService
+        private val mongoDatabaseFactory: MongoDatabaseFactory
 ) {
 
     @PostConstruct
     fun postConstruct() {
-        val settings = load()
-        if (settings.currencies.isEmpty()) {
-            saveDefaultCurrencies()
-        }
+        saveDefaultCurrencies()
     }
 
     fun load(): SettingsRecord {
@@ -47,7 +42,7 @@ class SettingsService(
     }
 
     private fun saveDefaultCurrencies() {
-        updateList(CURRENCIES, listOf("RUB", "USD", "EUR", "KZT", "TRY", "RSD", "USDT", "TRX"))
+        updateList(CURRENCIES, listOf("RUB", "USD", "EUR", "KZT", "TRY", "RSD", "GEL", "USDT", "TRX"))
     }
 
     private fun updateSetting(name: String, value: String?) {

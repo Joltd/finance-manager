@@ -52,11 +52,12 @@ export class CurrencySelectComponent implements ControlValueAccessor {
       return
     }
     this.currency = currency
+    this.currencySelect.close()
     this.onChange(currency)
   }
 
   visible(): boolean {
-    return this.currencySelect.visible
+    return this.currencySelect.visible()
   }
 
 }

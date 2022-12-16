@@ -3,7 +3,6 @@ package com.evgenltd.financemanager.document.controller
 import com.evgenltd.financemanager.document.record.*
 import com.evgenltd.financemanager.document.service.DocumentService
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
 
 @RestController
 class DocumentController(

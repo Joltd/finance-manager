@@ -1,19 +1,11 @@
-import {Component, OnInit, ViewChild} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {DocumentService} from "../../service/document.service";
-import {DocumentRow} from "../../model/document-row";
-import {ActivatedRoute, Router} from "@angular/router";
-import {MatMenuTrigger} from "@angular/material/menu";
-import {trigger} from "@angular/animations";
-import {DocumentTyped} from "../../model/document-typed";
-import {FormControl, FormGroup} from "@angular/forms";
-import {DocumentExchange, DocumentExpense, DocumentIncome} from "../../model/document";
-import * as moment from "moment";
-import {SettingsService} from "../../../settings/service/settings.service";
+import {Router} from "@angular/router";
+import {FormGroup} from "@angular/forms";
 import {PageEvent} from "@angular/material/paginator";
 import {DocumentPage} from "../../model/document-page";
 import {Reference} from "../../../common/model/reference";
 import {ReferenceService} from "../../../common/service/reference.service";
-import {Total} from "../../../report/model/total";
 
 @Component({
   selector: 'document-browser',

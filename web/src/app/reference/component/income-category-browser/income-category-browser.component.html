@@ -1,16 +1,13 @@
 <mat-card *ngIf="incomeCategories.length > 0">
-  <mat-list>
-    <mat-list-item *ngFor="let incomeCategory of incomeCategories">
-      <div matLine class="mat-line-with-menu">
-        <div>{{incomeCategory.name}}</div>
-        <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
-        <mat-menu #menu>
-          <button mat-menu-item (click)="edit(incomeCategory.id)">Edit</button>
-          <button mat-menu-item (click)="delete(incomeCategory.id)">Remove</button>
-          <button mat-menu-item (click)="usage(incomeCategory.id)">Usage</button>
-        </mat-menu>
-      </div>
-    </mat-list-item>
-  </mat-list>
+  <mat-action-list>
+    <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let incomeCategory of incomeCategories">
+      {{incomeCategory.name}}
+      <mat-menu #menu>
+        <button mat-menu-item (click)="edit(incomeCategory.id)">Edit</button>
+        <button mat-menu-item (click)="delete(incomeCategory.id)">Remove</button>
+        <button mat-menu-item (click)="usage(incomeCategory.id)">Usage</button>
+      </mat-menu>
+    </button>
+  </mat-action-list>
 </mat-card>
 <button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>

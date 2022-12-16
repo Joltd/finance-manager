@@ -3,9 +3,6 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.reference.entity.ExpenseCategory
-import com.evgenltd.financemanager.reference.entity.IncomeCategory
-import com.evgenltd.financemanager.reference.service.ReferenceService
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSeriesRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord

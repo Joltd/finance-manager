@@ -1,6 +1,6 @@
 <mat-card *ngIf="importData.length > 0">
-  <mat-list>
-    <mat-list-item *ngFor="let data of importData" [matMenuTriggerFor]="menu">
+  <mat-action-list>
+    <button mat-list-item [mat-menu-trigger-for]="menu" *ngFor="let data of importData" [matMenuTriggerFor]="menu">
       <div matLine>
         {{data.description}}
       </div>
@@ -10,8 +10,8 @@
         <button mat-menu-item (click)="delete(data.id)">Delete</button>
         <button mat-menu-item (click)="instantImport(data.id)">Instant import</button>
       </mat-menu>
-    </mat-list-item>
-  </mat-list>
+    </button>
+  </mat-action-list>
 </mat-card>
 
 <button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>

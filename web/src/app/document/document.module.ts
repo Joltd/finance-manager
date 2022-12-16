@@ -20,9 +20,9 @@ import {DocumentViewComponent} from "./component/document-view/document-view.com
 import {DocumentLabelComponent} from "./component/document-label/document-label.component";
 import {MatExpansionModule} from "@angular/material/expansion";
 import {MatSelectModule} from "@angular/material/select";
-import {MatMomentDateModule} from "@angular/material-moment-adapter";
 import {MatPaginatorModule} from "@angular/material/paginator";
 import {FastExpenseComponent} from "./component/fast-expense/fast-expense.component";
+import {OverlayModule} from "@angular/cdk/overlay";
 
 @NgModule({
   declarations: [
@@ -54,7 +54,8 @@ import {FastExpenseComponent} from "./component/fast-expense/fast-expense.compon
     MatPaginatorModule,
     NgSwitchCase,
     NgSwitchDefault,
-    NgSwitch
+    NgSwitch,
+    OverlayModule
   ],
   providers: [
     MatDatepickerModule

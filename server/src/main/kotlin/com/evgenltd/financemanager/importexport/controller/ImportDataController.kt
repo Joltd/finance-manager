@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.importexport.controller
 
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryForRemoveRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.service.ImportDataService

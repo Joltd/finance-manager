@@ -17,3 +17,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .hide {
   opacity: 0;
 }
+
+.card-content-form {
+  padding-bottom: 0!important;
+
+  form {
+    display: grid;
+    grid-auto-flow: row;
+  }
+}
