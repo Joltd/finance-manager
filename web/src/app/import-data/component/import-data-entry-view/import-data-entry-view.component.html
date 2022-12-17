@@ -8,11 +8,9 @@
     </mat-card>
 
     <mat-card>
-      <mat-card-header>
-        <mat-card-subtitle class="card-title">
-          Suggested document
-          <mat-slide-toggle [(ngModel)]="entry.skip">Skip/do not import</mat-slide-toggle>
-        </mat-card-subtitle>
+      <mat-card-header class="suggested-title">
+        <mat-card-subtitle>Suggested document</mat-card-subtitle>
+        <mat-slide-toggle [(ngModel)]="entry.skip">Skip/do not import</mat-slide-toggle>
       </mat-card-header>
       <mat-card-content class="suggested">
         <document-label [document]="entry.suggested" [disabled]="entry.skip" [mat-menu-trigger-for]="menu"></document-label>

@@ -5,18 +5,16 @@
 .success {
   color: green;
   justify-self: center;
-  margin-right: 1em;
 }
 
 .fail {
   color: red;
   justify-self: center;
-  margin-right: 1em;
 }
 
 .line {
   display: grid;
-  grid-template-columns: 2em 1fr min-content 1fr;
+  grid-template-columns: 3em 1fr min-content 1fr;
   grid-gap: 1em;
   align-items: center;
 }

@@ -4,7 +4,13 @@
 
 .card-title {
   display: grid;
-  grid-template-columns: 1fr min-content min-content;
+  grid-template-columns: 1fr min-content;
+  align-items: center;
+}
+
+.suggested-title {
+  display: grid;
+  grid-template-columns: 1fr 12em;
   align-items: center;
 }
 
@@ -12,6 +18,7 @@
   display: grid;
   justify-content: center;
   align-content: center;
+  margin: 1em 0;
 }
 
 form {
