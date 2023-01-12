@@ -6,7 +6,10 @@ import java.nio.file.Paths
 fun readCsv(path: String, delimiter: String = ","): List<Row> {
     val lines = Files.readAllLines(Paths.get(path))
 
-    val fields = lines.first().split(delimiter).toList()
+    val fields = lines.first()
+        .split(delimiter)
+        .map { it.trim() }
+        .toList()
 
     return lines.filterIndexed { index, _ -> index > 0 }
             .map {

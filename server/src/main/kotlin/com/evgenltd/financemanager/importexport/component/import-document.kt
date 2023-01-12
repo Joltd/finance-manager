@@ -10,9 +10,6 @@ import java.time.LocalDate
 
 fun List<RawDataRecord>.performImport(host: String, account: String, rules: String) {
 
-    val apiEndpoint = "$host/import-data"
-    val uiEndpoint = "$host/import-data"
-
     val result = mapData(account, rules)
 
     println("Mapped ${result.documents.size} documents")
@@ -32,6 +29,13 @@ fun List<RawDataRecord>.performImport(host: String, account: String, rules: Stri
         return
     }
 
+    result.documents.performImport(host, account)
+
+}
+
+fun List<DocumentEntry>.performImport(host: String, account: String) {
+    val apiEndpoint = "$host/import-data"
+
     val rest = RestTemplate()
     val response = rest.postForObject(
         apiEndpoint,
@@ -44,8 +48,8 @@ fun List<RawDataRecord>.performImport(host: String, account: String, rules: Stri
     try {
         val chunks = 500
         var counter = 0
-        val totalChunks = result.documents.size / chunks + 1
-        result.documents.chunked(chunks).onEach {
+        val totalChunks = size / chunks + 1
+        chunked(chunks).onEach {
             val request = it.map { ImportDataEntry(
                 it.raw,
                 it.document
@@ -60,9 +64,6 @@ fun List<RawDataRecord>.performImport(host: String, account: String, rules: Stri
     }
 
     println("Import done")
-
-    Desktop.getDesktop().browse(URI("$uiEndpoint/$id"))
-
 }
 
 data class ImportData(val id: String?, val description: String)

@@ -47,6 +47,8 @@ data class Amount(val value: Long, val currency: String) {
 
 }
 
+fun Amount.abs(): Amount = Amount(kotlin.math.abs(value), currency)
+
 fun BigDecimal.toAmountValue(): Long = movePointRight(4).toLong()
 
 fun fromFractionalString(value: String, currency: String): Amount {
