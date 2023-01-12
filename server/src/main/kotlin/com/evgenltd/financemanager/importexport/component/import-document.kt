@@ -4,8 +4,6 @@ import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.web.client.RestTemplate
-import java.awt.Desktop
-import java.net.URI
 import java.time.LocalDate
 
 fun List<RawDataRecord>.performImport(host: String, account: String, rules: String) {
