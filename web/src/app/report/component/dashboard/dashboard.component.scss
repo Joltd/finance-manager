@@ -1,14 +1,5 @@
 :host {
   display: grid;
   grid-gap: 1em;
-  grid-auto-flow: row;
-}
-
-mat-card-subtitle {
-  display: grid;
-  grid-template-columns: 1fr min-content;
-
-  .actual-on {
-    white-space: nowrap;
-  }
+  grid-template-columns: 1fr 1fr;
 }

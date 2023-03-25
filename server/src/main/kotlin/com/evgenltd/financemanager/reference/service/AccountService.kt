@@ -37,7 +37,7 @@ class AccountService(
         val entity = record.toEntity()
         entity.id
                 ?.let { accountRepository.findById(it).orElse(null) }
-                ?.let { entity.actualOn = it.actualOn }
+                ?.let { entity.actualOn = if (!entity.track) null else it.actualOn }
         accountRepository.save(entity)
     }
 

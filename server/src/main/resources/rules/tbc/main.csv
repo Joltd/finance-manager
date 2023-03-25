@@ -1,4 +1,7 @@
 type,category,oppositeAccount,oppositeAmount,date,amount,description,source
+expense,Развлечения,,,,,,../expense/entertainment.csv
+expense,Медицина,,,,,,../expense/medicine.csv
+expense,Поездки,,,,,,../expense/trip.csv
 expense,Мобильная связь,,,,,,../expense/mobile.csv
 expense,Аренда квартиры,,,,,,../expense/rent.csv
 expense,Доставка еды,,,,,,../expense/delivery.csv
