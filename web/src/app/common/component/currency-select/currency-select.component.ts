@@ -44,7 +44,9 @@ export class CurrencySelectComponent implements ControlValueAccessor {
     if (this.disabled) {
       return
     }
-    this.currencySelect.show()
+    if (!this.currencySelect.visible()) {
+      this.currencySelect.show()
+    }
   }
 
   select(currency: string) {

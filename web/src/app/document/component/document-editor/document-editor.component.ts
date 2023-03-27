@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {DocumentService} from "../../service/document.service";
 import {Document} from "../../model/document";
 import {DocumentTyped} from "../../model/document-typed";
+import * as moment from "moment";
 
 @Component({
   selector: 'document-edit',
@@ -13,7 +14,10 @@ export class DocumentEditorComponent {
 
   private id!: string
   type!: string
-  document!: Document
+  document: Document = {
+    id: null,
+    date: moment().format('yyyy-MM-DD')
+  }
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -25,18 +29,22 @@ export class DocumentEditorComponent {
         let id = params['id']
         if (id == 'expense' || id == 'income' || id == 'exchange') {
           this.type = id
-        } else {
-          this.id = id
-          this.load()
+          return
         }
-      })
-  }
 
-  private load() {
-    this.documentService.byId(this.id)
-      .subscribe(result => {
-        this.type = result.type
-        this.document = result.value
+        this.activatedRoute.queryParams.subscribe(queryParams => {
+          let copy = queryParams['copy']
+          this.documentService.byId(id)
+            .subscribe(result => {
+              this.type = result.type
+              this.document = result.value
+              if (copy) {
+                this.document.id = null
+              } else {
+                this.id = id
+              }
+            })
+        })
       })
   }
 

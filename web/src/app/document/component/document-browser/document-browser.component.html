@@ -67,6 +67,7 @@
     <button mat-list-item [mat-menu-trigger-for]="menu" *ngFor="let document of documentPage().documents" [matMenuTriggerFor]="menu">
       <document-label [document]="document"></document-label>
       <mat-menu #menu>
+        <button mat-menu-item (click)="copy(document.value.id!)">Copy</button>
         <button mat-menu-item (click)="edit(document.value.id!)">Edit</button>
         <button mat-menu-item (click)="delete(document.value.id!)">Delete</button>
       </mat-menu>

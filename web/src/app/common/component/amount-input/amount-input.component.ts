@@ -144,7 +144,11 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
 
   setDescribedByIds(ids: string[]) {}
 
-  onContainerClick(event: MouseEvent) {}
+  onContainerClick(event: MouseEvent) {
+    if (!this.amount.value.value && !this.amount.value.currency) {
+      this.currencySelect.showCurrencySelect()
+    }
+  }
 
   registerOnChange(fn: any) {
     this.onChange = fn

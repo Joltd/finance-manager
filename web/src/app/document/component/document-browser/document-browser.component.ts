@@ -76,6 +76,13 @@ export class DocumentBrowserComponent implements OnInit {
     this.router.navigate(['document', id]).then()
   }
 
+  copy(id: string) {
+    this.router.navigate(
+      ['document', id],
+      {queryParams: {copy: true}}
+    ).then()
+  }
+
   delete(id: string) {
     this.documentService.delete(id).subscribe(() => this.load())
   }
