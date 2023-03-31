@@ -7,6 +7,27 @@ import org.jgrapht.graph.builder.GraphTypeBuilder
 import java.math.BigDecimal
 
 fun main() {
+    val graph = GraphTypeBuilder.undirected<String, String>()
+        .buildGraph()
+
+    graph.addVertex("RUB")
+    graph.addVertex("USDT")
+    graph.addVertex("USD")
+    graph.addVertex("GEL")
+    graph.addVertex("EUR")
+    graph.addVertex("KZT")
+    graph.addEdge("RUB", "USDT", "RUB/USDT")
+    graph.addEdge("USDT", "USD", "USDT/USD")
+    graph.addEdge("USD", "GEL", "USD/GEL")
+    graph.addEdge("GEL", "EUR", "GEL/EUR")
+    graph.addEdge("RUB", "KZT", "RUB/KZT")
+
+    val alg = DijkstraShortestPath(graph)
+    val result = alg.getPath("EUR", "RUB")
+    println(result)
+}
+
+fun main1() {
 
     val graph = GraphTypeBuilder.directed<String,Price>()
         .allowingMultipleEdges(true)

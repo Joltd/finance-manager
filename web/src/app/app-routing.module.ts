@@ -45,7 +45,6 @@ const routes: Routes = [
   { path: 'document', component: DocumentBrowserComponent },
   { path: 'document/:id', component: DocumentEditorComponent },
   { path: 'import-data', component: ImportDataBrowserComponent },
-  { path: 'import-data/new', component: ImportDataBeginComponent },
   { path: 'import-data/:id', component: ImportDataViewComponent },
   { path: 'import-data/:id/entry/:entryId', component: ImportDataEntryViewComponent },
   { path: 'export-data', component: ExportDataBeginComponent },

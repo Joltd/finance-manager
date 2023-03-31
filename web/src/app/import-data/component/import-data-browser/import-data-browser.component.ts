@@ -31,11 +31,6 @@ export class ImportDataBrowserComponent implements OnInit {
       })
   }
 
-  add() {
-    this.router.navigate(['import-data', 'new'])
-      .then()
-  }
-
   edit(id: string) {
     this.router.navigate(['import-data', id])
       .then()
