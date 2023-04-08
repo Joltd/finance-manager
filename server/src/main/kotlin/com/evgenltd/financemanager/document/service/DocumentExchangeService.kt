@@ -3,34 +3,30 @@ package com.evgenltd.financemanager.document.service
 import com.evgenltd.financemanager.document.entity.DocumentExchange
 import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.repository.DocumentExchangeRepository
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.reference.service.AccountService
-import com.evgenltd.financemanager.transaction.entity.Direction
-import com.evgenltd.financemanager.transaction.entity.ExchangeTransaction
-import com.evgenltd.financemanager.transaction.service.AccountTransactionService
+import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.service.TransactionService
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
 class DocumentExchangeService(
-        private val documentExchangeRepository: DocumentExchangeRepository,
-        private val transactionService: TransactionService,
-        private val accountService: AccountService,
-        private val exchangeRateService: ExchangeRateService,
-        private val accountTransactionService: AccountTransactionService
+    private val documentExchangeRepository: DocumentExchangeRepository,
+    private val accountService: AccountService,
+    private val transactionService: TransactionService
 ) : DocumentTypedService<DocumentExchange, DocumentExchangeRecord> {
 
     override fun update(entity: DocumentExchange) {
         documentExchangeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-
-        ExchangeTransaction(null, entity.date, Direction.IN, entity.amountFrom, entity.id!!).also { transactionService.save(it) }
-        with(entity) { accountTransactionService.output(date, amountFrom, id!!, accountFrom) }
-
-        with(entity) { accountTransactionService.input(date, amountTo, id!!, accountTo) }
-        ExchangeTransaction(null, entity.date, Direction.OUT, entity.amountTo, entity.id!!).also { transactionService.save(it) }
-
-        exchangeRateService.saveRate(entity.date, entity.amountFrom, entity.amountTo)
+        transactionService.exchange(
+                date = entity.date,
+                amountFrom = entity.amountFrom,
+                accountFrom = entity.accountFrom,
+                amountTo = entity.amountTo,
+                accountTo = entity.accountTo,
+                document = entity.id!!
+        )
     }
 
     override fun toRecord(entity: DocumentExchange): DocumentExchangeRecord = DocumentExchangeRecord(

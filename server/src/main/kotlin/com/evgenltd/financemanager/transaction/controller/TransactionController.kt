@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.transaction.controller
 
+import com.evgenltd.financemanager.transaction.record.Usage
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,12 +12,12 @@ class TransactionController(
 ) {
 
     @GetMapping("/transaction/usage/account/{id}")
-    fun usageByAccount(@PathVariable("id") id: String) = transactionService.usageByAccount(id)
+    fun usageByAccount(@PathVariable("id") id: String): Usage = transactionService.usageByAccount(id)
 
     @GetMapping("/transaction/usage/expense/{id}")
-    fun usageByExpenseCategory(@PathVariable("id") id: String) = transactionService.usageByExpenseCategory(id)
+    fun usageByExpenseCategory(@PathVariable("id") id: String): Usage = transactionService.usageByExpenseCategory(id)
 
     @GetMapping("/transaction/usage/income/{id}")
-    fun usageByIncomeCategory(@PathVariable("id") id: String) = transactionService.usageByIncomeCategory(id)
+    fun usageByIncomeCategory(@PathVariable("id") id: String): Usage = transactionService.usageByIncomeCategory(id)
 
 }

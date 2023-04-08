@@ -5,27 +5,23 @@ import com.evgenltd.financemanager.document.record.DocumentIncomeRecord
 import com.evgenltd.financemanager.document.repository.DocumentIncomeRepository
 import com.evgenltd.financemanager.reference.service.AccountService
 import com.evgenltd.financemanager.reference.service.IncomeCategoryService
-import com.evgenltd.financemanager.transaction.entity.Direction
-import com.evgenltd.financemanager.transaction.entity.IncomeTransaction
-import com.evgenltd.financemanager.transaction.service.AccountTransactionService
+import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.service.TransactionService
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
 @Service
 class DocumentIncomeService(
-        private val documentIncomeRepository: DocumentIncomeRepository,
-        private val transactionService: TransactionService,
-        private val accountService: AccountService,
-        private val incomeCategoryService: IncomeCategoryService,
-        private val accountTransactionService: AccountTransactionService
+    private val documentIncomeRepository: DocumentIncomeRepository,
+    private val accountService: AccountService,
+    private val incomeCategoryService: IncomeCategoryService,
+    private val transactionService: TransactionService
 ) : DocumentTypedService<DocumentIncome, DocumentIncomeRecord> {
 
     override fun update(entity: DocumentIncome) {
         documentIncomeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-        with(entity) { accountTransactionService.input(date, amount, id!!, account) }
-        IncomeTransaction(null, entity.date, Direction.OUT, entity.amount, entity.id!!, entity.incomeCategory)
-                .also { transactionService.save(it) }
+        transactionService.inflow(entity.date, entity.amount, entity.id!!, entity.account)
     }
 
     override fun toRecord(entity: DocumentIncome): DocumentIncomeRecord = DocumentIncomeRecord(

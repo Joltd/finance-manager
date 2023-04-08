@@ -2,9 +2,11 @@ package com.evgenltd.financemanager.reference.service
 
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.reference.event.AccountActualOnEvent
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
+import org.springframework.context.event.EventListener
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -42,6 +44,15 @@ class AccountService(
     }
 
     fun delete(id: String) = accountRepository.deleteById(id)
+
+    @EventListener
+    fun updateActualOn(event: AccountActualOnEvent) {
+        val account = accountRepository.findByIdOrNull(event.id) ?: return
+        if (account.track && account.actualOn?.isBefore(event.date) != false) {
+            account.actualOn = event.date
+            accountRepository.save(account)
+        }
+    }
 
     fun updateActualOn(id: String, date: LocalDate) {
         accountRepository.findById(id)

@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.conversion
 
 import org.jgrapht.Graph
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath
-import org.jgrapht.graph.*
+import org.jgrapht.graph.DefaultWeightedEdge
 import org.jgrapht.graph.builder.GraphTypeBuilder
 import java.math.BigDecimal
 
