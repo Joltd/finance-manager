@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.transaction.record.Usage
 import com.evgenltd.financemanager.transaction.repository.TransactionRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
@@ -18,6 +19,7 @@ class TransactionService(
     private val eventPublisher: ApplicationEventPublisher
 ) {
 
+    @Transactional
     fun inflow(date: LocalDate, amount: Amount, document: String, account: String, incomeCategory: String? = null) {
         val transaction = Transaction(
             id = null,
@@ -33,6 +35,7 @@ class TransactionService(
         eventPublisher.publishEvent(AccountActualOnEvent(account, date))
     }
 
+    @Transactional
     fun outflow(date: LocalDate, amount: Amount, document: String, account: String, expenseCategory: String? = null) {
         val transaction = Transaction(
             id = null,
@@ -48,6 +51,7 @@ class TransactionService(
         eventPublisher.publishEvent(AccountActualOnEvent(account, date))
     }
 
+    @Transactional
     fun exchange(
         date: LocalDate,
         amountFrom: Amount,
@@ -73,18 +77,20 @@ class TransactionService(
             account = accountTo
         )
         transactionRepository.saveAll(listOf(transactionFrom, transactionTo))
-        relationService.saveExchangeRelation(date, transactionFrom, transactionTo)
+        relationService.saveExchangeRelation(date, transactionFrom, transactionTo, document)
         eventPublisher.publishEvent(ResetGraphEvent(date))
         eventPublisher.publishEvent(AccountActualOnEvent(accountFrom, date))
         eventPublisher.publishEvent(AccountActualOnEvent(accountTo, date))
     }
 
+    @Transactional
     fun deleteByDocument(document: String) {
         val transactions = transactionRepository.findByDocument(document)
         if (transactions.isEmpty()) {
             return
         }
         transactionRepository.deleteAll(transactions)
+        relationService.deleteByDocument(document)
         val resetDate = transactions.minOf { it.date }
         eventPublisher.publishEvent(ResetGraphEvent(resetDate))
     }
@@ -96,5 +102,14 @@ class TransactionService(
     fun usageByIncomeCategory(incomeCategory: String): Usage = transactionRepository.findByIncomeCategory(incomeCategory).size.let { Usage(it.toString()) }
 
     fun usageByExpenseCategory(expenseCategory: String): Usage = transactionRepository.findByExpenseCategory(expenseCategory).size.let { Usage(it.toString()) }
+
+    fun findTransactionsOrdered(date: LocalDate): List<Transaction> =
+        transactionRepository.findByDateGreaterThanOrderByDateAscDirectionAsc(date)
+
+    fun findTransactions(from: LocalDate, to: LocalDate): List<Transaction> =
+        transactionRepository.findByDateGreaterThanEqualAndDateLessThan(from, to)
+
+    fun findTransactions(ids: List<String>): List<Transaction> =
+        transactionRepository.findAllById(ids).toList()
 
 }

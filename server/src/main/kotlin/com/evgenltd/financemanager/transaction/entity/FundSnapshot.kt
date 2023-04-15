@@ -4,9 +4,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 
-@Document("fund_snapshot")
+@Document("fundSnapshot")
 class FundSnapshot(
-    @Id
     var id: String?,
     var date: LocalDate,
     var type: FundSnapshotType,
@@ -18,9 +17,17 @@ enum class FundSnapshotType {
     HISTORY
 }
 
-class Fund : HashMap<AllocationKey, AllocationQueue>() {
+class Fund : HashMap<String, AllocationQueue>() {
 
     fun get(account: String, currency: String): AllocationQueue =
-        getOrPut(AllocationKey(account, currency)) { AllocationQueue() }
+        getOrPut(key(account, currency)) { AllocationQueue() }
+
+    private fun key(account: String, currency: String): String = "${account}_${currency}"
+
+    companion object {
+        fun account(key: String): String = key.split("_")[0]
+
+        fun currency(key: String): String = key.split("_")[1]
+    }
 
 }

@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.settings.record.SettingsRecord
 import com.evgenltd.financemanager.settings.repository.SettingRepository
 import org.springframework.data.mongodb.MongoDatabaseFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import javax.annotation.PostConstruct
 
 @Service
@@ -30,6 +31,7 @@ class SettingsService(
         )
     }
 
+    @Transactional
     fun update(settings: SettingsRecord) {
         updateList(CURRENCIES, settings.currencies)
         updateSetting(FAST_EXPENSE_ACCOUNT, settings.fastExpense.account)

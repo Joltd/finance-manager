@@ -9,7 +9,11 @@ interface FundSnapshotRepository : MongoRepository<FundSnapshot, String> {
 
     fun deleteByDateGreaterThanEqualAndType(date: LocalDate, type: FundSnapshotType)
 
+    fun deleteByType(type: FundSnapshotType)
+
     fun findFirstByTypeOrderByDateDesc(type: FundSnapshotType): FundSnapshot?
+
+    fun findFirstByDateLessThanAndTypeOrderByDateDesc(date: LocalDate, type: FundSnapshotType): FundSnapshot?
 
     fun findByType(type: FundSnapshotType): FundSnapshot?
 

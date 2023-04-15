@@ -21,7 +21,7 @@ data class Amount(val value: Long, val currency: String) {
     }
 
     operator fun times(other: BigDecimal): Amount = Amount(
-            toBigDecimal().multiply(other).toLong(),
+            toBigDecimal().multiply(other).toAmountValue(),
             currency
     )
 

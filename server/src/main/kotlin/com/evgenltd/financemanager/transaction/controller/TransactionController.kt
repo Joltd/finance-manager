@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class TransactionController(
-        private val transactionService: TransactionService
+    private val transactionService: TransactionService
 ) {
 
     @GetMapping("/transaction/usage/account/{id}")

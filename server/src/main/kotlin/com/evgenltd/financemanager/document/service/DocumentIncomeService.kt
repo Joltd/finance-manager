@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DocumentIncomeService(
@@ -18,10 +19,11 @@ class DocumentIncomeService(
     private val transactionService: TransactionService
 ) : DocumentTypedService<DocumentIncome, DocumentIncomeRecord> {
 
+    @Transactional
     override fun update(entity: DocumentIncome) {
         documentIncomeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-        transactionService.inflow(entity.date, entity.amount, entity.id!!, entity.account)
+        transactionService.inflow(entity.date, entity.amount, entity.id!!, entity.account, entity.incomeCategory)
     }
 
     override fun toRecord(entity: DocumentIncome): DocumentIncomeRecord = DocumentIncomeRecord(

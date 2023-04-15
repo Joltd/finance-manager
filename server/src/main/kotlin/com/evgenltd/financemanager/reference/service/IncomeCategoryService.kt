@@ -7,6 +7,7 @@ import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.IncomeCategoryRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class IncomeCategoryService(
@@ -39,6 +40,7 @@ class IncomeCategoryService(
 
     fun delete(id: String) = incomeCategoryRepository.deleteById(id)
 
+    @Transactional
     fun findOrCreate(id: String?, name: String?): IncomeCategory = id
         ?.let { incomeCategoryRepository.findByIdOrNull(it) }
         ?: name?.let { incomeCategoryRepository.findByName(it) }

@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.context.event.EventListener
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
@@ -35,6 +36,7 @@ class AccountService(
 
     fun byId(id: String): AccountRecord = accountRepository.find(id).toRecord()
 
+    @Transactional
     fun update(record: AccountRecord) {
         val entity = record.toEntity()
         entity.id
@@ -46,6 +48,7 @@ class AccountService(
     fun delete(id: String) = accountRepository.deleteById(id)
 
     @EventListener
+    @Transactional
     fun updateActualOn(event: AccountActualOnEvent) {
         val account = accountRepository.findByIdOrNull(event.id) ?: return
         if (account.track && account.actualOn?.isBefore(event.date) != false) {
@@ -54,16 +57,7 @@ class AccountService(
         }
     }
 
-    fun updateActualOn(id: String, date: LocalDate) {
-        accountRepository.findById(id)
-                .ifPresent {
-                    if (it.track && it.actualOn?.isBefore(date) != false) {
-                        it.actualOn = date
-                        accountRepository.save(it)
-                    }
-                }
-    }
-
+    @Transactional
     fun findOrCreate(id: String?, name: String?): Account = id
         ?.let { accountRepository.findByIdOrNull(it) }
         ?: name?.let { accountRepository.findByName(it) }

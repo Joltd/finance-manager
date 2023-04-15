@@ -8,17 +8,21 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
+import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
+import com.evgenltd.financemanager.transaction.service.FundGraphService
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.util.*
 import javax.annotation.PostConstruct
 
 @Service
 class ImportDataService(
-        private val importDataProperties: ImportDataProperties,
-        private val importDataRepository: ImportDataRepository,
-        private val documentService: DocumentService
+    private val importDataProperties: ImportDataProperties,
+    private val importDataRepository: ImportDataRepository,
+    private val documentService: DocumentService,
+    private val fundGraphService: FundGraphService
 ) : Loggable() {
 
     @PostConstruct
@@ -50,6 +54,7 @@ class ImportDataService(
         return saved.toRecord()
     }
 
+    @Transactional
     fun entryUpdate(id: String, entryId: String, entry: ImportDataEntryRecord) {
         val importData = importDataRepository.find(id)
         importData
@@ -63,6 +68,7 @@ class ImportDataService(
             }
     }
 
+    @Transactional
     fun append(id: String, entries: List<ImportDataEntryRecord>) {
         val importData = importDataRepository.find(id)
         importData.entries = importData.entries + entries.map { it.toEntity() }
@@ -72,8 +78,12 @@ class ImportDataService(
     fun delete(id: String) = importDataRepository.deleteById(id)
 
     @Async
+    @Transactional
     fun performImport(id: String) {
         val entity = importDataRepository.find(id)
+
+        val resetDate = entity.entries.mapNotNull { it.suggested?.date }.minOf { it }
+        fundGraphService.resetGraph(resetDate)
 
         var counter = 0
         for (document in entity.entries) {
@@ -100,6 +110,9 @@ class ImportDataService(
         }
 
         importDataRepository.save(entity)
+
+        fundGraphService.onRebuildGraph(RebuildGraphEvent())
+
     }
 
     private fun ImportDataRecord.toEntity(): ImportData = ImportData(

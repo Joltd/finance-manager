@@ -14,8 +14,7 @@ import javax.annotation.PostConstruct
 
 @Service
 class ExchangeRateService(
-        private val exchangeRateRepository: ExchangeRateRepository,
-        private val documentExchangeRepository: DocumentExchangeRepository
+    private val exchangeRateRepository: ExchangeRateRepository
 ) {
 
     @PostConstruct
@@ -56,16 +55,8 @@ class ExchangeRateService(
         if (from == to) {
             return BigDecimal.ONE
         }
-        val rate = exchangeRateRepository.findByDateLessThanEqual(date)
-                .filter { (it.from == from && it.to == to) || (it.from == to && it.to == from) }
-                .maxByOrNull { it.date }
-                ?: throw IllegalStateException("No rate for $from/$to $date")
-
-        return if (rate.from == from && rate.to == to) {
-            rate.value
-        } else {
-            BigDecimal.ONE.divide(rate.value, 8, RoundingMode.HALF_DOWN)
-        }
+        return exchangeRateRepository.findByDateAndFromAndTo(date, from, to)?.value
+            ?: throw IllegalStateException("Unable to find exchange rate for date=$date, from=$from, to=$to")
     }
 
     private fun ExchangeRate.toRecord(): ExchangeRateRecord = ExchangeRateRecord(

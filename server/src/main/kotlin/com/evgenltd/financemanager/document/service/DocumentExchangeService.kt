@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DocumentExchangeService(
@@ -16,6 +17,7 @@ class DocumentExchangeService(
     private val transactionService: TransactionService
 ) : DocumentTypedService<DocumentExchange, DocumentExchangeRecord> {
 
+    @Transactional
     override fun update(entity: DocumentExchange) {
         documentExchangeRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)

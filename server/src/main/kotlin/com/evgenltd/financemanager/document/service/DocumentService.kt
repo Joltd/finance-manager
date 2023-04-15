@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import javax.annotation.PostConstruct
 
 @Service
@@ -102,6 +103,7 @@ class DocumentService(
 
     fun byId(id: String): DocumentTypedRecord = documentRepository.find(id).let(::toTypedRecord)
 
+    @Transactional
     fun update(record: DocumentTypedRecord) {
         val service = resolveService(record.value)
         val entity = service.toEntity(record.value)
@@ -109,8 +111,10 @@ class DocumentService(
         eventPublisher.publishEvent(RebuildGraphEvent())
     }
 
+    @Transactional
     fun update(entity: Document) = resolveService(entity).update(entity)
 
+    @Transactional
     fun delete(id: String) {
         transactionService.deleteByDocument(id)
         documentRepository.deleteById(id)
@@ -125,6 +129,7 @@ class DocumentService(
         return documentRepository.findAllById(documents).map(::toTypedRecord)
     }
 
+    @Transactional
     fun deleteByAccount(account: String) {
         transactionService.findByAccount(account)
                 .map { it.document }

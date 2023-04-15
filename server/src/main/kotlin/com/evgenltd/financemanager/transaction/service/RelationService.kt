@@ -32,21 +32,30 @@ class RelationService(
     fun saveExchangeRelation(
         date: LocalDate,
         from: Transaction,
-        to: Transaction
+        to: Transaction,
+        document: String
     ) {
         val relation = Relation(
             id = null,
             date = date,
             from = from.id!!,
             to = to.id!!,
+            document = document,
             exchange = true,
             rate = from.amount.toBigDecimal() / to.amount.toBigDecimal()
         )
         relationRepository.save(relation)
     }
 
+    fun deleteByDocument(document: String) {
+        relationRepository.deleteByDocument(document)
+    }
+
     fun deleteNotActual(date: LocalDate) {
         relationRepository.deleteByDateGreaterThanAndExchangeFalse(date)
     }
+
+    fun findRelations(from: LocalDate, to: LocalDate) =
+        relationRepository.findByDateGreaterThanEqualAndDateLessThan(from, to)
 
 }
