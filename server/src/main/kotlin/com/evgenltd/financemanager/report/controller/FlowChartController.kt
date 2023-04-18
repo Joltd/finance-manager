@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class FlowChartController(
-        private val flowChartService: FlowChartService
+    private val flowChartService: FlowChartService
 ) {
 
     @PostMapping("/flow-chart")

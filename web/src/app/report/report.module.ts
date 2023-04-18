@@ -14,12 +14,14 @@ import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {CategoryChartComponent} from "./component/category-chart/category-chart.component";
+import {FlowGraphChartComponent} from "./component/flow-graph-chart/flow-graph-chart.component";
 
 @NgModule({
   declarations: [
     DashboardComponent,
     FlowChartComponent,
-    CategoryChartComponent
+    CategoryChartComponent,
+    FlowGraphChartComponent
   ],
   imports: [
     MatCardModule,

@@ -23,7 +23,7 @@ class DashboardService(
         val fundSnapshot = fundSnapshotService.findCurrentSnapshot()
         return fundSnapshot.fund
             .entries
-            .map { it.key to it.value.toBalance() }
+            .map { it.key to it.value.toBalance(Fund.currency(it.key)) }
             .groupBy { Fund.account(it.first) }
             .map {
                 val account = accountIndex[it.key]
@@ -37,6 +37,11 @@ class DashboardService(
             }
     }
 
-    private fun AllocationQueue.toBalance(): Amount = map { it.amount }.reduce { acc, amount -> acc + amount }
+    private fun AllocationQueue.toBalance(currency: String): Amount =
+        if (isEmpty()) {
+            Amount(0, currency)
+        } else {
+            map { it.amount }.reduce { acc, amount -> acc + amount }
+        }
 
 }

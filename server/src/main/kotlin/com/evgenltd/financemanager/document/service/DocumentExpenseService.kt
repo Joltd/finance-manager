@@ -1,13 +1,13 @@
 package com.evgenltd.financemanager.document.service
 
+import com.evgenltd.financemanager.common.util.abs
 import com.evgenltd.financemanager.document.entity.DocumentExpense
 import com.evgenltd.financemanager.document.record.DocumentExpenseRecord
 import com.evgenltd.financemanager.document.repository.DocumentExpenseRepository
 import com.evgenltd.financemanager.reference.service.AccountService
 import com.evgenltd.financemanager.reference.service.ExpenseCategoryService
-import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
+import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.service.TransactionService
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,7 +23,11 @@ class DocumentExpenseService(
     override fun update(entity: DocumentExpense) {
         documentExpenseRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-        transactionService.outflow(entity.date, entity.amount, entity.id!!, entity.account, entity.expenseCategory)
+        if (entity.amount.value > 0) {
+            transactionService.flow(Direction.OUT, entity.date, entity.amount, entity.id!!, entity.account, null, entity.expenseCategory)
+        } else {
+            transactionService.flow(Direction.IN, entity.date, entity.amount.abs(), entity.id!!, entity.account, null, entity.expenseCategory)
+        }
     }
 
     override fun toRecord(entity: DocumentExpense): DocumentExpenseRecord = DocumentExpenseRecord(

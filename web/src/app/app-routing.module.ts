@@ -34,6 +34,7 @@ import {CategoryChartComponent} from "./report/component/category-chart/category
 import {
   ImportDataEntryViewComponent
 } from "./import-data/component/import-data-entry-view/import-data-entry-view.component";
+import {FlowGraphChartComponent} from "./report/component/flow-graph-chart/flow-graph-chart.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -52,6 +53,7 @@ const routes: Routes = [
   { path: 'fast-expense', component: FastExpenseComponent },
   { path: 'flow-chart', component: FlowChartComponent },
   { path: 'category-chart', component: CategoryChartComponent },
+  { path: 'flow-graph-chart', component: FlowGraphChartComponent },
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: 'settings', component: SettingsEditorComponent },

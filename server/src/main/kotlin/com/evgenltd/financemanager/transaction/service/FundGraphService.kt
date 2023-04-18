@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
+import com.evgenltd.financemanager.report.record.FlowGraphChartRecord
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.Fund
 import com.evgenltd.financemanager.transaction.entity.Transaction
@@ -102,6 +103,28 @@ class FundGraphService(
 
     }
 
+    fun loadGraph(from: LocalDate, to: LocalDate): FlowGraphChartRecord {
+        val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot(from)
+        val trulyFrom = fundSnapshot?.date ?: MIN_DATE
+
+        val transactions = transactionService.findTransactions(trulyFrom, to)
+        val fundTransactions = fundSnapshot?.fund
+            ?.values
+            ?.flatten()
+            ?.map { it.transaction }
+            ?.distinct()
+            ?.let { transactionService.findTransactions(it) }
+            ?: emptyList()
+
+        val relations = relationService.findRelations(trulyFrom, to)
+
+        return FlowGraphChartRecord(
+            nodes = (transactions + fundTransactions).sortedBy { it.date }
+                .map { FlowGraphChartRecord.Node(it.id!!, it.direction, it.date, it.amount.toString()) },
+            links = relations.map { FlowGraphChartRecord.Link(it.from, it.to, it.amount?.value ?: it.rate!!.toLong()) }
+        )
+    }
+
     // greater or equal from and less than to
     // maybe load expenses with incomes
     fun loadFlows(from: LocalDate, to: LocalDate, targetCurrency: String): FlowsRecord {
@@ -134,24 +157,26 @@ class FundGraphService(
         val incomes = mutableListOf<FlowRecord>()
         val expenses = mutableListOf<FlowRecord>()
         for (transaction in transactions) {
-            if (transaction.date < trulyFrom || transaction.date >= to) {
+            if (transaction.date < from || transaction.date >= to) {
                 continue
             }
 
-            if (transaction.incomeCategory != null) {
+            val incomeCategory = transaction.incomeCategory
+            val expenseCategory = transaction.expenseCategory
+            if (incomeCategory == null && expenseCategory == null) {
+                continue
+            }
+
+            if (transaction.direction == Direction.IN) {
                 val rate = exchangeRateService.rate(transaction.date, transaction.amount.currency, targetCurrency)
-                incomes.add(FlowRecord(transaction.date, transaction.amount * rate, transaction.incomeCategory!!))
-                continue
-            }
-
-            if (transaction.expenseCategory == null) {
+                incomes.add(FlowRecord(transaction.date, transaction.amount * rate, incomeCategory ?: expenseCategory!!))
                 continue
             }
 
             val root = nodeIndex[transaction.id!!]!!
             root.markIfContains(targetCurrency)
             val targetAmount = root.resolve(root.transaction.amount.toBigDecimal(), targetCurrency)
-            expenses.add(FlowRecord(transaction.date, Amount(targetAmount.toAmountValue(), targetCurrency), transaction.expenseCategory!!))
+            expenses.add(FlowRecord(transaction.date, Amount(targetAmount.toAmountValue(), targetCurrency), expenseCategory ?: incomeCategory!!))
 
         }
 

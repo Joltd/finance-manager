@@ -20,30 +20,23 @@ class TransactionService(
 ) {
 
     @Transactional
-    fun inflow(date: LocalDate, amount: Amount, document: String, account: String, incomeCategory: String? = null) {
+    fun flow(
+        direction: Direction,
+        date: LocalDate,
+        amount: Amount,
+        document: String,
+        account: String,
+        incomeCategory: String? = null,
+        expenseCategory: String? = null
+    ) {
         val transaction = Transaction(
             id = null,
-            direction = Direction.IN,
+            direction = direction,
             date = date,
             amount = amount,
             document = document,
             account = account,
-            incomeCategory = incomeCategory
-        )
-        transactionRepository.save(transaction)
-        eventPublisher.publishEvent(ResetGraphEvent(date))
-        eventPublisher.publishEvent(AccountActualOnEvent(account, date))
-    }
-
-    @Transactional
-    fun outflow(date: LocalDate, amount: Amount, document: String, account: String, expenseCategory: String? = null) {
-        val transaction = Transaction(
-            id = null,
-            direction = Direction.OUT,
-            date = date,
-            amount = amount,
-            document = document,
-            account = account,
+            incomeCategory = incomeCategory,
             expenseCategory = expenseCategory
         )
         transactionRepository.save(transaction)

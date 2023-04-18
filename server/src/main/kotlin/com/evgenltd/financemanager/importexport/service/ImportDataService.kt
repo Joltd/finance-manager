@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
+import java.time.LocalDate
 import java.util.*
 import javax.annotation.PostConstruct
 
@@ -92,6 +93,7 @@ class ImportDataService(
 
             if (!document.skip) {
                 val suggested = document.suggested ?: continue
+                if (suggested.date > LocalDate.of(2016,9,1)) continue
 
                 try {
                     documentService.update(suggested)

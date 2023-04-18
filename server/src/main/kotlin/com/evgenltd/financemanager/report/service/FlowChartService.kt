@@ -18,8 +18,9 @@ class FlowChartService(private val fundGraphService: FundGraphService) {
     private fun loadTotalChart(settings: FlowChartSettingsRecord): FlowChartRecord {
         val flows = fundGraphService.loadFlows(settings.dateFrom, settings.dateTo, settings.currency)
 
-        val expenses = flows.expenses.filter { it.category in settings.expenseCategories }
-        val incomes = flows.incomes.filter { it.category in settings.incomeCategories }
+        val categories = settings.expenseCategories + settings.incomeCategories
+        val expenses = flows.expenses.filter { it.category in categories }
+        val incomes = flows.incomes.filter { it.category in categories }
 
         val dates = (expenses.map { it.date } + incomes.map { it.date }).buildDateDimension(settings.groupBy)
 
