@@ -12,9 +12,9 @@ import * as moment from "moment/moment";
 export class FlowGraphChartService {
 
   settings: FormGroup = new FormGroup({
-    dateFrom: new FormControl(moment('2016-01-01').format('yyyy-MM-DD')),
-    dateTo: new FormControl(moment('2016-04-30').format('yyyy-MM-DD')),
-    account: new FormControl(),
+    dateFrom: new FormControl(moment('2016-08-01').format('yyyy-MM-DD')),
+    dateTo: new FormControl(moment('2016-08-02').format('yyyy-MM-DD')),
+    account: new FormControl('643f0ddac4c5763b71c44ff1'),
     currency: new FormControl('RUB')
   })
   data!: FlowGraphChart

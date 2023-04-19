@@ -50,14 +50,20 @@ class FundGraphService(
         }
     }
 
+    @Transactional
+    fun resetAndRebuildGraph() {
+        resetGraph(MIN_DATE)
+        rebuildGraph()
+    }
+
     private fun rebuildGraph() {
         val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot()
-        var fixationDate = fundSnapshot?.date ?: MIN_DATE
-        val fund = fundSnapshot?.fund ?: Fund()
-        val transactions = transactionService.findTransactionsOrdered(fixationDate)
+        val transactions = transactionService.findTransactionsOrdered(fundSnapshot?.date ?: MIN_DATE)
         if (transactions.isEmpty()) {
             return
         }
+        var fixationDate = fundSnapshot?.date ?: transactions.minOf { it.date }
+        val fund = fundSnapshot?.fund ?: Fund()
 
         for (transaction in transactions) {
 
@@ -97,31 +103,30 @@ class FundGraphService(
                 }
             }
 
+            if (allocationQueue.isEmpty()) {
+                fund.remove(transaction.account, transaction.amount.currency)
+            }
+
         }
 
         fundSnapshotService.saveCurrentSnapshot(transactions.last().date, fund)
 
     }
 
-    fun loadGraph(from: LocalDate, to: LocalDate): FlowGraphChartRecord {
-        val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot(from)
-        val trulyFrom = fundSnapshot?.date ?: MIN_DATE
+    fun loadGraph(from: LocalDate, to: LocalDate, account: String, currency: String): FlowGraphChartRecord {
+        val transactions = transactionService.findTransactions(from, to, account, currency)
+        val transactionIds = transactions.map { it.id!! }
+        val outTransactionIds = transactions.filter { it.direction == Direction.OUT }.map { it.id!! }
+        val relations = relationService.findRelations(outTransactionIds)
 
-        val transactions = transactionService.findTransactions(trulyFrom, to)
-        val fundTransactions = fundSnapshot?.fund
-            ?.values
-            ?.flatten()
-            ?.map { it.transaction }
-            ?.distinct()
-            ?.let { transactionService.findTransactions(it) }
-            ?: emptyList()
-
-        val relations = relationService.findRelations(trulyFrom, to)
+        val commonNodes = transactions.map { FlowGraphChartRecord.Node(it.id!!, it.direction, it.date, it.amount) }
+        val outsideNodes = (relations.flatMap { listOf(it.from, it.to) }.toSet() - transactionIds.toSet())
+            .let { transactionService.findTransactions(it.toList()) }
+            .map { FlowGraphChartRecord.Node(it.id!!, it.direction, it.date, it.amount, it.account != account || it.amount.currency != currency) }
 
         return FlowGraphChartRecord(
-            nodes = (transactions + fundTransactions).sortedBy { it.date }
-                .map { FlowGraphChartRecord.Node(it.id!!, it.direction, it.date, it.amount.toString()) },
-            links = relations.map { FlowGraphChartRecord.Link(it.from, it.to, it.amount?.value ?: it.rate!!.toLong()) }
+            nodes = (commonNodes + outsideNodes).sortedBy { it.date },
+            links = relations.map { FlowGraphChartRecord.Link(it.from, it.to, it.amount) }
         )
     }
 

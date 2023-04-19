@@ -100,7 +100,10 @@ class TransactionService(
         transactionRepository.findByDateGreaterThanOrderByDateAscDirectionAsc(date)
 
     fun findTransactions(from: LocalDate, to: LocalDate): List<Transaction> =
-        transactionRepository.findByDateGreaterThanEqualAndDateLessThan(from, to)
+        transactionRepository.findByDateBetween(from, to)
+
+    fun findTransactions(from: LocalDate, to: LocalDate, account: String, currency: String): List<Transaction> =
+        transactionRepository.findByDateBetweenAndAccountAndCurrency(from, to, account, currency)
 
     fun findTransactions(ids: List<String>): List<Transaction> =
         transactionRepository.findAllById(ids).toList()

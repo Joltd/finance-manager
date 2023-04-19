@@ -61,6 +61,14 @@ export class SettingsEditorComponent implements OnInit {
       })
   }
 
+  rebuildGraph() {
+    this.settingsService.rebuildGraph()
+      .subscribe(() => {
+        this.shortMessageService.show("Done")
+        this.load()
+      })
+  }
+
   addCurrency(event: MatChipInputEvent) {
     let value = (event.value || '').trim();
 

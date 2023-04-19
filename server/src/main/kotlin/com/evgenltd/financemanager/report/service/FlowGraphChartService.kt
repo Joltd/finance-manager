@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class FlowGraphChartService(private val fundGraphService: FundGraphService) {
 
     fun load(record: FlowGraphChartSettingsRecord): FlowGraphChartRecord {
-        return fundGraphService.loadGraph(record.dateFrom, record.dateTo)
+        return fundGraphService.loadGraph(record.dateFrom, record.dateTo, record.account, record.currency)
     }
 
 }

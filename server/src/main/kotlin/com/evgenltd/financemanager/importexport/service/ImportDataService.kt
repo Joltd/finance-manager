@@ -93,7 +93,7 @@ class ImportDataService(
 
             if (!document.skip) {
                 val suggested = document.suggested ?: continue
-                if (suggested.date > LocalDate.of(2016,9,1)) continue
+//                if (suggested.date > LocalDate.of(2016,9,1)) continue
 
                 try {
                     documentService.update(suggested)

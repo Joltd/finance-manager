@@ -58,4 +58,7 @@ class RelationService(
     fun findRelations(from: LocalDate, to: LocalDate) =
         relationRepository.findByDateGreaterThanEqualAndDateLessThan(from, to)
 
+    fun findRelations(transactionIds: List<String>) =
+        relationRepository.findByFromInOrToIn(transactionIds, transactionIds)
+
 }

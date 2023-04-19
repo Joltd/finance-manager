@@ -12,7 +12,10 @@ interface TransactionRepository : MongoRepository<Transaction, String> {
     fun findByDateGreaterThanOrderByDateAscDirectionAsc(date: LocalDate): List<Transaction>
 
     @Query("{'date': { \$gte: ?0, \$lt: ?1 }}")
-    fun findByDateGreaterThanEqualAndDateLessThan(from: LocalDate, to: LocalDate): List<Transaction>
+    fun findByDateBetween(from: LocalDate, to: LocalDate): List<Transaction>
+
+    @Query("{'date': { \$gte: ?0, \$lt: ?1 }, 'account': ?2, 'amount.currency': ?3}")
+    fun findByDateBetweenAndAccountAndCurrency(from: LocalDate, to: LocalDate, account: String, currency: String): List<Transaction>
 
     fun findByAccount(account: String): List<Transaction>
 

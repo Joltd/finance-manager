@@ -24,13 +24,17 @@ export function fromFractional(value: number): number {
     .replace('.', '')
 }
 
+export function formatAsString(amount: Amount): string {
+  return `${toFractional(amount)} ${amount.currency}`
+}
+
 @Pipe({
   name: 'format'
 })
 export class AmountPipe implements PipeTransform {
 
   transform(amount: Amount): string {
-    return `${toFractional(amount)} ${amount.currency}`
+    return formatAsString(amount)
   }
 
 }

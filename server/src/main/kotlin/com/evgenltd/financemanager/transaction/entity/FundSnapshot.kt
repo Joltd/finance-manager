@@ -22,6 +22,9 @@ class Fund : HashMap<String, AllocationQueue>() {
     fun get(account: String, currency: String): AllocationQueue =
         getOrPut(key(account, currency)) { AllocationQueue() }
 
+    fun remove(account: String, currency: String) =
+        remove(key(account, currency))
+
     private fun key(account: String, currency: String): String = "${account}_${currency}"
 
     companion object {
