@@ -70,6 +70,8 @@
         <button mat-menu-item (click)="copy(document.value.id!)">Copy</button>
         <button mat-menu-item (click)="edit(document.value.id!)">Edit</button>
         <button mat-menu-item (click)="delete(document.value.id!)">Delete</button>
+        <button *ngIf="document.type == 'expense' || document.type == 'exchange'"
+                mat-menu-item (click)="graph(document.value.id!)">Graph</button>
       </mat-menu>
     </button>
   </mat-action-list>

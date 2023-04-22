@@ -116,6 +116,7 @@ class FundGraphService(
     // greater or equal from and less than to
     // maybe load expenses with incomes
     fun loadFlows(from: LocalDate, to: LocalDate, targetCurrency: String): FlowsRecord {
+        REQUESTS.clear()
         val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot(from)
         val trulyFrom = fundSnapshot?.date ?: MIN_DATE
 
@@ -157,7 +158,8 @@ class FundGraphService(
 
             if (transaction.direction == Direction.IN) {
                 val rate = exchangeRateService.rate(transaction.date, transaction.amount.currency, targetCurrency)
-                incomes.add(FlowRecord(transaction.date, transaction.amount * rate, incomeCategory ?: expenseCategory!!))
+                val targetAmount = transaction.amount.toBigDecimal() * rate
+                incomes.add(FlowRecord(transaction.date, Amount(targetAmount.toAmountValue(), targetCurrency), incomeCategory ?: expenseCategory!!))
                 continue
             }
 
@@ -168,6 +170,7 @@ class FundGraphService(
 
         }
 
+        println(REQUESTS.size)
         return FlowsRecord(incomes, expenses)
     }
 
@@ -188,8 +191,9 @@ class FundGraphService(
         return parents.sumOf { it.source.resolve(value * it.rate, targetCurrency) }
     }
 
-    private companion object {
+    companion object {
         val MIN_DATE: LocalDate = LocalDate.of(2000,1,1)
+        val REQUESTS = mutableSetOf<String>()
     }
     
 }

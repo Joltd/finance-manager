@@ -26,4 +26,5 @@ class DocumentController(
 
     @DeleteMapping("/account/{id}/document")
     fun deleteByAccount(@PathVariable("id") account: String) = documentService.deleteByAccount(account)
+
 }

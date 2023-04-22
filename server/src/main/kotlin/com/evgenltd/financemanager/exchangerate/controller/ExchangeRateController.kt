@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 @RestController
 class ExchangeRateController(
-        private val exchangeRateService: ExchangeRateService
+    private val exchangeRateService: ExchangeRateService
 ) {
 
     @GetMapping("/exchange-rate")
@@ -22,12 +22,5 @@ class ExchangeRateController(
 
     @DeleteMapping("/exchange-rate/{id}")
     fun delete(@PathVariable("id") id: String) = exchangeRateService.delete(id)
-
-    @GetMapping("/exchange-rate/rate")
-    fun rate(
-            @RequestParam("date") date: String,
-            @RequestParam("from") from: String,
-            @RequestParam("to") to: String
-    ): BigDecimal = exchangeRateService.rate(LocalDate.parse(date), from, to)
 
 }

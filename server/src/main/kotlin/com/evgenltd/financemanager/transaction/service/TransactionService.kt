@@ -89,6 +89,8 @@ class TransactionService(
         eventPublisher.publishEvent(ResetGraphEvent(resetDate))
     }
 
+    fun findByDocument(document: String): List<Transaction> = transactionRepository.findByDocument(document)
+
     fun findByAccount(account: String): List<Transaction> = transactionRepository.findByAccount(account)
 
     fun usageByAccount(account: String): Usage = transactionRepository.findByAccount(account).size.let { Usage(it.toString()) }

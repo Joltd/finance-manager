@@ -17,17 +17,22 @@ import java.math.BigDecimal
 class FlowGraphChartService(
     private val transactionService: TransactionService,
     private val relationService: RelationService,
-    private val fundGraphService: FundGraphService,
     private val incomeCategoryService: IncomeCategoryService,
     private val expenseCategoryService: ExpenseCategoryService
 ) {
 
-    fun load(id: String): FlowGraphChartRecord {
+    fun load(documentId: String): FlowGraphChartRecord {
+
+        val transactionId = transactionService.findByDocument(documentId)
+            .firstOrNull()
+            ?.id
+            ?: throw IllegalArgumentException("Document $documentId not found")
 
         val incomeIndex = incomeCategoryService.listReference().associateBy { it.id }
         val expenseIndex = expenseCategoryService.listReference().associateBy { it.id }
 
-        val root = transactionService.findById(id) ?: throw IllegalArgumentException("Transaction $id not found")
+        val root = transactionService.findById(transactionId)
+            ?: throw IllegalArgumentException("Transaction $transactionId not found")
 
         val isExchange = root.expenseCategory == null && root.incomeCategory == null
         if (root.direction == Direction.IN && !isExchange) {
@@ -41,7 +46,7 @@ class FlowGraphChartService(
             loadRelatedExchangeTransaction(root, transactions, relations)
         }
 
-        loadPreviousTransactionsRecursively(id, transactions, relations)
+        loadPreviousTransactionsRecursively(transactionId, transactions, relations)
 
         val result = FlowGraphChartRecord(
             nodes = transactions.distinctBy { it.id }.map { it.toNode(incomeIndex, expenseIndex) },

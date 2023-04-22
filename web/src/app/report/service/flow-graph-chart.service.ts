@@ -14,8 +14,8 @@ export class FlowGraphChartService {
 
   constructor(private http: HttpClient) {}
 
-  load(transactionId: string): Observable<FlowGraphChart> {
-    return this.http.get<FlowGraphChart>(`/flow-graph-chart/${transactionId}`, TypeUtils.of(FlowGraphChart))
+  load(documentId: string): Observable<FlowGraphChart> {
+    return this.http.get<FlowGraphChart>(`/flow-graph-chart/${documentId}`, TypeUtils.of(FlowGraphChart))
   }
 
 }

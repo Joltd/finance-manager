@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, ViewChild} from "@angular/core";
 import {FlowChartService} from "../../service/flow-chart.service";
-import {FormGroup} from "@angular/forms";
+import {FormControl, FormGroup} from "@angular/forms";
 import * as echarts from "echarts";
 import {ECharts} from "echarts";
 import {toFractional} from "../../../common/model/amount";
@@ -11,6 +11,8 @@ import * as moment from "moment";
 import {CategoryChartService} from "../../service/category-chart.service";
 import {Router} from "@angular/router";
 import {Total} from "../../model/total";
+import {Subscription} from "rxjs";
+import {FlowChart} from "../../model/flow-chart";
 
 @Component({
   selector: 'flow-chart',
@@ -19,12 +21,23 @@ import {Total} from "../../model/total";
 })
 export class FlowChartComponent implements AfterViewInit, OnDestroy {
 
-  @ViewChild('chart')
-  chartContainer!: ElementRef
-  chart!: ECharts
+  settings: FormGroup = new FormGroup({
+    dateFrom: new FormControl(this.flowChartService.dateFrom),
+    dateTo: new FormControl(this.flowChartService.dateTo),
+    groupBy: new FormControl(this.flowChartService.groupBy),
+    expenseCategories: new FormControl(this.flowChartService.expenseCategories),
+    incomeCategories: new FormControl(this.flowChartService.incomeCategories),
+    currency: new FormControl(this.flowChartService.currency)
+  })
 
   expenseCategories: Reference[] = []
   incomeCategories: Reference[] = []
+
+  data!: FlowChart
+
+  @ViewChild('chart')
+  chartContainer!: ElementRef
+  chart!: ECharts
 
   totals: Total[] = []
 
@@ -33,12 +46,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     private categoryChartService: CategoryChartService,
     private referenceService: ReferenceService,
     private router: Router
-  ) {
-    this.referenceService.list('/expense/reference')
-      .subscribe(result => this.expenseCategories = result)
-    this.referenceService.list('/income/reference')
-      .subscribe(result => this.incomeCategories = result)
-  }
+  ) {}
 
   ngAfterViewInit(): void {
     let chart = echarts.init(this.chartContainer.nativeElement)
@@ -47,16 +55,42 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     }
     chart.on('click', params => this.drillDown(params))
     this.chart = chart
-    this.flowChartService.onLoad.subscribe(() => this.refreshChart())
-    this.flowChartService.load()
+
+    this.referenceService.list('/expense/reference')
+      .subscribe(result => {
+
+        this.expenseCategories = result
+
+        this.referenceService.list('/income/reference')
+          .subscribe(result => {
+
+            this.incomeCategories = result
+            this.settings.patchValue({
+              expenseCategories: this.expenseCategories.map(category => category.id),
+              incomeCategories: this.incomeCategories.map(category => category.id)
+            })
+
+            this.settings.valueChanges.subscribe(() => this.load())
+            this.load()
+
+          })
+      })
   }
 
   ngOnDestroy(): void {
     this.chart.dispose()
   }
 
+  private load() {
+    this.flowChartService.load(this.settings.value)
+      .subscribe(result => {
+        this.data = result
+        this.refreshChart()
+      })
+  }
+
   filter(): FormGroup {
-    return this.flowChartService.settings
+    return this.settings
   }
 
   allExpenseCategories() {
@@ -82,9 +116,9 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         axisLabel: {
           rotate: 90
         },
-        data: this.flowChartService.data.dates
+        data: this.data.dates
       },
-      series: this.flowChartService.data.flows.map(series => this.seriesOptions(series)),
+      series: this.data.flows.map(series => this.seriesOptions(series)),
       grid: {
         left: '2%',
         right: '6%',
@@ -139,15 +173,13 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   }
 
   private drillDown(params: any) {
-    let groupBy = this.flowChartService.settings.value.groupBy
-    let date = this.flowChartService.data.dates[params.dataIndex]
-    this.categoryChartService.settings.patchValue({
-      dateFrom: moment(date).format('yyyy-MM-DD'),
-      dateTo: moment(date).add(1, groupBy).format('yyyy-MM-DD'),
-      expenseCategories: this.flowChartService.settings.value.expenseCategories,
-      incomeCategories: this.flowChartService.settings.value.incomeCategories,
-      groupBy: params.seriesIndex == 0 ? 'expense' : 'income'
-    })
+    let groupBy = this.settings.value.groupBy
+    let date = this.data.dates[params.dataIndex]
+    this.categoryChartService.dateFrom = moment(date).format('yyyy-MM-DD')
+    this.categoryChartService.dateTo = moment(date).add(1, groupBy).format('yyyy-MM-DD')
+    this.categoryChartService.expenseCategories = this.settings.value.expenseCategories
+    this.categoryChartService.incomeCategories = this.settings.value.incomeCategories
+    this.categoryChartService.groupBy = params.seriesIndex == 0 ? 'expense' : 'income'
     this.router.navigate(['category-chart']).then()
   }
 

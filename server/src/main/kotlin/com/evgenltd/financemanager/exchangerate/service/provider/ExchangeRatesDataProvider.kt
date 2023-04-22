@@ -12,8 +12,8 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
-class FixerIoProvider(
-    @Value("\${exchange.fixerio.apikey}")
+class ExchangeRatesDataProvider(
+    @Value("\${exchange.exchange_rates.apikey}")
     private val apiKey: String
 ) : ExchangeRateProvider, Loggable() {
 
@@ -28,7 +28,7 @@ class FixerIoProvider(
             "$URL/$date?base=$from&symbols=$to",
             HttpMethod.GET,
             HttpEntity(null, headers),
-            FixerResponse::class.java
+            ExchangeRatesResponse::class.java
         )
 
         if (!response.statusCode.is2xxSuccessful) {
@@ -51,23 +51,22 @@ class FixerIoProvider(
     }
 
     private companion object {
-        const val URL = "https://api.apilayer.com/fixer"
+        const val URL = "https://api.apilayer.com/exchangerates_data"
     }
 
 }
 
-data class FixerResponse(
+data class ExchangeRatesResponse(
     val success: Boolean,
     val timestamp: Long? = null,
-    val error: FixerError? = null,
+    val error: ExchangeRatesError? = null,
     val historical: Boolean? = null,
     val base: String? = null,
     val date: LocalDate? = null,
-    val rates: Map<String,BigDecimal>? = null
+    val rates: Map<String, BigDecimal>? = null
 )
 
-data class FixerError(
+data class ExchangeRatesError(
     val code: Int,
-    val type: String,
-    val info: String
+    val message: String
 )

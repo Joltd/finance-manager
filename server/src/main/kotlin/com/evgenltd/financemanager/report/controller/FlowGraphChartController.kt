@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class FlowGraphChartController(private val flowGraphChartService: FlowGraphChartService) {
 
-    @GetMapping("/flow-graph-chart/{transactionId}")
-    fun loadFlowGraphChart(@PathVariable transactionId: String): FlowGraphChartRecord {
-        return flowGraphChartService.load(transactionId)
+    @GetMapping("/flow-graph-chart/{documentId}")
+    fun loadFlowGraphChart(@PathVariable documentId: String): FlowGraphChartRecord {
+        return flowGraphChartService.load(documentId)
     }
 
 }

@@ -31,9 +31,8 @@ export class FlowGraphChartComponent implements AfterViewInit, OnDestroy {
     }
     this.chart = chart
     this.activatedRoute.params.subscribe(params => {
-      let transactionId = params['transactionId']
-      console.log(transactionId)
-      this.flowGraphChartService.load(transactionId)
+      let documentId = params['documentId']
+      this.flowGraphChartService.load(documentId)
         .subscribe(result => this.refreshChart(result))
     })
   }

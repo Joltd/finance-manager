@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.document.repository.DocumentExchangeRepositor
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
+import com.evgenltd.financemanager.transaction.service.FundGraphService
 import com.evgenltd.financemanager.transaction.service.RelationService
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
@@ -74,14 +75,15 @@ class ExchangeRateService(
         }
 
     private fun loadFromProviders(date: LocalDate, from: String, to: String): BigDecimal? {
-        for (exchangeRateProvider in exchangeRateProviders) {
-            val rate = exchangeRateProvider.rate(date, from, to)
-            if (rate != null) {
-                exchangeRateRepository.save(ExchangeRate(null, date, from, to, rate))
-                return rate
-            }
-        }
-        return null
+//        for (exchangeRateProvider in exchangeRateProviders) {
+//            val rate = exchangeRateProvider.rate(date, from, to)
+//            if (rate != null) {
+//                exchangeRateRepository.save(ExchangeRate(null, date, from, to, rate))
+//                return rate
+//            }
+//        }
+        FundGraphService.REQUESTS.add("$date, $from, $to")
+        return BigDecimal(2)
     }
 
     private fun loadByPeriod(

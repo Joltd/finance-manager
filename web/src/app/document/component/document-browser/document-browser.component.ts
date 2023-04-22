@@ -87,4 +87,8 @@ export class DocumentBrowserComponent implements OnInit {
     this.documentService.delete(id).subscribe(() => this.load())
   }
 
+  graph(id: string) {
+    this.router.navigate(['flow-graph-chart', id]).then()
+  }
+
 }
