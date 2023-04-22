@@ -53,6 +53,7 @@ const routes: Routes = [
   { path: 'fast-expense', component: FastExpenseComponent },
   { path: 'flow-chart', component: FlowChartComponent },
   { path: 'category-chart', component: CategoryChartComponent },
+  { path: 'flow-graph-chart/:transactionId', component: FlowGraphChartComponent },
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: 'settings', component: SettingsEditorComponent },

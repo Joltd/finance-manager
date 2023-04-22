@@ -1,7 +1,9 @@
 package com.evgenltd.financemanager.report.record
 
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.transaction.entity.Direction
+import java.math.BigDecimal
 import java.time.LocalDate
 
 data class FlowGraphChartRecord(
@@ -9,18 +11,28 @@ data class FlowGraphChartRecord(
     val links: List<Link>
 ) {
 
+    enum class Type {
+        IN, OUT, EXCHANGE
+    }
+
     data class Node(
         val id: String,
-        val direction: Direction,
+        val direction: Type,
         val date: LocalDate,
-        val amount: Amount,
-        val outside: Boolean = false
+        val amount: Amount? = null,
+        val category: Reference? = null,
+        val amountFrom: Amount? = null,
+        val amountTo: Amount? = null,
+        val rate: BigDecimal? = null
     )
 
     data class Link(
-        val source: String,
-        val target: String,
-        val amount: Amount?
+        var source: String,
+        var target: String,
+        val date: LocalDate,
+        val exchange: Boolean,
+        val amount: Amount? = null,
+        val rate: BigDecimal? = null
     )
 
 }

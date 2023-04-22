@@ -42,7 +42,7 @@ class RelationService(
             to = to.id!!,
             document = document,
             exchange = true,
-            rate = from.amount.toBigDecimal() / to.amount.toBigDecimal()
+            rate = to.amount.toBigDecimal() / from.amount.toBigDecimal()
         )
         relationRepository.save(relation)
     }
@@ -58,7 +58,10 @@ class RelationService(
     fun findRelations(from: LocalDate, to: LocalDate) =
         relationRepository.findByDateGreaterThanEqualAndDateLessThan(from, to)
 
-    fun findRelations(transactionIds: List<String>) =
-        relationRepository.findByFromInOrToIn(transactionIds, transactionIds)
+    fun findInboundRelations(toIds: List<String>) =
+        relationRepository.findByToIn(toIds.distinct())
+
+    fun findOutboundRelations(fromIds: List<String>) =
+        relationRepository.findByFromIn(fromIds.distinct())
 
 }

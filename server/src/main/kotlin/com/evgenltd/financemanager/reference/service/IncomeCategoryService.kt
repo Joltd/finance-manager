@@ -14,7 +14,7 @@ class IncomeCategoryService(
         val incomeCategoryRepository: IncomeCategoryRepository
 ) {
 
-    fun listReference(mask: String?, id: String?): List<Reference> {
+    fun listReference(mask: String? = null, id: String? = null): List<Reference> {
         val list = if (mask?.isNotEmpty() == true) {
             incomeCategoryRepository.findByNameLike(mask)
         } else if (id != null) {

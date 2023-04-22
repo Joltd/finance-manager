@@ -113,23 +113,6 @@ class FundGraphService(
 
     }
 
-    fun loadGraph(from: LocalDate, to: LocalDate, account: String, currency: String): FlowGraphChartRecord {
-        val transactions = transactionService.findTransactions(from, to, account, currency)
-        val transactionIds = transactions.map { it.id!! }
-        val outTransactionIds = transactions.filter { it.direction == Direction.OUT }.map { it.id!! }
-        val relations = relationService.findRelations(outTransactionIds)
-
-        val commonNodes = transactions.map { FlowGraphChartRecord.Node(it.id!!, it.direction, it.date, it.amount) }
-        val outsideNodes = (relations.flatMap { listOf(it.from, it.to) }.toSet() - transactionIds.toSet())
-            .let { transactionService.findTransactions(it.toList()) }
-            .map { FlowGraphChartRecord.Node(it.id!!, it.direction, it.date, it.amount, it.account != account || it.amount.currency != currency) }
-
-        return FlowGraphChartRecord(
-            nodes = (commonNodes + outsideNodes).sortedBy { it.date },
-            links = relations.map { FlowGraphChartRecord.Link(it.from, it.to, it.amount) }
-        )
-    }
-
     // greater or equal from and less than to
     // maybe load expenses with incomes
     fun loadFlows(from: LocalDate, to: LocalDate, targetCurrency: String): FlowsRecord {

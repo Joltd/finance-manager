@@ -4,7 +4,8 @@ import * as echarts from "echarts";
 import {FlowGraphChartService} from "../../service/flow-graph-chart.service";
 import {FormGroup} from "@angular/forms";
 import {Amount, formatAsString} from "../../../common/model/amount";
-import {FlowGraphChartLink, FlowGraphChartNode} from "../../model/flow-graph-chart";
+import {FlowGraphChart, FlowGraphChartLink, FlowGraphChartNode} from "../../model/flow-graph-chart";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'flow-graph-chart',
@@ -18,7 +19,8 @@ export class FlowGraphChartComponent implements AfterViewInit, OnDestroy {
   chart!: ECharts
 
   constructor(
-    private flowGraphChartService: FlowGraphChartService
+    private flowGraphChartService: FlowGraphChartService,
+    private activatedRoute: ActivatedRoute
   ) {
   }
 
@@ -28,19 +30,19 @@ export class FlowGraphChartComponent implements AfterViewInit, OnDestroy {
       chart.resize()
     }
     this.chart = chart
-    this.flowGraphChartService.onLoad.subscribe(() => this.refreshChart())
-    this.flowGraphChartService.load()
+    this.activatedRoute.params.subscribe(params => {
+      let transactionId = params['transactionId']
+      console.log(transactionId)
+      this.flowGraphChartService.load(transactionId)
+        .subscribe(result => this.refreshChart(result))
+    })
   }
 
   ngOnDestroy(): void {
     this.chart.dispose()
   }
 
-  filter(): FormGroup {
-    return this.flowGraphChartService.settings
-  }
-
-  private refreshChart() {
+  private refreshChart(result: FlowGraphChart) {
     let option = {
       tooltip: {
         trigger: 'item',
@@ -51,23 +53,13 @@ export class FlowGraphChartComponent implements AfterViewInit, OnDestroy {
         layout: 'none',
         left: 'center',
         width: '80%',
-        layoutIterations: 0,
-        draggable: false,
+        layoutIterations: 64,
+        // draggable: false,
         emphasis: {
           focus: 'adjacency'
         },
-        levels: [
-          {depth: 0},
-          {depth: 1},
-          {depth: 2},
-          {depth: 3},
-        ],
-        data: this.prepareNodes(),
-        links: this.prepareLinks()
-      },
-      dataZoom: {
-        type: 'inside',
-        orient: 'vertical'
+        data: this.prepareNodes(result),
+        links: this.prepareLinks(result)
       }
     }
     this.chart.resize()
@@ -75,11 +67,11 @@ export class FlowGraphChartComponent implements AfterViewInit, OnDestroy {
     this.chart.setOption(option)
   }
 
-  private prepareNodes(): any[] {
-    return this.flowGraphChartService.data.nodes.map(node => {
+  private prepareNodes(result: FlowGraphChart): any[] {
+    return result.nodes.map(node => {
       return {
         name: node.id,
-        depth: this.determineDepth(node),
+        // depth: this.determineDepth(node),
         itemStyle: {
           color: this.determineColor(node)
         },
@@ -87,39 +79,44 @@ export class FlowGraphChartComponent implements AfterViewInit, OnDestroy {
           show: false
         },
         tooltip: {
-          formatter: `${node.date}<br/>${formatAsString(node.amount)}`
+          formatter: `${node.date}<br/>`
+            + (node.amount != null ? formatAsString(node.amount!!) + '</br>' : '')
+            + (node.amountFrom != null && node.amountTo != null ? formatAsString(node.amountFrom!!) + ' -> ' + formatAsString(node.amountTo!!) + '<br/>' : '')
+            + (
+              node.rate != null
+                ? `Rate: ${node.rate}</br>Inverted rate: ${(1/node.rate).toFixed(4)}`
+                : ''
+            )
         }
       }
     })
   }
 
-  private prepareLinks(): any[] {
-    let max = this.maxValue(this.flowGraphChartService.data.links)
-    let min = this.minValue(this.flowGraphChartService.data.links)
-
-    return this.flowGraphChartService.data.links.map(link => {
+  private prepareLinks(result: FlowGraphChart): any[] {
+    return result.links.map(link => {
       return {
         source: link.source,
         target: link.target,
-        value: link.amount != null ? this.mapValue(min, max, 10, 40, link.amount.value) : 10, // for exchange value should be the same
+        // value: link.amount != null ? this.mapValue(min, max, 10, 40, link.amount.value) : 10, // for exchange value should be the same
+        value: 1,
         tooltip: {
-          formatter: link.amount != null ? `${formatAsString(link.amount)}` : `Exchange`
+          formatter: link.amount != null ? formatAsString(link.amount) : ''
         }
       }
     })
   }
 
-  private determineDepth(node: FlowGraphChartNode): number {
-    if (node.outside && node.direction == 'OUT') return 0
-    if (!node.outside && node.direction == 'IN') return 1
-    if (!node.outside && node.direction == 'OUT') return 2
-    if (node.outside && node.direction == 'IN') return 3
-    throw new Error('Unknown node state')
-  }
+  // private determineDepth(node: FlowGraphChartNode): number {
+  //   if (node.outside && node.direction == 'OUT') return 0
+  //   if (!node.outside && node.direction == 'IN') return 1
+  //   if (!node.outside && node.direction == 'OUT') return 2
+  //   if (node.outside && node.direction == 'IN') return 3
+  //   throw new Error('Unknown node state')
+  // }
 
   private determineColor(node: FlowGraphChartNode): string {
-    if (!node.outside && node.direction == 'IN') return '#66bb6a'
-    if (!node.outside && node.direction == 'OUT') return '#ef5350'
+    if (node.direction == 'IN') return '#66bb6a'
+    if (node.direction == 'OUT') return '#ef5350'
     return '#1e88e5'
   }
 

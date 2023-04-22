@@ -6,23 +6,23 @@ import com.evgenltd.financemanager.document.repository.DocumentExchangeRepositor
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
+import com.evgenltd.financemanager.transaction.service.RelationService
+import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.Period
 import javax.annotation.PostConstruct
+import kotlin.math.absoluteValue
 
 @Service
 class ExchangeRateService(
-    private val exchangeRateRepository: ExchangeRateRepository
+    private val exchangeRateRepository: ExchangeRateRepository,
+    private val relationService: RelationService,
+    private val exchangeRateProviders: List<ExchangeRateProvider>,
+    private val transactionService: TransactionService
 ) {
-
-    @PostConstruct
-    fun postConstruct() {
-//        exchangeRateRepository.deleteAll()
-//        documentExchangeRepository.findByAccountFromNotNull()
-//                .onEach { saveRate(it.date, it.amountFrom, it.amountTo) }
-    }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }
 
@@ -38,26 +38,67 @@ class ExchangeRateService(
 
     fun delete(id: String) = exchangeRateRepository.deleteById(id)
 
-    fun saveRate(date: LocalDate, from: Amount, to: Amount) {
-        if (from.currency == to.currency) {
-            return
-        }
-        val entity = exchangeRateRepository.findByDateAndFromAndTo(date, from.currency, to.currency)
-                ?: ExchangeRate(null, LocalDate.now(), "", "", BigDecimal.ZERO)
-        entity.date = date
-        entity.from = from.currency
-        entity.to = to.currency
-        entity.value = to.toBigDecimal().div(from.toBigDecimal())
-        exchangeRateRepository.save(entity)
-    }
-
     fun rate(date: LocalDate, from: String, to: String): BigDecimal {
         if (from == to) {
             return BigDecimal.ONE
         }
-        return exchangeRateRepository.findByDateAndFromAndTo(date, from, to)?.value
-            ?: throw IllegalStateException("Unable to find exchange rate for date=$date, from=$from, to=$to")
+
+        loadFromRelations(date, from, to)?.let { return it }
+
+        loadFromDb(date, from, to)?.let { return it }
+
+        loadFromProviders(date, from, to)?.let { return it }
+
+        throw IllegalStateException("Can't find exchange rate for $from/$to on $date")
     }
+
+    private fun loadFromRelations(date: LocalDate, from: String, to: String): BigDecimal? =
+        loadByPeriod(date, from, to) { dateFrom, dateTo ->
+            val relations = relationService.findRelations(dateFrom, dateTo).filter { it.exchange }
+            val transactionIds = relations.flatMap { listOf(it.from, it.to) }.distinct()
+            val transactionIndex = transactionService.findTransactions(transactionIds).associateBy { it.id!! }
+            relations.map {
+                ExchangeRate(
+                    id = null,
+                    date = it.date,
+                    from = transactionIndex[it.from]!!.amount.currency,
+                    to = transactionIndex[it.to]!!.amount.currency,
+                    value = it.rate()
+                )
+            }.filter { it.from != it.to }
+        }
+
+    private fun loadFromDb(date: LocalDate, from: String, to: String): BigDecimal? =
+        loadByPeriod(date, from, to) { dateFrom, dateTo ->
+            exchangeRateRepository.findByDateGreaterThanEqualAndDateLessThan(dateFrom, dateTo)
+        }
+
+    private fun loadFromProviders(date: LocalDate, from: String, to: String): BigDecimal? {
+        for (exchangeRateProvider in exchangeRateProviders) {
+            val rate = exchangeRateProvider.rate(date, from, to)
+            if (rate != null) {
+                exchangeRateRepository.save(ExchangeRate(null, date, from, to, rate))
+                return rate
+            }
+        }
+        return null
+    }
+
+    private fun loadByPeriod(
+        date: LocalDate,
+        from: String,
+        to: String,
+        loader: (dateFrom: LocalDate, dateTo: LocalDate) -> List<ExchangeRate>
+    ): BigDecimal? = loader(date.minusDays(RELATIONS_RATE_PERIOD_GAP), date.plusDays(RELATIONS_RATE_PERIOD_GAP))
+        .filter { (it.from == from && it.to == to) || (it.from == to && it.to == from) }
+        .minByOrNull { Period.between(date, it.date).days.absoluteValue }
+        ?.let {
+            if (it.from == from && it.to == to) {
+                it.value
+            } else {
+                BigDecimal.ONE.divide(it.value, 10, RoundingMode.HALF_UP)
+            }
+        }
 
     private fun ExchangeRate.toRecord(): ExchangeRateRecord = ExchangeRateRecord(
             id = id,
@@ -74,5 +115,9 @@ class ExchangeRateService(
             to = to,
             value = value
     )
+
+    private companion object {
+        const val RELATIONS_RATE_PERIOD_GAP = 3L
+    }
 
 }

@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.transaction.event.ResetGraphEvent
 import com.evgenltd.financemanager.transaction.record.Usage
 import com.evgenltd.financemanager.transaction.repository.TransactionRepository
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -102,10 +103,9 @@ class TransactionService(
     fun findTransactions(from: LocalDate, to: LocalDate): List<Transaction> =
         transactionRepository.findByDateBetween(from, to)
 
-    fun findTransactions(from: LocalDate, to: LocalDate, account: String, currency: String): List<Transaction> =
-        transactionRepository.findByDateBetweenAndAccountAndCurrency(from, to, account, currency)
-
     fun findTransactions(ids: List<String>): List<Transaction> =
-        transactionRepository.findAllById(ids).toList()
+        transactionRepository.findAllById(ids.distinct()).toList()
+
+    fun findById(id: String): Transaction? = transactionRepository.findByIdOrNull(id)
 
 }

@@ -1,13 +1,14 @@
 package com.evgenltd.financemanager.exchangerate.repository
 
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
+import com.evgenltd.financemanager.transaction.entity.Relation
 import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.data.mongodb.repository.Query
 import java.time.LocalDate
 
 interface ExchangeRateRepository : MongoRepository<ExchangeRate, String> {
 
-    fun findByDateLessThanEqual(date: LocalDate): List<ExchangeRate>
-
-    fun findByDateAndFromAndTo(date: LocalDate, from: String, to: String): ExchangeRate?
+    @Query("{'date': { \$gte: ?0, \$lt: ?1 }}")
+    fun findByDateGreaterThanEqualAndDateLessThan(from: LocalDate, to: LocalDate): List<ExchangeRate>
 
 }

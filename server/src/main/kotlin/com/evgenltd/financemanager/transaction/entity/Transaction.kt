@@ -13,3 +13,5 @@ class Transaction(
     var incomeCategory: String? = null,
     var expenseCategory: String? = null,
 )
+
+enum class Direction { IN, OUT }
