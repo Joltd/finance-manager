@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.transaction.entity
 
-import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 
@@ -9,8 +8,15 @@ class FundSnapshot(
     var id: String?,
     var date: LocalDate,
     var type: FundSnapshotType,
-    var fund: Fund
+    var fund: Fund,
+    var status: FundGraphStatus? = null
 )
+
+enum class FundGraphStatus {
+    ACTUAL,
+    REBUILD,
+    OUTDATED
+}
 
 enum class FundSnapshotType {
     CURRENT,

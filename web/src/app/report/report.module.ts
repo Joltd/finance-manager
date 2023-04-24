@@ -15,6 +15,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {CategoryChartComponent} from "./component/category-chart/category-chart.component";
 import {FlowGraphChartComponent} from "./component/flow-graph-chart/flow-graph-chart.component";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 
 @NgModule({
   declarations: [
@@ -23,21 +24,22 @@ import {FlowGraphChartComponent} from "./component/flow-graph-chart/flow-graph-c
     CategoryChartComponent,
     FlowGraphChartComponent
   ],
-  imports: [
-    MatCardModule,
-    NgForOf,
-    CommonModule,
-    MatListModule,
-    MatChipsModule,
-    NgIf,
-    MatExpansionModule,
-    MatInputModule,
-    MatSelectModule,
-    ReactiveFormsModule,
-    MatDatepickerModule,
-    MatButtonModule,
-    MatIconModule
-  ],
+    imports: [
+        MatCardModule,
+        NgForOf,
+        CommonModule,
+        MatListModule,
+        MatChipsModule,
+        NgIf,
+        MatExpansionModule,
+        MatInputModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+        MatDatepickerModule,
+        MatButtonModule,
+        MatIconModule,
+        MatProgressSpinnerModule
+    ],
   exports: [
     DashboardComponent,
     FlowChartComponent,

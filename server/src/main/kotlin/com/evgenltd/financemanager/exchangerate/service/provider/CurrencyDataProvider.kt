@@ -1,8 +1,8 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
-import com.evgenltd.financemanager.common.util.Loggable
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
+import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -12,43 +12,46 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
+@Order(10)
 class CurrencyDataProvider(
     @Value("\${exchange.currency_date.apikey}")
-    private val apiKey: String
-) : ExchangeRateProvider, Loggable() {
+    private val apiKey: String,
+    exchangeRateRepository: ExchangeRateRepository
+) : LimitedExchangeRateProvider(exchangeRateRepository) {
 
     private val rest = RestTemplate()
 
-    override fun rate(date: LocalDate, from: String, to: String): BigDecimal? {
+    override fun rate(date: LocalDate, from: String, toCurrencies: Set<String>): Map<String, BigDecimal> {
         val headers = HttpHeaders().also {
             it.set("apikey", apiKey)
         }
 
         val response = rest.exchange(
-            "${URL}/historical?date=$date&source=$from&currencies=$to",
+            "${URL}/historical?date=$date&source=$from&currencies=${toCurrencies.joinToString(",")}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             CurrencyDataResponse::class.java
         )
 
         if (!response.statusCode.is2xxSuccessful) {
-            log.error("Unable to get exchange rate for date=$date, from=$from, to=$to, code ${response.statusCode}, body ${response.body}")
-            return null
+            log.error("Unable to get exchange rate for date=$date, from=$from, to=$toCurrencies, code ${response.statusCode}, body ${response.body}")
+            return emptyMap()
         }
 
-        val body = response.body ?: throw IllegalStateException("Unable to get exchange rate for date=$date, from=$from, to=$to, response body is null")
+        val body = response.body ?: throw IllegalStateException("Unable to get exchange rate for date=$date, from=$from, to=$toCurrencies, response body is null")
         if (!body.success) {
-            log.error("Unable to get exchange rate for date=$date, from=$from, to=$to, response body is not success, body=$body")
-            return null
+            log.error("Unable to get exchange rate for date=$date, from=$from, to=$toCurrencies, response body is not success, body=$body")
+            return emptyMap()
         }
 
-        val rate = body.quotes?.get(from + to)
-        if (rate == null) {
-            log.error("Unable to get exchange rate for date=$date, from=$from, to=$to, response body rates not found, body=$body")
-            return null
+        val rates = body.quotes
+        if (rates == null) {
+            log.error("Unable to get exchange rate for date=$date, from=$from, to=$toCurrencies, response body rates not found, body=$body")
+            return emptyMap()
         }
 
-        return rate
+        return rates.entries
+            .associate { it.key.replace(from, "") to it.value }
     }
 
     private companion object {

@@ -4,7 +4,6 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.report.record.FlowGraphChartRecord
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.Fund
 import com.evgenltd.financemanager.transaction.entity.Transaction
@@ -13,6 +12,7 @@ import com.evgenltd.financemanager.transaction.event.ResetGraphEvent
 import com.evgenltd.financemanager.transaction.record.FlowRecord
 import com.evgenltd.financemanager.transaction.record.FlowsRecord
 import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -38,6 +38,7 @@ class FundGraphService(
         val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot()
         val fixationDate = fundSnapshot?.date ?: MIN_DATE
         relationService.deleteNotActual(fixationDate)
+        fundSnapshotService.currentSnapshotOutdated(date)
     }
 
     @EventListener
@@ -51,8 +52,15 @@ class FundGraphService(
     }
 
     @Transactional
-    fun resetAndRebuildGraph() {
+    @Async
+    fun startResetAndRebuildGraph() {
         resetGraph(MIN_DATE)
+        rebuildGraph()
+    }
+
+    @Transactional
+    @Async
+    fun startRebuildGraph() {
         rebuildGraph()
     }
 
@@ -109,14 +117,13 @@ class FundGraphService(
 
         }
 
-        fundSnapshotService.saveCurrentSnapshot(transactions.last().date, fund)
+        fundSnapshotService.currentSnapshotActual(transactions.last().date, fund)
 
     }
 
     // greater or equal from and less than to
     // maybe load expenses with incomes
     fun loadFlows(from: LocalDate, to: LocalDate, targetCurrency: String): FlowsRecord {
-        REQUESTS.clear()
         val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot(from)
         val trulyFrom = fundSnapshot?.date ?: MIN_DATE
 
@@ -170,7 +177,6 @@ class FundGraphService(
 
         }
 
-        println(REQUESTS.size)
         return FlowsRecord(incomes, expenses)
     }
 
@@ -191,9 +197,8 @@ class FundGraphService(
         return parents.sumOf { it.source.resolve(value * it.rate, targetCurrency) }
     }
 
-    companion object {
+    private companion object {
         val MIN_DATE: LocalDate = LocalDate.of(2000,1,1)
-        val REQUESTS = mutableSetOf<String>()
     }
     
 }

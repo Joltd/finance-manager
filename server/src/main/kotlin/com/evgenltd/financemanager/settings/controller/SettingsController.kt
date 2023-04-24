@@ -6,10 +6,7 @@ import com.evgenltd.financemanager.transaction.service.FundGraphService
 import org.springframework.web.bind.annotation.*
 
 @RestController
-class SettingsController(
-    private val settingsService: SettingsService,
-    private val fundGraphService: FundGraphService
-) {
+class SettingsController(private val settingsService: SettingsService, ) {
 
     @GetMapping("/settings")
     fun load(): SettingsRecord = settingsService.load()
@@ -19,8 +16,5 @@ class SettingsController(
 
     @DeleteMapping("/settings/database")
     fun clearDatabase() = settingsService.clearDatabase()
-
-    @PostMapping("/settings/graph")
-    fun rebuildGraph() = fundGraphService.resetAndRebuildGraph()
 
 }

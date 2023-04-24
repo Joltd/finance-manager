@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.transaction.service
 
 import com.evgenltd.financemanager.transaction.entity.Fund
+import com.evgenltd.financemanager.transaction.entity.FundGraphStatus
 import com.evgenltd.financemanager.transaction.entity.FundSnapshot
 import com.evgenltd.financemanager.transaction.entity.FundSnapshotType
 import com.evgenltd.financemanager.transaction.repository.FundSnapshotRepository
@@ -21,24 +22,42 @@ class FundSnapshotService(
     @Transactional
     fun deleteNotActualSnapshots(date: LocalDate) {
         fundSnapshotRepository.deleteByDateGreaterThanEqualAndType(date, FundSnapshotType.HISTORY)
-        fundSnapshotRepository.deleteByType(FundSnapshotType.CURRENT)
     }
 
+    @Transactional
     fun saveHistorySnapshot(date: LocalDate, fund: Fund) {
         val fundSnapshot = FundSnapshot(null, date, FundSnapshotType.HISTORY, fund)
+        fundSnapshotRepository.save(fundSnapshot)
+        currentSnapshotRebuild(date, fund)
+    }
+
+    @Transactional
+    fun currentSnapshotOutdated(date: LocalDate) {
+        val fundSnapshot = findCurrentSnapshot()
+        fundSnapshot.date = date
+        fundSnapshot.status = FundGraphStatus.OUTDATED
+        fundSnapshotRepository.save(fundSnapshot)
+    }
+
+    private fun currentSnapshotRebuild(date: LocalDate, fund: Fund) {
+        val fundSnapshot = findCurrentSnapshot()
+        fundSnapshot.date = date
+        fundSnapshot.status = FundGraphStatus.REBUILD
+        fundSnapshot.fund = fund
         fundSnapshotRepository.save(fundSnapshot)
     }
 
     @Transactional
-    fun saveCurrentSnapshot(date: LocalDate, fund: Fund) {
+    fun currentSnapshotActual(date: LocalDate, fund: Fund) {
         val fundSnapshot = findCurrentSnapshot()
         fundSnapshot.date = date
+        fundSnapshot.status = FundGraphStatus.ACTUAL
         fundSnapshot.fund = fund
         fundSnapshotRepository.save(fundSnapshot)
     }
 
     fun findCurrentSnapshot(): FundSnapshot = fundSnapshotRepository.findByType(FundSnapshotType.CURRENT)
-        ?: FundSnapshot(null, LocalDate.now(), FundSnapshotType.CURRENT, Fund())
+        ?: FundSnapshot(null, LocalDate.now(), FundSnapshotType.CURRENT, Fund(), FundGraphStatus.OUTDATED)
             .also { fundSnapshotRepository.save(it) }
 
 }

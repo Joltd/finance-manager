@@ -6,3 +6,9 @@ form {
   display: flex;
   flex-direction: column;
 }
+
+.management-card {
+  display: grid;
+  grid-auto-flow: row;
+  grid-gap: 1em;
+}

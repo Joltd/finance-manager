@@ -31,7 +31,7 @@ export class SettingsService {
   }
 
   rebuildGraph(): Observable<void> {
-    return this.http.post<void>('/settings/graph', null)
+    return this.http.post<void>('/fund-graph', null)
   }
 
 }

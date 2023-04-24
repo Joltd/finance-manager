@@ -15,19 +15,14 @@ class SettingsService(
         private val mongoDatabaseFactory: MongoDatabaseFactory
 ) {
 
-    @PostConstruct
-    fun postConstruct() {
-        saveDefaultCurrencies()
-    }
-
     fun load(): SettingsRecord {
         val settings = settingRepository.findAll().associateBy { it.name }
         return SettingsRecord(
-                settings[CURRENCIES]?.list() ?: emptyList(),
-                FastExpenseRecord(
-                        settings[FAST_EXPENSE_ACCOUNT]?.value,
-                        settings[FAST_EXPENSE_CURRENCY]?.value
-                )
+            settings[CURRENCIES]?.list() ?: emptyList(),
+            FastExpenseRecord(
+                settings[FAST_EXPENSE_ACCOUNT]?.value,
+                settings[FAST_EXPENSE_CURRENCY]?.value
+            )
         )
     }
 

@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface SettingRepository : MongoRepository<Setting,String> {
 
+    fun findByName(name: String): Setting?
+
     fun deleteByName(name: String)
 
 }

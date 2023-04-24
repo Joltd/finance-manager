@@ -24,8 +24,9 @@ export function fromFractional(value: number): number {
     .replace('.', '')
 }
 
-export function formatAsString(amount: Amount): string {
-  return `${toFractional(amount)} ${amount.currency}`
+export function formatAsString(amount: Amount, truncate: boolean = false): string {
+  let value = truncate ? Math.trunc(toFractional(amount)) : toFractional(amount)
+  return `${value} ${amount.currency}`
 }
 
 @Pipe({
@@ -33,8 +34,8 @@ export function formatAsString(amount: Amount): string {
 })
 export class AmountPipe implements PipeTransform {
 
-  transform(amount: Amount): string {
-    return formatAsString(amount)
+  transform(amount: Amount, truncate: boolean = false): string {
+    return formatAsString(amount, truncate)
   }
 
 }
