@@ -58,8 +58,8 @@ class RelationService(
     fun findRelations(from: LocalDate, to: LocalDate) =
         relationRepository.findByDateGreaterThanEqualAndDateLessThan(from, to)
 
-    fun findInboundRelations(toIds: List<String>) =
-        relationRepository.findByToIn(toIds.distinct())
+    fun findInboundRelations(toIds: Set<String>) =
+        relationRepository.findByToIn(toIds)
 
     fun findOutboundRelations(fromIds: List<String>) =
         relationRepository.findByFromIn(fromIds.distinct())

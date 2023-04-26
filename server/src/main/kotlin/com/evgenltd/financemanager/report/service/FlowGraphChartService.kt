@@ -17,6 +17,7 @@ import java.math.BigDecimal
 class FlowGraphChartService(
     private val transactionService: TransactionService,
     private val relationService: RelationService,
+    private val fundGraphService: FundGraphService,
     private val incomeCategoryService: IncomeCategoryService,
     private val expenseCategoryService: ExpenseCategoryService
 ) {
@@ -34,48 +35,34 @@ class FlowGraphChartService(
         val root = transactionService.findById(transactionId)
             ?: throw IllegalArgumentException("Transaction $transactionId not found")
 
-        val isExchange = root.expenseCategory == null && root.incomeCategory == null
-        if (root.direction == Direction.IN && !isExchange) {
+        if (root.direction == Direction.IN && !(root.expenseCategory == null && root.incomeCategory == null)) {
             return FlowGraphChartRecord(emptyList(), emptyList())
         }
 
-        val transactions = mutableListOf(root)
-        val relations = mutableListOf<Relation>()
-
-        if (root.direction == Direction.OUT && isExchange) {
-            loadRelatedExchangeTransaction(root, transactions, relations)
-        }
-
-        loadPreviousTransactionsRecursively(transactionId, transactions, relations)
+        val (nextTransactions, nextRelations) = loadRelatedExchangeTransaction(root)
+        val (prevTransactions, prevRelations) = fundGraphService.loadGraphRecursively(listOf(transactionId))
 
         val result = FlowGraphChartRecord(
-            nodes = transactions.distinctBy { it.id }.map { it.toNode(incomeIndex, expenseIndex) },
-            links = relations.distinctBy { it.id }.map { it.toLink()}
+            nodes = (prevTransactions + nextTransactions).distinctBy { it.id }.map { it.toNode(incomeIndex, expenseIndex) },
+            links = (prevRelations + nextRelations).distinctBy { it.id }.map { it.toLink()}
         )
 
         return result.mergeExchanges().mergerTransfers()
     }
 
-    private fun loadRelatedExchangeTransaction(root: Transaction, transactions: MutableList<Transaction>, relations: MutableList<Relation>) {
-        val nextRelations = relationService.findOutboundRelations(listOf(root.id!!))
-            .also { relations.addAll(it) }
-        transactionService.findTransactions(nextRelations.map { it.to })
-            .also { transactions.addAll(it) }
-    }
-
-    private fun loadPreviousTransactionsRecursively(id: String, transactions: MutableList<Transaction>, relations: MutableList<Relation>) {
-        var prevTransactionsIds = listOf(id)
-        while (true) {
-            val prevRelations = relationService.findInboundRelations(prevTransactionsIds)
-            if (prevRelations.isEmpty()) {
-                break
-            }
-            relations.addAll(prevRelations)
-            val prevTransactions = transactionService.findTransactions(prevRelations.map { it.from })
-            transactions.addAll(prevTransactions)
-            prevTransactionsIds = prevTransactions.map { it.id!! }
+    private fun loadRelatedExchangeTransaction(root: Transaction): Pair<List<Transaction>,List<Relation>> =
+        if (root.direction == Direction.OUT && root.expenseCategory == null && root.incomeCategory == null) {
+            val nextRelations = relationService.findOutboundRelations(listOf(root.id!!))
+            Pair(
+                transactionService.findTransactions(nextRelations.map { it.to }),
+                nextRelations
+            )
+        } else {
+            Pair(
+                emptyList(),
+                emptyList()
+            )
         }
-    }
 
     private fun FlowGraphChartRecord.mergeExchanges(): FlowGraphChartRecord {
 

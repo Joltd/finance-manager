@@ -12,7 +12,7 @@ interface RelationRepository : MongoRepository<Relation, String> {
     @Query("{'date': { \$gte: ?0, \$lt: ?1 }}")
     fun findByDateGreaterThanEqualAndDateLessThan(from: LocalDate, to: LocalDate): List<Relation>
 
-    fun findByToIn(toIds: List<String>): List<Relation>
+    fun findByToIn(toIds: Set<String>): List<Relation>
 
     fun findByFromIn(fromIds: List<String>): List<Relation>
 

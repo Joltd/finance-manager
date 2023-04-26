@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.Fund
+import com.evgenltd.financemanager.transaction.entity.Relation
 import com.evgenltd.financemanager.transaction.entity.Transaction
 import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.event.ResetGraphEvent
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @Service
@@ -121,34 +123,47 @@ class FundGraphService(
 
     }
 
+    fun loadGraphRecursively(transactions: List<String>): Pair<List<Transaction>,List<Relation>> {
+        val resultTransactions = transactions.toMutableSet()
+        val resultRelations = mutableListOf<Relation>()
+        val nextTransaction = transactions.toMutableSet()
+        while (nextTransaction.isNotEmpty()) {
+            relationService.findInboundRelations(nextTransaction)
+                .also { nextTransaction.clear() }
+                .onEach {
+                    resultRelations.add(it)
+                    if (it.from !in resultTransactions) {
+                        resultTransactions.add(it.from)
+                        nextTransaction.add(it.from)
+                    }
+                }
+        }
+
+        return Pair(
+            transactionService.findTransactions(resultTransactions.toList()),
+            resultRelations
+        )
+    }
+
     // greater or equal from and less than to
     // maybe load expenses with incomes
     fun loadFlows(from: LocalDate, to: LocalDate, targetCurrency: String): FlowsRecord {
-        val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot(from)
-        val trulyFrom = fundSnapshot?.date ?: MIN_DATE
+        val (transactions, relations) = transactionService.findTransactions(from, to)
+            .map { it.id!! }
+            .let { loadGraphRecursively(it) }
+        val nodeIndex = transactions.map { FlowNode(it) }.associateBy { it.transaction.id!! }
 
-        val transactions = transactionService.findTransactions(trulyFrom, to)
-        val fundTransactions = fundSnapshot?.fund
-            ?.values
-            ?.flatten()
-            ?.map { it.transaction }
-            ?.distinct()
-            ?.let { transactionService.findTransactions(it) }
-            ?: emptyList()
-        val nodeIndex = (transactions + fundTransactions).map { FlowNode(it) }.associateBy { it.transaction.id!! }
-
-        relationService.findRelations(trulyFrom, to)
-            .onEach {
-                val nodeFrom = nodeIndex[it.from]!!
-                val nodeTo = nodeIndex[it.to]!!
-                val rate = if (it.exchange) {
-                    it.rate() // maybe inverse
-                } else {
-                    it.amount().toBigDecimal() / nodeTo.transaction.amount.toBigDecimal()
-                }
-                val edge = FlowEdge(rate, nodeFrom)
-                nodeTo.parents.add(edge)
+        relations.onEach {
+            val nodeFrom = nodeIndex[it.from]!!
+            val nodeTo = nodeIndex[it.to]!!
+            val rate = if (it.exchange) {
+                BigDecimal.ONE.divide(it.rate(), 10, RoundingMode.HALF_UP)
+            } else {
+                it.amount().toBigDecimal() / nodeTo.transaction.amount.toBigDecimal()
             }
+            val edge = FlowEdge(rate, nodeFrom)
+            nodeTo.parents.add(edge)
+        }
 
         val incomes = mutableListOf<FlowRecord>()
         val expenses = mutableListOf<FlowRecord>()
@@ -181,6 +196,10 @@ class FundGraphService(
     }
 
     private fun FlowNode.markIfContains(targetCurrency: String): Boolean {
+        if (transaction.incomeCategory == null && transaction.expenseCategory == null && parents.isEmpty()) {
+            throw IllegalStateException("Not enough relations for loading funds")
+        }
+
         if (transaction.amount.currency == targetCurrency) {
             return false
         }
