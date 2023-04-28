@@ -110,7 +110,6 @@ class DocumentService(
         val service = resolveService(record.value)
         val entity = service.toEntity(record.value)
         service.update(entity)
-        eventPublisher.publishEvent(RebuildGraphEvent())
     }
 
     @Transactional
@@ -120,7 +119,6 @@ class DocumentService(
     fun delete(id: String) {
         transactionService.deleteByDocument(id)
         documentRepository.deleteById(id)
-        eventPublisher.publishEvent(RebuildGraphEvent())
     }
 
     fun findDocumentByAccount(account: String?): List<DocumentTypedRecord> {

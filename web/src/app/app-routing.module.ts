@@ -36,6 +36,7 @@ import {
 } from "./import-data/component/import-data-entry-view/import-data-entry-view.component";
 import {FlowGraphChartComponent} from "./report/component/flow-graph-chart/flow-graph-chart.component";
 import {FundSnapshotViewComponent} from "./report/component/fund-snapshot-view/fund-snapshot-view.component";
+import {FastExchangeComponent} from "./document/component/fast-exchange/fast-exchange.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -52,10 +53,11 @@ const routes: Routes = [
   { path: 'export-data', component: ExportDataBeginComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'fast-expense', component: FastExpenseComponent },
+  { path: 'fast-exchange', component: FastExchangeComponent },
   { path: 'flow-chart', component: FlowChartComponent },
   { path: 'category-chart', component: CategoryChartComponent },
   { path: 'flow-graph-chart/:documentId', component: FlowGraphChartComponent },
-  { path: 'fund-snapshot-view', component: FundSnapshotViewComponent },
+  { path: 'fund-snapshot', component: FundSnapshotViewComponent },
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: 'settings', component: SettingsEditorComponent },

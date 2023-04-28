@@ -1,26 +1,3 @@
-<!--<ng-container *ngFor="let accountBalance of dashboard.balances">-->
-<!--  <mat-card *ngIf="accountBalance.balances.length > 0">-->
-<!--    <mat-card-header>-->
-<!--      <mat-card-title>{{accountBalance.accountName}}</mat-card-title>-->
-<!--      <mat-card-subtitle *ngIf="accountBalance.daysElapsed > 0">-->
-<!--        {{accountBalance.daysElapsed}} days-->
-<!--      </mat-card-subtitle>-->
-<!--    </mat-card-header>-->
-<!--    <mat-card-content>-->
-<!--      <mat-chip-listbox>-->
-<!--        <mat-chip-option *ngFor="let balance of accountBalance.balances"-->
-<!--                  (click)="viewDocuments(accountBalance.account, balance.currency)">-->
-<!--          <amount-label [amount]="balance"></amount-label>-->
-<!--        </mat-chip-option>-->
-<!--      </mat-chip-listbox>-->
-<!--    </mat-card-content>-->
-<!--  </mat-card>-->
-<!--</ng-container>-->
-
-<!--<button class="fab" mat-fab (click)="fastExpense()">-->
-<!--  <mat-icon>add</mat-icon>-->
-<!--</button>-->
-
 <mat-card class="graph-status actual" *ngIf="dashboard.graphStatus?.status == 'ACTUAL'">
   <mat-icon>check_circle</mat-icon>
   <div>
@@ -41,7 +18,6 @@
     <div class="status">Outdated</div>
     <div class="date">{{dashboard.graphStatus.date}}</div>
   </div>
-  <button mat-icon-button (click)="rebuildGraph()"><mat-icon>autorenew</mat-icon></button>
 </mat-card>
 
 <mat-card>
@@ -55,5 +31,5 @@
   <div #chart [style.height]="fundChartHeight()"></div>
 </mat-card>
 
-<button mat-raised-button class="expense">Expense</button>
-<button mat-raised-button class="exchange">Exchange</button>
+<button mat-raised-button class="expense" (click)="fastExpense()">Expense</button>
+<button mat-raised-button class="exchange" (click)="fastExchange()">Exchange</button>

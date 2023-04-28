@@ -48,23 +48,16 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       })
   }
 
-  rebuildGraph() {
-    this.dashboardService.rebuildGraph()
-      .subscribe(() => {
-        this.load()
-      })
-  }
-
-  viewDocuments(account: string, currency: string) {
-    if (!account) {
-      return
-    }
-    this.documentService.updateFilter({account, currency})
-    this.router.navigate(['document']).then()
+  fundSnapshot() {
+    this.router.navigate(['fund-snapshot']).then()
   }
 
   fastExpense() {
     this.router.navigate(['fast-expense']).then()
+  }
+
+  fastExchange() {
+    this.router.navigate(['fast-exchange']).then()
   }
 
   fundChartHeight(): string {
