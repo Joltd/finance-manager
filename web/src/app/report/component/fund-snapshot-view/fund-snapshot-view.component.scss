@@ -1,0 +1,59 @@
+:host {
+  display: grid;
+  grid-auto-flow: row;
+  grid-gap: 1em;
+}
+
+.horizontal {
+  overflow-x: auto;
+}
+
+.horizontal::-webkit-scrollbar {
+  display: none;
+}
+
+.date-filter {
+  display: grid;
+
+  .date {
+    width: 8em;
+    white-space: nowrap;
+  }
+}
+
+.account {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 1em;
+  padding: 1em;
+}
+
+.currency {
+  display: grid;
+  grid-template-columns: 3em .2em 1fr;
+  grid-template-rows: 3.6em;
+  grid-gap: .4em;
+
+  .label {
+    justify-self: center;
+    align-self: center;
+  }
+
+  .balance {
+    display: grid;
+    align-self: center;
+    min-height: 3em;
+
+    .marker {
+      background-color: #66bb6a;
+      align-self: end;
+      border-radius: .2em;
+    }
+  }
+}
+
+.queue {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 1em;
+}

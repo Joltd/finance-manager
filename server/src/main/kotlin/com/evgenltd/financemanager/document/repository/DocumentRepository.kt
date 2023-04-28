@@ -5,6 +5,6 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface DocumentRepository : MongoRepository<Document,String> {
 
-
+    fun findByIdIn(documentIds: List<String>): List<Document>
 
 }

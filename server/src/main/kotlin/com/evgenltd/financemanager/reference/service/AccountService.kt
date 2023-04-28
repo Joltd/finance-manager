@@ -17,7 +17,7 @@ class AccountService(
         private val accountRepository: AccountRepository
 ) {
 
-    fun listReference(mask: String?, id: String?): List<Reference> {
+    fun listReference(mask: String? = null, id: String? = null): List<Reference> {
         val list = if (mask?.isNotEmpty() == true) {
             accountRepository.findByNameLike(mask)
         } else if (id != null) {

@@ -48,6 +48,8 @@ class DocumentService(
         )
     }
 
+    fun list(documentIds: List<String>): List<DocumentTypedRecord> = documentRepository.findByIdIn(documentIds).map(::toTypedRecord)
+
     private fun DocumentFilter.query(): Query {
         val criteriaList = mutableListOf(Criteria.where("").isEqualTo(""))
 

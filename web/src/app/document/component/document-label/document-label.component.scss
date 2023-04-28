@@ -4,6 +4,7 @@
   gap: 1em;
   cursor: default;
   user-select: none;
+  min-width: 16em;
 }
 
 .vertical {
@@ -23,9 +24,14 @@
 }
 
 .marker {
-  width: .2em;
-  height: 3em;
+  min-width: .2em;
+  min-height: 3em;
   border-radius: .2em;
+}
+
+.exchange-arrow {
+  min-width: 1em;
+  min-height: 1em;
 }
 
 .income {

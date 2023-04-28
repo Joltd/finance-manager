@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.reference.service
 
 import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import com.evgenltd.financemanager.reference.repository.IncomeCategoryRepository
@@ -12,8 +13,6 @@ class ReferenceService(
     private val expenseCategoryRepository: ExpenseCategoryRepository,
     private val incomeCategoryRepository: IncomeCategoryRepository
 ) {
-
-    fun accountIndex(): Map<String, Account> = accountRepository.findAll().associateBy { it.id!! }
 
     fun expenseCategoryIndex(): Map<String, String> = expenseCategoryRepository.findAll().associate { it.id!! to it.name }
 

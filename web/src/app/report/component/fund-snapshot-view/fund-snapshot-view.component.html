@@ -1,0 +1,21 @@
+<mat-card class="date-filter" *ngIf="fundSnapshots.length > 0">
+  <mat-button-toggle-group class="horizontal" [ngModel]="id" (ngModelChange)="loadFundSnapshot($event)">
+    <mat-button-toggle class="date" *ngFor="let snapshot of fundSnapshots" [value]="snapshot.id">
+      {{snapshot.date}}
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+</mat-card>
+<ng-container *ngIf="fundSnapshot != null">
+  <mat-card class="account" *ngFor="let account of fundSnapshot.accounts">
+    <div>{{account.account.name}}</div>
+    <div class="currency" *ngFor="let allocationQueue of account.allocationQueues">
+      <div class="label">{{allocationQueue.currency}}</div>
+      <div class="balance">
+        <div class="marker" [style.height]="balanceHeight(allocationQueue.allocations[0].weight)"></div>
+      </div>
+      <div class="queue horizontal">
+        <document-label [document]="allocation.document" *ngFor="let allocation of allocationQueue.allocations" [matTooltip]="allocation.amount | format"></document-label>
+      </div>
+    </div>
+  </mat-card>
+</ng-container>
