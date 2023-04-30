@@ -5,7 +5,6 @@ import {Reference} from "../../common/model/reference";
 export class FundSnapshot {
   id!: string
   date!: string
-  type!: 'HISTORY' | 'CURRENT'
   accounts: FundSnapshotAccount[] = []
 }
 
@@ -15,7 +14,7 @@ export class FundSnapshotAccount{
 }
 
 export class AllocationQueue {
-  currency!: string
+  amount!: Amount
   allocations: Allocation[] = []
 }
 

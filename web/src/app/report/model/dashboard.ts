@@ -1,15 +1,11 @@
-import {Amount, fromFractional} from "../../common/model/amount";
+import {Amount} from "../../common/model/amount";
+import {GraphState} from "./graph-state";
 
 export class Dashboard {
-  graphStatus!: GraphStatus
+  graph!: GraphState
   funds: Fund[] = []
   fundsTotal: Amount = {value: 0, currency: 'USD'}
   fundsTotalSecondary: Amount = {value: 0, currency: 'RUB'}
-}
-
-export class GraphStatus {
-  status!: 'ACTUAL' | 'REBUILD' | 'OUTDATED'
-  date!: string
 }
 
 export class Fund {

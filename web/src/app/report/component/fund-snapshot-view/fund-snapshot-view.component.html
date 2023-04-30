@@ -1,5 +1,35 @@
+<mat-card class="graph-status actual" *ngIf="graph?.status == 'ACTUAL'">
+  <mat-icon>check_circle</mat-icon>
+  <div>
+    <div class="status">Actual</div>
+    <div class="date">{{graph.date}}</div>
+  </div>
+  <button mat-icon-button (click)="date.open()"><mat-icon>restart_alt</mat-icon></button>
+  <button mat-icon-button (click)="rebuildGraph()"><mat-icon>schema</mat-icon></button>
+</mat-card>
+<mat-card class="graph-status rebuild" *ngIf="graph?.status == 'REBUILD'">
+  <button mat-icon-button (click)="load()"><mat-icon>autorenew</mat-icon></button>
+  <div>
+    <div class="status">Rebuild...</div>
+    <div class="date">{{graph.date}}</div>
+  </div>
+</mat-card>
+<mat-card class="graph-status outdated" *ngIf="graph?.status == 'OUTDATED'">
+  <mat-icon>error</mat-icon>
+  <div [matTooltip]="graphError()">
+    <div class="status">Outdated</div>
+    <div class="date">{{graph.date}}</div>
+  </div>
+  <button mat-icon-button (click)="date.open()"><mat-icon>restart_alt</mat-icon></button>
+  <button mat-icon-button (click)="rebuildGraph()"><mat-icon>schema</mat-icon></button>
+</mat-card>
+
+<input [matDatepicker]="date" [hidden]="true" (dateChange)="resetGraph($event.value)">
+<mat-datepicker touchUi #date [hidden]="true"></mat-datepicker>
+
 <mat-card class="date-filter" *ngIf="fundSnapshots.length > 0">
   <mat-button-toggle-group class="horizontal" [ngModel]="id" (ngModelChange)="loadFundSnapshot($event)">
+    <mat-button-toggle [value]="'0'">Current</mat-button-toggle>
     <mat-button-toggle class="date" *ngFor="let snapshot of fundSnapshots" [value]="snapshot.id">
       {{snapshot.date}}
     </mat-button-toggle>
@@ -9,8 +39,8 @@
   <mat-card class="account" *ngFor="let account of fundSnapshot.accounts">
     <div>{{account.account.name}}</div>
     <div class="currency" *ngFor="let allocationQueue of account.allocationQueues">
-      <div class="label">{{allocationQueue.currency}}</div>
-      <div class="balance">
+      <div class="amount" [matTooltip]="allocationQueue.amount | format">{{allocationQueue.amount.currency}}</div>
+      <div class="balance" *ngIf="allocationQueue.allocations.length > 0">
         <div class="marker" [style.height]="balanceHeight(allocationQueue.allocations[0].weight)"></div>
       </div>
       <div class="queue horizontal">

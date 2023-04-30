@@ -5,22 +5,22 @@ import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.report.record.FundRecord
-import com.evgenltd.financemanager.report.record.GraphStatusRecord
 import com.evgenltd.financemanager.transaction.entity.Fund
-import com.evgenltd.financemanager.transaction.service.FundSnapshotService
+import com.evgenltd.financemanager.transaction.record.GraphStateRecord
+import com.evgenltd.financemanager.transaction.service.GraphStateService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
 class DashboardService(
-    private val fundSnapshotService: FundSnapshotService,
+    private val graphStateService: GraphStateService,
     private val exchangeRateService: ExchangeRateService
 ) {
 
     fun load(): DashboardRecord {
 
-        val current = fundSnapshotService.findCurrentSnapshot()
-        val amounts = current.fund
+        val graph = graphStateService.find()
+        val amounts = graph.fund
             .map { it.value.sum(Fund.currency(it.key)) }
             .groupBy { it.currency }
             .map { it.value.reduce { acc, amount -> acc + amount } }
@@ -36,9 +36,10 @@ class DashboardService(
         val totalInSecondaryCurrency = amountsInSecondaryCurrency.values.fold(BigDecimal.ZERO) { acc, amount -> acc + amount }
 
         return DashboardRecord(
-            graphStatus = GraphStatusRecord(
-                status = current.status!!,
-                date = current.date
+            graph = GraphStateRecord(
+                status = graph.status,
+                date = graph.date,
+                error = graph.error
             ),
             funds = amounts.map {
                 val amountInMainCurrency = amountsInMainCurrency[it.currency] ?: BigDecimal.ZERO

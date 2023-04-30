@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.transaction.service
 
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.reference.record.Reference
@@ -25,95 +26,63 @@ class FundSnapshotService(
 ) {
 
     fun list(): List<FundSnapshotRecord> = fundSnapshotRepository.findAll()
-        .map { FundSnapshotRecord(
-            id = it.id!!,
-            date = it.date,
-            type = it.type,
-            accounts = emptyList()
-        ) }
+        .map { it.toRecord() }
         .sortedByDescending { it.date }
 
     fun byId(id: String): FundSnapshotRecord {
         val fundSnapshot = fundSnapshotRepository.find(id)
-        val fund = fundSnapshot.fund
+        return FundSnapshotRecord(
+            id = fundSnapshot.id!!,
+            date = fundSnapshot.date,
+            accounts = asAccounts(fundSnapshot.fund)
+        )
+    }
+
+    fun asAccounts(fund: Fund): List<FundSnapshotAccountRecord> {
         val transactionIds = fund.values.flatten().map { it.transaction }.distinct()
         val transactionIndex = transactionService.findTransactions(transactionIds).associateBy { it.id!! }
         val documentIds = transactionIndex.values.map { it.document }.distinct()
         val documentIndex = documentService.list(documentIds).associateBy { it.value.id()!! }
         val accountIndex = accountService.listReference().associateBy { it.id }
 
-        val accounts = fund
+        return fund
             .entries
             .groupingBy { accountIndex.reference(it.key) }
             .fold(listOf<AllocationQueueRecord>()) { accumulator, element ->
                 accumulator + element.value.toRecord(element.key, transactionIndex, documentIndex).let { listOf(it) }
             }
-            .map { FundSnapshotAccountRecord(it.key, it.value.sortedBy { it.currency }) }
+            .map { FundSnapshotAccountRecord(it.key, it.value.sortedBy { it.amount.currency }) }
             .sortedBy { it.account.name }
-
-        return FundSnapshotRecord(
-            id = fundSnapshot.id!!,
-            date = fundSnapshot.date,
-            type = fundSnapshot.type,
-            accounts = accounts
-        )
     }
 
-    fun findLastActualHistorySnapshot(): FundSnapshot? = fundSnapshotRepository.findFirstByTypeOrderByDateDesc(FundSnapshotType.HISTORY)
-
-    fun findLastActualHistorySnapshot(date: LocalDate): FundSnapshot? =
-        fundSnapshotRepository.findFirstByDateLessThanAndTypeOrderByDateDesc(date, FundSnapshotType.HISTORY)
+    fun findLastActualSnapshot(): FundSnapshot? = fundSnapshotRepository.findFirstByOrderByDateDesc()
 
     @Transactional
     fun deleteNotActualSnapshots(date: LocalDate) {
-        fundSnapshotRepository.deleteByDateGreaterThanEqualAndType(date, FundSnapshotType.HISTORY)
+        fundSnapshotRepository.deleteByDateGreaterThanEqual(date)
     }
 
     @Transactional
-    fun saveHistorySnapshot(date: LocalDate, fund: Fund) {
-        val fundSnapshot = FundSnapshot(null, date, FundSnapshotType.HISTORY, fund)
-        fundSnapshotRepository.save(fundSnapshot)
-        currentSnapshotRebuild(date, fund)
-    }
-
-    @Transactional
-    fun currentSnapshotOutdated(date: LocalDate) {
-        val fundSnapshot = findCurrentSnapshot()
-        fundSnapshot.date = date
-        fundSnapshot.status = FundGraphStatus.OUTDATED
+    fun saveSnapshot(date: LocalDate, fund: Fund) {
+        val fundSnapshot = FundSnapshot(null, date, fund)
         fundSnapshotRepository.save(fundSnapshot)
     }
 
-    private fun currentSnapshotRebuild(date: LocalDate, fund: Fund) {
-        val fundSnapshot = findCurrentSnapshot()
-        fundSnapshot.date = date
-        fundSnapshot.status = FundGraphStatus.REBUILD
-        fundSnapshot.fund = fund
-        fundSnapshotRepository.save(fundSnapshot)
-    }
-
-    @Transactional
-    fun currentSnapshotActual(date: LocalDate, fund: Fund) {
-        val fundSnapshot = findCurrentSnapshot()
-        fundSnapshot.date = date
-        fundSnapshot.status = FundGraphStatus.ACTUAL
-        fundSnapshot.fund = fund
-        fundSnapshotRepository.save(fundSnapshot)
-    }
-
-    fun findCurrentSnapshot(): FundSnapshot = fundSnapshotRepository.findByType(FundSnapshotType.CURRENT)
-        ?: FundSnapshot(null, LocalDate.now(), FundSnapshotType.CURRENT, Fund(), FundGraphStatus.OUTDATED)
-            .also { fundSnapshotRepository.save(it) }
+    private fun FundSnapshot.toRecord() = FundSnapshotRecord(
+        id = id!!,
+        date = date,
+        accounts = emptyList()
+    )
 
     private fun Map<String,Reference>.reference(key: String) = Fund.account(key)
         .let { get(it) ?: Reference(it, "Unknown", false) }
 
     private fun AllocationQueue.toRecord(
         key: String,
-        transactionIndex: Map<String,Transaction>,
-        documentIndex: Map<String,DocumentTypedRecord>
+        transactionIndex: Map<String, Transaction>,
+        documentIndex: Map<String, DocumentTypedRecord>
     ) = AllocationQueueRecord(
-        currency = Fund.currency(key),
+        amount = map { it.amount }.fold(Amount(0, Fund.currency(key))) { acc, amount -> acc + amount },
         allocations = map { allocation ->
             val transaction = transactionIndex[allocation.transaction]!!
             val document = documentIndex[transaction.document]!!

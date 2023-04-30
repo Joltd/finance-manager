@@ -53,6 +53,11 @@ class ExchangeRateService(
         exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2023-04-11"),"USD","RUB",BigDecimal("81.091494")))
         exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2023-04-14"),"GEL","RUB",BigDecimal("32.48513")))
         exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2022-04-05"),"USD","RUB",BigDecimal("83.999854")))
+        exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2022-04-29"),"USD","KZT",BigDecimal("445.909887")))
+        exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2022-04-29"),"USD","RUB",BigDecimal("80.450373")))
+        exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2022-04-29"),"USD","GEL",BigDecimal("2.490391")))
+        exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2022-04-29"),"RUB","KZT",BigDecimal("5.54267")))
+        exchangeRateRepository.save(ExchangeRate(null, LocalDate.parse("2022-04-29"),"RUB","GEL",BigDecimal("0.030956")))
     }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }

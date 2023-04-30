@@ -25,7 +25,8 @@ class FundGraphService(
     private val transactionService: TransactionService,
     private val relationService: RelationService,
     private val fundSnapshotService: FundSnapshotService,
-    private val exchangeRateService: ExchangeRateService
+    private val exchangeRateService: ExchangeRateService,
+    private val graphStateService: GraphStateService
 ) : Loggable() {
 
     @EventListener
@@ -37,26 +38,15 @@ class FundGraphService(
     @Transactional
     fun resetGraph(date: LocalDate) {
         fundSnapshotService.deleteNotActualSnapshots(date)
-        val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot()
+        val fundSnapshot = fundSnapshotService.findLastActualSnapshot()
         val fixationDate = fundSnapshot?.date ?: MIN_DATE
         relationService.deleteNotActual(fixationDate)
-        fundSnapshotService.currentSnapshotOutdated(date)
+        graphStateService.graphOutdated(fixationDate)
     }
 
     @EventListener
     @Transactional
     fun onRebuildGraph(event: RebuildGraphEvent) {
-        try {
-            rebuildGraph()
-        } catch (e: Exception) {
-            log.error("Error while rebuilding graph", e)
-        }
-    }
-
-    @Transactional
-    @Async
-    fun startResetAndRebuildGraph() {
-        resetGraph(MIN_DATE)
         rebuildGraph()
     }
 
@@ -67,7 +57,16 @@ class FundGraphService(
     }
 
     private fun rebuildGraph() {
-        val fundSnapshot = fundSnapshotService.findLastActualHistorySnapshot()
+        try {
+            rebuildGraphImpl()
+        } catch (e: Exception) {
+            graphStateService.graphError(Fund(), e.message ?: "Rebuilding graph error")
+            log.error("Error while rebuilding graph", e)
+        }
+    }
+
+    private fun rebuildGraphImpl() {
+        val fundSnapshot = fundSnapshotService.findLastActualSnapshot()
         val transactions = transactionService.findTransactionsOrdered(fundSnapshot?.date ?: MIN_DATE)
         if (transactions.isEmpty()) {
             return
@@ -80,7 +79,8 @@ class FundGraphService(
             val snapshotDate = transaction.date.withDayOfMonth(1)
             if (snapshotDate > fixationDate && fund.isNotEmpty()) {
                 fixationDate = snapshotDate
-                fundSnapshotService.saveHistorySnapshot(fixationDate, fund)
+                fundSnapshotService.saveSnapshot(fixationDate, fund)
+                graphStateService.graphRebuild(fixationDate)
             }
 
             val allocationQueue = fund.get(transaction.account, transaction.amount.currency)
@@ -92,7 +92,11 @@ class FundGraphService(
 
             var outFlowAmount = transaction.amount
             while (outFlowAmount.value > 0) {
-                val nextAllocation = allocationQueue.removeFirstOrNull() ?: throw IllegalStateException("No budget for transaction ${transaction.id}")
+                val nextAllocation = allocationQueue.removeFirstOrNull()
+                if (nextAllocation == null) {
+                    graphStateService.graphError(fund, "No budget for transaction ${transaction.date} ${transaction.direction} ${transaction.amount}")
+                    return
+                }
                 val relationAmount = if (nextAllocation.amount <= outFlowAmount) {
                     nextAllocation.amount
                 } else {
@@ -119,7 +123,7 @@ class FundGraphService(
 
         }
 
-        fundSnapshotService.currentSnapshotActual(transactions.last().date, fund)
+        graphStateService.graphActual(transactions.last().date, fund)
 
     }
 

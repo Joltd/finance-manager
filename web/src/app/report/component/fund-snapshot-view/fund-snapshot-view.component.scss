@@ -4,6 +4,43 @@
   grid-gap: 1em;
 }
 
+.graph-status {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 3.8em 1fr min-content min-content;
+  grid-template-rows: 4em;
+  align-items: center;
+
+  mat-icon {
+    justify-self: center;
+    align-self: center;
+  }
+
+  .status {
+    font-size: 1.4em;
+    padding-top: .2em;
+  }
+
+  .date {
+    font-size: .8em;
+  }
+}
+
+.actual {
+  background-color: #a5d6a7;
+  color: #2e7d32;
+}
+
+.rebuild {
+  background-color: #90caf9;
+  color: #0d47a1;
+}
+
+.outdated {
+  background-color: #ef9a9a;
+  color: #c62828;
+}
+
 .horizontal {
   overflow-x: auto;
 }
@@ -34,7 +71,7 @@
   grid-template-rows: 3.6em;
   grid-gap: .4em;
 
-  .label {
+  .amount {
     justify-self: center;
     align-self: center;
   }

@@ -1,22 +1,22 @@
-<mat-card class="graph-status actual" *ngIf="dashboard.graphStatus?.status == 'ACTUAL'">
+<mat-card class="graph-status actual" *ngIf="dashboard.graph?.status == 'ACTUAL'" (click)="fundSnapshot()">
   <mat-icon>check_circle</mat-icon>
   <div>
     <div class="status">Actual</div>
-    <div class="date">{{dashboard.graphStatus.date}}</div>
+    <div class="date">{{dashboard.graph.date}}</div>
   </div>
 </mat-card>
-<mat-card class="graph-status rebuild" *ngIf="dashboard.graphStatus?.status == 'REBUILD'">
+<mat-card class="graph-status rebuild" *ngIf="dashboard.graph?.status == 'REBUILD'" (click)="fundSnapshot()">
   <mat-icon>autorenew</mat-icon>
   <div>
     <div class="status">Rebuild...</div>
-    <div class="date">{{dashboard.graphStatus.date}}</div>
+    <div class="date">{{dashboard.graph.date}}</div>
   </div>
 </mat-card>
-<mat-card class="graph-status outdated" *ngIf="dashboard.graphStatus?.status == 'OUTDATED'">
+<mat-card class="graph-status outdated" *ngIf="dashboard.graph?.status == 'OUTDATED'" (click)="fundSnapshot()">
   <mat-icon>error</mat-icon>
   <div>
     <div class="status">Outdated</div>
-    <div class="date">{{dashboard.graphStatus.date}}</div>
+    <div class="date">{{dashboard.graph.date}}</div>
   </div>
 </mat-card>
 

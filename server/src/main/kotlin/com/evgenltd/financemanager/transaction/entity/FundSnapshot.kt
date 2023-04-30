@@ -7,21 +7,8 @@ import java.time.LocalDate
 class FundSnapshot(
     var id: String?,
     var date: LocalDate,
-    var type: FundSnapshotType,
     var fund: Fund,
-    var status: FundGraphStatus? = null
 )
-
-enum class FundGraphStatus {
-    ACTUAL,
-    REBUILD,
-    OUTDATED
-}
-
-enum class FundSnapshotType {
-    CURRENT,
-    HISTORY
-}
 
 class Fund : HashMap<String, AllocationQueue>() {
 

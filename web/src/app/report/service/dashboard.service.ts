@@ -15,8 +15,4 @@ export class DashboardService {
     return this.http.get<Dashboard>('/dashboard', TypeUtils.of(Dashboard))
   }
 
-  rebuildGraph(): Observable<void> {
-    return this.http.patch<void>('/fund-graph', null)
-  }
-
 }
