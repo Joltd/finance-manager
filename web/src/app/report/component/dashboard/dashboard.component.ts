@@ -1,12 +1,11 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, ElementRef, OnDestroy, ViewChild} from "@angular/core";
 import {Dashboard} from "../../model/dashboard";
 import {DashboardService} from "../../service/dashboard.service";
 import {Router} from "@angular/router";
 import {DocumentService} from "../../../document/service/document.service";
-import {ECharts} from "echarts";
 import * as echarts from "echarts";
+import {ECharts} from "echarts";
 import {formatAsString} from "../../../common/model/amount";
-import {SettingsService} from "../../../settings/service/settings.service";
 
 @Component({
   selector: 'dashboard',

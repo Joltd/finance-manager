@@ -65,6 +65,6 @@ private fun Graph<String, Price>.edge(name: String, source: String, target: Stri
         }
 }
 
-class Price() : DefaultWeightedEdge() {
+class Price : DefaultWeightedEdge() {
     var name: String = ""
 }

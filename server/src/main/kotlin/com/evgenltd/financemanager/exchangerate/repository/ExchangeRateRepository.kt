@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.exchangerate.repository
 
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
-import com.evgenltd.financemanager.transaction.entity.Relation
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.data.mongodb.repository.Query
 import java.time.LocalDate

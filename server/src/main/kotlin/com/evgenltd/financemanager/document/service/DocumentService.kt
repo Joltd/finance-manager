@@ -4,7 +4,6 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.Document
 import com.evgenltd.financemanager.document.record.*
 import com.evgenltd.financemanager.document.repository.DocumentRepository
-import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.PageRequest
@@ -22,13 +21,12 @@ class DocumentService(
     private val documentRepository: DocumentRepository,
     private val mongoTemplate: MongoTemplate,
     private val transactionService: TransactionService,
-    private val documentTypedServices: List<DocumentTypedService<*,*>>,
-    private val eventPublisher: ApplicationEventPublisher
+    private val documentTypedServices: List<DocumentTypedService<*,*>>
 ) {
 
     private lateinit var index: Map<String,DocumentTypedService<*,*>>
 
-    @PostConstruct()
+    @PostConstruct
     fun postConstruct() {
         index = documentTypedServices.associateBy { resolveType(it) }
     }
@@ -132,12 +130,12 @@ class DocumentService(
     @Transactional
     fun deleteByAccount(account: String) {
         transactionService.findByAccount(account)
-                .map { it.document }
-                .distinct()
-                .onEach {
-                    transactionService.deleteByDocument(it)
-                    documentRepository.deleteById(it)
-                }
+            .map { it.document }
+            .distinct()
+            .onEach {
+                transactionService.deleteByDocument(it)
+                documentRepository.deleteById(it)
+            }
     }
 
     fun toEntity(record: DocumentRecord): Document = resolveService(record).toEntity(record)

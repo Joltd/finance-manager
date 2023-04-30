@@ -3,8 +3,6 @@ package com.evgenltd.financemanager.exchangerate.controller
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import org.springframework.web.bind.annotation.*
-import java.math.BigDecimal
-import java.time.LocalDate
 
 @RestController
 class ExchangeRateController(

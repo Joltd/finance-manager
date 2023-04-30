@@ -11,7 +11,6 @@ import * as moment from "moment";
 import {CategoryChartService} from "../../service/category-chart.service";
 import {Router} from "@angular/router";
 import {Total} from "../../model/total";
-import {Subscription} from "rxjs";
 import {FlowChart} from "../../model/flow-chart";
 
 @Component({

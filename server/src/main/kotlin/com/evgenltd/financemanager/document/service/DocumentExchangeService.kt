@@ -4,9 +4,7 @@ import com.evgenltd.financemanager.document.entity.DocumentExchange
 import com.evgenltd.financemanager.document.record.DocumentExchangeRecord
 import com.evgenltd.financemanager.document.repository.DocumentExchangeRepository
 import com.evgenltd.financemanager.reference.service.AccountService
-import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.service.TransactionService
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

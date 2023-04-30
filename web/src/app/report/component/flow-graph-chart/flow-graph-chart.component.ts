@@ -1,9 +1,8 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, ViewChild} from "@angular/core";
-import {ECharts} from "echarts";
 import * as echarts from "echarts";
+import {ECharts} from "echarts";
 import {FlowGraphChartService} from "../../service/flow-graph-chart.service";
-import {FormGroup} from "@angular/forms";
-import {Amount, formatAsString} from "../../../common/model/amount";
+import {formatAsString} from "../../../common/model/amount";
 import {FlowGraphChart, FlowGraphChartLink, FlowGraphChartNode} from "../../model/flow-graph-chart";
 import {ActivatedRoute} from "@angular/router";
 

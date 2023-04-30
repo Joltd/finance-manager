@@ -6,7 +6,10 @@ import com.evgenltd.financemanager.document.record.DocumentTypedRecord
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.service.AccountService
-import com.evgenltd.financemanager.transaction.entity.*
+import com.evgenltd.financemanager.transaction.entity.AllocationQueue
+import com.evgenltd.financemanager.transaction.entity.Fund
+import com.evgenltd.financemanager.transaction.entity.FundSnapshot
+import com.evgenltd.financemanager.transaction.entity.Transaction
 import com.evgenltd.financemanager.transaction.record.AllocationQueueRecord
 import com.evgenltd.financemanager.transaction.record.AllocationRecord
 import com.evgenltd.financemanager.transaction.record.FundSnapshotAccountRecord

@@ -4,15 +4,11 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
-import com.evgenltd.financemanager.transaction.service.RelationService
-import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
-import java.time.Period
 import javax.annotation.PostConstruct
-import kotlin.math.absoluteValue
 
 @Service
 class ExchangeRateService(

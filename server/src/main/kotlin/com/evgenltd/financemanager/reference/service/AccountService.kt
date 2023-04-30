@@ -10,11 +10,10 @@ import org.springframework.context.event.EventListener
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 @Service
 class AccountService(
-        private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository
 ) {
 
     fun listReference(mask: String? = null, id: String? = null): List<Reference> {

@@ -9,7 +9,6 @@ import {ReferenceService} from "../../../common/service/reference.service";
 import {Total} from "../../model/total";
 import {DocumentService} from "../../../document/service/document.service";
 import {Router} from "@angular/router";
-import * as moment from "moment/moment";
 import {CategoryChart} from "../../model/category-chart";
 
 @Component({

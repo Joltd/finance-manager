@@ -1,5 +1,5 @@
 import {Component, OnInit} from "@angular/core";
-import {Allocation, FundSnapshot} from "../../model/fund-snapshor";
+import {FundSnapshot} from "../../model/fund-snapshor";
 import {FundSnapshotService} from "../../service/fund-snapshot.service";
 import {FundGraphService} from "../../service/fund-graph.service";
 import {ShortMessageService} from "../../../common/service/short-message.service";

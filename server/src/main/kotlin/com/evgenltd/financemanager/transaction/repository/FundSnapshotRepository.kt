@@ -10,6 +10,4 @@ interface FundSnapshotRepository : MongoRepository<FundSnapshot, String> {
 
     fun findFirstByOrderByDateDesc(): FundSnapshot?
 
-    fun findFirstByDateLessThanOrderByDateDesc(date: LocalDate): FundSnapshot?
-
 }
