@@ -22,16 +22,15 @@ class CategoryChartService(
 
     private fun loadExpensesChart(settings: CategoryChartSettingsRecord): CategoryChartRecord {
         val categoryIndex = referenceService.incomeCategoryIndex() + referenceService.expenseCategoryIndex()
-        return fundGraphService.loadFlows(settings.dateFrom, settings.dateTo, settings.currency)
-            .expenses
+        val (_, expenses) = fundGraphService.loadFlows(settings.dateFrom, settings.dateTo, settings.currency)
+        return expenses
             .prepareChartRecord(categoryIndex, settings.incomeCategories + settings.expenseCategories)
     }
 
     private fun loadIncomeChart(settings: CategoryChartSettingsRecord): CategoryChartRecord {
         val categoryIndex = referenceService.incomeCategoryIndex() + referenceService.expenseCategoryIndex()
-        return fundGraphService.loadFlows(settings.dateFrom, settings.dateTo, settings.currency)
-            .incomes
-            .prepareChartRecord(categoryIndex, settings.incomeCategories + settings.expenseCategories)
+        val (incomes, _) = fundGraphService.loadFlows(settings.dateFrom, settings.dateTo, settings.currency)
+        return incomes.prepareChartRecord(categoryIndex, settings.incomeCategories + settings.expenseCategories)
     }
 
     private fun List<FlowRecord>.prepareChartRecord(

@@ -16,11 +16,11 @@ class FlowChartService(private val fundGraphService: FundGraphService) {
     fun load(settings: FlowChartSettingsRecord): FlowChartRecord = loadTotalChart(settings)
 
     private fun loadTotalChart(settings: FlowChartSettingsRecord): FlowChartRecord {
-        val flows = fundGraphService.loadFlows(settings.dateFrom, settings.dateTo, settings.currency)
+        var (incomes, expenses) = fundGraphService.loadFlows(settings.dateFrom, settings.dateTo, settings.currency)
 
         val categories = settings.expenseCategories + settings.incomeCategories
-        val expenses = flows.expenses.filter { it.category in categories }
-        val incomes = flows.incomes.filter { it.category in categories }
+        expenses = expenses.filter { it.category in categories }
+        incomes = incomes.filter { it.category in categories }
 
         val dates = (expenses.map { it.date } + incomes.map { it.date }).buildDateDimension(settings.groupBy)
 

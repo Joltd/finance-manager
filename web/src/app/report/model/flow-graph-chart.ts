@@ -11,6 +11,7 @@ export class FlowGraphChartNode {
   direction!: string
   date!: string
   amount: Amount | null = null
+  targetAmount: Amount | null = null
   category: Reference | null = null
   amountFrom: Amount | null = null
   amountTo: Amount | null = null

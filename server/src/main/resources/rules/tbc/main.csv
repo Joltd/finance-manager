@@ -4,8 +4,10 @@ expense,Самокат,,,,,,../expense/scooter.csv
 expense,Медицина,,,,,,../expense/medicine.csv
 expense,Поездки,,,,,,../expense/trip.csv
 expense,Мобильная связь,,,,,,../expense/mobile.csv
+expense,Для дома,,,,,,../expense/forhome.csv
 expense,Подписки,,,,,,../expense/subscription.csv
 expense,Одежда,,,,,,../expense/clothes.csv
+expense,Налоги,,,,,,../expense/tax.csv
 expense,Аренда квартиры,,,,,,../expense/rent.csv
 expense,Доставка еды,,,,,,../expense/delivery.csv
 expense,Супермаркеты,,,,,,../expense/supermarket.csv

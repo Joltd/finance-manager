@@ -10,8 +10,7 @@ import com.evgenltd.financemanager.transaction.entity.Relation
 import com.evgenltd.financemanager.transaction.entity.Transaction
 import com.evgenltd.financemanager.transaction.event.RebuildGraphEvent
 import com.evgenltd.financemanager.transaction.event.ResetGraphEvent
-import com.evgenltd.financemanager.transaction.record.FlowRecord
-import com.evgenltd.financemanager.transaction.record.FlowsRecord
+import com.evgenltd.financemanager.transaction.record.*
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
@@ -127,8 +126,45 @@ class FundGraphService(
 
     }
 
-    fun loadGraphRecursively(transactions: List<String>): Pair<List<Transaction>,List<Relation>> {
-        val resultTransactions = transactions.toMutableSet()
+    //
+
+    fun loadFlows(from: LocalDate, to: LocalDate, targetCurrency: String): Pair<List<FlowRecord>,List<FlowRecord>> {
+        val transactions = transactionService.findTransactions(from, to)
+
+        val incomes = mutableListOf<FlowRecord>()
+        val expenses = mutableListOf<FlowRecord>()
+
+        for (transaction in transactions) {
+            val category = transaction.incomeCategory ?: transaction.expenseCategory ?: continue
+
+            if (transaction.direction == Direction.IN) {
+                val rate = exchangeRateService.rate(transaction.date, transaction.amount.currency, targetCurrency)
+                val targetAmount = transaction.amount.toBigDecimal() * rate
+                incomes.add(FlowRecord(transaction.date, Amount(targetAmount.toAmountValue(), targetCurrency), category))
+            } else if (transaction.direction == Direction.OUT) {
+                val graph = loadFlowGraph(transaction.id!!, targetCurrency)
+                expenses.add(FlowRecord(transaction.date, graph.targetAmount, category))
+            }
+        }
+
+        return incomes to expenses
+    }
+
+    fun loadFlowGraph(transactionId: String, targetCurrency: String): FlowGraph {
+        val (transactions, relations) = loadRawGraph(listOf(transactionId))
+        val graph = prepareGraph(transactions, relations)
+        val root = graph[transactionId] ?: throw IllegalStateException("Graph does not contains transaction $transactionId")
+        root.markIfContains(targetCurrency)
+        val targetAmount = root.resolve(root.transaction.amount.toBigDecimal(), targetCurrency)
+        return FlowGraph(
+            nodes = graph.values.map { it.toFlowGraphNode() },
+            edges = relations.map { FlowGraphEdge(it) },
+            targetAmount = Amount(targetAmount.toAmountValue(), targetCurrency)
+        )
+    }
+
+    private fun loadRawGraph(transactions: List<String>): Pair<List<Transaction>, List<Relation>> {
+        val resultTransactionIds = transactions.toMutableSet()
         val resultRelations = mutableListOf<Relation>()
         val nextTransaction = transactions.toMutableSet()
         while (nextTransaction.isNotEmpty()) {
@@ -136,26 +172,20 @@ class FundGraphService(
                 .also { nextTransaction.clear() }
                 .onEach {
                     resultRelations.add(it)
-                    if (it.from !in resultTransactions) {
-                        resultTransactions.add(it.from)
+                    if (it.from !in resultTransactionIds) {
+                        resultTransactionIds.add(it.from)
                         nextTransaction.add(it.from)
                     }
                 }
         }
 
-        return Pair(
-            transactionService.findTransactions(resultTransactions.toList()),
-            resultRelations
-        )
+        val resultTransactions = transactionService.findTransactions(resultTransactionIds.toList())
+
+        return resultTransactions to resultRelations
     }
 
-    // greater or equal from and less than to
-    // maybe load expenses with incomes
-    fun loadFlows(from: LocalDate, to: LocalDate, targetCurrency: String): FlowsRecord {
-        val (transactions, relations) = transactionService.findTransactions(from, to)
-            .map { it.id!! }
-            .let { loadGraphRecursively(it) }
-        val nodeIndex = transactions.map { FlowNode(it) }.associateBy { it.transaction.id!! }
+    private fun prepareGraph(transactions: List<Transaction>, relations: List<Relation>): Map<String, InternalFlowGraphNode> {
+        val nodeIndex = transactions.map { InternalFlowGraphNode(it) }.associateBy { it.transaction.id!! }
 
         relations.onEach {
             val nodeFrom = nodeIndex[it.from]!!
@@ -165,41 +195,14 @@ class FundGraphService(
             } else {
                 it.amount().toBigDecimal() / nodeTo.transaction.amount.toBigDecimal()
             }
-            val edge = FlowEdge(rate, nodeFrom)
+            val edge = InternalFlowGraphEdge(it, rate, nodeFrom)
             nodeTo.parents.add(edge)
         }
 
-        val incomes = mutableListOf<FlowRecord>()
-        val expenses = mutableListOf<FlowRecord>()
-        for (transaction in transactions) {
-            if (transaction.date < from || transaction.date >= to) {
-                continue
-            }
-
-            val incomeCategory = transaction.incomeCategory
-            val expenseCategory = transaction.expenseCategory
-            if (incomeCategory == null && expenseCategory == null) {
-                continue
-            }
-
-            if (transaction.direction == Direction.IN) {
-                val rate = exchangeRateService.rate(transaction.date, transaction.amount.currency, targetCurrency)
-                val targetAmount = transaction.amount.toBigDecimal() * rate
-                incomes.add(FlowRecord(transaction.date, Amount(targetAmount.toAmountValue(), targetCurrency), incomeCategory ?: expenseCategory!!))
-                continue
-            }
-
-            val root = nodeIndex[transaction.id!!]!!
-            root.markIfContains(targetCurrency)
-            val targetAmount = root.resolve(root.transaction.amount.toBigDecimal(), targetCurrency)
-            expenses.add(FlowRecord(transaction.date, Amount(targetAmount.toAmountValue(), targetCurrency), expenseCategory ?: incomeCategory!!))
-
-        }
-
-        return FlowsRecord(incomes, expenses)
+        return nodeIndex
     }
 
-    private fun FlowNode.markIfContains(targetCurrency: String): Boolean {
+    private fun InternalFlowGraphNode.markIfContains(targetCurrency: String): Boolean {
         if (transaction.incomeCategory == null && transaction.expenseCategory == null && parents.isEmpty()) {
             throw IllegalStateException("Not enough relations for loading funds")
         }
@@ -207,18 +210,30 @@ class FundGraphService(
         if (transaction.amount.currency == targetCurrency) {
             return false
         }
+
+        if (necessaryVisitAncestor) {
+            return true
+        }
+
         necessaryVisitAncestor = parents.map { it.source.transaction.amount.currency == targetCurrency || it.source.markIfContains(targetCurrency) }.any { it }
         return necessaryVisitAncestor
     }
 
-    private fun FlowNode.resolve(value: BigDecimal, targetCurrency: String): BigDecimal {
-        if (!necessaryVisitAncestor) {
+    private fun InternalFlowGraphNode.resolve(value: BigDecimal, targetCurrency: String): BigDecimal {
+        targetAmount += value
+        return if (!necessaryVisitAncestor) {
             val rate = exchangeRateService.rate(transaction.date, transaction.amount.currency, targetCurrency)
-            return value * rate
+            value * rate
+        } else {
+            parents.sumOf { it.source.resolve(value * it.rate, targetCurrency) }
         }
-
-        return parents.sumOf { it.source.resolve(value * it.rate, targetCurrency) }
     }
+
+    private fun InternalFlowGraphNode.toFlowGraphNode(): FlowGraphNode = FlowGraphNode(
+        transaction,
+        if (targetAmount.signum() != 0) Amount(targetAmount.toAmountValue(), transaction.amount.currency)
+        else null
+    )
 
     private companion object {
         val MIN_DATE: LocalDate = LocalDate.of(2000,1,1)
@@ -226,13 +241,15 @@ class FundGraphService(
     
 }
 
-class FlowNode(
+class InternalFlowGraphNode(
     val transaction: Transaction,
-    val parents: MutableList<FlowEdge> = mutableListOf(),
+    val parents: MutableList<InternalFlowGraphEdge> = mutableListOf(),
     var necessaryVisitAncestor: Boolean = false, // node is not target currency, but it is some of the parent
+    var targetAmount: BigDecimal = BigDecimal.ZERO,
 )
 
-class FlowEdge(
+class InternalFlowGraphEdge(
+    val relation: Relation,
     val rate: BigDecimal,
-    val source: FlowNode,
+    val source: InternalFlowGraphNode,
 )

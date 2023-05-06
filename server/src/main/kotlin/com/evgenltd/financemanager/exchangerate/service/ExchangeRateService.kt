@@ -95,6 +95,10 @@ class ExchangeRateService(
             return BigDecimal.ONE
         }
 
+        if ((from == "USDT" && to == "USD") || (from == "USD" && to == "USDT")) {
+            return BigDecimal.ONE
+        }
+
         val result = rate(date, from, listOf(to))
         return result[to] ?: throw IllegalStateException("Can't find exchange rate for $from/$to on $date")
     }

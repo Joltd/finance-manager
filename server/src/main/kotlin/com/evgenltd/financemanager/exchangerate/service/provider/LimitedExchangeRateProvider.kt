@@ -12,10 +12,15 @@ abstract class LimitedExchangeRateProvider(
 ) : ExchangeRateProvider, Loggable() {
 
     override fun rate(date: LocalDate, from: String, toCurrencies: Set<String>, gap: Long): Map<String, BigDecimal> =
-        rate(date, from, toCurrencies)
-            .onEach { (to, rate) ->
-                exchangeRateRepository.save(ExchangeRate(null, date, from, to, rate))
-            }
+        try {
+            rate(date, from, toCurrencies)
+                .onEach { (to, rate) ->
+                    exchangeRateRepository.save(ExchangeRate(null, date, from, to, rate))
+                }
+        } catch (e: Exception) {
+            log.error("Unable to get exchange rate for date=$date, from=$from, to=$toCurrencies", e)
+            emptyMap()
+        }
 
     abstract fun rate(date: LocalDate, from: String, toCurrencies: Set<String>): Map<String, BigDecimal>
 

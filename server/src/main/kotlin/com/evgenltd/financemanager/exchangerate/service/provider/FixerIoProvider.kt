@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
+import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.annotation.Order
@@ -14,12 +15,11 @@ import java.time.LocalDate
 @Service
 @Order(10)
 class FixerIoProvider(
-    @Value("\${exchange.fixerio.apikey}")
+    @Value("\${exchange.apilayer.apikey}")
     private val apiKey: String,
-    exchangeRateRepository: ExchangeRateRepository
+    exchangeRateRepository: ExchangeRateRepository,
+    private val rest: IntegrationRestTemplate
 ) : LimitedExchangeRateProvider(exchangeRateRepository) {
-
-    private val rest = RestTemplate()
 
     override fun rate(date: LocalDate, from: String, toCurrencies: Set<String>): Map<String, BigDecimal> {
         val headers = HttpHeaders().also {
@@ -69,7 +69,7 @@ data class FixerResponse(
 )
 
 data class FixerError(
-    val code: Int,
+    val code: String,
     val type: String,
-    val info: String
+    val info: String? = null
 )

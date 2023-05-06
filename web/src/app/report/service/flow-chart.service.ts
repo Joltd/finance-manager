@@ -10,7 +10,7 @@ import {Observable} from "rxjs";
 })
 export class FlowChartService {
 
-  dateFrom = moment().subtract(6, 'month').format('yyyy-MM-DD')
+  dateFrom = moment().subtract(2, 'month').format('yyyy-MM-DD')
   dateTo = moment().format('yyyy-MM-DD')
   groupBy = 'month'
   expenseCategories: string[] = []

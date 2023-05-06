@@ -1,36 +1,23 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
+import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.annotation.Order
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
-@Order(10)
+@Order(5)
 class ExchangeRatesDataProvider(
-    @Value("\${exchange.exchange_rates.apikey}")
-    private val apiKey: String,
-    exchangeRateRepository: ExchangeRateRepository
+    exchangeRateRepository: ExchangeRateRepository,
+    private val rest: IntegrationRestTemplate
 ) : LimitedExchangeRateProvider(exchangeRateRepository) {
 
-    private val rest = RestTemplate()
-
     override fun rate(date: LocalDate, from: String, toCurrencies: Set<String>): Map<String, BigDecimal> {
-        val headers = HttpHeaders().also {
-            it.set("apikey", apiKey)
-        }
-
-        val response = rest.exchange(
+        val response = rest.getForEntity(
             "$URL/$date?base=$from&symbols=$toCurrencies",
-            HttpMethod.GET,
-            HttpEntity(null, headers),
-            ExchangeRatesResponse::class.java
+            ExchangeRateDataResponse::class.java
         )
 
         if (!response.statusCode.is2xxSuccessful) {
@@ -53,22 +40,21 @@ class ExchangeRatesDataProvider(
     }
 
     private companion object {
-        const val URL = "https://api.apilayer.com/exchangerates_data"
+        const val URL = "https://api.exchangerate.host/"
     }
 
 }
 
-data class ExchangeRatesResponse(
+data class ExchangeRateDataResponse(
     val success: Boolean,
-    val timestamp: Long? = null,
-    val error: ExchangeRatesError? = null,
+    val error: ExchangeRateDataError? = null,
     val historical: Boolean? = null,
     val base: String? = null,
     val date: LocalDate? = null,
     val rates: Map<String, BigDecimal>? = null
 )
 
-data class ExchangeRatesError(
-    val code: Int,
+data class ExchangeRateDataError(
+    val code: String,
     val message: String
 )

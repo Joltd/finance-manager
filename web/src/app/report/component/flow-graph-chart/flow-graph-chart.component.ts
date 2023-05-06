@@ -74,11 +74,14 @@ export class FlowGraphChartComponent implements AfterViewInit, OnDestroy {
           color: this.determineColor(node)
         },
         label: {
-          show: false
+          // show: false
+          show: node.targetAmount != null,
+          formatter: node.targetAmount != null ? formatAsString(node.targetAmount!!) : ''
         },
         tooltip: {
           formatter: `${node.date}<br/>`
             + (node.amount != null ? formatAsString(node.amount!!) + '</br>' : '')
+            + (node.targetAmount != null ? formatAsString(node.targetAmount!!) + '</br>' : '')
             + (node.amountFrom != null && node.amountTo != null ? formatAsString(node.amountFrom!!) + ' -> ' + formatAsString(node.amountTo!!) + '<br/>' : '')
             + (
               node.rate != null

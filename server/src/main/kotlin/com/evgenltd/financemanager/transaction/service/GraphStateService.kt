@@ -42,6 +42,7 @@ class GraphStateService(
         state.date = fixationDate
         state.status = GraphStatus.OUTDATED
         state.error = null
+        state.fund = Fund()
         graphStateRepository.save(state)
     }
 

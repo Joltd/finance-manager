@@ -19,10 +19,11 @@ data class FlowGraphChartRecord(
         val direction: Type,
         val date: LocalDate,
         val amount: Amount? = null,
+        val targetAmount: Amount? = null,
         val category: Reference? = null,
-        val amountFrom: Amount? = null,
-        val amountTo: Amount? = null,
-        val rate: BigDecimal? = null
+//        val amountFrom: Amount? = null,
+//        val amountTo: Amount? = null,
+//        val rate: BigDecimal? = null
     )
 
     data class Link(
