@@ -7,13 +7,14 @@ import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ExpenseCategoryService(
-        val expenseCategoryRepository: ExpenseCategoryRepository
+    val expenseCategoryRepository: ExpenseCategoryRepository
 ) {
 
-    fun listReference(mask: String?, id: String?): List<Reference> {
+    fun listReference(mask: String? = null, id: String? = null): List<Reference> {
         val list = if (mask?.isNotEmpty() == true) {
             expenseCategoryRepository.findByNameLike(mask)
         } else if (id != null) {
@@ -39,6 +40,7 @@ class ExpenseCategoryService(
 
     fun delete(id: String) = expenseCategoryRepository.deleteById(id)
 
+    @Transactional
     fun findOrCreate(id: String?, name: String?): ExpenseCategory = id
         ?.let { expenseCategoryRepository.findByIdOrNull(it) }
         ?: name?.let { expenseCategoryRepository.findByName(it) }

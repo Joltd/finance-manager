@@ -7,14 +7,14 @@ import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AccountService(
-        private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository
 ) {
 
-    fun listReference(mask: String?, id: String?): List<Reference> {
+    fun listReference(mask: String? = null, id: String? = null): List<Reference> {
         val list = if (mask?.isNotEmpty() == true) {
             accountRepository.findByNameLike(mask)
         } else if (id != null) {
@@ -33,6 +33,7 @@ class AccountService(
 
     fun byId(id: String): AccountRecord = accountRepository.find(id).toRecord()
 
+    @Transactional
     fun update(record: AccountRecord) {
         val entity = record.toEntity()
         entity.id
@@ -42,16 +43,6 @@ class AccountService(
     }
 
     fun delete(id: String) = accountRepository.deleteById(id)
-
-    fun updateActualOn(id: String, date: LocalDate) {
-        accountRepository.findById(id)
-                .ifPresent {
-                    if (it.track && it.actualOn?.isBefore(date) != false) {
-                        it.actualOn = date
-                        accountRepository.save(it)
-                    }
-                }
-    }
 
     fun findOrCreate(id: String?, name: String?): Account = id
         ?.let { accountRepository.findByIdOrNull(it) }

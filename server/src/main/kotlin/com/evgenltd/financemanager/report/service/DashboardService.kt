@@ -1,49 +1,49 @@
 package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.reference.service.ReferenceService
-import com.evgenltd.financemanager.report.record.AccountBalanceRecord
+import com.evgenltd.financemanager.common.util.toAmountValue
+import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.report.record.DashboardRecord
-import com.evgenltd.financemanager.transaction.entity.AccountTransaction
+import com.evgenltd.financemanager.report.record.FundRecord
 import com.evgenltd.financemanager.transaction.entity.Direction
-import com.evgenltd.financemanager.transaction.repository.AccountTransactionRepository
+import com.evgenltd.financemanager.transaction.entity.Transaction
+import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 @Service
 class DashboardService(
-        private val referenceService: ReferenceService,
-        private val accountTransactionRepository: AccountTransactionRepository
+    private val transactionService: TransactionService,
+    private val exchangeRateService: ExchangeRateService
 ) {
 
-    fun load(): DashboardRecord = DashboardRecord(loadAccountBalances())
+    fun load(): DashboardRecord {
+        val funds = transactionService.findAll()
+            .groupBy { it.amount.currency }
+            .map { (_, transactions) ->
+                transactions.map { it.amountWithDirection() }
+                    .reduce { acc, amount -> acc + amount }
+            }
 
-    private fun loadAccountBalances(): List<AccountBalanceRecord> {
-        val accountIndex = referenceService.accountIndex()
-        return accountTransactionRepository.findByAccountNotNull()
-                .groupBy { it.account }
-                .map {
-                    val account = accountIndex[it.key]
-                    AccountBalanceRecord(
-                            account?.id,
-                            account?.name ?: "Unknown",
-                            account?.actualOn
-                                    ?.let { actualOn -> ChronoUnit.DAYS.between(actualOn, LocalDate.now()) },
-                            it.value.sumByCurrency()
-                    )
-                }
-    }
-
-    private fun List<AccountTransaction>.sumByCurrency(): List<Amount> = this.groupBy { it.amount.currency }
-            .map { Amount(it.value.sum(), it.key) }
-            .filter { it.value != 0L }
-
-    private fun List<AccountTransaction>.sum() = sumOf {
-        if (it.direction == Direction.IN) {
-            it.amount.value
-        } else {
-            -it.amount.value
+        val usdFunds = funds.map {
+            val rate = exchangeRateService.rate(LocalDate.now(), it.currency, "USD")
+            it.toBigDecimal() * rate
         }
+        val usdTotal = usdFunds.sumOf { it }
+
+        val rubTotal = funds.sumOf {
+            val rate = exchangeRateService.rate(LocalDate.now(), it.currency, "RUB")
+            it.toBigDecimal() * rate
+        }
+
+        return DashboardRecord(
+            funds = funds.map { FundRecord(it, (it.toBigDecimal() / usdTotal * BigDecimal(100)).toInt()) },
+            fundsTotal = Amount(usdTotal.toAmountValue(), "USD"),
+            fundsTotalSecondary = Amount(rubTotal.toAmountValue(), "RUB")
+        )
     }
+
+    private fun Transaction.amountWithDirection(): Amount = if (direction == Direction.OUT) -amount else amount
+
 }

@@ -1,8 +1,6 @@
 package com.evgenltd.financemanager.exchangerate.service
 
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.document.repository.DocumentExchangeRepository
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
@@ -14,15 +12,15 @@ import javax.annotation.PostConstruct
 
 @Service
 class ExchangeRateService(
-        private val exchangeRateRepository: ExchangeRateRepository,
-        private val documentExchangeRepository: DocumentExchangeRepository
+    private val exchangeRateRepository: ExchangeRateRepository,
+    private val exchangeRateProviders: List<ExchangeRateProvider>
 ) {
 
     @PostConstruct
     fun postConstruct() {
-//        exchangeRateRepository.deleteAll()
-//        documentExchangeRepository.findByAccountFromNotNull()
-//                .onEach { saveRate(it.date, it.amountFrom, it.amountTo) }
+        if (exchangeRateRepository.findAll().isNotEmpty()) {
+            return
+        }
     }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }
@@ -39,33 +37,49 @@ class ExchangeRateService(
 
     fun delete(id: String) = exchangeRateRepository.deleteById(id)
 
-    fun saveRate(date: LocalDate, from: Amount, to: Amount) {
-        if (from.currency == to.currency) {
-            return
+    fun rate(date: LocalDate, from: String, toCurrencies: List<String>): Map<String,BigDecimal> {
+        if (toCurrencies.isEmpty()) {
+            return emptyMap()
         }
-        val entity = exchangeRateRepository.findByDateAndFromAndTo(date, from.currency, to.currency)
-                ?: ExchangeRate(null, LocalDate.now(), "", "", BigDecimal.ZERO)
-        entity.date = date
-        entity.from = from.currency
-        entity.to = to.currency
-        entity.value = to.toBigDecimal().div(from.toBigDecimal())
-        exchangeRateRepository.save(entity)
+
+        val toCurrenciesSet = toCurrencies.toMutableSet()
+        val result = mutableMapOf<String,BigDecimal>()
+        for (exchangeRateProvider in exchangeRateProviders) {
+            if (toCurrenciesSet.isEmpty()) {
+                break
+            }
+            exchangeRateProvider.rate(date, from, toCurrenciesSet, ExchangeRateProvider.SHORT_PERIOD_GAP)
+                .onEach {
+                    result[it.key] = it.value
+                    toCurrenciesSet.remove(it.key)
+                }
+        }
+        return result
     }
 
     fun rate(date: LocalDate, from: String, to: String): BigDecimal {
         if (from == to) {
             return BigDecimal.ONE
         }
-        val rate = exchangeRateRepository.findByDateLessThanEqual(date)
-                .filter { (it.from == from && it.to == to) || (it.from == to && it.to == from) }
-                .maxByOrNull { it.date }
-                ?: throw IllegalStateException("No rate for $from/$to $date")
 
-        return if (rate.from == from && rate.to == to) {
-            rate.value
-        } else {
-            BigDecimal.ONE.divide(rate.value, 8, RoundingMode.HALF_DOWN)
+        if ((from == "USDT" && to == "USD") || (from == "USD" && to == "USDT")) {
+            return BigDecimal.ONE
         }
+
+        val result = rate(date, from, listOf(to))
+        return result[to] ?: throw IllegalStateException("Can't find exchange rate for $from/$to on $date")
+    }
+
+    fun rate(from: List<String>, to: String): Map<String, BigDecimal> {
+        if (from.isEmpty()) {
+            return emptyMap()
+        }
+
+        return rate(LocalDate.now().minusDays(1), to, from)
+            .entries
+            .associate {
+                it.key to BigDecimal.ONE.divide(it.value, 10, RoundingMode.HALF_UP)
+            }
     }
 
     private fun ExchangeRate.toRecord(): ExchangeRateRecord = ExchangeRateRecord(

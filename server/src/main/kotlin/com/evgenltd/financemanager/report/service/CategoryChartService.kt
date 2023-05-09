@@ -7,10 +7,8 @@ import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.service.ReferenceService
 import com.evgenltd.financemanager.report.record.CategoryChartRecord
 import com.evgenltd.financemanager.report.record.CategoryChartSettingsRecord
-import com.evgenltd.financemanager.transaction.entity.ExpenseTransaction
-import com.evgenltd.financemanager.transaction.entity.IncomeTransaction
-import com.evgenltd.financemanager.transaction.repository.ExpenseTransactionRepository
-import com.evgenltd.financemanager.transaction.repository.IncomeTransactionRepository
+import com.evgenltd.financemanager.transaction.entity.Transaction
+import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -18,8 +16,7 @@ import java.time.LocalDate
 @Service
 class CategoryChartService(
     private val referenceService: ReferenceService,
-    private val expenseTransactionRepository: ExpenseTransactionRepository,
-    private val incomeTransactionRepository: IncomeTransactionRepository,
+    private val transactionService: TransactionService,
     private val exchangeRateService: ExchangeRateService
 ) {
 
@@ -31,11 +28,11 @@ class CategoryChartService(
 
     private fun loadExpensesChart(settings: CategoryChartSettingsRecord): CategoryChartRecord {
         val referenceIndex = referenceService.expenseCategoryIndex()
-        return expenseTransactionRepository.findByDate(settings.dateFrom, settings.dateTo)
+        return transactionService.findTransactions(settings.dateFrom, settings.dateTo)
             .filter { it.expenseCategory in settings.expenseCategories }
-            .groupBy { it.expenseCategory }
+            .groupBy { it.expenseCategory!! }
             .entries
-            .map { it.key to it.value.sumExpenses(settings.currency) }
+            .map { it.key to it.value.sum(settings.currency) }
             .sortedBy { it.second.value }
             .let { expenses ->
                 CategoryChartRecord(
@@ -47,11 +44,11 @@ class CategoryChartService(
 
     private fun loadIncomeChart(settings: CategoryChartSettingsRecord): CategoryChartRecord {
         val referenceIndex = referenceService.incomeCategoryIndex()
-        return incomeTransactionRepository.findByDate(settings.dateFrom, settings.dateTo)
+        return transactionService.findTransactions(settings.dateFrom, settings.dateTo)
             .filter { it.incomeCategory in settings.incomeCategories }
-            .groupBy { it.incomeCategory }
+            .groupBy { it.incomeCategory!! }
             .entries
-            .map { it.key to it.value.sumIncomes(settings.currency) }
+            .map { it.key to it.value.sum(settings.currency) }
             .sortedBy { it.first }
             .let { incomes ->
                 CategoryChartRecord(
@@ -61,17 +58,11 @@ class CategoryChartService(
             }
     }
 
-    private fun List<ExpenseTransaction>.sumExpenses(currency: String) =
-        map { it.amount.convertTo(it.date, currency) }.reduce { acc, amount -> acc + amount }
-
-    private fun List<IncomeTransaction>.sumIncomes(currency: String) =
-        map { it.amount.convertTo(it.date, currency) }.reduce { acc, amount -> acc + amount }
+    private fun List<Transaction>.sum(currency: String) =
+        map { it.amount().convertTo(it.date, currency) }.reduce { acc, amount -> acc + amount }
 
     private fun Amount.convertTo(date: LocalDate, target: String): Amount =
-        Amount(
-            toBigDecimal().multiply(rate(date, currency, target)).toAmountValue(),
-            target
-        )
+        Amount(toBigDecimal().multiply(rate(date, currency, target)).toAmountValue(), target)
 
     private fun rate(date: LocalDate, from: String, to: String): BigDecimal =
         exchangeRateService.rate(date, from, to)

@@ -6,10 +6,8 @@ import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSeriesRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
-import com.evgenltd.financemanager.transaction.entity.ExpenseTransaction
-import com.evgenltd.financemanager.transaction.entity.IncomeTransaction
-import com.evgenltd.financemanager.transaction.repository.ExpenseTransactionRepository
-import com.evgenltd.financemanager.transaction.repository.IncomeTransactionRepository
+import com.evgenltd.financemanager.transaction.entity.Transaction
+import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.DayOfWeek
@@ -17,43 +15,42 @@ import java.time.LocalDate
 
 @Service
 class FlowChartService(
-        private val expenseTransactionRepository: ExpenseTransactionRepository,
-        private val incomeTransactionRepository: IncomeTransactionRepository,
-        private val exchangeRateService: ExchangeRateService
+    private val transactionService: TransactionService,
+    private val exchangeRateService: ExchangeRateService
 ) {
 
     fun load(settings: FlowChartSettingsRecord): FlowChartRecord = loadTotalChart(settings)
 
     private fun loadTotalChart(settings: FlowChartSettingsRecord): FlowChartRecord {
-        val expenses = expenseTransactionRepository.findByDate(settings.dateFrom, settings.dateTo)
-                .filter { it.expenseCategory in settings.expenseCategories }
-        val incomes = incomeTransactionRepository.findByDate(settings.dateFrom, settings.dateTo)
-                .filter { it.incomeCategory in settings.incomeCategories }
+        val transactions = transactionService.findTransactions(settings.dateFrom, settings.dateTo)
+            .filter { it.incomeCategory in settings.incomeCategories || it.expenseCategory in settings.expenseCategories }
 
-        val dates = (expenses.map { it.date } + incomes.map { it.date }).buildDateDimension(settings.groupBy)
+        val dates = transactions.map { it.date }.buildDateDimension(settings.groupBy)
 
-        val expenseByDate = expenses.groupBy { it.date.grouped(settings.groupBy) }
-                .entries
-                .map { it.key to it.value.sumExpenses(settings.currency) }
-                .associate { it }
+        val expenseByDate = transactions.filter { it.expenseCategory != null }
+            .groupBy { it.date.grouped(settings.groupBy) }
+            .entries
+            .map { it.key to it.value.sum(settings.currency) }
+            .associate { it }
 
-        val incomeByDate = incomes.groupBy { it.date.grouped(settings.groupBy) }
-                .entries
-                .map { it.key to it.value.sumIncomes(settings.currency) }
-                .associate { it }
+        val incomeByDate = transactions.filter { it.incomeCategory != null }
+            .groupBy { it.date.grouped(settings.groupBy) }
+            .entries
+            .map { it.key to it.value.sum(settings.currency) }
+            .associate { it }
 
         return FlowChartRecord(
-                dates,
-                listOf(
-                        FlowChartSeriesRecord(
-                                "Expense",
-                                dates.map { date -> expenseByDate[date] ?: Amount(0, settings.currency) }
-                        ),
-                        FlowChartSeriesRecord(
-                                "Income",
-                                dates.map { date -> incomeByDate[date] ?: Amount(0, settings.currency) }
-                        )
+            dates,
+            listOf(
+                FlowChartSeriesRecord(
+                    "Expense",
+                    dates.map { date -> expenseByDate[date] ?: Amount(0, settings.currency) }
+                ),
+                FlowChartSeriesRecord(
+                    "Income",
+                    dates.map { date -> incomeByDate[date] ?: Amount(0, settings.currency) }
                 )
+            )
         )
     }
 
@@ -83,19 +80,11 @@ class FlowChartService(
         else -> plusMonths(1L)
     }
 
-    private fun List<ExpenseTransaction>.sumExpenses(currency: String) =
-            map { it.amount.convertTo(it.date, currency) }.reduce { acc, amount -> acc + amount }
+    private fun List<Transaction>.sum(currency: String) = map { it.amount().convertTo(it.date, currency) }
+        .reduce { acc, amount -> acc + amount }
 
-    private fun List<IncomeTransaction>.sumIncomes(currency: String) =
-            map { it.amount.convertTo(it.date, currency) }.reduce { acc, amount -> acc + amount }
+    private fun Amount.convertTo(date: LocalDate, target: String): Amount = Amount(toBigDecimal().multiply(rate(date, currency, target)).toAmountValue(), target)
 
-    private fun Amount.convertTo(date: LocalDate, target: String): Amount =
-            Amount(
-                    toBigDecimal().multiply(rate(date, currency, target)).toAmountValue(),
-                    target
-            )
-
-    private fun rate(date: LocalDate, from: String, to: String): BigDecimal =
-            exchangeRateService.rate(date, from, to)
+    private fun rate(date: LocalDate, from: String, to: String): BigDecimal = exchangeRateService.rate(date, from, to)
 
 }

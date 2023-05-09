@@ -18,7 +18,7 @@ class RestLoggingInterceptor : ClientHttpRequestInterceptor, Loggable() {
         body: ByteArray,
         execution: ClientHttpRequestExecution
     ): ClientHttpResponse {
-        log.debug("Request url: ${request.uri}")
+        log.debug("Request url: {}", request.uri)
         log.debug("Request body: {}", String(body, StandardCharsets.UTF_8))
 
         val response: ClientHttpResponse = execution.execute(request, body)

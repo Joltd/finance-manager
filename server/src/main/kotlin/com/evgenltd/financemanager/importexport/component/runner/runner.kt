@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.importexport.component.runner
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.importexport.component.readFinance
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 
 fun main(args: Array<String>) {

@@ -17,11 +17,11 @@ data class Amount(val value: Long, val currency: String) {
 
     operator fun minus(other: Amount): Amount {
         checkCurrencySame(other)
-        return Amount(value + other.value, currency)
+        return Amount(value - other.value, currency)
     }
 
     operator fun times(other: BigDecimal): Amount = Amount(
-            toBigDecimal().multiply(other).toLong(),
+            toBigDecimal().multiply(other).toAmountValue(),
             currency
     )
 

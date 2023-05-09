@@ -10,12 +10,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class ReferenceService(
-        private val accountRepository: AccountRepository,
-        private val expenseCategoryRepository: ExpenseCategoryRepository,
-        private val incomeCategoryRepository: IncomeCategoryRepository
+    private val expenseCategoryRepository: ExpenseCategoryRepository,
+    private val incomeCategoryRepository: IncomeCategoryRepository
 ) {
-
-    fun accountIndex(): Map<String, Account> = accountRepository.findAll().associateBy { it.id!! }
 
     fun expenseCategoryIndex(): Map<String, ExpenseCategory> = expenseCategoryRepository.findAll().associateBy { it.id!! }
 

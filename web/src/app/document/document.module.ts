@@ -23,6 +23,7 @@ import {MatSelectModule} from "@angular/material/select";
 import {MatPaginatorModule} from "@angular/material/paginator";
 import {FastExpenseComponent} from "./component/fast-expense/fast-expense.component";
 import {OverlayModule} from "@angular/cdk/overlay";
+import {FastExchangeComponent} from "./component/fast-exchange/fast-exchange.component";
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import {OverlayModule} from "@angular/cdk/overlay";
     DocumentEditorComponent,
     DocumentViewComponent,
     DocumentLabelComponent,
-    FastExpenseComponent
+    FastExpenseComponent,
+    FastExchangeComponent
   ],
   imports: [
     MatListModule,
@@ -65,7 +67,8 @@ import {OverlayModule} from "@angular/cdk/overlay";
     DocumentEditorComponent,
     DocumentLabelComponent,
     DocumentViewComponent,
-    FastExpenseComponent
+    FastExpenseComponent,
+    FastExchangeComponent
   ]
 })
 export class DocumentModule {}

@@ -3,3 +3,25 @@
   grid-gap: 1em;
   grid-template-columns: 1fr 1fr;
 }
+
+.totals {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.expense {
+  background-color: #ef5350!important;
+  color: #fff!important;
+}
+
+.exchange {
+  background-color: #1e88e5!important;
+  color: #fff!important;
+}

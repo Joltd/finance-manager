@@ -4,7 +4,6 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.entity.Document
 import com.evgenltd.financemanager.document.record.*
 import com.evgenltd.financemanager.document.repository.DocumentRepository
-import com.evgenltd.financemanager.transaction.service.AccountTransactionService
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -13,20 +12,20 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import javax.annotation.PostConstruct
 
 @Service
 class DocumentService(
         private val documentRepository: DocumentRepository,
         private val mongoTemplate: MongoTemplate,
-        private val accountTransactionService: AccountTransactionService,
         private val transactionService: TransactionService,
         private val documentTypedServices: List<DocumentTypedService<*,*>>
 ) {
 
     private lateinit var index: Map<String,DocumentTypedService<*,*>>
 
-    @PostConstruct()
+    @PostConstruct
     fun postConstruct() {
         index = documentTypedServices.associateBy { resolveType(it) }
     }
@@ -101,14 +100,17 @@ class DocumentService(
 
     fun byId(id: String): DocumentTypedRecord = documentRepository.find(id).let(::toTypedRecord)
 
+    @Transactional
     fun update(record: DocumentTypedRecord) {
         val service = resolveService(record.value)
         val entity = service.toEntity(record.value)
         service.update(entity)
     }
 
+    @Transactional
     fun update(entity: Document) = resolveService(entity).update(entity)
 
+    @Transactional
     fun delete(id: String) {
         transactionService.deleteByDocument(id)
         documentRepository.deleteById(id)
@@ -118,16 +120,19 @@ class DocumentService(
         if (account == null) {
             return documentRepository.findAll().map(::toTypedRecord)
         }
-        val documents = accountTransactionService.findTransactionByAccount(account)
-                .map { it.document }
-        return documentRepository.findAllById(documents)
-                .map(::toTypedRecord)
+        val documents = transactionService.findByAccount(account).map { it.document }
+        return documentRepository.findAllById(documents).map(::toTypedRecord)
     }
 
+    @Transactional
     fun deleteByAccount(account: String) {
-        accountTransactionService.findTransactionByAccount(account)
-                .map { it.document }
-                .onEach { delete(it) }
+        transactionService.findByAccount(account)
+            .map { it.document }
+            .distinct()
+            .onEach {
+                transactionService.deleteByDocument(it)
+                documentRepository.deleteById(it)
+            }
     }
 
     fun toEntity(record: DocumentRecord): Document = resolveService(record).toEntity(record)
