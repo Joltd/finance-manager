@@ -27,9 +27,8 @@ class ExpenseCategoryService(
         return list.map { Reference(it.id!!, it.name, it.deleted) }
     }
 
-    fun list(): List<ExpenseCategoryRecord> =
-            expenseCategoryRepository.findAll()
-                    .map { it.toRecord() }
+    fun list(): List<ExpenseCategoryRecord> = expenseCategoryRepository.findAll()
+            .map { it.toRecord() }
 
     fun byId(id: String): ExpenseCategoryRecord = expenseCategoryRepository.find(id).toRecord()
 
@@ -50,15 +49,15 @@ class ExpenseCategoryService(
     fun name(id: String): String = expenseCategoryRepository.findByIdOrNull(id)?.name ?: id
 
     private fun ExpenseCategory.toRecord(): ExpenseCategoryRecord = ExpenseCategoryRecord(
-            id = id,
-            name = name,
-            deleted = deleted
+        id = id,
+        name = name,
+        deleted = deleted
     )
 
     private fun ExpenseCategoryRecord.toEntity(): ExpenseCategory = ExpenseCategory(
-            id = id,
-            name = name,
-            deleted = deleted
+        id = id,
+        name = name,
+        deleted = deleted
     )
 
 }

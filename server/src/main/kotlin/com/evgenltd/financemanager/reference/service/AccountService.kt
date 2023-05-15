@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class AccountService(
-    private val accountRepository: AccountRepository
-) {
+class AccountService(private val accountRepository: AccountRepository) {
 
     fun listReference(mask: String? = null, id: String? = null): List<Reference> {
         val list = if (mask?.isNotEmpty() == true) {
@@ -36,9 +34,6 @@ class AccountService(
     @Transactional
     fun update(record: AccountRecord) {
         val entity = record.toEntity()
-        entity.id
-                ?.let { accountRepository.findById(it).orElse(null) }
-                ?.let { entity.actualOn = if (!entity.track) null else it.actualOn }
         accountRepository.save(entity)
     }
 
@@ -53,17 +48,15 @@ class AccountService(
     fun name(id: String): String = accountRepository.findByIdOrNull(id)?.name ?: id
 
     private fun Account.toRecord(): AccountRecord = AccountRecord(
-            id = id,
-            name = name,
-            deleted = deleted,
-            track = track
+        id = id,
+        name = name,
+        deleted = deleted
     )
 
     private fun AccountRecord.toEntity(): Account = Account(
-            id = id,
-            name = name,
-            deleted = deleted,
-            track = track,
+        id = id,
+        name = name,
+        deleted = deleted
     )
     
 }

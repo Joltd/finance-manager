@@ -4,7 +4,10 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.stereotype.Service
+import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -21,6 +24,20 @@ class ExchangeRateService(
         if (exchangeRateRepository.findAll().isNotEmpty()) {
             return
         }
+
+        val ratesFile = {}.javaClass.getResource("/rates.json")
+        val mapper = jacksonObjectMapper()
+        val rates = mapper.readValue<List<ExchangeRateRecord>>(ratesFile)
+        for (rate in rates) {
+            update(rate)
+        }
+//        val currencies = listOf("USD", "EUR", "RUB", "RSD", "KZT", "TRY", "GEL")
+//        val rates = exchangeRateRepository.findAll()
+//            .filter { it.from in currencies || it.to in currencies }
+//            .map { RateRecord(it.date.toString(), it.from, it.to, it.value) }
+//
+//        val mapper = jacksonObjectMapper()
+//        mapper.writeValue(File("""C:\Users\lebed\Downloads\rates.json"""), rates)
     }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }
@@ -38,10 +55,6 @@ class ExchangeRateService(
     fun delete(id: String) = exchangeRateRepository.deleteById(id)
 
     fun rate(date: LocalDate, from: String, toCurrencies: List<String>): Map<String,BigDecimal> {
-        if (toCurrencies.isEmpty()) {
-            return emptyMap()
-        }
-
         val toCurrenciesSet = toCurrencies.toMutableSet()
         val result = mutableMapOf<String,BigDecimal>()
         for (exchangeRateProvider in exchangeRateProviders) {

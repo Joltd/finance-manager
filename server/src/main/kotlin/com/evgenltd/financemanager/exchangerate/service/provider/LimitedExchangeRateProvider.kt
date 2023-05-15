@@ -13,6 +13,7 @@ abstract class LimitedExchangeRateProvider(
 
     override fun rate(date: LocalDate, from: String, toCurrencies: Set<String>, gap: Long): Map<String, BigDecimal> =
         try {
+            log.info("Load rate $from/$toCurrencies for date $date")
             rate(date, from, toCurrencies)
                 .onEach { (to, rate) ->
                     exchangeRateRepository.save(ExchangeRate(null, date, from, to, rate))

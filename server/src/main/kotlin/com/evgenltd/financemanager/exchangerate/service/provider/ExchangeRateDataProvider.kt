@@ -16,7 +16,7 @@ class ExchangeRatesDataProvider(
 
     override fun rate(date: LocalDate, from: String, toCurrencies: Set<String>): Map<String, BigDecimal> {
         val response = rest.getForEntity(
-            "$URL/$date?base=$from&symbols=$toCurrencies",
+            "$URL/$date?base=$from&symbols=${toCurrencies.joinToString(",")}",
             ExchangeRateDataResponse::class.java
         )
 
@@ -40,7 +40,7 @@ class ExchangeRatesDataProvider(
     }
 
     private companion object {
-        const val URL = "https://api.exchangerate.host/"
+        const val URL = "https://api.exchangerate.host"
     }
 
 }
