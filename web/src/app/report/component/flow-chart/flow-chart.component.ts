@@ -3,16 +3,11 @@ import {FlowChartService} from "../../service/flow-chart.service";
 import {FormControl, FormGroup} from "@angular/forms";
 import * as echarts from "echarts";
 import {ECharts} from "echarts";
-import {Amount, fromFractional, toFractional} from "../../../common/model/amount";
-import {FlowChartSeries} from "../../model/flow-chart-series";
+import {Amount, toFractional} from "../../../common/model/amount";
 import {ReferenceService} from "../../../common/service/reference.service";
 import {Reference} from "../../../common/model/reference";
 import * as moment from "moment";
-import {CategoryChartService} from "../../service/category-chart.service";
-import {Router} from "@angular/router";
-import {Total} from "../../model/total";
 import {FlowChart, FlowChartEntry} from "../../model/flow-chart";
-import {groupData} from "echarts/types/src/util/model";
 
 @Component({
   selector: 'flow-chart',
@@ -44,9 +39,15 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     private referenceService: ReferenceService
   ) {
     this.referenceService.list('/expense/reference')
-      .subscribe(result => this.expenseCategories = result)
+      .subscribe(result => {
+        this.expenseCategories = result
+        this.selectAllCategories()
+      })
     this.referenceService.list('/income/reference')
-      .subscribe(result => this.incomeCategories = result)
+      .subscribe(result => {
+        this.incomeCategories = result
+        this.selectAllCategories()
+      })
   }
 
   ngAfterViewInit(): void {
@@ -77,6 +78,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   }
 
   forward(params: any) {
+    console.log(params)
     if (this.level == 'BY_DATE') {
       this.level = 'BY_CATEGORY'
       this.apply()
@@ -95,13 +97,18 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
       })
   }
 
-  disableAllCategories() {
-    this.settings.patchValue({
-      categories: []
-    })
+  toggleAllCategories() {
+    if (this.settings.value.categories.length == 0) {
+      this.selectAllCategories()
+    } else {
+      this.settings.patchValue({
+        categories: []
+      })
+    }
+
   }
 
-  enableAllCategories() {
+  private selectAllCategories() {
     this.settings.patchValue({
       categories: this.expenseCategories.map(category => category.id).concat(
         this.incomeCategories.map(category => category.id)

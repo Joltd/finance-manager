@@ -1,11 +1,10 @@
 <mat-card>
-  <mat-card-content>
-    <button mat-icon-button [hidden]="!isBackAvailable()" (click)="back()"><mat-icon>arrow</mat-icon></button>
-    <div>Flow chart</div>
-    <div *ngIf="level == 'BY_DATE'">Totals for expense/income chart</div>
-    <div *ngIf="level != 'BY_DATE'">Some totals</div>
-    <button mat-icon-button (click)="apply()"><mat-icon>apply</mat-icon></button>
-  </mat-card-content>
+  <mat-card-header class="chart-header">
+    <mat-card-title>Flow chart</mat-card-title>
+    <mat-card-subtitle>+1000 -500</mat-card-subtitle>
+    <button mat-icon-button [hidden]="!isBackAvailable()" (click)="back()"><mat-icon>arrow_back</mat-icon></button>
+    <button mat-icon-button (click)="apply()"><mat-icon>done</mat-icon></button>
+  </mat-card-header>
 </mat-card>
 
 <mat-expansion-panel>
@@ -28,17 +27,16 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>categories</mat-label>
+      <mat-label>Categories</mat-label>
       <mat-select formControlName="categories" multiple>
-        <mat-optgroup label="Expenses" disabled="true">
+        <mat-optgroup label="Expenses">
           <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
         </mat-optgroup>
-        <mat-optgroup label="Incomes" disabled="true">
+        <mat-optgroup label="Incomes">
           <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
         </mat-optgroup>
       </mat-select>
-      <button matSuffix mat-icon-button (click)="disableAllCategories()"><mat-icon>checklist</mat-icon></button>
-      <button matSuffix mat-icon-button (click)="enableAllCategories()"><mat-icon>checklist</mat-icon></button>
+      <button matSuffix mat-icon-button (click)="toggleAllCategories()"><mat-icon>checklist</mat-icon></button>
     </mat-form-field>
 
     <mat-form-field>
