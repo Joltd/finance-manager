@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 class AccountController(
-        private val accountService: AccountService
+    private val accountService: AccountService
 ) {
 
     @GetMapping("/account/reference")

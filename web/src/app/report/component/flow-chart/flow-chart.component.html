@@ -1,9 +1,19 @@
+<mat-card>
+  <mat-card-content>
+    <button mat-icon-button [hidden]="!isBackAvailable()" (click)="back()"><mat-icon>arrow</mat-icon></button>
+    <div>Flow chart</div>
+    <div *ngIf="level == 'BY_DATE'">Totals for expense/income chart</div>
+    <div *ngIf="level != 'BY_DATE'">Some totals</div>
+    <button mat-icon-button (click)="apply()"><mat-icon>apply</mat-icon></button>
+  </mat-card-content>
+</mat-card>
+
 <mat-expansion-panel>
   <mat-expansion-panel-header>
     <mat-panel-title>Settings</mat-panel-title>
   </mat-expansion-panel-header>
 
-  <form [formGroup]="filter()">
+  <form [formGroup]="settings">
 
     <mat-form-field>
       <mat-label>From</mat-label>
@@ -18,42 +28,31 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Group by</mat-label>
-      <mat-select formControlName="groupBy">
-        <mat-option [value]="'week'">Week</mat-option>
-        <mat-option [value]="'month'">Month</mat-option>
+      <mat-label>categories</mat-label>
+      <mat-select formControlName="categories" multiple>
+        <mat-optgroup label="Expenses" disabled="true">
+          <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
+        </mat-optgroup>
+        <mat-optgroup label="Incomes" disabled="true">
+          <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
+        </mat-optgroup>
       </mat-select>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Expenses</mat-label>
-      <mat-select formControlName="expenseCategories" multiple>
-        <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
-      </mat-select>
-      <button matSuffix mat-icon-button (click)="allExpenseCategories()"><mat-icon>checklist</mat-icon></button>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Incomes</mat-label>
-      <mat-select formControlName="incomeCategories" multiple>
-        <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
-      </mat-select>
-      <button matSuffix mat-icon-button (click)="allIncomeCategories()"><mat-icon>checklist</mat-icon></button>
+      <button matSuffix mat-icon-button (click)="disableAllCategories()"><mat-icon>checklist</mat-icon></button>
+      <button matSuffix mat-icon-button (click)="enableAllCategories()"><mat-icon>checklist</mat-icon></button>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Currency</mat-label>
-      <currency-input formControlName="currency"></currency-input>
+      <mat-select formControlName="commonCurrency">
+        <mat-option [value]="'USD'">USD</mat-option>
+        <mat-option [value]="'RUB'">RUB</mat-option>
+      </mat-select>
     </mat-form-field>
+
+    <mat-slide-toggle formControlName="byCurrency">View by category</mat-slide-toggle>
 
   </form>
 </mat-expansion-panel>
-
-<mat-card>
-  <mat-card-content>
-    <div *ngFor="let total of totals">{{total.category}}: {{total.amount}}</div>
-  </mat-card-content>
-</mat-card>
 
 <mat-card class="chart-card">
   <mat-card-content>

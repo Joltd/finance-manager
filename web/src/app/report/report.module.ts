@@ -14,6 +14,7 @@ import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {CategoryChartComponent} from "./component/category-chart/category-chart.component";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @NgModule({
   declarations: [
@@ -21,21 +22,22 @@ import {CategoryChartComponent} from "./component/category-chart/category-chart.
     FlowChartComponent,
     CategoryChartComponent
   ],
-  imports: [
-    MatCardModule,
-    NgForOf,
-    CommonModule,
-    MatListModule,
-    MatChipsModule,
-    NgIf,
-    MatExpansionModule,
-    MatInputModule,
-    MatSelectModule,
-    ReactiveFormsModule,
-    MatDatepickerModule,
-    MatButtonModule,
-    MatIconModule
-  ],
+    imports: [
+        MatCardModule,
+        NgForOf,
+        CommonModule,
+        MatListModule,
+        MatChipsModule,
+        NgIf,
+        MatExpansionModule,
+        MatInputModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+        MatDatepickerModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSlideToggleModule
+    ],
   exports: [
     DashboardComponent,
     FlowChartComponent,

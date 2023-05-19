@@ -1,6 +1,14 @@
-import {FlowChartSeries} from "./flow-chart-series";
+import { Amount } from "src/app/common/model/amount";
 
 export class FlowChart {
-  dates: string[] = []
-  flows: FlowChartSeries[] = []
+  entries: FlowChartEntry[] = []
+}
+
+export class FlowChartEntry {
+  date!: string
+  type!: 'expense' | 'income'
+  category!: string
+  account!: string
+  amount!: Amount
+  commonAmount!: Amount
 }

@@ -12,7 +12,7 @@ import java.time.Period
 import kotlin.math.absoluteValue
 
 @Service
-@Order(1)
+@Order(2)
 class ExchangeRateEntityProvider(
     private val exchangeRateRepository: ExchangeRateRepository
 ) : ExchangeRateProvider {

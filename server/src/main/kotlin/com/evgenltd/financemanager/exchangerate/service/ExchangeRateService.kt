@@ -4,6 +4,8 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.stereotype.Service
@@ -25,8 +27,9 @@ class ExchangeRateService(
             return
         }
 
-        val ratesFile = {}.javaClass.getResource("/rates.json")
         val mapper = jacksonObjectMapper()
+        mapper.registerModule(JavaTimeModule())
+        val ratesFile = {}.javaClass.getResource("/rates.json")
         val rates = mapper.readValue<List<ExchangeRateRecord>>(ratesFile)
         for (rate in rates) {
             update(rate)
@@ -61,7 +64,7 @@ class ExchangeRateService(
             if (toCurrenciesSet.isEmpty()) {
                 break
             }
-            exchangeRateProvider.rate(date, from, toCurrenciesSet, ExchangeRateProvider.SHORT_PERIOD_GAP)
+            exchangeRateProvider.rate(date, from, toCurrenciesSet, ExchangeRateProvider.LONG_PERIOD_GAP)
                 .onEach {
                     result[it.key] = it.value
                     toCurrenciesSet.remove(it.key)
