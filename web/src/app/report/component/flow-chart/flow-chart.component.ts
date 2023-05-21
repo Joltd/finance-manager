@@ -194,7 +194,9 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
             focus: 'series'
           },
           itemStyle: {
-            borderRadius: 5
+            borderRadius: 5,
+            color: this.level == 'BY_DATE' && secondDimension == 'IN' ? '#66bb6a' :
+              this.level == 'BY_DATE' && secondDimension == 'OUT' ? '#ef5350' : 'auto'
           },
           barGap: '10%',
           barCategoryGap: '10%',
