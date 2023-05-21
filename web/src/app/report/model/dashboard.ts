@@ -7,6 +7,7 @@ export class Dashboard {
 }
 
 export class Fund {
+  account!: string
   amount!: Amount
-  weight!: number
+  commonAmount!: Amount
 }

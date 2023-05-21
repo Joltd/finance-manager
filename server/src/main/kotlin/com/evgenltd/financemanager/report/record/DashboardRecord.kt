@@ -9,6 +9,7 @@ data class DashboardRecord(
 )
 
 data class FundRecord(
+    val account: String,
     val amount: Amount,
-    val weight: Int
+    val commonAmount: Amount
 )

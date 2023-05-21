@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
+import com.evgenltd.financemanager.reference.service.ReferenceService
 import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.report.record.FundRecord
 import com.evgenltd.financemanager.transaction.entity.Direction
@@ -19,28 +20,33 @@ class DashboardService(
 ) {
 
     fun load(): DashboardRecord {
-        val funds = transactionService.findAll()
-            .groupBy { it.amount.currency }
-            .map { (_, transactions) ->
-                transactions.map { it.amountWithDirection() }
-                    .reduce { acc, amount -> acc + amount }
-            }
+        val firstCurrency = "USD"
+        val secondCurrency = "RUB"
 
-        val usdFunds = funds.map {
-            val rate = exchangeRateService.rate(LocalDate.now(), it.currency, "USD")
-            it to it.toBigDecimal() * rate
-        }
-        val usdTotal = usdFunds.sumOf { it.second }
+        val funds = transactionService.findAll()
+            .groupBy { it.account to it.amount.currency }
+            .map { (accountCurrency, transactions) ->
+                val amount = transactions.map { it.amountWithDirection() }.reduce { acc, amount -> acc + amount }
+                val commonAmount = exchangeRateService.rate(LocalDate.now(), amount.currency, firstCurrency) * amount.toBigDecimal()
+                FundRecord(
+                    account = accountCurrency.first,
+                    amount = amount,
+                    commonAmount = Amount(commonAmount.toAmountValue(), firstCurrency)
+                )
+            }
+            .filter { it.commonAmount.toBigDecimal().signum() > 0 }
+
+        val usdTotal = funds.sumOf { it.commonAmount.toBigDecimal() }
 
         val rubTotal = funds.sumOf {
-            val rate = exchangeRateService.rate(LocalDate.now(), it.currency, "RUB")
-            it.toBigDecimal() * rate
+            val rate = exchangeRateService.rate(LocalDate.now(), it.amount.currency, secondCurrency)
+            it.amount.toBigDecimal() * rate
         }
 
         return DashboardRecord(
-            funds = usdFunds.map { FundRecord(it.first, (it.second / usdTotal * BigDecimal(100)).toInt()) },
-            fundsTotal = Amount(usdTotal.toAmountValue(), "USD"),
-            fundsTotalSecondary = Amount(rubTotal.toAmountValue(), "RUB")
+            funds = funds,
+            fundsTotal = Amount(usdTotal.toAmountValue(), firstCurrency),
+            fundsTotalSecondary = Amount(rubTotal.toAmountValue(), secondCurrency)
         )
     }
 
