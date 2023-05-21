@@ -16,10 +16,14 @@ form {
   flex-direction: column;
 }
 
-.chart-card {
-  //padding: 0!important;
+.hidden {
+  display: none;
 }
 
-.chart {
-  height: 40em;
+.expense {
+  color: #ef5350;
+}
+
+.income {
+  color: #66bb6a;
 }

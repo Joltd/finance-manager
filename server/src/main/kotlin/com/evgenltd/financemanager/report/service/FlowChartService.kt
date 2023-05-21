@@ -21,6 +21,7 @@ class FlowChartService(
 
     fun load(settings: FlowChartSettingsRecord): FlowChartRecord {
         val entries = transactionService.findTransactions(settings.dateFrom, settings.dateTo)
+            .filter { settings.type == null || it.direction == settings.type }
             .filter { it.incomeCategory in settings.categories || it.expenseCategory in settings.categories }
             .map { it.toEntry(settings.commonCurrency) }
         return FlowChartRecord(entries)
@@ -28,10 +29,7 @@ class FlowChartService(
 
     private fun Transaction.toEntry(commonCurrency: String): FlowChartEntryRecord = FlowChartEntryRecord(
         date = date,
-        type = when (direction) {
-            Direction.IN -> "income"
-            Direction.OUT -> "expense"
-        },
+        type = direction,
         category = incomeCategory ?: expenseCategory ?: throw IllegalStateException("Should be only expense or income"),
         account = account,
         amount = amount,

@@ -6,7 +6,7 @@ export class FlowChart {
 
 export class FlowChartEntry {
   date!: string
-  type!: 'expense' | 'income'
+  type!: 'IN' | 'OUT'
   category!: string
   account!: string
   amount!: Amount

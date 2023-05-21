@@ -1,13 +1,16 @@
 <mat-card>
   <mat-card-header class="chart-header">
     <mat-card-title>Flow chart</mat-card-title>
-    <mat-card-subtitle>+1000 -500</mat-card-subtitle>
+    <mat-card-subtitle *ngIf="level == 'BY_DATE'">
+      <span class="income">+{{totalIncome}}</span>&nbsp;<span class="expense">-{{totalExpense}}</span>
+    </mat-card-subtitle>
+    <mat-card-subtitle *ngIf="level != 'BY_DATE'">{{total}}</mat-card-subtitle>
     <button mat-icon-button [hidden]="!isBackAvailable()" (click)="back()"><mat-icon>arrow_back</mat-icon></button>
     <button mat-icon-button (click)="apply()"><mat-icon>done</mat-icon></button>
   </mat-card-header>
 </mat-card>
 
-<mat-expansion-panel>
+<mat-expansion-panel #filter>
   <mat-expansion-panel-header>
     <mat-panel-title>Settings</mat-panel-title>
   </mat-expansion-panel-header>
@@ -24,6 +27,15 @@
       <mat-label>To</mat-label>
       <input formControlName="dateTo" matInput [matDatepicker]="to" readonly (click)="to.open()">
       <mat-datepicker touchUi #to></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="null">Nothing</mat-option>
+        <mat-option [value]="'IN'">Income</mat-option>
+        <mat-option [value]="'OUT'">Expense</mat-option>
+      </mat-select>
     </mat-form-field>
 
     <mat-form-field>
@@ -47,13 +59,13 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-slide-toggle formControlName="byCurrency">View by category</mat-slide-toggle>
+    <mat-slide-toggle formControlName="byCurrency">View by currency</mat-slide-toggle>
 
   </form>
 </mat-expansion-panel>
 
-<mat-card class="chart-card">
+<mat-card [class.hidden]="!data">
   <mat-card-content>
-    <div #chart class="chart"></div>
+    <div #chart [style.height]="chartHeight + 'em'"></div>
   </mat-card-content>
 </mat-card>

@@ -7,6 +7,21 @@ export class Amount {
   currency!: string
 }
 
+export function emptyAmount(currency: string): Amount {
+  let amount = new Amount()
+  amount.value = 0
+  amount.currency = currency
+  return amount
+}
+
+export function plus(left: Amount, right: Amount): Amount {
+  if (left.currency != right.currency) throw Error('Cannot add amounts with different currencies')
+  let amount = new Amount()
+  amount.value = left.value + right.value
+  amount.currency = left.currency
+  return amount
+}
+
 export function toFractional(amount: Amount): number {
   let text = ''+amount.value
   while (text.length < decimals + 1) {
