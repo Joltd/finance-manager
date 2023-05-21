@@ -28,9 +28,9 @@ class DashboardService(
 
         val usdFunds = funds.map {
             val rate = exchangeRateService.rate(LocalDate.now(), it.currency, "USD")
-            it.toBigDecimal() * rate
+            it to it.toBigDecimal() * rate
         }
-        val usdTotal = usdFunds.sumOf { it }
+        val usdTotal = usdFunds.sumOf { it.second }
 
         val rubTotal = funds.sumOf {
             val rate = exchangeRateService.rate(LocalDate.now(), it.currency, "RUB")
@@ -38,7 +38,7 @@ class DashboardService(
         }
 
         return DashboardRecord(
-            funds = funds.map { FundRecord(it, (it.toBigDecimal() / usdTotal * BigDecimal(100)).toInt()) },
+            funds = usdFunds.map { FundRecord(it.first, (it.second / usdTotal * BigDecimal(100)).toInt()) },
             fundsTotal = Amount(usdTotal.toAmountValue(), "USD"),
             fundsTotalSecondary = Amount(rubTotal.toAmountValue(), "RUB")
         )
