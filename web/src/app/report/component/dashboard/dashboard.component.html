@@ -1,13 +1,17 @@
-<mat-card>
-  <mat-card-content class="totals">
-    <h1>{{dashboard.fundsTotal | format:true}}</h1>
-    <h5>{{dashboard.fundsTotalSecondary | format:true}}</h5>
-  </mat-card-content>
-</mat-card>
+<div class="total-and-actions">
+  <mat-card>
+    <mat-card-content class="totals">
+      <h1>{{dashboard.fundsTotal | format:true}}</h1>
+      <h5>{{dashboard.fundsTotalSecondary | format:true}}</h5>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="fast-actions">
+    <button mat-raised-button class="expense" (click)="fastExpense()">Expense</button>
+    <button mat-raised-button class="exchange" (click)="fastExchange()">Exchange</button>
+  </div>
+</div>
 
 <mat-card>
-  <div #chart [style.height]="fundChartHeight()"></div>
+  <div #chart [style.height]="chartHeight + 'em'"></div>
 </mat-card>
-
-<button mat-raised-button class="expense" (click)="fastExpense()">Expense</button>
-<button mat-raised-button class="exchange" (click)="fastExchange()">Exchange</button>

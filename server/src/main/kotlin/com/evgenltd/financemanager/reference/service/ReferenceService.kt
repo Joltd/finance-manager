@@ -1,9 +1,7 @@
 package com.evgenltd.financemanager.reference.service
 
-import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.ExpenseCategory
 import com.evgenltd.financemanager.reference.entity.IncomeCategory
-import com.evgenltd.financemanager.reference.repository.AccountRepository
 import com.evgenltd.financemanager.reference.repository.ExpenseCategoryRepository
 import com.evgenltd.financemanager.reference.repository.IncomeCategoryRepository
 import org.springframework.stereotype.Service

@@ -6,7 +6,6 @@ import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.report.record.FlowChartEntryRecord
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
-import com.evgenltd.financemanager.transaction.entity.Direction
 import com.evgenltd.financemanager.transaction.entity.Transaction
 import com.evgenltd.financemanager.transaction.service.TransactionService
 import org.springframework.stereotype.Service

@@ -5,7 +5,7 @@ import {Router} from "@angular/router";
 import {DocumentService} from "../../../document/service/document.service";
 import * as echarts from "echarts";
 import {ECharts} from "echarts";
-import {formatAsString} from "../../../common/model/amount";
+import {formatAsString, toFractional} from "../../../common/model/amount";
 
 @Component({
   selector: 'dashboard',
@@ -19,6 +19,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   @ViewChild('chart')
   chartContainer!: ElementRef
   chart!: ECharts
+  chartHeight: number = 0
 
   constructor(
     private dashboardService: DashboardService,
@@ -43,17 +44,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.dashboardService.load()
       .subscribe(result => {
         this.dashboard = result
-        this.refreshChart()
+        this.chartHeight = result.funds.length * 2.5
+        setTimeout(() => this.refreshChart(), 10)
       })
   }
-
-  // viewDocuments(account: string, currency: string) {
-  //   if (!account) {
-  //     return
-  //   }
-  //   this.documentService.updateFilter({account, currency})
-  //   this.router.navigate(['document']).then()
-  // }
 
   fastExpense() {
     this.router.navigate(['fast-expense']).then()
@@ -63,19 +57,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['fast-exchange']).then()
   }
 
-  fundChartHeight(): string {
-    return `${this.dashboard.funds.length * 2}em`;
-  }
-
   private refreshChart() {
     let data = this.dashboard.funds.sort((a,b) => a.weight - b.weight)
+    let positionThreshold = Math.max(...data.map(fund => fund.weight)) * .15
     let option = {
-      grid: {
-        top: '5%',
-        bottom: '5%',
-        left: '5%',
-        right: '5%'
-      },
       xAxis: {
         type: 'value',
         show: false,
@@ -88,40 +73,33 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       series: [
         {
           type: 'bar',
-          label: {
-            show: true,
-            position: 'insideLeft',
-            color: '#000',
+          itemStyle: {
+            borderRadius: 5
           },
-          barMinHeight: 5,
-          barCategoryGap: '10%',
+          barGap: '15%',
+          barCategoryGap: '15%',
           data: data.map(fund => {
             return {
               value: fund.weight,
               label: {
-                formatter: formatAsString(fund.amount, true)
+                show: true,
+                formatter: formatAsString(fund.amount, true),
+                position: fund.weight < positionThreshold ? 'right' : 'insideLeft'
               }
             }
           })
         }
-      ]
-      // series: this.dashboard.funds.sort((a,b) => b.weight - a.weight).map(fund => {
-      //   return {
-      //     type: 'bar',
-      //     data: [fund.weight == 0 ? 2 : fund.weight],
-      //     label: {
-      //       show: true,
-      //       formatter: formatAsString(fund.amount, true),
-      //       position: 'insideLeft',
-      //       align: 'left',
-      //     }
-      //   }
-      // })
+      ],
+      grid: {
+        top: '10',
+        bottom: '10',
+        left: '10',
+        right: '10'
+      }
     }
     this.chart.resize()
     this.chart.clear()
     this.chart.setOption(option)
-    setTimeout(() => this.chart.resize(), 10)
   }
 
 }

@@ -182,7 +182,6 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         axisTick: {
           show: false
         },
-        min: 0.1,
         data: groupData.firstDimensions
       },
       series: groupData.secondDimensions.map(secondDimension => {
