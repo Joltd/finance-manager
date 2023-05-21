@@ -32,13 +32,6 @@ class ExchangeRateService(
         for (rate in rates) {
             update(rate)
         }
-//        val currencies = listOf("USD", "EUR", "RUB", "RSD", "KZT", "TRY", "GEL")
-//        val rates = exchangeRateRepository.findAll()
-//            .filter { it.from in currencies || it.to in currencies }
-//            .map { RateRecord(it.date.toString(), it.from, it.to, it.value) }
-//
-//        val mapper = jacksonObjectMapper()
-//        mapper.writeValue(File("""C:\Users\lebed\Downloads\rates.json"""), rates)
     }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }

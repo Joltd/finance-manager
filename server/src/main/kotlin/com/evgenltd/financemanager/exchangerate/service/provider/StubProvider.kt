@@ -12,7 +12,7 @@ import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Service
-@Order(1)
+//@Order(1)
 class StubProvider : ExchangeRateProvider {
 
     @PostConstruct
