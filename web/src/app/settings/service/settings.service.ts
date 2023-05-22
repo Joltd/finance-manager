@@ -30,4 +30,8 @@ export class SettingsService {
     return this.http.delete<void>('/settings/database')
   }
 
+  handleDocuments(): Observable<void> {
+    return this.http.post<void>('/settings/document', null)
+  }
+
 }

@@ -6,3 +6,12 @@ form {
   display: flex;
   flex-direction: column;
 }
+
+.management {
+  display: flex;
+  //grid-gap: 1em;
+  //grid-template-columns: min-content min-content;
+  button {
+    margin-right: 1em;
+  }
+}

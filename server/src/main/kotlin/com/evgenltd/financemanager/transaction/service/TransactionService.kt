@@ -81,4 +81,8 @@ class TransactionService(private val transactionRepository: TransactionRepositor
     fun findTransactions(from: LocalDate, to: LocalDate): List<Transaction> =
         transactionRepository.findByDateBetween(from, to)
 
+    fun deleteAll() {
+        transactionRepository.deleteAll()
+    }
+
 }

@@ -10,8 +10,8 @@ import javax.annotation.PostConstruct
 
 @Service
 class SettingsService(
-        private val settingRepository: SettingRepository,
-        private val mongoDatabaseFactory: MongoDatabaseFactory
+    private val settingRepository: SettingRepository,
+    private val mongoDatabaseFactory: MongoDatabaseFactory
 ) {
 
     @PostConstruct
