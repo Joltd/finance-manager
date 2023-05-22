@@ -23,11 +23,7 @@ class DocumentExpenseService(
     override fun update(entity: DocumentExpense) {
         documentExpenseRepository.save(entity)
         transactionService.deleteByDocument(entity.id!!)
-        if (entity.amount.value > 0) {
-            transactionService.flow(Direction.OUT, entity.date, entity.amount, entity.id!!, entity.account, null, entity.expenseCategory)
-        } else {
-            transactionService.flow(Direction.IN, entity.date, entity.amount.abs(), entity.id!!, entity.account, null, entity.expenseCategory)
-        }
+        transactionService.flow(Direction.OUT, entity.date, entity.amount, entity.id!!, entity.account, null, entity.expenseCategory)
     }
 
     override fun toRecord(entity: DocumentExpense): DocumentExpenseRecord = DocumentExpenseRecord(

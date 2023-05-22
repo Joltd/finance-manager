@@ -190,7 +190,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
             return 0
           } else {
             let secondDimension = groupData.secondDimensions[0]
-            return groupData.getValue(b, secondDimension, commonCurrency).commonAmount.value - groupData.getValue(a, secondDimension, commonCurrency).commonAmount.value
+            return groupData.getValue(a, secondDimension, commonCurrency).commonAmount.value - groupData.getValue(b, secondDimension, commonCurrency).commonAmount.value
           }
         })
       },
