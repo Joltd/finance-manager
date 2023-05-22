@@ -23,7 +23,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
 
   private accounts: Map<string,Reference> = new Map<string,Reference>()
 
-  private currency!: string
+  private currency: string | null = null
   public dashboard: Dashboard = new Dashboard()
 
   private level: 'BY_CURRENCY' | 'BY_ACCOUNT' = 'BY_CURRENCY'
@@ -47,7 +47,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     window.onresize = function () {
       chart.resize()
     }
-    chart.on('click', (params) => this.forward(params))
+    chart.on('click', (params) => this.toggleLevel(params))
     this.chart = chart
     this.load()
   }
@@ -56,12 +56,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.chart.dispose()
   }
 
-  forward(params: any) {
+  toggleLevel(params: any) {
     if (this.level == 'BY_CURRENCY') {
       this.currency = params.name
       this.level = 'BY_ACCOUNT'
       this.apply()
     } else {
+      this.currency = null
       this.level = 'BY_CURRENCY'
       this.apply()
     }
@@ -69,10 +70,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   private apply() {
-    let groupData = this.groupData()
-    this.chartHeight = groupData.size * 3
-    console.log(this.chartHeight)
-    setTimeout(() => this.refreshChart(groupData), 10)
+    if (this.level == 'BY_CURRENCY') {
+      this.chartByCurrency()
+    } else if (this.level == 'BY_ACCOUNT') {
+      this.chartByAccount()
+    }
   }
 
   private load() {
@@ -91,9 +93,26 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['fast-exchange']).then()
   }
 
-  private refreshChart(groupData: Map<string, ChartValue>) {
-    let allCommonAmounts = [...groupData.values()].map(value => toFractional(value.commonAmount))
-    let positionThreshold = Math.max(...allCommonAmounts) * .15
+  private chartByCurrency() {
+
+    let groupIndex = new Map<string,Fund>()
+    for (let fund of this.dashboard.funds) {
+      let group = groupIndex.get(fund.amount.currency)
+      if (group) {
+        group.amount = plus(group.amount, fund.amount)
+        group.commonAmount = plus(group.commonAmount, fund.commonAmount)
+      } else {
+        group = new Fund()
+        group.amount = fund.amount
+        group.commonAmount = fund.commonAmount
+        groupIndex.set(fund.amount.currency, group)
+      }
+    }
+
+    let groups = [...groupIndex.values()].sort((a, b) => a.commonAmount.value - b.commonAmount.value)
+    let positionThreshold = Math.max(...groups.map(group => toFractional(group.commonAmount))) * .15
+    this.chartHeight = Math.max(4, groups.length * 2.5)
+
     let option = {
       xAxis: {
         type: 'value',
@@ -101,17 +120,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       },
       yAxis: {
         type: 'category',
-        axisLabel: {
-          formatter: (value: string) => this.level == 'BY_ACCOUNT' ? this.accounts.get(value)?.name : value
-        },
         axisLine: {
           show: false
         },
         axisTick: {
           show: false
         },
-        data: [...groupData.keys()],
-        show: this.level == 'BY_ACCOUNT',
+        show: false,
+        data: groups.map(group => group.amount.currency)
       },
       series: [
         {
@@ -120,15 +136,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
             borderRadius: 5
           },
           barGap: '15%',
-          barCategoryGap: '15%',
-          data: [...groupData.entries()].map(entry => {
-            let commonAmount = toFractional(entry[1].commonAmount);
+          data: groups.map(group => {
+            let commonAmount = toFractional(group.commonAmount)
             return {
-              name: entry[0],
+              name: group.amount.currency,
               value: commonAmount,
               label: {
                 show: true,
-                formatter: formatAsString(entry[1].amount, true),
+                formatter: formatAsString(group.amount, true),
                 position: commonAmount < positionThreshold ? 'right' : 'insideLeft'
               }
             }
@@ -138,44 +153,72 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
       grid: {
         top: '10',
         bottom: '10',
-        left: this.level == 'BY_ACCOUNT' ? '80' : '10',
-        right: '10'
+        right: '10',
+        left: '10'
       }
     }
-    this.chart.resize()
-    this.chart.clear()
-    this.chart.setOption(option)
+    setTimeout(() => {
+      this.chart.resize()
+      this.chart.clear()
+      this.chart.setOption(option)
+    }, 10)
   }
 
-  private groupData(): Map<string,ChartValue> {
-    let result = new Map<string,ChartValue>()
-    for (let fund of this.dashboard.funds) {
-      if (this.level == 'BY_ACCOUNT' && fund.amount.currency != this.currency) {
-        continue
+  private chartByAccount() {
+    let funds = this.dashboard.funds
+      .filter(fund => fund.amount.currency == this.currency)
+      .sort((a, b) => a.commonAmount.value - b.commonAmount.value)
+    let positionThreshold = Math.max(...funds.map(fund => toFractional(fund.commonAmount))) * .15
+    this.chartHeight = Math.max(4, funds.length * 2.5)
+
+    let option = {
+      xAxis: {
+        type: 'value',
+        show: false,
+      },
+      yAxis: {
+        type: 'category',
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        show: true,
+        data: funds.map(fund => formatAsString(fund.amount))
+      },
+      series: [
+        {
+          type: 'bar',
+          itemStyle: {
+            borderRadius: 5
+          },
+          barGap: '15%',
+          data: funds.map(fund => {
+            let commonAmount = toFractional(fund.commonAmount);
+            return {
+              value: commonAmount,
+              label: {
+                show: true,
+                formatter: this.accounts.get(fund.account)?.name,
+                position: commonAmount < positionThreshold ? 'right' : 'insideLeft'
+              }
+            }
+          })
+        }
+      ],
+      grid: {
+        top: '10',
+        bottom: '10',
+        right: '10',
+        left: '120'
       }
-
-      let dimension = this.level == 'BY_ACCOUNT' ? fund.account : fund.amount.currency
-
-      let accumulated = result.get(fund.amount.currency)
-      if (!accumulated) {
-        result.set(dimension, new ChartValue(fund.amount, fund.commonAmount))
-      } else {
-        accumulated.amount = plus(accumulated.amount, fund.amount)
-        accumulated.commonAmount = plus(accumulated.commonAmount, fund.commonAmount)
-      }
-
     }
-    return result
+    setTimeout(() => {
+      this.chart.resize()
+      this.chart.clear()
+      this.chart.setOption(option)
+    }, 10)
   }
 
-}
-
-class ChartValue {
-  amount!: Amount
-  commonAmount!: Amount
-
-  constructor(amount: Amount, commonAmount: Amount) {
-    this.amount = amount
-    this.commonAmount = commonAmount
-  }
 }
