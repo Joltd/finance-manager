@@ -166,6 +166,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
       .flatMap(it => [...it.values()])
       .map(value => toFractional(value.commonAmount))
     let positionThreshold = Math.max(...allCommonAmounts) * .15
+    let commonCurrency = this.settings.value.commonCurrency;
     let option = {
       xAxis: {
         type: 'value',
@@ -182,11 +183,22 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         axisTick: {
           show: false
         },
-        data: groupData.firstDimensions
+        data: groupData.firstDimensions.sort((a,b) => {
+          if (this.level == 'BY_DATE') {
+            return a.localeCompare(b)
+          } else if (this.settings.value.byCurrency) {
+            return 0
+          } else {
+            let secondDimension = groupData.secondDimensions[0]
+            return groupData.getValue(b, secondDimension, commonCurrency).commonAmount.value - groupData.getValue(a, secondDimension, commonCurrency).commonAmount.value
+          }
+        })
       },
       series: groupData.secondDimensions.map(secondDimension => {
         let commonCurrency = this.settings.value.commonCurrency;
-        let data = groupData.firstDimensions.map(firstDimension => groupData.getValue(firstDimension, secondDimension, commonCurrency))
+        let data = groupData.firstDimensions
+          .map(firstDimension => groupData.getValue(firstDimension, secondDimension, commonCurrency))
+          .sort((a,b) => b.commonAmount.value - a.commonAmount.value)
         return {
           name: secondDimension,
           type: 'bar',
