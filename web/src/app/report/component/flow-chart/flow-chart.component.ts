@@ -112,9 +112,10 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     if (this.level == 'BY_DATE') {
       this.byDateSettings = this.settings.value
       this.level = 'BY_CATEGORY'
+      console.log(params.name)
       this.settings.patchValue({
-        dateFrom: moment(params.name),
-        dateTo: moment(params.name).add(1, 'month'),
+        dateFrom: moment(params.name).format('yyyy-MM-DD'),
+        dateTo: moment(params.name).add(1, 'month').format('yyyy-MM-DD'),
         type: params.seriesName
       })
       this.apply()
