@@ -126,7 +126,6 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
       })
       this.apply()
     } else if (this.level == 'BY_ACCOUNT') {
-      console.log(this.settings.value.categories)
       this.documentService.updateSettings({
         dateFrom: this.settings.value.dateFrom,
         dateTo: this.settings.value.dateTo,
@@ -196,20 +195,12 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         axisTick: {
           show: false
         },
-        data: groupData.firstDimensions.sort((a,b) => {
-          if (this.level == 'BY_DATE') {
-            return a.localeCompare(b)
-          } else {
-            let secondDimension = groupData.secondDimensions[0]
-            return groupData.getValue(a, secondDimension, commonCurrency).commonAmount.value - groupData.getValue(b, secondDimension, commonCurrency).commonAmount.value
-          }
-        })
+        data: groupData.firstDimensions
       },
       series: groupData.secondDimensions.map(secondDimension => {
         let commonCurrency = this.settings.value.commonCurrency;
         let data = groupData.firstDimensions
           .map(firstDimension => groupData.getValue(firstDimension, secondDimension, commonCurrency))
-          .sort((a,b) => a.commonAmount.value - b.commonAmount.value)
         return {
           name: secondDimension,
           type: 'bar',
