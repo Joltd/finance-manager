@@ -1,14 +1,21 @@
-<mat-expansion-panel cdkOverlayOrigin #trigger="cdkOverlayOrigin">
+<mat-card>
+  <mat-card-header class="browser-header">
+    <mat-card-title>Documents</mat-card-title>
+    <button mat-icon-button (click)="load()"><mat-icon>done</mat-icon></button>
+  </mat-card-header>
+</mat-card>
+
+<mat-expansion-panel #filter>
   <mat-expansion-panel-header>
     <mat-panel-title>Filters</mat-panel-title>
   </mat-expansion-panel-header>
 
-  <form [formGroup]="filter()">
+  <form [formGroup]="settings()">
     <mat-form-field>
       <mat-label>From</mat-label>
       <input formControlName="dateFrom" matInput [matDatepicker]="from" readonly (click)="from.open()">
       <mat-datepicker touchUi #from></mat-datepicker>
-      <button mat-icon-button matSuffix (click)="filter().patchValue({dateFrom: null})">
+      <button mat-icon-button matSuffix (click)="settings().patchValue({dateFrom: null})">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
@@ -17,7 +24,7 @@
       <mat-label>To</mat-label>
       <input formControlName="dateTo" matInput [matDatepicker]="to" readonly (click)="to.open()">
       <mat-datepicker touchUi #to></mat-datepicker>
-      <button mat-icon-button matSuffix (click)="filter().patchValue({dateTo: null})">
+      <button mat-icon-button matSuffix (click)="settings().patchValue({dateTo: null})">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
@@ -28,19 +35,16 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Expenses</mat-label>
-      <mat-select formControlName="expenseCategories" multiple>
-        <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
+      <mat-label>Categories</mat-label>
+      <mat-select formControlName="categories" multiple>
+        <mat-optgroup label="Expenses">
+          <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
+        </mat-optgroup>
+        <mat-optgroup label="Incomes">
+          <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
+        </mat-optgroup>
       </mat-select>
-      <button matSuffix mat-icon-button (click)="allExpenseCategories()"><mat-icon>checklist</mat-icon></button>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Incomes</mat-label>
-      <mat-select formControlName="incomeCategories" multiple>
-        <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
-      </mat-select>
-      <button matSuffix mat-icon-button (click)="allIncomeCategories()"><mat-icon>checklist</mat-icon></button>
+      <button matSuffix mat-icon-button (click)="toggleAllCategories()"><mat-icon>checklist</mat-icon></button>
     </mat-form-field>
 
     <mat-form-field>

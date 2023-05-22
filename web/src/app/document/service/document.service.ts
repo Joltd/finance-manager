@@ -11,14 +11,11 @@ import {DocumentPage} from "../model/document-page";
 })
 export class DocumentService {
 
-  filter: FormGroup = new FormGroup({
-    // dateFrom: new FormControl(moment().subtract(6, 'month').format('yyyy-MM-DD')),
-    // dateTo: new FormControl(moment().format('yyyy-MM-DD')),
+  settings: FormGroup = new FormGroup({
     dateFrom: new FormControl(null),
     dateTo: new FormControl(null),
     type: new FormControl(null),
-    expenseCategories: new FormControl([]),
-    incomeCategories: new FormControl([]),
+    categories: new FormControl([]),
     account: new FormControl(null),
     currency: new FormControl(null)
   })
@@ -28,21 +25,20 @@ export class DocumentService {
     private http: HttpClient
   ) {}
 
-  updateFilter(filter: any) {
+  updateSettings(filter: any) {
     let empty = {
       dateFrom: null,
       dateTo: null,
       type: null,
-      expenseCategories: [],
-      incomeCategories: [],
+      categories: [],
       account: null,
       currency: null
     }
-    this.filter.setValue({...empty, ...filter})
+    this.settings.setValue({...empty, ...filter})
   }
 
   list() {
-    let filter = {...this.filter.value}
+    let filter = {...this.settings.value}
     filter.page = this.documentPage.page
     filter.size = this.documentPage.size
     this.http.post<DocumentPage>('/document/filter', filter, TypeUtils.of(DocumentPage))

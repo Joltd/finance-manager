@@ -60,13 +60,11 @@ class DocumentService(
                     Criteria.where("_class").regex(".*$it", "i")
                 }
                 ?.let { criteriaList.add(it) }
-        if (expenseCategories.isNotEmpty()) {
-            Criteria.where("expenseCategory").`in`(expenseCategories)
-                .let { criteriaList.add(it) }
-        }
-        if (incomeCategories.isNotEmpty()) {
-            Criteria.where("incomeCategory").`in`(incomeCategories)
-                .let { criteriaList.add(it) }
+        if (categories.isNotEmpty()) {
+            Criteria().orOperator(
+                Criteria.where("expenseCategory").`in`(categories),
+                Criteria.where("incomeCategory").`in`(categories)
+            ).let { criteriaList.add(it) }
         }
         currency
                 ?.let {

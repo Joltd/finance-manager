@@ -3,12 +3,14 @@ import {FlowChartService} from "../../service/flow-chart.service";
 import {FormControl, FormGroup} from "@angular/forms";
 import * as echarts from "echarts";
 import {ECharts} from "echarts";
-import {Amount, emptyAmount, plus, toFractional} from "../../../common/model/amount";
+import {Amount, emptyAmount, formatAsString, plus, toFractional} from "../../../common/model/amount";
 import {ReferenceService} from "../../../common/service/reference.service";
 import {Reference} from "../../../common/model/reference";
 import * as moment from "moment";
 import {FlowChart, FlowChartEntry} from "../../model/flow-chart";
 import {MatExpansionPanel} from "@angular/material/expansion";
+import {DocumentService} from "../../../document/service/document.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'flow-chart',
@@ -35,8 +37,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     dateTo: new FormControl(moment().format('yyyy-MM-DD')),
     type: new FormControl(null),
     categories: new FormControl([]),
-    commonCurrency: new FormControl('USD'),
-    byCurrency: new FormControl(false)
+    commonCurrency: new FormControl('USD')
   })
   byDateSettings: any = null
   byCategorySettings: any = null
@@ -50,7 +51,9 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private flowChartService: FlowChartService,
-    private referenceService: ReferenceService
+    private referenceService: ReferenceService,
+    private documentService: DocumentService,
+    private router: Router
   ) {
     this.referenceService.list('/account/reference')
       .subscribe(result => {
@@ -122,6 +125,16 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         categories: [params.name]
       })
       this.apply()
+    } else if (this.level == 'BY_ACCOUNT') {
+      console.log(this.settings.value.categories)
+      this.documentService.updateSettings({
+        dateFrom: this.settings.value.dateFrom,
+        dateTo: this.settings.value.dateTo,
+        type: this.settings.value.type == 'IN' ? 'income' : 'expense',
+        categories: this.settings.value.categories,
+        account: params.name
+      })
+      this.router.navigate(['document']).then()
     }
   }
 
@@ -186,8 +199,6 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         data: groupData.firstDimensions.sort((a,b) => {
           if (this.level == 'BY_DATE') {
             return a.localeCompare(b)
-          } else if (this.settings.value.byCurrency) {
-            return 0
           } else {
             let secondDimension = groupData.secondDimensions[0]
             return groupData.getValue(a, secondDimension, commonCurrency).commonAmount.value - groupData.getValue(b, secondDimension, commonCurrency).commonAmount.value
@@ -213,15 +224,12 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
           barGap: '10%',
           barCategoryGap: '10%',
           data: data.map(value => {
-            let amount = this.level != 'BY_DATE' && this.settings.value.byCurrency
-              ? toFractional(value.amount)
-              : toFractional(value.commonAmount)
             let commonAmount = toFractional(value.commonAmount)
             return {
               value: commonAmount,
               label: {
                 show: true,
-                formatter: this.level == 'BY_DATE' ? amount : `${amount} {a}`,
+                formatter: formatAsString(value.commonAmount),
                 position: commonAmount < positionThreshold ? 'right' : 'insideLeft',
               }
             }
@@ -275,9 +283,6 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
       if (!accumulated) {
         group.set(secondDimension, new GroupValue(entry.amount, entry.commonAmount))
       } else {
-        if (this.settings.value.byCurrency && this.level != 'BY_DATE') {
-          accumulated.amount = plus(accumulated.amount, entry.amount)
-        }
         accumulated.commonAmount = plus(accumulated.commonAmount, entry.commonAmount)
       }
     }
@@ -305,8 +310,6 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   private secondDimension(entry: FlowChartEntry): string {
     if (this.level == 'BY_DATE') {
       return entry.type
-    } else if (this.settings.value.byCurrency) {
-      return entry.amount.currency
     } else {
       return entry.commonAmount.currency
     }
