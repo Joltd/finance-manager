@@ -198,7 +198,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         let commonCurrency = this.settings.value.commonCurrency;
         let data = groupData.firstDimensions
           .map(firstDimension => groupData.getValue(firstDimension, secondDimension, commonCurrency))
-          .sort((a,b) => b.commonAmount.value - a.commonAmount.value)
+          .sort((a,b) => a.commonAmount.value - b.commonAmount.value)
         return {
           name: secondDimension,
           type: 'bar',
