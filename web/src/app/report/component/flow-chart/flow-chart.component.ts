@@ -112,7 +112,6 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     if (this.level == 'BY_DATE') {
       this.byDateSettings = this.settings.value
       this.level = 'BY_CATEGORY'
-      console.log(params.name)
       this.settings.patchValue({
         dateFrom: moment(params.name).format('yyyy-MM-DD'),
         dateTo: moment(params.name).add(1, 'month').format('yyyy-MM-DD'),
@@ -146,14 +145,16 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
       type: this.settings.value.type,
       categories: this.settings.value.categories,
       commonCurrency: this.settings.value.commonCurrency,
+    }).subscribe(result => {
+      this.data = result
+      if (this.level == 'BY_DATE') {
+        this.chartByDate()
+      } else if (this.level == 'BY_CATEGORY') {
+        this.chartByCategory()
+      } else if (this.level == 'BY_ACCOUNT') {
+        this.chartByAccount()
+      }
     })
-      .subscribe(result => {
-        this.data = result
-        this.calcTotal()
-        let groupData = this.groupData()
-        this.chartHeight = groupData.firstDimensions.length * groupData.secondDimensions.length * 2.5
-        setTimeout(() => this.refreshChart(groupData), 10)
-      })
   }
 
   toggleAllCategories() {
@@ -174,12 +175,141 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     })
   }
 
-  private refreshChart(groupData: GroupData) {
-    let allCommonAmounts = [...groupData.data.values()]
-      .flatMap(it => [...it.values()])
-      .map(value => toFractional(value.commonAmount))
-    let positionThreshold = Math.max(...allCommonAmounts) * .15
-    let commonCurrency = this.settings.value.commonCurrency;
+  private sum(entries: FlowChartEntry[]): string {
+    return entries.map(entry => toFractional(entry.commonAmount))
+      .reduce((a, b) => a + b, 0)
+      .toFixed(2)
+  }
+
+  private chartByDate() {
+    this.totalIncome = this.sum(this.data.entries.filter(entry => entry.type == 'IN'))
+    this.totalExpense = this.sum(this.data.entries.filter(entry => entry.type == 'OUT'))
+
+    let commonCurrency = this.settings.value.commonCurrency
+    let index = new Map<string,DateEntry>()
+    for (let entry of this.data.entries) {
+      let date = moment(entry.date).startOf('month').format('yyyy-MM-DD')
+      let indexEntry = index.get(date)
+      if (!indexEntry) {
+        indexEntry = new DateEntry()
+        indexEntry.date = date
+        indexEntry.expense = emptyAmount(commonCurrency)
+        indexEntry.income = emptyAmount(commonCurrency)
+        index.set(date, indexEntry)
+      }
+
+      if (entry.type == 'IN') {
+        indexEntry.income = plus(indexEntry.income, entry.commonAmount)
+      } else {
+        indexEntry.expense = plus(indexEntry.expense, entry.commonAmount)
+      }
+    }
+
+    let funds = [...index.values()].sort((a, b) => a.date.localeCompare(b.date))
+    let positionThreshold = Math.max(...funds.map(entry => toFractional(entry.income)), ...funds.map(entry => toFractional(entry.expense))) * .25
+    this.chartHeight = funds.length * 4
+
+    let option = {
+      xAxis: {
+        type: 'value',
+        show: false
+      },
+      yAxis: {
+        type: 'category',
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        data: funds.map(entry => entry.date)
+      },
+      series: [
+        {
+          type: 'bar',
+          name: 'IN',
+          emphasis: {
+            focus: 'series'
+          },
+          itemStyle: {
+            borderRadius: 5,
+            color: '#66bb6a'
+          },
+          barGap: '10%',
+          barCategoryGap: '10%',
+          data: funds.map(entry => {
+            let commonAmount = toFractional(entry.income);
+            return {
+              value: commonAmount,
+              label: {
+                show: true,
+                formatter: formatAsString(entry.income),
+                position: commonAmount < positionThreshold ? 'right' : 'insideLeft'
+              }
+            }
+          })
+        },
+        {
+          type: 'bar',
+          name: 'OUT',
+          emphasis: {
+            focus: 'series'
+          },
+          itemStyle: {
+            borderRadius: 5,
+            color: '#ef5350'
+          },
+          barGap: '10%',
+          barCategoryGap: '10%',
+          data: funds.map(entry => {
+            let commonAmount = toFractional(entry.expense);
+            return {
+              value: commonAmount,
+              label: {
+                show: true,
+                formatter: formatAsString(entry.expense),
+                position: commonAmount < positionThreshold ? 'right' : 'insideLeft'
+              }
+            }
+          })
+        }
+      ],
+      grid: {
+        left: '80',
+        right: '5%',
+        bottom: '5%',
+        top: '5%'
+      },
+    }
+    setTimeout(() => {
+      this.chart.resize()
+      this.chart.clear()
+      this.chart.setOption(option)
+    }, 10)
+  }
+
+  private chartByCategory() {
+    this.total = this.sum(this.data.entries)
+
+    let commonCurrency = this.settings.value.commonCurrency
+    let index = new Map<string,CategoryEntry>()
+    for (let entry of this.data.entries) {
+      let indexEntry = index.get(entry.category)
+      if (!indexEntry) {
+        indexEntry = new CategoryEntry()
+        indexEntry.category = entry.category
+        indexEntry.categoryName = this.categories.get(entry.category)?.name || entry.category
+        indexEntry.amount = emptyAmount(commonCurrency)
+        index.set(entry.category, indexEntry)
+      }
+
+      indexEntry.amount = plus(indexEntry.amount, entry.commonAmount)
+    }
+
+    let funds = [...index.values()].sort((a, b) => a.amount.value - b.amount.value)
+    let positionThreshold = Math.max(...funds.map(entry => toFractional(entry.amount))) * .25
+    this.chartHeight = funds.length * 2.5
+
     let option = {
       xAxis: {
         type: 'value',
@@ -188,7 +318,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
       yAxis: {
         type: 'category',
         axisLabel: {
-          formatter: (value: string) => this.dimensionName(value)
+          formatter: (value: string) => this.categories.get(value)?.name || value
         },
         axisLine: {
           show: false
@@ -196,148 +326,140 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
         axisTick: {
           show: false
         },
-        data: groupData.firstDimensions
+        data: funds.map(entry => entry.category)
       },
-      series: groupData.secondDimensions.map(secondDimension => {
-        let commonCurrency = this.settings.value.commonCurrency;
-        let data = groupData.firstDimensions
-          .map(firstDimension => groupData.getValue(firstDimension, secondDimension, commonCurrency))
-        return {
-          name: secondDimension,
+      series: [
+        {
           type: 'bar',
           emphasis: {
             focus: 'series'
           },
           itemStyle: {
-            borderRadius: 5,
-            color: this.level == 'BY_DATE' && secondDimension == 'IN' ? '#66bb6a' :
-              this.level == 'BY_DATE' && secondDimension == 'OUT' ? '#ef5350' : 'auto'
+            borderRadius: 5
           },
           barGap: '10%',
           barCategoryGap: '10%',
-          data: data.map(value => {
-            let commonAmount = toFractional(value.commonAmount)
+          data: funds.map(entry => {
+            let commonAmount = toFractional(entry.amount);
             return {
               value: commonAmount,
               label: {
                 show: true,
-                formatter: formatAsString(value.commonAmount),
-                position: commonAmount < positionThreshold ? 'right' : 'insideLeft',
+                formatter: formatAsString(entry.amount),
+                position: commonAmount < positionThreshold ? 'right' : 'insideLeft'
               }
             }
           })
         }
-      }),
+      ],
       grid: {
         left: '80',
         right: '5%',
         bottom: '5%',
         top: '5%'
-      },
-    }
-    this.chart.clear()
-    this.chart.setOption(option)
-    this.chart.resize()
-  }
-
-  private calcTotal() {
-    if (this.level == 'BY_DATE') {
-      this.totalIncome = this.sum(this.data.entries.filter(entry => entry.type == 'IN'))
-      this.totalExpense = this.sum(this.data.entries.filter(entry => entry.type == 'OUT'))
-    } else {
-      this.total = this.sum(this.data.entries)
-    }
-  }
-
-  private sum(entries: FlowChartEntry[]): string {
-    return entries.map(entry => toFractional(entry.commonAmount))
-      .reduce((a, b) => a + b, 0)
-      .toFixed(2)
-  }
-
-  private groupData(): GroupData {
-
-    let result = new Map<string,Map<string,GroupValue>>()
-    let firstDimensions = new Set<string>()
-    let secondDimensions = new Set<string>()
-
-    for (let entry of this.data.entries) {
-      let firstDimension = this.firstDimension(entry)
-      firstDimensions.add(firstDimension)
-
-      let secondDimension = this.secondDimension(entry)
-      secondDimensions.add(secondDimension)
-
-      let group = result.get(firstDimension) || new Map<string,GroupValue>()
-      result.set(firstDimension, group)
-
-      let accumulated = group.get(secondDimension)
-      if (!accumulated) {
-        group.set(secondDimension, new GroupValue(entry.amount, entry.commonAmount))
-      } else {
-        accumulated.commonAmount = plus(accumulated.commonAmount, entry.commonAmount)
       }
     }
-
-    let groupData = new GroupData()
-    groupData.firstDimensions = [...firstDimensions].sort((a, b) => a.localeCompare(b))
-    groupData.secondDimensions = [...secondDimensions].sort((a, b) => a.localeCompare(b))
-    groupData.data = result
-    return groupData
-
+    setTimeout(() => {
+      this.chart.resize()
+      this.chart.clear()
+      this.chart.setOption(option)
+    }, 10)
   }
 
-  private firstDimension(entry: FlowChartEntry): string {
-    if (this.level == 'BY_DATE') {
-      return moment(entry.date).startOf('month').format('yyyy-MM-DD')
-    } else if (this.level == 'BY_CATEGORY') {
-      return entry.category
-    } else if (this.level == 'BY_ACCOUNT') {
-      return entry.account
-    } else {
-      throw Error('Unknown chart level ' + this.level)
-    }
-  }
+  private chartByAccount() {
+    this.total = this.sum(this.data.entries)
 
-  private secondDimension(entry: FlowChartEntry): string {
-    if (this.level == 'BY_DATE') {
-      return entry.type
-    } else {
-      return entry.commonAmount.currency
-    }
-  }
+    let commonCurrency = this.settings.value.commonCurrency
+    let index = new Map<string,AccountEntry>()
+    for (let entry of this.data.entries) {
+      let indexEntry = index.get(entry.account)
+      if (!indexEntry) {
+        indexEntry = new AccountEntry()
+        indexEntry.account = entry.account
+        indexEntry.accountName = this.accounts.get(entry.account)?.name || entry.account
+        indexEntry.amount = emptyAmount(commonCurrency)
+        index.set(entry.account, indexEntry)
+      }
 
-  private dimensionName(dimension: string): string {
-    if (this.level == 'BY_DATE') {
-      return dimension
-    } else if (this.level == 'BY_CATEGORY') {
-      return this.categories.get(dimension)?.name || dimension
-    } else if (this.level == 'BY_ACCOUNT') {
-      return this.accounts.get(dimension)?.name || dimension
-    } else {
-      throw Error('Unknown chart level ' + this.level)
+      indexEntry.amount = plus(indexEntry.amount, entry.commonAmount)
     }
+
+    let funds = [...index.values()].sort((a, b) => a.amount.value - b.amount.value)
+    let positionThreshold = Math.max(...funds.map(entry => toFractional(entry.amount))) * .25
+    this.chartHeight = funds.length * 2.5
+
+    let option = {
+      xAxis: {
+        type: 'value',
+        show: false
+      },
+      yAxis: {
+        type: 'category',
+        axisLabel: {
+          formatter: (value: string) => this.accounts.get(value)?.name || value
+        },
+        axisLine: {
+          show: false
+        },
+        axisTick: {
+          show: false
+        },
+        data: funds.map(entry => entry.account)
+      },
+      series: [
+        {
+          type: 'bar',
+          emphasis: {
+            focus: 'series'
+          },
+          itemStyle: {
+            borderRadius: 5
+          },
+          barGap: '10%',
+          barCategoryGap: '10%',
+          data: funds.map(entry => {
+            let commonAmount = toFractional(entry.amount);
+            return {
+              value: commonAmount,
+              label: {
+                show: true,
+                formatter: formatAsString(entry.amount),
+                position: commonAmount < positionThreshold ? 'right' : 'insideLeft'
+              }
+            }
+          })
+        }
+      ],
+      grid: {
+        left: '80',
+        right: '5%',
+        bottom: '5%',
+        top: '5%'
+      }
+    }
+    setTimeout(() => {
+      this.chart.resize()
+      this.chart.clear()
+      this.chart.setOption(option)
+    }, 10)
   }
 
 }
 
-class GroupData {
-  firstDimensions: string[] = []
-  secondDimensions: string[] = []
-  data!: Map<string,Map<string,GroupValue>>
-
-  getValue(first: string, second: string, commonCurrency: string): GroupValue {
-    let group = this.data.get(first) || new Map<string,GroupValue>()
-    return group.get(second) || new GroupValue(emptyAmount(second), emptyAmount(commonCurrency))
-  }
+class DateEntry {
+  date!: string
+  income!: Amount
+  expense!: Amount
 }
 
-class GroupValue {
+class CategoryEntry {
+  category!: string
+  categoryName!: string
   amount!: Amount
-  commonAmount!: Amount
+}
 
-  constructor(amount: Amount, commonAmount: Amount) {
-    this.amount = amount;
-    this.commonAmount = commonAmount;
-  }
+class AccountEntry {
+  account!: string
+  accountName!: string
+  amount!: Amount
 }
