@@ -3,6 +3,7 @@ expense,Развлечения,,,,,,../expense/entertainment.csv
 expense,Самокат,,,,,,../expense/scooter.csv
 expense,Медицина,,,,,,../expense/medicine.csv
 expense,Поездки,,,,,,../expense/trip.csv
+expense,Техника,,,,,,../expense/device.csv
 expense,Мобильная связь,,,,,,../expense/mobile.csv
 expense,Для дома,,,,,,../expense/forhome.csv
 expense,Подписки,,,,,,../expense/subscription.csv
