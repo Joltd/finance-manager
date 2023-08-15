@@ -19,10 +19,10 @@ class CategoryMappingController(
     fun byId(@PathVariable("id") id: String): CategoryMappingRecord =
         categoryMappingService.byId(id)
 
-    @PostMapping("/document")
+    @PostMapping("/category-mapping")
     fun update(@RequestBody record: CategoryMappingRecord) = categoryMappingService.update(record)
 
-    @DeleteMapping("/document/{id}")
+    @DeleteMapping("/category-mapping/{id}")
     fun delete(@PathVariable("id") id: String) = categoryMappingService.delete(id)
 
 }

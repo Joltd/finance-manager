@@ -65,7 +65,7 @@ class CategoryMappingService(
         categoryMappingRepository.deleteById(id)
     }
 
-    fun toRecord(entity: CategoryMapping): CategoryMappingRecord = entity.toRecord()
+    fun toCategoryMappingRecord(entity: CategoryMapping): CategoryMappingRecord = entity.toRecord()
 
     private fun CategoryMapping.toRecord(): CategoryMappingRecord =
         CategoryMappingRecord(

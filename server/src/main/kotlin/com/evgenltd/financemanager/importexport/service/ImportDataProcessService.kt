@@ -10,9 +10,7 @@ import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importexport.entity.*
 import com.evgenltd.financemanager.importexport.repository.CategoryMappingRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.importexport.service.parser.ImportParser
-import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.*
@@ -24,14 +22,11 @@ import javax.annotation.PostConstruct
 
 @Service
 class ImportDataProcessService(
-    private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val categoryMappingRepository: CategoryMappingRepository,
-    private val importDataService: ImportDataService,
     private val documentService: DocumentService,
     private val importParsers: List<ImportParser>,
-    private val mongoTemplate: MongoTemplate,
-    private val accountRepository: AccountRepository
+    private val mongoTemplate: MongoTemplate
 ) : Loggable() {
 
     private lateinit var parsers: Map<String,ImportParser>
@@ -43,7 +38,7 @@ class ImportDataProcessService(
 
     @Async
     fun startPreparation(file: InputStream, id: String) {
-        val importData = importDataService.update(id, ImportDataStatus.NEW, ImportDataStatus.PREPARE_IN_PROGRESS)
+        val importData = update(id, ImportDataStatus.NEW, ImportDataStatus.PREPARE_IN_PROGRESS)
         if (importData == null) {
             log.info("Import data $id not found or status is different from ${ImportDataStatus.NEW}")
             return
@@ -51,7 +46,7 @@ class ImportDataProcessService(
 
         val parser = parsers[importData.parser]
         if (parser == null) {
-            importDataService.update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.FAILED) {
+            update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.FAILED) {
                 mapOf(ImportData::message.name to "Parser ${importData.parser} not found")
             }
             return
@@ -63,14 +58,14 @@ class ImportDataProcessService(
         val parsed = try {
             parser.parse(file)
         } catch (e: RuntimeException) {
-            importDataService.update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.FAILED) {
+            update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.FAILED) {
                 mapOf(ImportData::message.name to "Unable to parse: ${e.message ?: "Unknown error"}")
             }
             return
         }
 
         for (parsedRecord in parsed) {
-            val importData = importDataService.update(id, ImportDataStatus.PREPARE_IN_PROGRESS)
+            val importData = update(id, ImportDataStatus.PREPARE_IN_PROGRESS)
             if (importData == null) {
                 log.info("Import data $id not found or status is different from ${ImportDataStatus.PREPARE_IN_PROGRESS}")
                 break
@@ -80,12 +75,12 @@ class ImportDataProcessService(
             prepareImportEntry(importDataEntry, importData, categoryMappings)
         }
 
-        importDataService.update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.PREPARE_DONE)
+        update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.PREPARE_DONE)
     }
 
     @Async
     fun repeatPreparation(id: String) {
-        val importData = importDataService.update(id, ImportDataStatus.PREPARE_DONE, ImportDataStatus.PREPARE_IN_PROGRESS) {
+        val importData = update(id, ImportDataStatus.PREPARE_DONE, ImportDataStatus.PREPARE_IN_PROGRESS) {
             mapOf(
                 ImportData::message.name to null,
                 ImportData::progress.name to 0.0
@@ -103,7 +98,7 @@ class ImportDataProcessService(
             Criteria.where(ImportDataEntry::importData.name).isEqualTo(id),
             Criteria.where(ImportDataEntry::preparationResult.name).isEqualTo(false)
         )).findBatched<ImportDataEntry> { entry, _, _ ->
-            val importData = importDataService.update(id, ImportDataStatus.PREPARE_IN_PROGRESS)
+            val importData = update(id, ImportDataStatus.PREPARE_IN_PROGRESS)
             if (importData == null) {
                 log.info("Import data $id not found or status is different from ${ImportDataStatus.PREPARE_IN_PROGRESS}")
                 false
@@ -118,12 +113,16 @@ class ImportDataProcessService(
             }
         }
 
-        importDataService.update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.PREPARE_DONE)
+        update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.PREPARE_DONE)
+    }
+
+    fun cancelPreparation(id: String) {
+        update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.PREPARE_DONE)
     }
 
     @Async
     fun startImport(id: String) {
-        val importData = importDataService.update(id, ImportDataStatus.PREPARE_DONE, ImportDataStatus.IMPORT_IN_PROGRESS)
+        val importData = update(id, ImportDataStatus.PREPARE_DONE, ImportDataStatus.IMPORT_IN_PROGRESS)
         if (importData == null) {
             log.info("Import data $id not found or status is different from ${ImportDataStatus.PREPARE_DONE}")
             return
@@ -135,7 +134,7 @@ class ImportDataProcessService(
             Criteria.where(ImportDataEntry::option.name).inValues(ImportOption.REPLACE, ImportOption.CREATE_NEW),
             Criteria.where(ImportDataEntry::importResult.name).isEqualTo(ImportResult.NOT_IMPORTED)
         )).findBatched<ImportDataEntry> { entry, index, count ->
-            val importData = importDataService.update(id, ImportDataStatus.IMPORT_IN_PROGRESS) {
+            val importData = update(id, ImportDataStatus.IMPORT_IN_PROGRESS) {
                 mapOf(ImportData::progress.name to (index.toDouble() / count.toDouble()))
             }
             if (importData == null) {
@@ -149,13 +148,17 @@ class ImportDataProcessService(
         }
 
         if (empty) {
-            importDataService.update(id, ImportDataStatus.IMPORT_IN_PROGRESS, ImportDataStatus.IMPORT_DONE) {
+            update(id, ImportDataStatus.IMPORT_IN_PROGRESS, ImportDataStatus.IMPORT_DONE) {
                 mapOf(ImportData::message.name to "Nothing to import")
             }
             return
         }
 
-        importDataService.update(id, ImportDataStatus.IMPORT_IN_PROGRESS, ImportDataStatus.IMPORT_DONE)
+        update(id, ImportDataStatus.IMPORT_IN_PROGRESS, ImportDataStatus.IMPORT_DONE)
+    }
+
+    fun cancelImport(id: String) {
+        
     }
 
     private fun doImportEntry(entry: ImportDataEntry) {
@@ -346,6 +349,33 @@ class ImportDataProcessService(
         }
 
         return false
+    }
+
+    private fun update(
+        id: String,
+        oldStatus: ImportDataStatus,
+        newStatus: ImportDataStatus,
+        block: () -> Map<String,Any?> = { emptyMap() }
+    ): ImportData? = update(id, oldStatus) {
+        mapOf(ImportData::status.name to newStatus) + block()
+    }
+
+    private fun update(
+        id: String,
+        statusCondition: ImportDataStatus,
+        block: () -> Map<String,Any?> = { emptyMap() }
+    ): ImportData? {
+        val query = mapOf(ImportData::id.name to id, ImportData::status.name to statusCondition)
+            .let { Criteria.byExample(it) }
+            .let { Query.query(it) }
+        val update = block()
+            .let { org.bson.Document(it) }
+            .let { Update.fromDocument(it) }
+        return mongoTemplate.findAndModify(
+            query,
+            update,
+            ImportData::class.java
+        )
     }
 
     private companion object {

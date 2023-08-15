@@ -11,7 +11,6 @@ import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.reference.service.AccountService
-import org.bson.Document
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.*
@@ -45,33 +44,6 @@ class ImportDataService(
 
     fun byId(id: String): ImportDataRecord = importDataRepository.find(id).toRecord()
 
-    fun update(
-        id: String,
-        oldStatus: ImportDataStatus,
-        newStatus: ImportDataStatus,
-        block: () -> Map<String,Any?> = { emptyMap() }
-    ): ImportData? = update(id, oldStatus) {
-        mapOf(ImportData::status.name to newStatus) + block()
-    }
-
-    fun update(
-        id: String,
-        statusCondition: ImportDataStatus,
-        block: () -> Map<String,Any?> = { emptyMap() }
-    ): ImportData? {
-        val query = mapOf(ImportData::id.name to id, ImportData::status.name to statusCondition)
-            .let { Criteria.byExample(it) }
-            .let { Query.query(it) }
-        val update = block()
-            .let { Document(it) }
-            .let { Update.fromDocument(it) }
-        return mongoTemplate.findAndModify(
-            query,
-            update,
-            ImportData::class.java
-        )
-    }
-
     fun delete(id: String) {
         val query = Criteria().andOperator(
             Criteria.where(ImportData::id.name).isEqualTo(id),
@@ -102,7 +74,7 @@ class ImportDataService(
     }
 
     fun cancelPreparation(id: String) {
-        update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.PREPARE_DONE)
+        importDataProcessService.cancelPreparation(id)
     }
 
     fun startImport(id: String) {
@@ -110,7 +82,7 @@ class ImportDataService(
     }
 
     fun cancelImport(id: String) {
-        update(id, ImportDataStatus.IMPORT_IN_PROGRESS, ImportDataStatus.IMPORT_DONE)
+        importDataProcessService.cancelImport(id)
     }
 
     private fun ImportData.toRecord(): ImportDataRecord = ImportDataRecord(
@@ -128,7 +100,7 @@ class ImportDataService(
         parsedEntry = parsedEntry,
         suggestedDocument = suggestedDocument?.let { documentService.toTypedRecord(it) },
         existedDocuments = documentService.list(existedDocuments),
-        matchedCategoryMappings = matchedCategoryMappings.map { categoryMappingService.toRecord(it) },
+        matchedCategoryMappings = matchedCategoryMappings.map { categoryMappingService.toCategoryMappingRecord(it) },
         preparationResult = preparationResult,
         preparationError = preparationError,
         option = option,
