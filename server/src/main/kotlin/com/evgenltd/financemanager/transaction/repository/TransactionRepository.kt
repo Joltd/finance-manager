@@ -12,6 +12,8 @@ interface TransactionRepository : MongoRepository<Transaction, String> {
     @Query("{'date': { \$gte: ?0, \$lt: ?1 }}")
     fun findByDateBetween(from: LocalDate, to: LocalDate): List<Transaction>
 
+    fun findByAccountAndDate(account: String, date: LocalDate): List<Transaction>
+
     fun findByAccount(account: String): List<Transaction>
 
     fun findByIncomeCategory(incomeCategory: String): List<Transaction>

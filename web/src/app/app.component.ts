@@ -13,7 +13,7 @@ export class AppComponent {
 
   version: string = environment.version
   loading: boolean = false
-  wide: boolean = false
+  private wide: boolean = false
 
   constructor(
     public loadingService: LoadingService,
@@ -25,7 +25,15 @@ export class AppComponent {
     })
     this.breakpointObserver.observe(['(min-width: 40em)'])
       .subscribe(state => this.wide = state.matches)
-    this.settingsService.load().subscribe()
+    // this.settingsService.load().subscribe()
+  }
+
+  isWideMenu(): boolean {
+    return this.wide
+  }
+
+  isWideScreen(): boolean {
+    return this.settingsService.wideScreenToggle && this.wide
   }
 
 }

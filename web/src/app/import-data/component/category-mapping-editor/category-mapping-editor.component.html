@@ -1,0 +1,36 @@
+<editor title="Category Mapping" (onSave)="save()" (onClose)="close()" [saveDisabled]="!form.valid">
+
+  <mat-card>
+    <mat-card-content class="card-content-form">
+      <form [formGroup]="form">
+
+        <mat-form-field>
+          <mat-label>Parser</mat-label>
+          <input matInput formControlName="parser">
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Pattern</mat-label>
+          <input matInput formControlName="pattern">
+        </mat-form-field>
+
+        <mat-button-toggle-group formControlName="categoryType">
+          <mat-button-toggle value="expense">Expense</mat-button-toggle>
+          <mat-button-toggle value="income">Income</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <mat-form-field *ngIf="form.value['categoryType'] == 'expense'">
+          <mat-label>Expense category</mat-label>
+          <reference-input api="/expense/reference" formControlName="category"></reference-input>
+        </mat-form-field>
+
+        <mat-form-field  *ngIf="form.value['categoryType'] == 'income'">
+          <mat-label>Income category</mat-label>
+          <reference-input api="/income/reference" formControlName="category"></reference-input>
+        </mat-form-field>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+</editor>

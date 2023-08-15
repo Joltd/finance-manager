@@ -1,39 +1,57 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import {ImportDataService} from "../../service/import-data.service";
 import {ImportData} from "../../model/import-data";
 import {Router} from "@angular/router";
-import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
   selector: 'import-data-browser',
   templateUrl: 'import-data-browser.component.html',
   styleUrls: ['import-data-browser.component.scss']
 })
-export class ImportDataBrowserComponent implements OnInit {
+export class ImportDataBrowserComponent implements OnInit, OnDestroy {
 
   importData: ImportData[] = []
+  private timerId!: any
 
   constructor(
     private importDataService: ImportDataService,
-    private router: Router,
-    private shortMessageService: ShortMessageService
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.load()
+
+    this.timerId = setInterval(
+      () => {
+        if (this.importData.find(entry => this.isInProgress(entry))) {
+          this.load()
+        }
+      },
+      500
+    )
   }
 
-  load() {
+  ngOnDestroy(): void {
+    clearInterval(this.timerId)
+  }
+
+  private load() {
     this.importDataService.list()
-      .subscribe(result => {
-        this.importData = result
-        this.checkProgress()
-      })
+      .subscribe(result => this.importData = result)
   }
 
-  edit(id: string) {
-    this.router.navigate(['import-data', id])
-      .then()
+  cancel(importData: ImportData) {
+    if (importData.status == 'PREPARE_IN_PROGRESS') {
+      this.importDataService.cancelPreparation(importData.id)
+        .subscribe(() => this.load())
+    } else if (importData.status == 'IMPORT_IN_PROGRESS') {
+      this.importDataService.cancelImport(importData.id)
+        .subscribe(() => this.load())
+    }
+  }
+
+  view(id: string) {
+    this.router.navigate(['import-data', id]).then()
   }
 
   delete(id: string) {
@@ -41,20 +59,16 @@ export class ImportDataBrowserComponent implements OnInit {
       .subscribe(() => this.load())
   }
 
-  instantImport(id: string) {
-    this.importDataService.performImport(id)
-      .subscribe(() => {
-        this.shortMessageService.show("Import started")
-        this.load()
-      })
+  isInProgress(importData: ImportData): boolean {
+    return importData.status == 'PREPARE_IN_PROGRESS' || importData.status == 'IMPORT_IN_PROGRESS'
   }
 
-  private checkProgress() {
-    if (this.importData.find(entry => entry.progress > 0 && entry.progress < 1)) {
-      setTimeout(() => {
-        this.load()
-      }, 1000)
-    }
+  isDone(importData: ImportData): boolean {
+    return importData.status == 'PREPARE_DONE' || importData.status == 'IMPORT_DONE'
+  }
+
+  deleteAllowed(importData: ImportData): boolean {
+    return importData.status == 'NEW' || importData.status == 'FAILED' || this.isDone(importData)
   }
 
 }

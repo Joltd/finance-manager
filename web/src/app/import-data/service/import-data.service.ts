@@ -1,8 +1,7 @@
 import {Injectable} from "@angular/core";
-import {ImportData, ImportDataEntry, ImportDataFileResponse} from "../model/import-data";
+import {ImportData, ImportDataEntryPage} from "../model/import-data";
 import {Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
-import {TypeUtils} from "../../common/service/type-utils";
 
 @Injectable({
   providedIn: 'root'
@@ -12,39 +11,43 @@ export class ImportDataService {
   constructor(private http: HttpClient) {}
 
   list(): Observable<ImportData[]> {
-    return this.http.get<ImportData[]>('/import-data', TypeUtils.of(ImportData))
+    return this.http.get<ImportData[]>('/import-data')
+  }
+
+  entryList(id: string, page: number, size: number): Observable<ImportDataEntryPage> {
+    return this.http.post<ImportDataEntryPage>(`/import-data/${id}/entry`, { page, size })
   }
 
   byId(id: string): Observable<ImportData> {
-    return this.http.get<ImportData>('/import-data/' + id, TypeUtils.of(ImportData))
-  }
-
-  entryById(id: string, entryId: string): Observable<ImportDataEntry> {
-    return this.http.get<ImportDataEntry>(`/import-data/${id}/entry/${entryId}`, TypeUtils.of(ImportDataEntry))
-  }
-
-  entryUpdate(id: string, entryId: string, entry: ImportDataEntry): Observable<void> {
-    return this.http.patch<void>(`/import-data/${id}/entry/${entryId}`, entry)
+    return this.http.get<ImportData>('/import-data/' + id)
   }
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>('/import-data/' + id)
   }
 
-  performImport(id: string): Observable<void> {
-    return this.http.post<void>('/import-data/' + id, null)
-  }
-
-  //
-
-  uploadFile(file: File): Observable<ImportDataFileResponse> {
+  startPreparation(beginImport: any): Observable<void> {
     let formData = new FormData()
-    formData.append('file', file)
-    return this.http.post<ImportDataFileResponse>('/import-data/file', formData, TypeUtils.of(ImportDataFileResponse))
+    formData.append('parser', beginImport.parser)
+    formData.append('account', beginImport.account)
+    formData.append('file', beginImport.file)
+    return this.http.post<void>('/import-data', formData)
   }
 
-  create(importData: ImportData): Observable<void> {
-    return this.http.post<void>('/import-data', importData)
+  repeatPreparation(id: string): Observable<void> {
+    return this.http.patch<void>(`/import-data/${id}/preparation`, null)
+  }
+
+  cancelPreparation(id: string): Observable<void> {
+    return this.http.delete<void>(`/import-data/${id}/preparation`)
+  }
+
+  startImport(id: string): Observable<void> {
+    return this.http.post<void>(`/import-data/${id}/import`, null)
+  }
+
+  cancelImport(id: string): Observable<void> {
+    return this.http.delete<void>(`/import-data/${id}/import`)
   }
 
 }

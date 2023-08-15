@@ -1,7 +1,6 @@
 import {Component} from "@angular/core";
 import {ImportDataService} from "../../service/import-data.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {ImportData} from "../../model/import-data";
 import {Router} from "@angular/router";
 
 @Component({
@@ -12,8 +11,9 @@ import {Router} from "@angular/router";
 export class ImportDataBeginComponent {
 
   form: FormGroup = new FormGroup({
-    file: new FormControl(null, Validators.required),
-    description: new FormControl('')
+    parser: new FormControl(null, Validators.required),
+    account: new FormControl(null, Validators.required),
+    file: new FormControl(null, Validators.required)
   })
 
   constructor(
@@ -22,15 +22,8 @@ export class ImportDataBeginComponent {
   ) {}
 
   save() {
-    let formValue = this.form.value
-    let importData = new ImportData()
-    this.importDataService.uploadFile(formValue.file)
-      .subscribe(result => {
-        importData.file = result.filename
-        importData.description = formValue.description
-        this.importDataService.create(importData)
-          .subscribe(() => this.close())
-      })
+    this.importDataService.startPreparation(this.form.value)
+      .subscribe(() => this.close())
   }
 
   close() {

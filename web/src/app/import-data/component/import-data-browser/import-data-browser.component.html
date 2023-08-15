@@ -1,14 +1,24 @@
 <mat-card *ngIf="importData.length > 0">
   <mat-action-list>
-    <button mat-list-item [mat-menu-trigger-for]="menu" *ngFor="let data of importData" [matMenuTriggerFor]="menu">
-      <div matLine>
-        {{data.description}}
-      </div>
-      <mat-progress-bar matLine *ngIf="data.progress > 0 && data.progress < 1" [value]="data.progress * 100"></mat-progress-bar>
+    <button mat-list-item *ngFor="let data of importData" [matMenuTriggerFor]="menu">
+      <mat-spinner matListItemIcon
+                   class="icon"
+                   *ngIf="isInProgress(data)"
+                   diameter="24"
+                   mode="determinate"
+                   [value]="data.progress"></mat-spinner>
+      <mat-icon matListItemIcon
+                class="icon"
+                *ngIf="isDone(data)">done</mat-icon>
+      <mat-icon matListItemIcon
+                class="icon"
+                *ngIf="data.status == 'FAILED'">warning</mat-icon>
+      <div matListItemTitle>{{data.parser}} ({{data.accountName}})</div>
+      <div matListItemLine *ngIf="data.message != null">{{data.message}}</div>
       <mat-menu #menu>
-        <button mat-menu-item (click)="edit(data.id)">Edit</button>
-        <button mat-menu-item (click)="delete(data.id)">Delete</button>
-        <button mat-menu-item (click)="instantImport(data.id)">Instant import</button>
+        <button mat-menu-item *ngIf="isInProgress(data)" (click)="cancel(data)">Cancel</button>
+        <button mat-menu-item *ngIf="data.status != 'FAILED'" (click)="view(data.id)">View</button>
+        <button mat-menu-item *ngIf="deleteAllowed(data)" (click)="delete(data.id)">Delete</button>
       </mat-menu>
     </button>
   </mat-action-list>

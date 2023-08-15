@@ -4,7 +4,7 @@
   <div class="app-version">{{version}}</div>
 </mat-toolbar>
 <mat-sidenav-container>
-  <mat-sidenav #left position="start" class="left-side" [class.left-side-narrow]="wide">
+  <mat-sidenav #left position="start" class="left-side" [class.left-side-narrow]="isWideMenu()">
     <mat-nav-list>
       <a mat-list-item [routerLink]="['dashboard']" (click)="left.close()">Dashboard</a>
       <a mat-list-item [routerLink]="['flow-chart']" (click)="left.close()">Flow chart</a>
@@ -20,7 +20,7 @@
       <a mat-list-item [routerLink]="['settings']" (click)="left.close()">Settings</a>
     </mat-nav-list>
   </mat-sidenav>
-  <mat-sidenav-content class="content" [class.content-wide]="wide">
+  <mat-sidenav-content class="content" [class.content-wide]="isWideScreen()">
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

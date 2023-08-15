@@ -68,6 +68,9 @@ class TransactionService(private val transactionRepository: TransactionRepositor
         transactionRepository.deleteByDocument(document)
     }
 
+    fun findByAccountAndDate(account: String, date: LocalDate): List<Transaction> =
+        transactionRepository.findByAccountAndDate(account, date)
+
     fun findByAccount(account: String): List<Transaction> = transactionRepository.findByAccount(account)
 
     fun usageByAccount(account: String): Usage = transactionRepository.findByAccount(account).size.let { Usage(it.toString()) }

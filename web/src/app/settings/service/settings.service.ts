@@ -11,6 +11,7 @@ import {map} from "rxjs/operators";
 export class SettingsService {
 
   settings: Settings = new Settings()
+  wideScreenToggle: boolean = true
 
   constructor(private http: HttpClient) {}
 

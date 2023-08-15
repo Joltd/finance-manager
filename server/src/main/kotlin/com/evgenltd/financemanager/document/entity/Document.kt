@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Document as Entity
 
 @Entity("document")
 abstract class Document(
-        @Id
-        var id: String?,
-        var date: LocalDate,
-        var description: String
+    @Id
+    var id: String?,
+    var date: LocalDate,
+    var description: String
 )

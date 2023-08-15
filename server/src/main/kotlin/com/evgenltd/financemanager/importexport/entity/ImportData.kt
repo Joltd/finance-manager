@@ -1,19 +1,14 @@
 package com.evgenltd.financemanager.importexport.entity
 
-import com.evgenltd.financemanager.document.entity.Document
-
 class ImportData(
-        var id: String?,
-        var description: String,
-        var entries: List<ImportDataEntry>
+    var id: String?,
+    var parser: String,
+    var account: String,
+    var status: ImportDataStatus,
+    var message: String?,
+    var progress: Double
 )
 
-class ImportDataEntry(
-        var id: String,
-        var raw: String,
-        var suggested: Document?,
-        var skip: Boolean = false,
-        var result: Boolean? = null,
-        var message: String? = null,
-        var forRemove: String? = null
-)
+enum class ImportDataStatus {
+    NEW, PREPARE_IN_PROGRESS, PREPARE_DONE, IMPORT_IN_PROGRESS, IMPORT_DONE, FAILED
+}

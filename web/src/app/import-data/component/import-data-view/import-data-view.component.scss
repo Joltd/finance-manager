@@ -1,20 +1,55 @@
-.mdc-list-item.mdc-list-item--with-one-line {
-  height: 4em;
-}
-
-.success {
-  color: green;
-  justify-self: center;
-}
-
-.fail {
-  color: red;
-  justify-self: center;
-}
-
-.line {
+:host {
   display: grid;
-  grid-template-columns: 3em 1fr min-content 1fr;
+  height: 100%;
+  grid-template-columns: 20em 1fr;
   grid-gap: 1em;
-  align-items: center;
+}
+//
+//.header {
+//  mat-card-header {
+//    padding: 16px;
+//    display: grid;
+//    grid-auto-flow: column;
+//    grid-template-columns: 1fr;
+//    align-items: center;
+//  }
+//}
+
+.entries {
+  display: grid;
+  grid-template-rows: 1fr min-content;
+  height: 100%;
+  overflow: hidden;
+
+  mat-action-list {
+    height: 100%;
+    overflow-y: auto;
+  }
+}
+
+.view {
+  display: grid;
+  grid-template-rows: min-content min-content;
+  grid-gap: 1em;
+  width: 100%;
+  overflow: hidden;
+}
+
+.error {
+  mat-card-content {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    grid-gap: 1em;
+    align-items: center;
+  }
+}
+
+.raw {
+  width: 100%;
+  overflow: hidden;
+  mat-card-content {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }

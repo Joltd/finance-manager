@@ -68,7 +68,7 @@
 
 <mat-card *ngIf="documentPage().documents.length > 0">
   <mat-action-list>
-    <button mat-list-item [mat-menu-trigger-for]="menu" *ngFor="let document of documentPage().documents" [matMenuTriggerFor]="menu">
+    <button mat-list-item *ngFor="let document of documentPage().documents" [matMenuTriggerFor]="menu">
       <document-label [document]="document"></document-label>
       <mat-menu #menu>
         <button mat-menu-item (click)="copy(document.value.id!)">Copy</button>

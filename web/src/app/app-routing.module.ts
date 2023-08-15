@@ -29,10 +29,13 @@ import {
 import {FlowChartComponent} from "./report/component/flow-chart/flow-chart.component";
 import {SettingsEditorComponent} from "./settings/component/settings-editor.component";
 import {FastExpenseComponent} from "./document/component/fast-expense/fast-expense.component";
-import {
-  ImportDataEntryViewComponent
-} from "./import-data/component/import-data-entry-view/import-data-entry-view.component";
 import {FastExchangeComponent} from "./document/component/fast-exchange/fast-exchange.component";
+import {
+  CategoryMappingBrowserComponent
+} from "./import-data/component/category-mapping-browser/category-mapping-browser.component";
+import {
+  CategoryMappingEditorComponent
+} from "./import-data/component/category-mapping-editor/category-mapping-editor.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -43,9 +46,10 @@ const routes: Routes = [
   { path: 'income/:id', component: IncomeCategoryEditorComponent },
   { path: 'document', component: DocumentBrowserComponent },
   { path: 'document/:id', component: DocumentEditorComponent },
+  { path: 'category-mapping', component: CategoryMappingBrowserComponent },
+  { path: 'category-mapping/:id', component: CategoryMappingEditorComponent },
   { path: 'import-data', component: ImportDataBrowserComponent },
   { path: 'import-data/:id', component: ImportDataViewComponent },
-  { path: 'import-data/:id/entry/:entryId', component: ImportDataEntryViewComponent },
   { path: 'export-data', component: ExportDataBeginComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'fast-expense', component: FastExpenseComponent },
@@ -54,7 +58,7 @@ const routes: Routes = [
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: 'settings', component: SettingsEditorComponent },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
+  { path: '', redirectTo: '/import-data', pathMatch: 'full' }
 ];
 
 @NgModule({

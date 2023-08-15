@@ -14,46 +14,55 @@ import {MatMenuModule} from "@angular/material/menu";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatInputModule} from "@angular/material/input";
 import {DocumentModule} from "../document/document.module";
-import {MatLineModule, MatRippleModule} from "@angular/material/core";
+import {MatLineModule, MatOptionModule, MatRippleModule} from "@angular/material/core";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
-import {ImportDataEntryViewComponent} from "./component/import-data-entry-view/import-data-entry-view.component";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatExpansionModule} from "@angular/material/expansion";
+import {MatPaginatorModule} from "@angular/material/paginator";
+import {CategoryMappingBrowserComponent} from "./component/category-mapping-browser/category-mapping-browser.component";
+import {MatSelectModule} from "@angular/material/select";
+import {CategoryMappingEditorComponent} from "./component/category-mapping-editor/category-mapping-editor.component";
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
 @NgModule({
   declarations: [
     ImportDataViewComponent,
-    ImportDataEntryViewComponent,
     ImportDataBeginComponent,
-    ImportDataBrowserComponent
+    ImportDataBrowserComponent,
+    CategoryMappingBrowserComponent,
+    CategoryMappingEditorComponent
   ],
-  imports: [
-    MatCardModule,
-    MatListModule,
-    MatFormFieldModule,
-    CommonModule,
-    MatIconModule,
-    NgIf,
-    ReactiveFormsModule,
-    MatButtonModule,
-    NgForOf,
-    MatMenuModule,
-    MatCheckboxModule,
-    MatInputModule,
-    DocumentModule,
-    MatRippleModule,
-    FormsModule,
-    MatTooltipModule,
-    MatSlideToggleModule,
-    MatProgressSpinnerModule,
-    MatProgressBarModule,
-    MatDatepickerModule,
-    MatExpansionModule,
-    MatLineModule
-  ],
+    imports: [
+        MatCardModule,
+        MatListModule,
+        MatFormFieldModule,
+        CommonModule,
+        MatIconModule,
+        NgIf,
+        ReactiveFormsModule,
+        MatButtonModule,
+        NgForOf,
+        MatMenuModule,
+        MatCheckboxModule,
+        MatInputModule,
+        DocumentModule,
+        MatRippleModule,
+        FormsModule,
+        MatTooltipModule,
+        MatSlideToggleModule,
+        MatProgressSpinnerModule,
+        MatProgressBarModule,
+        MatDatepickerModule,
+        MatExpansionModule,
+        MatLineModule,
+        MatPaginatorModule,
+        MatOptionModule,
+        MatSelectModule,
+        MatButtonToggleModule
+    ],
   exports: [
     ImportDataViewComponent,
     ImportDataBrowserComponent

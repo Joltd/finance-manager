@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class ExportDataService(private val documentService: DocumentService) {
 
     fun performExport(account: String?): ByteArray {
-        val data = documentService.findDocumentByAccount(account)
+        val data = documentService.findTypedDocumentByAccount(account)
                 .joinToString("\n") { record -> exportDocument(record) }
         val header = FIELDS.joinToString(",")
         return "$header\n$data".toByteArray()

@@ -4,13 +4,18 @@
       <form [formGroup]="form">
 
         <mat-form-field>
-          <mat-label>File</mat-label>
-          <file-input formControlName="file"></file-input>
+          <mat-label>Parser</mat-label>
+          <input matInput formControlName="parser">
         </mat-form-field>
 
         <mat-form-field>
-          <mat-label>Description</mat-label>
-          <input matInput formControlName="description">
+          <mat-label>Account</mat-label>
+          <reference-input api="/account/reference" formControlName="account"></reference-input>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>File</mat-label>
+          <file-input formControlName="file"></file-input>
         </mat-form-field>
 
       </form>

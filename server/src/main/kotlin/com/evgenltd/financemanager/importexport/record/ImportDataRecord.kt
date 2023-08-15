@@ -1,21 +1,13 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.document.record.DocumentTypedRecord
+import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 
-class ImportDataRecord(
-        val id: String?,
-        val description: String,
-        val entries: List<ImportDataEntryRecord> = emptyList()
+data class ImportDataRecord(
+    val id: String,
+    val parser: String,
+    val account: String,
+    val accountName: String,
+    val status: ImportDataStatus,
+    val message: String?,
+    val progress: Double
 )
-
-class ImportDataEntryRecord(
-        val id: String?,
-        val raw: String,
-        val suggested: DocumentTypedRecord?,
-        val skip: Boolean,
-        val result: Boolean?,
-        val message: String?,
-        val forRemove: DocumentTypedRecord?
-)
-
-class ImportDataEntryForRemoveRecord(val documents: Set<String>)

@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Service
@@ -39,10 +40,10 @@ class DocumentService(
         query = query.with(Sort.by(Sort.Direction.DESC, "date"))
                 .with(PageRequest.of(filter.page, filter.size))
         return DocumentPage(
-                count,
-                filter.page,
-                filter.size,
-                mongoTemplate.find(query, Document::class.java).map(::toTypedRecord)
+            total = count,
+            page = filter.page,
+            size = filter.size,
+            documents = mongoTemplate.find(query, Document::class.java).map(::toTypedRecord)
         )
     }
 
@@ -97,6 +98,8 @@ class DocumentService(
         return mongoTemplate.find(query, Document::class.java).map(::toTypedRecord)
     }
 
+    fun list(ids: List<String>): List<DocumentTypedRecord> = documentRepository.findAllById(ids).map(::toTypedRecord)
+
     fun byId(id: String): DocumentTypedRecord = documentRepository.find(id).let(::toTypedRecord)
 
     @Transactional
@@ -115,12 +118,17 @@ class DocumentService(
         documentRepository.deleteById(id)
     }
 
-    fun findDocumentByAccount(account: String?): List<DocumentTypedRecord> {
+    fun findTypedDocumentByAccount(account: String?): List<DocumentTypedRecord> {
         if (account == null) {
             return documentRepository.findAll().map(::toTypedRecord)
         }
         val documents = transactionService.findByAccount(account).map { it.document }
         return documentRepository.findAllById(documents).map(::toTypedRecord)
+    }
+
+    fun findDocumentByAccountAndDate(account: String, date: LocalDate): List<Document> {
+        val documents = transactionService.findByAccountAndDate(account, date).map { it.document }
+        return documentRepository.findAllById(documents).toList()
     }
 
     @Transactional

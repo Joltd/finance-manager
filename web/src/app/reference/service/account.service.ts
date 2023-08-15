@@ -20,8 +20,8 @@ export class AccountService {
     return this.http.get<Account>('/account/' + id, TypeUtils.of(Account))
   }
 
-  update(accountCategory: Account): Observable<void> {
-    return this.http.post<void>('/account', accountCategory)
+  update(account: Account): Observable<void> {
+    return this.http.post<void>('/account', account)
   }
 
   delete(id: string): Observable<void> {
