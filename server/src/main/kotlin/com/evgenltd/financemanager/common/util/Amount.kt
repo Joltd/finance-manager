@@ -4,6 +4,8 @@ import java.math.BigDecimal
 
 data class Amount(val value: Long, val currency: String) {
 
+    fun isNegative(): Boolean = value < 0
+
     operator fun unaryPlus(): Amount = this
 
     operator fun unaryMinus(): Amount = Amount(-value, currency)
@@ -53,8 +55,8 @@ fun BigDecimal.toAmountValue(): Long = movePointRight(4).toLong()
 
 fun fromFractionalString(value: String, currency: String): Amount {
     return Amount(
-            BigDecimal(value.replace(",",".")).movePointRight(4).toLong(),
-            currency
+            BigDecimal(value.trim().replace(",",".")).movePointRight(4).toLong(),
+            currency.trim()
     )
 }
 
