@@ -1,0 +1,38 @@
+:host {
+  align-items: center;
+  display: flex;
+  gap: 1em;
+  cursor: default;
+  user-select: none;
+  min-width: 16em;
+}
+
+.marker {
+  min-width: .2em;
+  min-height: 3em;
+  border-radius: .2em;
+}
+
+.income {
+  background-color: #66bb6a;
+}
+
+.expense {
+  background-color: #ef5350;
+}
+
+.label-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.parser {
+  font-size: 7px;
+  line-height: 10px;
+  color: grey;
+}
+
+.mapping {
+  display: flex;
+  align-items: center;
+}

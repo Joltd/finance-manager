@@ -10,6 +10,8 @@ import com.evgenltd.financemanager.importexport.record.ImportDataEntryPage
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
+import com.evgenltd.financemanager.importexport.service.parser.ImportParser
+import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.service.AccountService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -24,8 +26,11 @@ class ImportDataService(
     private val accountService: AccountService,
     private val documentService: DocumentService,
     private val categoryMappingService: CategoryMappingService,
+    private val importParsers: List<ImportParser>,
     private val mongoTemplate: MongoTemplate
 ) {
+
+    fun parserList(): List<Reference> = importParsers.map { Reference(it.id, it.name, false) }
 
     fun list(): List<ImportDataRecord> = importDataRepository.findAll().map { it.toRecord() }
 

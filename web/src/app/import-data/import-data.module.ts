@@ -6,7 +6,7 @@ import {ImportDataBeginComponent} from "./component/import-data-begin/import-dat
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {CommonModule} from "../common/common.module";
 import {MatIconModule} from "@angular/material/icon";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {ImportDataBrowserComponent} from "./component/import-data-browser/import-data-browser.component";
 import {MatButtonModule} from "@angular/material/button";
@@ -26,6 +26,7 @@ import {CategoryMappingBrowserComponent} from "./component/category-mapping-brow
 import {MatSelectModule} from "@angular/material/select";
 import {CategoryMappingEditorComponent} from "./component/category-mapping-editor/category-mapping-editor.component";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {CategoryMappingLabelComponent} from "./component/category-mapping-label/category-mapping-label.component";
 
 @NgModule({
   declarations: [
@@ -33,36 +34,38 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
     ImportDataBeginComponent,
     ImportDataBrowserComponent,
     CategoryMappingBrowserComponent,
-    CategoryMappingEditorComponent
+    CategoryMappingEditorComponent,
+    CategoryMappingLabelComponent
   ],
-    imports: [
-        MatCardModule,
-        MatListModule,
-        MatFormFieldModule,
-        CommonModule,
-        MatIconModule,
-        NgIf,
-        ReactiveFormsModule,
-        MatButtonModule,
-        NgForOf,
-        MatMenuModule,
-        MatCheckboxModule,
-        MatInputModule,
-        DocumentModule,
-        MatRippleModule,
-        FormsModule,
-        MatTooltipModule,
-        MatSlideToggleModule,
-        MatProgressSpinnerModule,
-        MatProgressBarModule,
-        MatDatepickerModule,
-        MatExpansionModule,
-        MatLineModule,
-        MatPaginatorModule,
-        MatOptionModule,
-        MatSelectModule,
-        MatButtonToggleModule
-    ],
+  imports: [
+    MatCardModule,
+    MatListModule,
+    MatFormFieldModule,
+    CommonModule,
+    MatIconModule,
+    NgIf,
+    ReactiveFormsModule,
+    MatButtonModule,
+    NgForOf,
+    MatMenuModule,
+    MatCheckboxModule,
+    MatInputModule,
+    DocumentModule,
+    MatRippleModule,
+    FormsModule,
+    MatTooltipModule,
+    MatSlideToggleModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatDatepickerModule,
+    MatExpansionModule,
+    MatLineModule,
+    MatPaginatorModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatButtonToggleModule,
+    NgClass
+  ],
   exports: [
     ImportDataViewComponent,
     ImportDataBrowserComponent

@@ -4,13 +4,15 @@ import {CategoryMapping, CategoryMappingPage} from "../model/category-mapping";
 import {HttpClient} from "@angular/common/http";
 import {TypeUtils} from "../../common/service/type-utils";
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CategoryMappingService {
 
   constructor(private http: HttpClient) {}
 
   list(filter: any): Observable<CategoryMappingPage> {
-    return this.http.post<CategoryMappingPage>('/category-mapping/list', filter, TypeUtils.of(CategoryMappingPage))
+    return this.http.post<CategoryMappingPage>('/category-mapping/filter', filter, TypeUtils.of(CategoryMappingPage))
   }
 
   byId(id: string): Observable<CategoryMapping> {

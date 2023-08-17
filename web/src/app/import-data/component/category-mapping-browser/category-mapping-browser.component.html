@@ -5,7 +5,6 @@
   </mat-card-header>
 </mat-card>
 
-
 <mat-expansion-panel #filter>
   <mat-expansion-panel-header>
     <mat-panel-title>Filters</mat-panel-title>
@@ -14,12 +13,12 @@
   <form [formGroup]="settings">
     <mat-form-field>
       <mat-label>Parser</mat-label>
-      <reference-input formControlName="parser" [references]="parsers"></reference-input>
+      <reference-input api="/parser/reference" formControlName="parser"></reference-input>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Categories</mat-label>
-      <mat-select formControlName="categories">
+      <mat-select formControlName="category">
         <mat-optgroup label="Expenses">
           <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
         </mat-optgroup>
@@ -42,6 +41,7 @@
 <mat-card *ngIf="categoryMappingPage.mappings.length > 0">
   <mat-action-list>
     <button mat-list-item *ngFor="let mapping of categoryMappingPage.mappings" [matMenuTriggerFor]="menu">
+      <category-mapping-label [categoryMapping]="mapping" [hideParser]="settings.value.parser != null"></category-mapping-label>
       <mat-menu #menu>
         <button mat-menu-item (click)="edit(mapping.id)">Edit</button>
         <button mat-menu-item (click)="delete(mapping.id)">Delete</button>

@@ -8,8 +8,9 @@ export class CategoryMappingPage {
 export class CategoryMapping {
   id!: string
   parser!: string
+  parserName!: string
   pattern!: string
-  categoryType!: 'EXPENSE' | 'INCOME'
+  categoryType!: 'expense' | 'income'
   category!: string
   categoryName!: string
 }

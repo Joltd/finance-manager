@@ -2,11 +2,11 @@ package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
-import com.evgenltd.financemanager.importexport.entity.CategoryType
 import com.evgenltd.financemanager.importexport.record.CategoryMappingFilter
 import com.evgenltd.financemanager.importexport.record.CategoryMappingPage
 import com.evgenltd.financemanager.importexport.record.CategoryMappingRecord
 import com.evgenltd.financemanager.importexport.repository.CategoryMappingRepository
+import com.evgenltd.financemanager.importexport.service.parser.ImportParser
 import com.evgenltd.financemanager.reference.service.ExpenseCategoryService
 import com.evgenltd.financemanager.reference.service.IncomeCategoryService
 import org.springframework.data.domain.PageRequest
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
 
@@ -22,6 +23,7 @@ class CategoryMappingService(
     private val categoryMappingRepository: CategoryMappingRepository,
     private val expenseCategoryService: ExpenseCategoryService,
     private val incomeCategoryService: IncomeCategoryService,
+    private val importParsers: List<ImportParser>,
     private val mongoTemplate: MongoTemplate,
 ) {
 
@@ -43,17 +45,11 @@ class CategoryMappingService(
     }
 
     private fun Criteria.parserCondition(filter: CategoryMappingFilter): Criteria =
-        filter.parser?.let { value -> and("parser").isEqualTo(value) } ?: this
+        filter.parser?.let { value -> and(CategoryMapping::parser.name).isEqualTo(value) } ?: this
 
     private fun Criteria.categoryCondition(filter: CategoryMappingFilter): Criteria =
-        filter.category?.let {
-            andOperator(
-                Criteria().orOperator(
-                    Criteria.where("expenseCategory").isEqualTo(it),
-                    Criteria.where("incomeCategory").isEqualTo(it),
-                )
-            )
-        } ?: this
+        if (filter.category.isEmpty()) this
+        else and(CategoryMapping::category.name).inValues(filter.category)
 
     fun byId(id: String): CategoryMappingRecord = categoryMappingRepository.find(id).toRecord()
 
@@ -71,12 +67,14 @@ class CategoryMappingService(
         CategoryMappingRecord(
             id = id,
             parser = parser,
+            parserName = importParsers.find { it.id == parser }?.name ?: parser,
             pattern = pattern,
             categoryType = categoryType,
             category = category,
             categoryName = when (categoryType) {
-                CategoryType.EXPENSE -> expenseCategoryService.name(category)
-                CategoryType.INCOME -> incomeCategoryService.name(category)
+                "expense" -> expenseCategoryService.name(category)
+                "income" -> incomeCategoryService.name(category)
+                else -> "<Unknown>"
             }
         )
 

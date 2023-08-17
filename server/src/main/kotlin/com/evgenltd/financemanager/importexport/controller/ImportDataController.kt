@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.importexport.record.ImportDataEntryFilter
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryPage
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.service.ImportDataService
+import com.evgenltd.financemanager.reference.record.Reference
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -18,6 +19,9 @@ import org.springframework.web.multipart.MultipartFile
 class ImportDataController(
     private val importDataService: ImportDataService
 ) {
+
+    @GetMapping("/parser/reference")
+    fun parserList(): List<Reference> = importDataService.parserList()
 
     @GetMapping("/import-data")
     fun list(): List<ImportDataRecord> = importDataService.list()

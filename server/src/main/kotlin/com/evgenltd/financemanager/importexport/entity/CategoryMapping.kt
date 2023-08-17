@@ -4,10 +4,6 @@ class CategoryMapping(
     var id: String?,
     var parser: String,
     var pattern: String,
-    var categoryType: CategoryType,
+    var categoryType: String,
     var category: String
 )
-
-enum class CategoryType {
-    EXPENSE, INCOME
-}

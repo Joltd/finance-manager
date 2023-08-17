@@ -1,12 +1,11 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.importexport.entity.CategoryType
-
 data class CategoryMappingRecord(
     val id: String?,
     val parser: String,
+    val parserName: String? = null,
     val pattern: String,
-    val categoryType: CategoryType,
+    val categoryType: String,
     val category: String,
-    val categoryName: String,
+    val categoryName: String? = null,
 )

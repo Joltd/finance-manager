@@ -241,7 +241,7 @@ class ImportDataProcessService(
 
         val matchedCategoryMapping = matchedCategoryMappings.first()
         when (matchedCategoryMapping.second.categoryType) {
-            CategoryType.EXPENSE -> suggestedDocument = DocumentExpense(
+            EXPENSE_TYPE -> suggestedDocument = DocumentExpense(
                 id = null,
                 date = parsedEntry.date,
                 description = parsedEntry.description,
@@ -249,7 +249,7 @@ class ImportDataProcessService(
                 amount = amount,
                 expenseCategory = matchedCategoryMapping.second.category
             )
-            CategoryType.INCOME -> suggestedDocument = DocumentIncome(
+            INCOME_TYPE -> suggestedDocument = DocumentIncome(
                 id = null,
                 date = parsedEntry.date,
                 description = parsedEntry.description,
@@ -257,6 +257,10 @@ class ImportDataProcessService(
                 amount = amount,
                 incomeCategory = matchedCategoryMapping.second.category
             )
+            else -> {
+                preparationError = "Unknown category type ${matchedCategoryMapping.second.categoryType}"
+                return this
+            }
         }
 
         preparationResult = true

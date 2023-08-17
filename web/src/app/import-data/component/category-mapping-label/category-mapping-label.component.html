@@ -1,0 +1,9 @@
+<div class="marker" [ngClass]="categoryMapping.categoryType"></div>
+<div class="label-group">
+  <div *ngIf="!hideParser" class="parser">{{categoryMapping.parserName}}</div>
+  <div class="mapping">
+    {{categoryMapping.pattern}}
+    <mat-icon class="exchange-arrow">arrow_right</mat-icon>
+    {{categoryMapping.categoryName}}
+  </div>
+</div>

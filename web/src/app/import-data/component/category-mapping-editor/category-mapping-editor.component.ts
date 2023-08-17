@@ -40,6 +40,7 @@ export class CategoryMappingEditorComponent {
   }
 
   save() {
+    console.log(this.form.value)
     this.categoryMappingService.update(this.form.value)
       .subscribe(() => this.close())
   }

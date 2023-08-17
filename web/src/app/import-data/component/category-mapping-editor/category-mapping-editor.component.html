@@ -6,7 +6,7 @@
 
         <mat-form-field>
           <mat-label>Parser</mat-label>
-          <input matInput formControlName="parser">
+          <reference-input api="/parser/reference" formControlName="parser"></reference-input>
         </mat-form-field>
 
         <mat-form-field>
@@ -14,10 +14,12 @@
           <input matInput formControlName="pattern">
         </mat-form-field>
 
-        <mat-button-toggle-group formControlName="categoryType">
-          <mat-button-toggle value="expense">Expense</mat-button-toggle>
-          <mat-button-toggle value="income">Income</mat-button-toggle>
-        </mat-button-toggle-group>
+        <div class="category-type">
+          <mat-button-toggle-group formControlName="categoryType">
+            <mat-button-toggle value="expense">Expense</mat-button-toggle>
+            <mat-button-toggle value="income">Income</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
 
         <mat-form-field *ngIf="form.value['categoryType'] == 'expense'">
           <mat-label>Expense category</mat-label>
