@@ -14,12 +14,16 @@ export class ImportDataService {
     return this.http.get<ImportData[]>('/import-data')
   }
 
-  entryList(id: string, page: number, size: number): Observable<ImportDataEntryPage> {
-    return this.http.post<ImportDataEntryPage>(`/import-data/${id}/entry`, { page, size })
+  entryList(id: string, request: any): Observable<ImportDataEntryPage> {
+    return this.http.post<ImportDataEntryPage>(`/import-data/${id}/entry`, request)
   }
 
   byId(id: string): Observable<ImportData> {
     return this.http.get<ImportData>('/import-data/' + id)
+  }
+
+  entryUpdate(id: string, request: any): Observable<void> {
+    return this.http.patch<void>(`/import-data/${id}/entry`, request)
   }
 
   delete(id: string): Observable<void> {

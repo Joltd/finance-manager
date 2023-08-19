@@ -47,26 +47,25 @@ class ImportDataProcessService(
         val parser = parsers[importData.parser]
         if (parser == null) {
             update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.FAILED) {
-                mapOf(ImportData::message.name to "Parser ${importData.parser} not found")
+                it.set(ImportData::message.name, "Parser ${importData.parser} not found")
             }
             return
         }
 
         val categoryMappings = categoryMappingRepository.findByParser(importData.parser)
-            .map { Regex(it.pattern) to it }
+            .map { Regex(".*${it.pattern}.*") to it }
 
         val parsed = try {
             parser.parse(file)
         } catch (e: RuntimeException) {
             update(id, ImportDataStatus.PREPARE_IN_PROGRESS, ImportDataStatus.FAILED) {
-                mapOf(ImportData::message.name to "Unable to parse: ${e.message ?: "Unknown error"}")
+                it.set(ImportData::message.name, "Unable to parse: ${e.message ?: "Unknown error"}")
             }
             return
         }
 
         for (parsedRecord in parsed) {
-            val importData = update(id, ImportDataStatus.PREPARE_IN_PROGRESS)
-            if (importData == null) {
+            if (!exists(id, ImportDataStatus.PREPARE_IN_PROGRESS)) {
                 log.info("Import data $id not found or status is different from ${ImportDataStatus.PREPARE_IN_PROGRESS}")
                 break
             }
@@ -81,10 +80,8 @@ class ImportDataProcessService(
     @Async
     fun repeatPreparation(id: String) {
         val importData = update(id, ImportDataStatus.PREPARE_DONE, ImportDataStatus.PREPARE_IN_PROGRESS) {
-            mapOf(
-                ImportData::message.name to null,
-                ImportData::progress.name to 0.0
-            )
+            it.set(ImportData::message.name, null)
+            it.set(ImportData::progress.name, 0.0)
         }
         if (importData == null) {
             log.info("Import data $id not found or status is different from ${ImportDataStatus.NEW}")
@@ -98,8 +95,7 @@ class ImportDataProcessService(
             Criteria.where(ImportDataEntry::importData.name).isEqualTo(id),
             Criteria.where(ImportDataEntry::preparationResult.name).isEqualTo(false)
         )).findBatched<ImportDataEntry> { entry, _, _ ->
-            val importData = update(id, ImportDataStatus.PREPARE_IN_PROGRESS)
-            if (importData == null) {
+            if (!exists(id, ImportDataStatus.PREPARE_IN_PROGRESS)) {
                 log.info("Import data $id not found or status is different from ${ImportDataStatus.PREPARE_IN_PROGRESS}")
                 false
             } else {
@@ -149,7 +145,7 @@ class ImportDataProcessService(
 
         if (empty) {
             update(id, ImportDataStatus.IMPORT_IN_PROGRESS, ImportDataStatus.IMPORT_DONE) {
-                mapOf(ImportData::message.name to "Nothing to import")
+                it.set(ImportData::message.name, "Nothing to import")
             }
             return
         }
@@ -355,26 +351,34 @@ class ImportDataProcessService(
         return false
     }
 
+    private fun exists(id: String, expectedStatus: ImportDataStatus): Boolean = Criteria().andOperator(
+        Criteria.where(ImportData::id.name).isEqualTo(id),
+        Criteria.where(ImportData::status.name).isEqualTo(expectedStatus)
+    )
+        .let { Query.query(it) }
+        .let { mongoTemplate.exists(it, ImportData::class.java) }
+
     private fun update(
         id: String,
         oldStatus: ImportDataStatus,
         newStatus: ImportDataStatus,
-        block: () -> Map<String,Any?> = { emptyMap() }
+        block: (Update) -> Unit = {}
     ): ImportData? = update(id, oldStatus) {
-        mapOf(ImportData::status.name to newStatus) + block()
+        it.set(ImportData::status.name, newStatus)
+        block(it)
     }
 
     private fun update(
         id: String,
         statusCondition: ImportDataStatus,
-        block: () -> Map<String,Any?> = { emptyMap() }
+        block: (Update) -> Unit
     ): ImportData? {
-        val query = mapOf(ImportData::id.name to id, ImportData::status.name to statusCondition)
-            .let { Criteria.byExample(it) }
-            .let { Query.query(it) }
-        val update = block()
-            .let { org.bson.Document(it) }
-            .let { Update.fromDocument(it) }
+        val query = Criteria().andOperator(
+            Criteria.where(ImportData::id.name).isEqualTo(id),
+            Criteria.where(ImportData::status.name).isEqualTo(statusCondition)
+        ).let { Query.query(it) }
+        val update = Update()
+        block(update)
         return mongoTemplate.findAndModify(
             query,
             update,

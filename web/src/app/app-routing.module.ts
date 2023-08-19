@@ -36,6 +36,7 @@ import {
 import {
   CategoryMappingEditorComponent
 } from "./import-data/component/category-mapping-editor/category-mapping-editor.component";
+import {ImportDataStartComponent} from "./import-data/component/import-data-begin/import-data-start.component";
 
 const routes: Routes = [
   { path: 'account', component: AccountBrowserComponent },
@@ -49,6 +50,7 @@ const routes: Routes = [
   { path: 'category-mapping', component: CategoryMappingBrowserComponent },
   { path: 'category-mapping/:id', component: CategoryMappingEditorComponent },
   { path: 'import-data', component: ImportDataBrowserComponent },
+  { path: 'import-data-start', component: ImportDataStartComponent },
   { path: 'import-data/:id', component: ImportDataViewComponent },
   { path: 'export-data', component: ExportDataBeginComponent },
   { path: 'dashboard', component: DashboardComponent },

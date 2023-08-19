@@ -3,7 +3,7 @@ package com.evgenltd.financemanager.importexport.component.rulemanager
 import com.evgenltd.financemanager.importexport.record.RawDataRecord
 
 class RuleManager(
-        private val rules: Map<Template,Hint>
+        val rules: Map<Template,Hint>
 ) {
 
     fun find(record: RawDataRecord): Hint? =

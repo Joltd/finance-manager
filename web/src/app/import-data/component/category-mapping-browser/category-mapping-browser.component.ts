@@ -19,7 +19,7 @@ export class CategoryMappingBrowserComponent {
   filter!: MatExpansionPanel
   settings: FormGroup = new FormGroup({
     parser: new FormControl(null),
-    category: new FormControl([]),
+    category: new FormControl(null),
   })
   categoryMappingPage: CategoryMappingPage = new CategoryMappingPage()
 
@@ -37,9 +37,6 @@ export class CategoryMappingBrowserComponent {
         this.referenceService.list('/income/reference')
           .subscribe(result => {
             this.incomeCategories = result
-            if (this.settings.value.category.length == 0) {
-              this.selectAllCategories()
-            }
           })
       })
   }
@@ -69,24 +66,6 @@ export class CategoryMappingBrowserComponent {
   delete(id: string) {
     this.categoryMappingService.delete(id)
       .subscribe(() => this.load())
-  }
-
-  toggleAllCategories() {
-    if (this.settings.value.category.length == 0) {
-      this.selectAllCategories()
-    } else {
-      this.settings.patchValue({
-        category: []
-      })
-    }
-  }
-
-  private selectAllCategories() {
-    this.settings.patchValue({
-      category: this.expenseCategories.map(category => category.id).concat(
-        this.incomeCategories.map(category => category.id)
-      )
-    })
   }
 
 }

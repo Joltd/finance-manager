@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.importexport.component.rulemanager.buildRuleManager
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
 import com.evgenltd.financemanager.importexport.record.CategoryMappingFilter
 import com.evgenltd.financemanager.importexport.record.CategoryMappingPage
@@ -17,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
+import javax.annotation.PostConstruct
 
 @Service
 class CategoryMappingService(
@@ -26,6 +28,31 @@ class CategoryMappingService(
     private val importParsers: List<ImportParser>,
     private val mongoTemplate: MongoTemplate,
 ) {
+
+    @PostConstruct
+    fun postConstruct() {
+        if (categoryMappingRepository.count() > 0) {
+            return
+        }
+        buildRuleManager("/tbc/main.csv")
+            .rules
+            .entries
+            .filter { it.value.type in listOf("income", "expense") }
+            .onEach {
+                val category = when (it.value.type) {
+                    "expense" -> expenseCategoryService.findOrCreate(null, it.value.category).id
+                    "income" -> incomeCategoryService.findOrCreate(null, it.value.category).id
+                    else -> throw IllegalArgumentException("Unknown category type: ${it.value.type}")
+                }
+                categoryMappingRepository.save(CategoryMapping(
+                    id = null,
+                    parser = "TBC",
+                    pattern = it.key.description.pattern,
+                    categoryType = it.value.type,
+                    category = category!!
+                ))
+            }
+    }
 
     fun list(filter: CategoryMappingFilter): CategoryMappingPage {
         var query = Criteria.where("").isEqualTo("")
@@ -48,8 +75,7 @@ class CategoryMappingService(
         filter.parser?.let { value -> and(CategoryMapping::parser.name).isEqualTo(value) } ?: this
 
     private fun Criteria.categoryCondition(filter: CategoryMappingFilter): Criteria =
-        if (filter.category.isEmpty()) this
-        else and(CategoryMapping::category.name).inValues(filter.category)
+        filter.category?.let { value -> and(CategoryMapping::category.name).isEqualTo(value) } ?: this
 
     fun byId(id: String): CategoryMappingRecord = categoryMappingRepository.find(id).toRecord()
 

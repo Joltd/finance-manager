@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.importexport.controller
 
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryFilter
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryPage
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.service.ImportDataService
 import com.evgenltd.financemanager.reference.record.Reference
@@ -34,6 +35,12 @@ class ImportDataController(
 
     @GetMapping("/import-data/{id}")
     fun byId(@PathVariable id: String): ImportDataRecord = importDataService.byId(id)
+
+    @PatchMapping("/import-data/{id}/entry")
+    fun entryUpdate(
+        @PathVariable("id") id: String,
+        @RequestBody request: ImportDataEntryUpdateRequest
+    ) = importDataService.entryUpdate(id, request)
 
     @DeleteMapping("/import-data/{id}")
     fun delete(@PathVariable id: String) = importDataService.delete(id)

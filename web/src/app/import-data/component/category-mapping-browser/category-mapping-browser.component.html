@@ -19,6 +19,7 @@
     <mat-form-field>
       <mat-label>Categories</mat-label>
       <mat-select formControlName="category">
+        <mat-option [value]="null">Nothing</mat-option>
         <mat-optgroup label="Expenses">
           <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
         </mat-optgroup>
@@ -26,7 +27,6 @@
           <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
         </mat-optgroup>
       </mat-select>
-<!--      <button matSuffix mat-icon-button (click)="toggleAllCategories()"><mat-icon>checklist</mat-icon></button>-->
     </mat-form-field>
   </form>
 

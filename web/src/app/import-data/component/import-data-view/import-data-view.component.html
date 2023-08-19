@@ -1,74 +1,144 @@
-<mat-card class="entries">
-  <mat-action-list>
-    <button mat-list-item *ngFor="let entry of page.entries" (click)="viewEntry(entry)">
-      <document-label *ngIf="entry.suggestedDocument != null" [document]="entry.suggestedDocument"></document-label>
-      <ng-container *ngIf="entry.suggestedDocument == null">
-        <div matListItemLine>{{entry.parsedEntry.date}}</div>
-        <div matListItemLine>{{entry.parsedEntry.description}}</div>
-      </ng-container>
-    </button>
-  </mat-action-list>
-  <mat-paginator [hidePageSize]="true"
-                 [pageSize]="10"
-                 [pageIndex]="page.page"
-                 [length]="page.total"
-                 (page)="onPage($event)"></mat-paginator>
-</mat-card>
+<div class="import-view" *ngIf="suggestedDocument == null && page.entries.length > 0">
 
-<div class="view" *ngIf="entry != null">
-
-  <mat-card *ngIf="entry.preparationError">
-    <mat-card-content>
-      <mat-icon>warning</mat-icon>
-      {{entry.preparationError}}
-    </mat-card-content>
+  <mat-card class="entries">
+    <mat-tab-group dynamicHeight>
+      <mat-tab label="Entries">
+        <div class="entries-tab-content">
+          <mat-action-list>
+            <button mat-list-item *ngFor="let entry of page.entries" (click)="viewEntry(entry)">
+              <document-label *ngIf="entry.suggestedDocument != null" [document]="entry.suggestedDocument"></document-label>
+              <mat-icon matListItemIcon *ngIf="entry.suggestedDocument == null">question_mark</mat-icon>
+              <div *ngIf="entry.suggestedDocument == null">{{entry.parsedEntry.date}}</div>
+              <div *ngIf="entry.suggestedDocument == null">{{entry.parsedEntry.description}}</div>
+            </button>
+          </mat-action-list>
+          <mat-paginator [hidePageSize]="true"
+                         [pageSize]="10"
+                         [pageIndex]="page.page"
+                         [length]="page.total"
+                         (page)="onPage($event)"></mat-paginator>
+        </div>
+      </mat-tab>
+      <mat-tab label="Filter">
+        <form class="filter-tab-form" [formGroup]="entriesFilter">
+          <mat-slide-toggle formControlName="preparationResult">Prepared</mat-slide-toggle>
+          <mat-form-field>
+            <mat-label>Preparation result</mat-label>
+            <mat-select>
+              <mat-option [value]="null">Nothing</mat-option>
+              <mat-option [value]="false">Not prepared</mat-option>
+              <mat-option [value]="true">Prepared</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field formControlName="option">
+            <mat-label>Option</mat-label>
+            <mat-select>
+              <mat-option [value]="null">Nothing</mat-option>
+              <mat-option [value]="'NONE'">None</mat-option>
+              <mat-option [value]="'SKIP'">Skip</mat-option>
+              <mat-option [value]="'CREATE_NEW'">Add</mat-option>
+              <mat-option [value]="'REPLACE'">Replace</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field formControlName="importResult">
+            <mat-label>Import result</mat-label>
+            <mat-option [value]="null">Nothing</mat-option>
+            <mat-option [value]="'NOT_IMPORTED'">Not imported</mat-option>
+            <mat-option [value]="'DONE'">Done</mat-option>
+            <mat-option [value]="'FAILED'">Failed</mat-option>
+          </mat-form-field>
+        </form>
+      </mat-tab>
+    </mat-tab-group>
   </mat-card>
 
-  <mat-card *ngIf="entry.importError">
-    <mat-card-content>
-      <mat-icon>warning</mat-icon>
-      {{entry.importError}}
-    </mat-card-content>
-  </mat-card>
+  <div class="view" *ngIf="entry != null">
 
-  <mat-card>
-    <mat-card-content>
-      <document-label *ngIf="entry.suggestedDocument" [document]="entry.suggestedDocument"></document-label>
-      <div *ngIf="entry.suggestedDocument == null">No suggestion</div>
-      <button mat-button (click)="changeSuggestedDocument(entry)">Change</button>
-      <mat-button-toggle-group *ngIf="entry.suggestedDocument" [(ngModel)]="entry.option">
-        <mat-button-toggle value="NONE">None</mat-button-toggle>
-        <mat-button-toggle value="SKIP">Skip</mat-button-toggle>
-        <mat-button-toggle value="CREATE_NEW">Add</mat-button-toggle>
-        <mat-button-toggle value="REPLACE">Replace</mat-button-toggle>
-      </mat-button-toggle-group>
-    </mat-card-content>
-  </mat-card>
+    <mat-card class="error" *ngIf="entry.preparationError">
+      <mat-card-content>
+        <mat-icon>warning</mat-icon>
+        {{entry.preparationError}}
+      </mat-card-content>
+    </mat-card>
 
-  <mat-card>
-    <mat-card-content>
-      <span>Type: {{entry.parsedEntry.type}}</span>
-      <span>Date: {{entry.parsedEntry.date}}</span>
-      <span>Description: {{entry.parsedEntry.description}}</span>
-      <span>Amount: <amount-label [amount]="entry.parsedEntry.amount"></amount-label></span>
-      <span>Amount from: <amount-label [amount]="entry.parsedEntry.amountFrom"></amount-label></span>
-      <span>Amount to: <amount-label [amount]="entry.parsedEntry.amountTo"></amount-label></span>
-      <div *ngFor="let row of entry.parsedEntry.rawEntries">{{row}}</div>
-    </mat-card-content>
-  </mat-card>
+    <mat-card class="error" *ngIf="entry.importError">
+      <mat-card-content>
+        <mat-icon>warning</mat-icon>
+        {{entry.importError}}
+      </mat-card-content>
+    </mat-card>
 
-  <mat-card *ngIf="entry.existedDocuments.length > 0">
-    <mat-card-content>
-      <document-label [document]="existedDocument" *ngFor="let existedDocument of entry.existedDocuments"></document-label>
-    </mat-card-content>
-  </mat-card>
+    <mat-card class="suggestion">
+      <mat-card-content>
+        <document-label *ngIf="entry.suggestedDocument" [document]="entry.suggestedDocument" (click)="viewSuggestedDocument()"></document-label>
+        <div class="no-suggestion" *ngIf="entry.suggestedDocument == null">No suggestion</div>
+        <button mat-raised-button color="primary" (click)="select.show()">Change</button>
+        <div class="spacer"></div>
+        <mat-button-toggle-group *ngIf="entry.suggestedDocument" [ngModel]="entry.option" (ngModelChange)="changeOption($event)">
+          <mat-button-toggle value="NONE">None</mat-button-toggle>
+          <mat-button-toggle value="SKIP">Skip</mat-button-toggle>
+          <mat-button-toggle value="CREATE_NEW">Add</mat-button-toggle>
+          <mat-button-toggle value="REPLACE">Replace</mat-button-toggle>
+        </mat-button-toggle-group>
+      </mat-card-content>
+    </mat-card>
 
-  <mat-card *ngIf="entry.matchedCategoryMappings.length > 0">
-    <mat-card-content>
-      <div *ngFor="let categoryMapping of entry.matchedCategoryMappings">
-        {{categoryMapping.pattern}} -> {{categoryMapping.categoryName}} ({{categoryMapping.categoryType}})
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <mat-card class="parsed">
+      <mat-card-content>
+        <div class="token-list">
+          <div class="token">
+            <div class="name">Type</div><div class="value">{{entry.parsedEntry.type}}</div>
+          </div>
+          <div class="token">
+            <div class="name">Date</div><div class="value">{{entry.parsedEntry.date}}</div>
+          </div>
+          <div class="token" [matTooltip]="entry.parsedEntry.description">
+            <div class="name">Description</div><div class="value">{{entry.parsedEntry.description}}</div>
+          </div>
+          <div class="token">
+            <div class="name">Amount</div><amount-label class="value" [amount]="entry.parsedEntry.amount"></amount-label>
+          </div>
+          <div class="token">
+            <div class="name">Amount from</div><amount-label class="value" [amount]="entry.parsedEntry.amountFrom"></amount-label>
+          </div>
+          <div class="token">
+            <div class="name">Amount to</div><amount-label class="value" [amount]="entry.parsedEntry.amountTo"></amount-label>
+          </div>
+        </div>
+        <div class="raw-entries">
+          <div class="raw-entry" *ngFor="let row of entry.parsedEntry.rawEntries">{{row}}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
+    <div class="description-group">
+      <mat-card *ngIf="entry.existedDocuments.length > 0">
+        <mat-card-content>
+          <document-label [document]="existedDocument" *ngFor="let existedDocument of entry.existedDocuments"></document-label>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card *ngIf="entry.matchedCategoryMappings.length > 0">
+        <mat-card-content>
+          <div *ngFor="let categoryMapping of entry.matchedCategoryMappings">
+            <category-mapping-label [categoryMapping]="categoryMapping"></category-mapping-label>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
 </div>
+
+<document-view class="suggested-document-view"
+               *ngIf="suggestedDocument != null"
+               [document]="suggestedDocument.value"
+               [type]="suggestedDocument.type"
+               (onSave)="saveSuggestedDocument($event)"
+               (onClose)="closeSuggestedDocument()"></document-view>
+
+<entry-select #select (select)="newSuggestedDocument($event)">
+  <entry-item [value]="'expense'">Expense</entry-item>
+  <entry-item [value]="'income'">Income</entry-item>
+  <entry-item [value]="'exchange'">Exchange</entry-item>
+</entry-select>

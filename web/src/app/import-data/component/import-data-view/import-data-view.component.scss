@@ -1,55 +1,136 @@
 :host {
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+  justify-content: center;
+}
+
+.import-view {
   display: grid;
   height: 100%;
   grid-template-columns: 20em 1fr;
   grid-gap: 1em;
 }
-//
-//.header {
-//  mat-card-header {
-//    padding: 16px;
-//    display: grid;
-//    grid-auto-flow: column;
-//    grid-template-columns: 1fr;
-//    align-items: center;
-//  }
-//}
+
+.suggested-document-view {
+  display: grid;
+  width: 30em;
+}
 
 .entries {
-  display: grid;
-  grid-template-rows: 1fr min-content;
-  height: 100%;
   overflow: hidden;
 
-  mat-action-list {
+  mat-tab-group {
+    overflow: hidden;
+  }
+
+  .entries-tab-content {
+    display: grid;
+    grid-template-rows: 1fr min-content;
+    overflow: hidden;
     height: 100%;
+  }
+
+  mat-action-list {
     overflow-y: auto;
+
+    .mdc-list-item.mdc-list-item--with-one-line {
+      height: 4em;
+    }
+  }
+
+  .filter-tab-form {
+    display: grid;
+    gap: 1em;
+    padding: 1em;
+    justify-items: left;
   }
 }
 
 .view {
-  display: grid;
-  grid-template-rows: min-content min-content;
-  grid-gap: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
   width: 100%;
   overflow: hidden;
 }
 
 .error {
-  mat-card-content {
-    display: grid;
-    grid-template-columns: min-content 1fr;
-    grid-gap: 1em;
+  background-color: #e56353;
+
+  .mat-mdc-card-content {
+    display: flex;
+    flex-direction: row;
     align-items: center;
+    gap: 1em;
   }
 }
 
-.raw {
-  width: 100%;
+.suggestion {
+  .spacer {
+    flex-grow: 1;
+  }
+
+  .mat-mdc-card-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+  }
+
+  .no-suggestion {
+    cursor: default;
+    user-select: none;
+  }
+
+  document-label {
+    cursor: pointer;
+  }
+}
+
+.parsed {
   overflow: hidden;
-  mat-card-content {
-    width: 100%;
-    overflow-x: auto;
+}
+
+.token-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5em;
+
+  .token {
+    display: flex;
+    flex-direction: column;
+    background-color: lightgrey;
+    border-radius: 1.6em;
+    padding: .4em 1em 0.4em 1em;
+
+    .name {
+      font-size: 7px;
+      line-height: 7px;
+    }
+
+    .value {
+      white-space: nowrap;
+      max-width: 10em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+}
+
+.raw-entries {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 2em;
+
+  .raw-entry {
     white-space: nowrap;
   }
+}
+
+.description-group {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
 }

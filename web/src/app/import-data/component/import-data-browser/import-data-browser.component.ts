@@ -40,6 +40,10 @@ export class ImportDataBrowserComponent implements OnInit, OnDestroy {
       .subscribe(result => this.importData = result)
   }
 
+  start() {
+    this.router.navigate(['import-data-start']).then()
+  }
+
   cancel(importData: ImportData) {
     if (importData.status == 'PREPARE_IN_PROGRESS') {
       this.importDataService.cancelPreparation(importData.id)

@@ -41,6 +41,7 @@ export class EntrySelectComponent implements AfterViewInit {
       .subscribe((items: QueryList<EntryItemComponent>) => {
         for (let item of items) {
           item.select.subscribe(value => {
+            this.close()
             this.select.emit(value)
           })
         }
@@ -55,6 +56,11 @@ export class EntrySelectComponent implements AfterViewInit {
     this.ref = this.overlay.create(config)
     this.ref.attach(this.portal)
     this.ref.backdropClick().subscribe(() => this.close())
+  }
+
+  onSelect() {
+    this.close()
+    this.select.emit(null)
   }
 
   close() {

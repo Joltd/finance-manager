@@ -4,11 +4,11 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {Router} from "@angular/router";
 
 @Component({
-  selector: 'import-data-begin',
-  templateUrl: 'import-data-begin.component.html',
-  styleUrls: ['import-data-begin.component.scss']
+  selector: 'import-data-start',
+  templateUrl: 'import-data-start.component.html',
+  styleUrls: ['import-data-start.component.scss']
 })
-export class ImportDataBeginComponent {
+export class ImportDataStartComponent {
 
   form: FormGroup = new FormGroup({
     parser: new FormControl(null, Validators.required),

@@ -1,14 +1,12 @@
 package com.evgenltd.financemanager.importexport.service
 
+import com.evgenltd.financemanager.common.repository.andIsEqual
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.document.service.DocumentService
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryFilter
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryPage
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
-import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.importexport.record.*
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.importexport.service.parser.ImportParser
 import com.evgenltd.financemanager.reference.record.Reference
@@ -35,7 +33,14 @@ class ImportDataService(
     fun list(): List<ImportDataRecord> = importDataRepository.findAll().map { it.toRecord() }
 
     fun entryList(id: String, filter: ImportDataEntryFilter): ImportDataEntryPage {
-        var query = Query().addCriteria(Criteria.where(ImportDataEntry::importData.name).isEqualTo(id))
+        Criteria.where(ImportDataEntry::importData.name).isEqualTo(id)
+
+        var query = Criteria()
+            .and(ImportDataEntry::importData.name).isEqualTo(id)
+            .andIsEqual(ImportDataEntry::preparationResult.name, filter.preparationResult)
+            .andIsEqual(ImportDataEntry::option.name, filter.option)
+            .andIsEqual(ImportDataEntry::importResult.name, filter.importResult)
+            .let { Query.query(it) }
         val count = mongoTemplate.count(query, ImportDataEntry::class.java)
         query = Query().with(PageRequest.of(filter.page, filter.size))
         return ImportDataEntryPage(
@@ -49,12 +54,26 @@ class ImportDataService(
 
     fun byId(id: String): ImportDataRecord = importDataRepository.find(id).toRecord()
 
+    fun entryUpdate(id: String, request: ImportDataEntryUpdateRequest) {
+        val query = Query().addCriteria(Criteria.where(ImportDataEntry::id.name).isEqualTo(request.entryId))
+        val update = Update()
+        request.option?.let { update.set(ImportDataEntry::option.name, it) }
+        request.suggestedDocument?.let {
+            update.set(ImportDataEntry::suggestedDocument.name, documentService.toEntity(it.value))
+        }
+        mongoTemplate.findAndModify(query, update, ImportDataEntry::class.java)
+    }
+
     fun delete(id: String) {
         val query = Criteria().andOperator(
             Criteria.where(ImportData::id.name).isEqualTo(id),
             Criteria.where(ImportData::status.name).inValues(ImportDataStatus.NEW, ImportDataStatus.PREPARE_DONE, ImportDataStatus.IMPORT_DONE, ImportDataStatus.FAILED)
         ).let { Query.query(it) }
         mongoTemplate.findAndRemove(query, ImportData::class.java)
+        mongoTemplate.remove(
+            Query.query(Criteria.where(ImportDataEntry::importData.name).isEqualTo(id)),
+            ImportDataEntry::class.java
+        )
     }
 
     fun startPreparation(

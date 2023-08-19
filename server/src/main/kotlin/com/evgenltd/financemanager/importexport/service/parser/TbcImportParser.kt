@@ -54,7 +54,7 @@ class TbcImportParser : ImportParser {
     }
 
     private fun List<CsvRow>.parseRegularOperations(): List<ImportDataParsedEntry> =
-        filter { it[TRANSACTION_TYPE] == EXCHANGE_OPERATION }
+        filter { it[TRANSACTION_TYPE] != EXCHANGE_OPERATION }
             .map {
                 val amount = fromFractionalString(it[AMOUNT], it[CURRENCY])
                 ImportDataParsedEntry(
@@ -71,7 +71,7 @@ class TbcImportParser : ImportParser {
 
     private companion object {
         const val TRANSACTION_TYPE = "Transaction Type"
-        const val DATE = "\uFEFFDate"
+        const val DATE = "Date"
         const val AMOUNT = "Amount"
         const val CURRENCY = "Currency"
         const val DESCRIPTION = "Description"

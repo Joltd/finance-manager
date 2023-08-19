@@ -38,9 +38,6 @@ export class DocumentBrowserComponent implements AfterViewInit {
         this.referenceService.list('/income/reference')
           .subscribe(result => {
             this.incomeCategories = result
-            if (this.settings().value.categories.length == 0) {
-              this.selectAllCategories()
-            }
           })
       })
 
