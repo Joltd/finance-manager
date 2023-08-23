@@ -11,7 +11,6 @@ import {SettingsService} from "./settings/service/settings.service";
 })
 export class AppComponent {
 
-  version: string = environment.version
   loading: boolean = false
   wide: boolean = false
 

@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.report.record
 
 import com.evgenltd.financemanager.common.util.Amount
+import java.util.UUID
 
 data class DashboardRecord(
     val funds: List<FundRecord>,
@@ -9,7 +10,7 @@ data class DashboardRecord(
 )
 
 data class FundRecord(
-    val account: String,
+    val account: UUID,
     val amount: Amount,
     val commonAmount: Amount
 )

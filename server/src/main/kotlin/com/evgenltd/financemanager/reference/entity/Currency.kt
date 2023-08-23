@@ -4,8 +4,8 @@ import jakarta.persistence.*
 import java.util.UUID
 
 @Entity
-@Table(name = "accounts")
-class Account(
+@Table(name = "currencies")
+class Currency(
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -13,15 +13,6 @@ class Account(
 
     var name: String,
 
-    @Enumerated(EnumType.STRING)
-    var type: AccountType,
-
-    var deleted: Boolean = false,
+    var crypto: Boolean,
 
 )
-
-enum class AccountType {
-    ACCOUNT,
-    EXPENSE,
-    INCOME,
-}

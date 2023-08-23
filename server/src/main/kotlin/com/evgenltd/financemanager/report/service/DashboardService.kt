@@ -3,14 +3,12 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.reference.service.ReferenceService
 import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.report.record.FundRecord
-import com.evgenltd.financemanager.transaction.entity.Direction
-import com.evgenltd.financemanager.transaction.entity.Transaction
-import com.evgenltd.financemanager.transaction.service.TransactionService
+import com.evgenltd.financemanager.operation.entity.TransactionType
+import com.evgenltd.financemanager.operation.entity.Transaction
+import com.evgenltd.financemanager.operation.service.TransactionService
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
@@ -24,7 +22,7 @@ class DashboardService(
         val secondCurrency = "RUB"
 
         val funds = transactionService.findAll()
-            .groupBy { it.account to it.amount.currency }
+            .groupBy { it.account.id!! to it.amount.currency }
             .map { (accountCurrency, transactions) ->
                 val amount = transactions.map { it.amountWithDirection() }.reduce { acc, amount -> acc + amount }
                 val commonAmount = exchangeRateService.rate(LocalDate.now(), amount.currency, firstCurrency) * amount.toBigDecimal()
@@ -50,6 +48,6 @@ class DashboardService(
         )
     }
 
-    private fun Transaction.amountWithDirection(): Amount = if (direction == Direction.OUT) -amount else amount
+    private fun Transaction.amountWithDirection(): Amount = if (type == TransactionType.OUT) -amount else amount
 
 }

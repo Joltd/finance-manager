@@ -5,14 +5,14 @@ import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class AccountService(private val accountRepository: AccountRepository) {
 
-    fun listReference(mask: String? = null, id: String? = null): List<Reference> {
+    fun listReference(mask: String? = null, id: UUID? = null): List<Reference> {
         val list = if (mask?.isNotEmpty() == true) {
             accountRepository.findByNameLike(mask)
         } else if (id != null) {
@@ -25,11 +25,9 @@ class AccountService(private val accountRepository: AccountRepository) {
         return list.map { Reference(it.id!!, it.name, it.deleted) }
     }
 
-    fun list(): List<AccountRecord> =
-            accountRepository.findAll()
-                    .map { it.toRecord() }
+    fun list(): List<AccountRecord> = accountRepository.findAll().map { it.toRecord() }
 
-    fun byId(id: String): AccountRecord = accountRepository.find(id).toRecord()
+    fun byId(id: UUID): AccountRecord = accountRepository.find(id).toRecord()
 
     @Transactional
     fun update(record: AccountRecord) {
@@ -37,25 +35,23 @@ class AccountService(private val accountRepository: AccountRepository) {
         accountRepository.save(entity)
     }
 
-    fun delete(id: String) = accountRepository.deleteById(id)
-
-    fun findOrCreate(id: String?, name: String?): Account = id
-        ?.let { accountRepository.findByIdOrNull(it) }
-        ?: name?.let { accountRepository.findByName(it) }
-        ?: name?.let { accountRepository.save(Account(null, it)) }
-        ?: throw IllegalArgumentException("Id or Name should be specified")
-
-    fun name(id: String): String = accountRepository.findByIdOrNull(id)?.name ?: id
+    @Transactional
+    fun delete(id: UUID) {
+        val account = accountRepository.findAndLock(id) ?: return
+        account.deleted = true
+    }
 
     private fun Account.toRecord(): AccountRecord = AccountRecord(
         id = id,
         name = name,
+        type = type,
         deleted = deleted
     )
 
     private fun AccountRecord.toEntity(): Account = Account(
         id = id,
         name = name,
+        type = type,
         deleted = deleted
     )
     

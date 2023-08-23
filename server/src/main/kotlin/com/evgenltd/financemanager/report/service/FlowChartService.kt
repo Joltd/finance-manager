@@ -6,8 +6,8 @@ import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.report.record.FlowChartEntryRecord
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
-import com.evgenltd.financemanager.transaction.entity.Transaction
-import com.evgenltd.financemanager.transaction.service.TransactionService
+import com.evgenltd.financemanager.operation.entity.Transaction
+import com.evgenltd.financemanager.operation.service.TransactionService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -20,17 +20,16 @@ class FlowChartService(
 
     fun load(settings: FlowChartSettingsRecord): FlowChartRecord {
         val entries = transactionService.findTransactions(settings.dateFrom, settings.dateTo)
-            .filter { settings.type == null || it.direction == settings.type }
-            .filter { it.incomeCategory in settings.categories || it.expenseCategory in settings.categories }
+            .filter { settings.type == null || it.type == settings.type }
+            .filter { it.account.id in settings.categories }
             .map { it.toEntry(settings.commonCurrency) }
         return FlowChartRecord(entries)
     }
 
     private fun Transaction.toEntry(commonCurrency: String): FlowChartEntryRecord = FlowChartEntryRecord(
         date = date,
-        type = direction,
-        category = incomeCategory ?: expenseCategory ?: throw IllegalStateException("Should be only expense or income"),
-        account = account,
+        type = type,
+        category = account.id!!,
         amount = amount,
         commonAmount = amount.convertTo(date, commonCurrency)
     )

@@ -1,7 +1,9 @@
 package com.evgenltd.financemanager.common.util
 
+import jakarta.persistence.Embeddable
 import java.math.BigDecimal
 
+@Embeddable
 data class Amount(val value: Long, val currency: String) {
 
     operator fun unaryPlus(): Amount = this

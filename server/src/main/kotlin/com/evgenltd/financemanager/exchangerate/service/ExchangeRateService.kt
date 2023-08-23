@@ -7,11 +7,11 @@ import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepositor
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
-import javax.annotation.PostConstruct
 
 @Service
 class ExchangeRateService(
@@ -19,20 +19,20 @@ class ExchangeRateService(
     private val exchangeRateProviders: List<ExchangeRateProvider>
 ) {
 
-    @PostConstruct
-    fun postConstruct() {
-        if (exchangeRateRepository.findAll().isNotEmpty()) {
-            return
-        }
-
-        val mapper = jacksonObjectMapper()
-        mapper.registerModule(JavaTimeModule())
-        val ratesFile = {}.javaClass.getResource("/rates.json")
-        val rates = mapper.readValue<List<ExchangeRateRecord>>(ratesFile)
-        for (rate in rates) {
-            update(rate)
-        }
-    }
+//    @PostConstruct
+//    fun postConstruct() {
+//        if (exchangeRateRepository.findAll().isNotEmpty()) {
+//            return
+//        }
+//
+//        val mapper = jacksonObjectMapper()
+//        mapper.registerModule(JavaTimeModule())
+//        val ratesFile = {}.javaClass.getResource("/rates.json")
+//        val rates = mapper.readValue<List<ExchangeRateRecord>>(ratesFile)
+//        for (rate in rates) {
+//            update(rate)
+//        }
+//    }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }
 
