@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.CrudRepository
@@ -13,15 +14,24 @@ import java.time.LocalDate
 
 typealias GetPath<T,E> = Root<E>.() -> Path<T>
 
-typealias Condition<E> = (Root<E>, CriteriaQuery<*>, CriteriaBuilder) -> Predicate
+typealias Condition<E> = (Root<E>, CriteriaQuery<*>, CriteriaBuilder) -> Predicate?
+
+fun <E> emptyCondition(): Condition<E> = { _, _, _ -> null }
 
 inline fun <reified T,ID> CrudRepository<T, ID>.find(id: ID): T = findByIdOrNull(id)
     ?: throw IllegalArgumentException("${T::class.java.simpleName} [$id] not found")
 
-inline fun <T> JpaSpecificationExecutor<T>.findAll(
+inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
+    crossinline block: () -> Condition<T>
+): List<T> = findAll { root, query, cb ->
+    val condition = block()
+    condition(root, query, cb)
+}
+
+inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
     pageable: Pageable,
     crossinline block: () -> Condition<T>
-) = findAll(
+): Page<T> = findAll(
     { root, query, cb ->
         root.get<LocalDate>("").`in`(listOf(LocalDate.now()))
         val condition = block()
@@ -52,6 +62,10 @@ private inline fun <T : Comparable<T>, E> compare(
 }
 
 infix fun <T : Comparable<T>, E> GetPath<T,E>.eq(value: T?): Condition<E> = compare(this, value, CriteriaBuilder::equal)
+
+infix fun <T : Comparable<T>, E> GetPath<T,E>.notEq(value: T?): Condition<E> = compare(this, value, CriteriaBuilder::notEqual)
+
+infix fun <E> GetPath<String,E>.like(value: String?): Condition<E> = compare(this, value, CriteriaBuilder::like)
 
 infix fun <T : Comparable<T>, E> GetPath<T,E>.gte(value: T?): Condition<E> = compare(this, value, CriteriaBuilder::greaterThanOrEqualTo)
 

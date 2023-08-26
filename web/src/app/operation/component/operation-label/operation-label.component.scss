@@ -1,0 +1,59 @@
+:host {
+  align-items: center;
+  display: flex;
+  gap: 1em;
+  cursor: default;
+  user-select: none;
+  min-width: 16em;
+}
+
+:host.disabled {
+  filter: grayscale(1);
+}
+
+.marker {
+  min-width: .2em;
+  min-height: 3em;
+  border-radius: .2em;
+}
+
+.income {
+  background-color: #66bb6a;
+}
+
+.expense {
+  background-color: #ef5350;
+}
+
+.exchange {
+  background-color: #1e88e5;
+}
+
+.body {
+  display: grid;
+  grid-template-areas:
+    "amount-from arrow-icon amount-to"
+    "account-from arrow-icon account-to";
+}
+
+.amount-from {
+  grid-area: amount-from;
+}
+
+.amount-to {
+  grid-area: amount-to;
+}
+
+.arrow-icon {
+  grid-area: arrow-icon;
+  min-width: 1em;
+  min-height: 1em;
+}
+
+.account-from {
+  grid-area: account-from;
+}
+
+.account-to {
+  grid-area: account-to;
+}

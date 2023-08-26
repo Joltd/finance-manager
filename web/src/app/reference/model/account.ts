@@ -1,5 +1,6 @@
-export class Account {
-  id!: string
-  name!: string
-  deleted!: string
+export interface Account {
+  id: string | null
+  name: string
+  type: 'ACCOUNT' | 'EXPENSE' | 'INCOME'
+  deleted: boolean
 }

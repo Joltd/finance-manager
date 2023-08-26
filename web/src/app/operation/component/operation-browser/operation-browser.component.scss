@@ -1,0 +1,13 @@
+:host {
+  display: grid;
+  grid-gap: 1em;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.mdc-list-item.mdc-list-item--with-one-line {
+  height: 4em;
+}

@@ -1,0 +1,1 @@
+alter table operations add column description varchar(1024) not null;

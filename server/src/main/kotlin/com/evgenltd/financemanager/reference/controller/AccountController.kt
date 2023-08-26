@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.reference.controller
 
+import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.service.AccountService
@@ -13,9 +14,10 @@ class AccountController(
 
     @GetMapping("/account/reference")
     fun listReference(
-            @RequestParam("mask", required = false) mask: String?,
-            @RequestParam("id", required = false) id: UUID?
-    ): List<Reference> = accountService.listReference(mask, id)
+        @RequestParam("mask", required = false) mask: String?,
+        @RequestParam("id", required = false) id: UUID?,
+        @RequestParam("types", required = false) types: List<AccountType>,
+    ): List<Reference> = accountService.listReference(mask, id, types)
 
     @GetMapping("/account")
     fun list(): List<AccountRecord> = accountService.list()

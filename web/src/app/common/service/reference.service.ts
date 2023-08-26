@@ -16,7 +16,7 @@ export class ReferenceService {
     if (!api) {
       throw 'API URL is not specified'
     }
-    return this.http.get<Reference[]>(api, TypeUtils.of(Reference))
+    return this.http.get<Reference[]>(api)
       .pipe(map(result => result.sort((a,b) => a.name.localeCompare(b.name))))
   }
 

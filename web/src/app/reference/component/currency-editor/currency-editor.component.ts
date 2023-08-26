@@ -1,25 +1,24 @@
 import {Component, OnDestroy, OnInit} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {ActivatedRoute, Router} from "@angular/router";
-import {AccountService} from "../../service/account.service";
+import {CurrencyService} from "../../service/currency.service";
 import {ToolbarService} from "../../../common/service/toolbar.service";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
-  selector: 'account-editor',
-  templateUrl: 'account-editor.component.html',
-  styleUrls: ['account-editor.component.scss']
+  selector: 'currency-editor',
+  templateUrl: 'currency-editor.component.html',
+  styleUrls: ['currency-editor.component.scss']
 })
-export class AccountEditorComponent implements OnInit,OnDestroy {
+export class CurrencyEditorComponent implements OnInit,OnDestroy {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
-    type: new FormControl(null, Validators.required),
     name: new FormControl(null, Validators.required),
-    deleted: new FormControl(false)
+    crypto: new FormControl(false)
   })
 
   constructor(
-    private accountService: AccountService,
+    private currencyService: CurrencyService,
     private toolbarService: ToolbarService,
     private activatedRoute: ActivatedRoute,
     private router: Router
@@ -34,8 +33,8 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(): void {
-    this.toolbarService.setup("Account", [
-      { name: 'save', icon: 'done', action: () => this.save() },
+    this.toolbarService.setup("Currency", [
+      { name: 'done', icon: 'done', action: () => this.save() },
       { name: 'close', icon: 'close', action: () => this.close() },
     ])
   }
@@ -45,19 +44,19 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
   }
 
   private load() {
-    this.accountService.byId(this.form.value.id)
+    this.currencyService.byId(this.form.value.id)
       .subscribe(result => {
         this.form.patchValue(result)
       })
   }
 
   private save() {
-    this.accountService.update(this.form.value)
+    this.currencyService.update(this.form.value)
       .subscribe(() => this.close())
   }
 
   private close() {
-    this.router.navigate(['account']).then()
+    this.router.navigate(['currency']).then()
   }
 
 }

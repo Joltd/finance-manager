@@ -1,0 +1,71 @@
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>Filter</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <form [formGroup]="operationService.filter">
+
+    <mat-form-field>
+      <mat-label>From</mat-label>
+      <input formControlName="dateFrom" matInput [matDatepicker]="from" readonly (click)="from.open()">
+      <mat-datepicker touchUi #from></mat-datepicker>
+      <button mat-icon-button matSuffix (click)="operationService.filter.patchValue({dateFrom: null})"><mat-icon>close</mat-icon></button>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>To</mat-label>
+      <input formControlName="dateTo" matInput [matDatepicker]="to" readonly (click)="to.open()">
+      <mat-datepicker touchUi #to></mat-datepicker>
+      <button mat-icon-button matSuffix (click)="operationService.filter.patchValue({dateTo: null})"><mat-icon>close</mat-icon></button>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="null">Nothing</mat-option>
+        <mat-option [value]="'EXPENSE'">Expense</mat-option>
+        <mat-option [value]="'INCOME'">Income</mat-option>
+        <mat-option [value]="'ACCOUNT'">Exchange</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Account</mat-label>
+      <reference-input api="/account/reference?type=ACCOUNT" formControlName="account"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Category</mat-label>
+      <reference-input api="/category/reference?type=EXPENSE&type=INCOME" formControlName="category"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Currency</mat-label>
+      <currency-input formControlName="currency"></currency-input>
+    </mat-form-field>
+
+  </form>
+
+  <mat-paginator [hidePageSize]="true"
+                 [showFirstLastButtons]="true"
+                 [pageIndex]="operationService.operationPage.page"
+                 [length]="operationService.operationPage.total"
+                 (page)="onPage($event)"></mat-paginator>
+</mat-expansion-panel>
+
+<mat-card *ngIf="operationService.operationPage.operations.length > 0">
+  <mat-action-list>
+    <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let operation of operationService.operationPage.operations">
+      <operation-label [operation]="operation"></operation-label>
+      <mat-menu #menu>
+        <button mat-menu-item (click)="copy(operation.id!)">Copy</button>
+        <button mat-menu-item (click)="edit(operation.id!)">Edit</button>
+        <button mat-menu-item (click)="delete(operation.id!)">Delete</button>
+      </mat-menu>
+    </button>
+  </mat-action-list>
+</mat-card>
+
+<button class="fab" mat-fab (click)="add()">
+  <mat-icon>add</mat-icon>
+</button>

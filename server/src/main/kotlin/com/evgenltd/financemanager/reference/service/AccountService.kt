@@ -1,10 +1,17 @@
 package com.evgenltd.financemanager.reference.service
 
+import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.repository.findAllByCondition
+import com.evgenltd.financemanager.common.repository.inList
+import com.evgenltd.financemanager.common.repository.like
 import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.reference.record.toRecord
 import com.evgenltd.financemanager.reference.repository.AccountRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -12,18 +19,14 @@ import java.util.UUID
 @Service
 class AccountService(private val accountRepository: AccountRepository) {
 
-    fun listReference(mask: String? = null, id: UUID? = null): List<Reference> {
-        val list = if (mask?.isNotEmpty() == true) {
-            accountRepository.findByNameLike(mask)
-        } else if (id != null) {
-            accountRepository.findById(id)
-                    .map { listOf(it) }
-                    .orElse(emptyList())
+    fun listReference(mask: String? = null, id: UUID? = null, types: List<AccountType>): List<Reference> =
+        if (id != null) {
+            accountRepository.findByIdOrNull(id)?.let { listOf(Reference(it.id!!, it.name, it.deleted)) } ?: emptyList()
         } else {
-            accountRepository.findAll()
+            accountRepository.findAllByCondition {
+                (Account.Companion::type inList types) and (Account.Companion::name like mask)
+            }.map { Reference(it.id!!, it.name, it.deleted) }
         }
-        return list.map { Reference(it.id!!, it.name, it.deleted) }
-    }
 
     fun list(): List<AccountRecord> = accountRepository.findAll().map { it.toRecord() }
 
@@ -40,13 +43,6 @@ class AccountService(private val accountRepository: AccountRepository) {
         val account = accountRepository.findAndLock(id) ?: return
         account.deleted = true
     }
-
-    private fun Account.toRecord(): AccountRecord = AccountRecord(
-        id = id,
-        name = name,
-        type = type,
-        deleted = deleted
-    )
 
     private fun AccountRecord.toEntity(): Account = Account(
         id = id,

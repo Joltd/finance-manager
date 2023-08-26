@@ -1,22 +1,17 @@
 <mat-toolbar color="primary">
   <button mat-icon-button (click)="left.toggle()"><mat-icon>menu</mat-icon></button>
-  <a class="app-title" href="/finance-manager">Finance Manager</a>
+  <a class="app-title" href="/finance-manager">{{toolbarService.title}}</a>
+  <button mat-icon-button *ngFor="let command of toolbarService.commands" (click)="command.action()"><mat-icon>{{command.icon}}</mat-icon></button>
 </mat-toolbar>
 <mat-sidenav-container>
   <mat-sidenav #left position="start" class="left-side" [class.left-side-narrow]="wide">
     <mat-nav-list>
-      <a mat-list-item [routerLink]="['dashboard']" (click)="left.close()">Dashboard</a>
-      <a mat-list-item [routerLink]="['flow-chart']" (click)="left.close()">Flow chart</a>
-      <mat-divider></mat-divider>
+      <a mat-list-item [routerLink]="['currency']" (click)="left.close()">Currency</a>
       <a mat-list-item [routerLink]="['account']" (click)="left.close()">Account</a>
-      <a mat-list-item [routerLink]="['expense']" (click)="left.close()">Expense</a>
-      <a mat-list-item [routerLink]="['income']" (click)="left.close()">Income</a>
       <mat-divider></mat-divider>
-      <a mat-list-item [routerLink]="['document']" (click)="left.close()">Document</a>
-      <a mat-list-item [routerLink]="['import-data']" (click)="left.close()">Import</a>
-      <a mat-list-item [routerLink]="['export-data']" (click)="left.close()">Export</a>
+      <a mat-list-item [routerLink]="['operation']" (click)="left.close()">Operation</a>
       <mat-divider></mat-divider>
-      <a mat-list-item [routerLink]="['settings']" (click)="left.close()">Settings</a>
+      <a mat-list-item [routerLink]="['setting']" (click)="left.close()">Settings</a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content class="content" [class.content-wide]="wide">

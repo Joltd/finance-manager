@@ -1,0 +1,74 @@
+<mat-card>
+
+  <form [formGroup]="exchange" *ngIf="type == 'EXCHANGE'">
+
+    <mat-form-field>
+      <mat-label>Date</mat-label>
+      <input formControlName="date" matInput [matDatepicker]="picker" readonly (click)="picker.open()">
+      <mat-datepicker touchUi #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>From</mat-label>
+      <reference-input api="/account/reference" formControlName="accountFrom"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Amount</mat-label>
+      <amount-input formControlName="amountFrom"></amount-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>To</mat-label>
+      <reference-input api="/account/reference" formControlName="accountTo"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Amount</mat-label>
+      <amount-input formControlName="amountTo"></amount-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea matInput
+                formControlName="description"
+                cdkTextareaAutosize
+                #autosize="cdkTextareaAutosize"></textarea>
+    </mat-form-field>
+
+  </form>
+
+
+  <form [formGroup]="expenseIncome" *ngIf="type != 'EXCHANGE'">
+
+    <mat-form-field>
+      <mat-label>Date</mat-label>
+      <input formControlName="date" matInput [matDatepicker]="picker" readonly (click)="picker.open()">
+      <mat-datepicker touchUi #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Account</mat-label>
+      <reference-input api="/account/reference?type=ACCOUNT" formControlName="account"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Category</mat-label>
+      <reference-input [api]="'/account/reference?type=' + type" formControlName="category"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Amount</mat-label>
+      <amount-input formControlName="amount"></amount-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea matInput
+                formControlName="description"
+                cdkTextareaAutosize
+                #autosize="cdkTextareaAutosize"></textarea>
+    </mat-form-field>
+
+  </form>
+</mat-card>

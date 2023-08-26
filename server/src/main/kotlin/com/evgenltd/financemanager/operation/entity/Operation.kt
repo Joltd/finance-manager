@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.operation.entity
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.persistence.*
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Root
@@ -39,6 +40,8 @@ class Operation(
     @ManyToOne
     @JoinColumn(name = "account_to_id")
     var accountTo: Account,
+
+    var description: String,
 ) {
 
     companion object {
@@ -46,7 +49,15 @@ class Operation(
 
         fun accountFromId(root: Root<Operation>): Path<UUID> = root.get<Account>(Operation::accountFrom.name).get(Account::id.name)
 
+        fun accountFromType(root: Root<Operation>): Path<AccountType> = root.get<Account>(Operation::accountFrom.name).get(Account::type.name)
+
         fun accountToId(root: Root<Operation>): Path<UUID> = root.get<Account>(Operation::accountTo.name).get(Account::id.name)
+
+        fun accountToType(root: Root<Operation>): Path<AccountType> = root.get<Account>(Operation::accountTo.name).get(Account::type.name)
+
+        fun currencyFrom(root: Root<Operation>): Path<String> = root.get<Amount>(Operation::amountFrom.name).get(Amount::currency.name)
+
+        fun currencyTo(root: Root<Operation>): Path<String> = root.get<Amount>(Operation::amountTo.name).get(Amount::currency.name)
     }
 
 }

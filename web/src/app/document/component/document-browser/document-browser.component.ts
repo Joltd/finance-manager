@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, ViewChild} from "@angular/core";
 import {DocumentService} from "../../service/document.service";
 import {Router} from "@angular/router";
 import {FormGroup} from "@angular/forms";
@@ -18,11 +18,7 @@ export class DocumentBrowserComponent implements AfterViewInit {
   @ViewChild('filter')
   filter!: MatExpansionPanel
 
-  types: Reference[] = [
-    new Reference('expense', 'Expense'),
-    new Reference('income', 'Income'),
-    new Reference('exchange', 'Exchange')
-  ]
+  types: Reference[] = []
 
   expenseCategories: Reference[] = []
   incomeCategories: Reference[] = []

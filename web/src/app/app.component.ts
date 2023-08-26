@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
-import {environment} from "../environments/environment";
 import {LoadingService} from "./common/service/loading.service";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {SettingsService} from "./settings/service/settings.service";
+import {ToolbarService} from "./common/service/toolbar.service";
 
 @Component({
   selector: 'app-root',
@@ -17,7 +17,8 @@ export class AppComponent {
   constructor(
     public loadingService: LoadingService,
     private breakpointObserver: BreakpointObserver,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    public toolbarService: ToolbarService,
   ) {
     this.loadingService.onLoading.subscribe(result => {
       setTimeout(() => this.loading = result)
