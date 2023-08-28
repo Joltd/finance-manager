@@ -1,9 +1,15 @@
 package com.evgenltd.financemanager.reference.entity
 
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Root
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "accounts")

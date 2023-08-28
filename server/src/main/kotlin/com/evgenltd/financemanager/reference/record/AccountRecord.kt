@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.reference.record
 
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
-import java.util.UUID
+import java.util.*
 
 data class AccountRecord(
     val id: UUID?,

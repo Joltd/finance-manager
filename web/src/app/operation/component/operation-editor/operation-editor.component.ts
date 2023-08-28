@@ -11,7 +11,7 @@ import {Reference} from "../../../common/model/reference";
 @Component({
   selector: 'operation-editor',
   templateUrl: './operation-editor.component.html',
-  styleUrls: ['./operation-editor.component.css']
+  styleUrls: ['./operation-editor.component.scss']
 })
 export class OperationEditorComponent implements OnInit {
 

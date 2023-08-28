@@ -1,12 +1,10 @@
 package com.evgenltd.financemanager.settings.service
 
 import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.reference.record.toRecord
 import com.evgenltd.financemanager.reference.record.toReference
 import com.evgenltd.financemanager.reference.service.AccountService
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.record.ApplicationSettings
-import com.evgenltd.financemanager.settings.record.`setting-record`
 import com.evgenltd.financemanager.settings.repository.SettingRepository
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value

@@ -1,7 +1,6 @@
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {Dashboard} from "../../model/dashboard";
 import {DashboardService} from "../../service/dashboard.service";
-import {Router} from "@angular/router";
 
 @Component({
   selector: 'dashboard',

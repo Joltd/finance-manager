@@ -8,7 +8,7 @@ import {Account} from "../../../reference/model/account";
 @Component({
   selector: 'operation-view',
   templateUrl: './operation-view.component.html',
-  styleUrls: ['./operation-view.component.css']
+  styleUrls: ['./operation-view.component.scss']
 })
 export class OperationViewComponent implements OnInit, OnDestroy {
 

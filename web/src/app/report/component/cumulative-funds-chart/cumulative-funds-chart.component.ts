@@ -1,12 +1,12 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {MatExpansionPanel} from "@angular/material/expansion";
+import * as echarts from "echarts";
 import {ECharts} from "echarts";
 import {FormControl, FormGroup} from "@angular/forms";
 import {CumulativeFundsChart} from "../../model/cumulative-funds-chart";
 import {CumulativeFundsChartService} from "../../service/cumulative-funds-chart.service";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {Router} from "@angular/router";
-import * as echarts from "echarts";
 import {OperationService} from "../../../operation/service/operation.service";
 
 @Component({

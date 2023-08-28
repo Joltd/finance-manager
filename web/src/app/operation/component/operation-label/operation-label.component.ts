@@ -1,10 +1,10 @@
 import {Component, HostBinding, Input} from "@angular/core";
-import {isExpense, isIncome, isExchange, Operation} from "../../model/operation";
+import {isExchange, isExpense, isIncome, Operation} from "../../model/operation";
 
 @Component({
   selector: 'operation-label',
   templateUrl: './operation-label.component.html',
-  styleUrls: ['./operation-label.component.css']
+  styleUrls: ['./operation-label.component.scss']
 })
 export class OperationLabelComponent {
 

@@ -4,10 +4,9 @@ import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.emptyCondition
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.repository.findAllByCondition
 import com.evgenltd.financemanager.common.repository.gte
 import com.evgenltd.financemanager.common.repository.lt
-import com.evgenltd.financemanager.common.repository.findAllByCondition
-import com.evgenltd.financemanager.common.repository.inList
 import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -22,7 +21,7 @@ import com.evgenltd.financemanager.reference.repository.AccountRepository
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class OperationService(

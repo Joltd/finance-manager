@@ -2,7 +2,6 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {ExchangeRate} from "../model/exchange-rate";
-import {TypeUtils} from "../../common/service/type-utils";
 
 @Injectable({
   providedIn: 'root'
@@ -12,14 +11,14 @@ export class ExchangeRateService {
   constructor(private http: HttpClient) {}
 
   list(): Observable<ExchangeRate[]> {
-    return this.http.get<ExchangeRate[]>('/exchange-rate', TypeUtils.of(ExchangeRate))
+    return this.http.get<ExchangeRate[]>('/exchange-rate')
   }
 
   byId(id: string): Observable<ExchangeRate> {
-    return this.http.get<ExchangeRate>('/exchange-rate/' + id, TypeUtils.of(ExchangeRate))
+    return this.http.get<ExchangeRate>('/exchange-rate/' + id)
   }
 
-  update(record: ExchangeRate): Observable<void> {
+  update(record: any): Observable<void> {
     return this.http.post<void>('/exchange-rate', record)
   }
 

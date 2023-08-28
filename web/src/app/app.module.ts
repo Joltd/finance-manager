@@ -27,6 +27,7 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {ExchangeRateModule} from "./exchangerate/exchange-rate.module";
 import {SettingsModule} from "./settings/settings.module";
+import {OperationModule} from "./operation/operation.modules";
 
 @NgModule({
   declarations: [
@@ -58,7 +59,8 @@ import {SettingsModule} from "./settings/settings.module";
     MatIconModule,
     MatButtonModule,
     ExchangeRateModule,
-    SettingsModule
+    SettingsModule,
+    OperationModule
   ],
   providers: [
     restInterceptorProvider,

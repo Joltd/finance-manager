@@ -10,8 +10,6 @@ import {
 import {Observable, throwError} from "rxjs";
 import {catchError, map} from "rxjs/operators";
 import {ErrorService} from "./error.service";
-import {plainToClass} from "class-transformer";
-import {TypeUtils} from "./type-utils";
 import {environment} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {LoadingService} from "./loading.service";
@@ -59,13 +57,8 @@ export class RestInterceptorService implements HttpInterceptor {
             throw new Error(responseBody.error);
           }
 
-          let type = TypeUtils.get(req)
-          if (!type) {
-            return event
-          }
-
           return event.clone({
-            body: plainToClass(type, responseBody.body)
+            body: responseBody.body
           })
 
         }),

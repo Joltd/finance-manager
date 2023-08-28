@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.exchangerate.record
 
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class ExchangeRateRecord(
     val id: UUID?,

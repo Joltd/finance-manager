@@ -3,7 +3,7 @@ package com.evgenltd.financemanager.reference.service
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class ReferenceService(

@@ -4,11 +4,11 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.report.record.FlowChartRecord
-import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
 import com.evgenltd.financemanager.operation.service.TransactionService
 import com.evgenltd.financemanager.report.record.FLowChartAverageRecord
+import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSeriesRecord
+import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 

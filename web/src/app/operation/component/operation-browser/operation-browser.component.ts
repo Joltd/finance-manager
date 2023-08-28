@@ -1,6 +1,4 @@
 import {Component, OnDestroy, OnInit} from "@angular/core";
-import {FormControl, FormGroup} from "@angular/forms";
-import {OperationPage} from "../../model/operation";
 import {Router} from "@angular/router";
 import {OperationService} from "../../service/operation.service";
 import {PageEvent} from "@angular/material/paginator";

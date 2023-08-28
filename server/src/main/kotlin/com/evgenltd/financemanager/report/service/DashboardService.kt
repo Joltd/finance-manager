@@ -2,8 +2,8 @@ package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.operation.service.TransactionService
+import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.stereotype.Service
 

@@ -3,11 +3,21 @@ package com.evgenltd.financemanager.operation.entity
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
-import jakarta.persistence.*
+import jakarta.persistence.AttributeOverride
+import jakarta.persistence.AttributeOverrides
+import jakarta.persistence.Column
+import jakarta.persistence.Embedded
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Root
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "operations")

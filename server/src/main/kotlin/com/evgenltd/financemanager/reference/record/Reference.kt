@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.reference.record
 
-import java.util.UUID
+import java.util.*
 
 data class Reference(
     val id: UUID,

@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.operation.record
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import java.time.LocalDate
 import java.util.*

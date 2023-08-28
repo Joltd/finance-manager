@@ -1,9 +1,6 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {TypeUtils} from "../../common/service/type-utils";
-import {Settings} from "../model/settings";
 import {Observable} from "rxjs";
-import {map} from "rxjs/operators";
 import {ApplicationSettings} from "../model/application-settings";
 
 @Injectable({

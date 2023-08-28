@@ -4,8 +4,8 @@
       <currency-label [currency]="currency.name"></currency-label>
       <mat-slide-toggle [checked]="currency.crypto" [disabled]="true"></mat-slide-toggle>
       <mat-menu #menu>
-        <button mat-menu-item (click)="edit(currency.id)">Edit</button>
-        <button mat-menu-item (click)="delete(currency.id)">Delete</button>
+        <button mat-menu-item (click)="edit(currency.id!)">Edit</button>
+        <button mat-menu-item (click)="delete(currency.id!)">Delete</button>
       </mat-menu>
     </button>
   </mat-action-list>

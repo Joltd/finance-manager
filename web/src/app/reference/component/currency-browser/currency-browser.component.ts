@@ -6,7 +6,7 @@ import {CurrencyService} from "../../service/currency.service";
 @Component({
   selector: 'currency-browser',
   templateUrl: './currency-browser.component.html',
-  styleUrls: ['./currency-browser.component.css']
+  styleUrls: ['./currency-browser.component.scss']
 })
 export class CurrencyBrowserComponent implements OnInit {
 

@@ -48,6 +48,7 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
   exports: [
     OperationBrowserComponent,
     OperationEditorComponent,
+    OperationViewComponent,
     OperationLabelComponent
   ]
 })

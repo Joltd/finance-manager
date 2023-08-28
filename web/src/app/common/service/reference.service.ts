@@ -1,7 +1,6 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Reference} from "../model/reference";
-import {TypeUtils} from "./type-utils";
 import {map} from "rxjs/operators";
 import {Observable} from "rxjs";
 

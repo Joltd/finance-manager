@@ -3,8 +3,12 @@ import {RouterModule, Routes} from '@angular/router';
 import {DashboardComponent} from "./report/component/dashboard/dashboard.component";
 import {AccountEditorComponent} from "./reference/component/account-editor/account-editor.component";
 import {AccountBrowserComponent} from "./reference/component/account-browser/account-browser.component";
-import {ExchangeRateBrowserComponent} from "./exchangerate/component/exchange-rate-browser/exchange-rate-browser.component";
-import {ExchangeRateEditorComponent} from "./exchangerate/component/exchange-rate-editor/exchange-rate-editor.component";
+import {
+  ExchangeRateBrowserComponent
+} from "./exchangerate/component/exchange-rate-browser/exchange-rate-browser.component";
+import {
+  ExchangeRateEditorComponent
+} from "./exchangerate/component/exchange-rate-editor/exchange-rate-editor.component";
 import {FlowChartComponent} from "./report/component/flow-chart/flow-chart.component";
 import {SettingsEditorComponent} from "./settings/component/settings-editor.component";
 import {OperationBrowserComponent} from "./operation/component/operation-browser/operation-browser.component";

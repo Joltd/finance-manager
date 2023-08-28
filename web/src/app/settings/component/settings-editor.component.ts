@@ -2,8 +2,6 @@ import {Component, OnDestroy, OnInit} from "@angular/core";
 import {SettingsService} from "../service/settings.service";
 import {FormControl, FormGroup} from "@angular/forms";
 import {Settings} from "../model/settings";
-import {COMMA, ENTER} from "@angular/cdk/keycodes";
-import {MatChipInputEvent} from "@angular/material/chips";
 import {ShortMessageService} from "../../common/service/short-message.service";
 import {ToolbarService} from "../../common/service/toolbar.service";
 
