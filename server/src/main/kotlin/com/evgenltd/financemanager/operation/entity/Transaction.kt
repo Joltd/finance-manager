@@ -28,6 +28,10 @@ class Transaction(
     @ManyToOne
     @JoinColumn(name = "operation_id")
     var operation: Operation
-)
+) {
+
+    fun signedAmount(): Amount = if (type == TransactionType.OUT) -amount else amount
+
+}
 
 enum class TransactionType { IN, OUT }

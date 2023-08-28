@@ -49,16 +49,19 @@ data class Amount(val value: Long, val currency: String) {
 
 }
 
-fun Amount.abs(): Amount = Amount(kotlin.math.abs(value), currency)
+fun emptyAmount(currency: String): Amount = Amount(0, currency)
 
 fun BigDecimal.toAmountValue(): Long = movePointRight(4).toLong()
 
-fun fromFractionalString(value: String, currency: String): Amount {
-    return Amount(
-            BigDecimal(value.replace(",",".")).movePointRight(4).toLong(),
-            currency
-    )
-}
+fun BigDecimal.fromFractional(currency: String): Amount = Amount(
+    movePointRight(4).toLong(),
+    currency
+)
+
+fun fromFractionalString(value: String, currency: String): Amount = Amount(
+    BigDecimal(value.replace(",",".")).movePointRight(4).toLong(),
+    currency
+)
 
 fun String.parseAmount(): Amount {
     val parts = this.split(" ")

@@ -1,19 +1,5 @@
-<mat-card>
-  <mat-card-header class="chart-header">
-    <mat-card-title>Flow chart</mat-card-title>
-    <mat-card-subtitle *ngIf="level == 'BY_DATE'">
-      <span class="income">+{{totalIncome}}</span>&nbsp;<span class="expense">-{{totalExpense}}</span>
-    </mat-card-subtitle>
-    <mat-card-subtitle *ngIf="level != 'BY_DATE'">{{total}}</mat-card-subtitle>
-    <button mat-icon-button [hidden]="!isBackAvailable()" (click)="back()"><mat-icon>arrow_back</mat-icon></button>
-    <button mat-icon-button (click)="apply()"><mat-icon>done</mat-icon></button>
-  </mat-card-header>
-</mat-card>
-
-<mat-expansion-panel #filter>
-  <mat-expansion-panel-header>
-    <mat-panel-title>Settings</mat-panel-title>
-  </mat-expansion-panel-header>
+<mat-expansion-panel>
+  <mat-expansion-panel-header>Settings</mat-expansion-panel-header>
 
   <form [formGroup]="settings">
 
@@ -30,15 +16,6 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Type</mat-label>
-      <mat-select formControlName="type">
-        <mat-option [value]="null">Nothing</mat-option>
-        <mat-option [value]="'IN'">Income</mat-option>
-        <mat-option [value]="'OUT'">Expense</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field>
       <mat-label>Categories</mat-label>
       <mat-select formControlName="categories" multiple>
         <mat-optgroup label="Expenses">
@@ -48,22 +25,21 @@
           <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
         </mat-optgroup>
       </mat-select>
-      <button matSuffix mat-icon-button (click)="toggleAllCategories()"><mat-icon>checklist</mat-icon></button>
+      <button matSuffix mat-icon-button (click)="clearCategories()"><mat-icon>close</mat-icon></button>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Currency</mat-label>
-      <mat-select formControlName="commonCurrency">
-        <mat-option [value]="'USD'">USD</mat-option>
-        <mat-option [value]="'RUB'">RUB</mat-option>
-      </mat-select>
+      <currency-input formControlName="currency"></currency-input>
     </mat-form-field>
+
+    <mat-slide-toggle formControlName="total">Total</mat-slide-toggle>
+
+    <mat-slide-toggle formControlName="showAverage">Show average</mat-slide-toggle>
 
   </form>
 </mat-expansion-panel>
 
-<mat-card [class.hidden]="!data">
-  <mat-card-content>
-    <div #chart [style.height]="chartHeight + 'em'"></div>
-  </mat-card-content>
+<mat-card *ngIf="flow?.dates?.length > 0">
+  <div #chart [style.height]="chartHeight + 'em'"></div>
 </mat-card>

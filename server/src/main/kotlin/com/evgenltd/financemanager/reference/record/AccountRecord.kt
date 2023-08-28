@@ -17,3 +17,9 @@ fun Account.toRecord(): AccountRecord = AccountRecord(
     type = type,
     deleted = deleted
 )
+
+fun Account.toReference(): Reference = Reference(
+    id = id!!,
+    name = name,
+    deleted = deleted
+)

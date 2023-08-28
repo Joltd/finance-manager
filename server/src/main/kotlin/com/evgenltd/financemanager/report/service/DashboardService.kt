@@ -1,53 +1,40 @@
 package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.common.util.toAmountValue
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
+import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.report.record.DashboardRecord
-import com.evgenltd.financemanager.report.record.FundRecord
-import com.evgenltd.financemanager.operation.entity.TransactionType
-import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.service.TransactionService
+import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class DashboardService(
     private val transactionService: TransactionService,
-    private val exchangeRateService: ExchangeRateService
+    private val settingService: SettingService
 ) {
 
     fun load(): DashboardRecord {
-        val firstCurrency = "USD"
-        val secondCurrency = "RUB"
 
-        val funds = transactionService.findAll()
-            .groupBy { it.account.id!! to it.amount.currency }
-            .map { (accountCurrency, transactions) ->
-                val amount = transactions.map { it.amountWithDirection() }.reduce { acc, amount -> acc + amount }
-                val commonAmount = exchangeRateService.rate(LocalDate.now(), amount.currency, firstCurrency) * amount.toBigDecimal()
-                FundRecord(
-                    account = accountCurrency.first,
-                    amount = amount,
-                    commonAmount = Amount(commonAmount.toAmountValue(), firstCurrency)
-                )
+        val cashFunds = transactionService.findCashTransactions()
+            .groupingBy { it.amount.currency }
+            .aggregate { currency, accumulator: Amount?, transaction, _ ->
+                (accumulator ?: Amount(0, currency)) + transaction.signedAmount()
             }
-            .filter { it.commonAmount.toBigDecimal().signum() > 0 }
+            .toMutableMap()
 
-        val usdTotal = funds.sumOf { it.commonAmount.toBigDecimal() }
-
-        val rubTotal = funds.sumOf {
-            val rate = exchangeRateService.rate(LocalDate.now(), it.amount.currency, secondCurrency)
-            it.amount.toBigDecimal() * rate
-        }
+        val defaultCurrency = settingService.operationDefaultCurrency() ?: MAIN_CURRENCY
+        val defaultCurrencyAmount = cashFunds.remove(defaultCurrency) ?: emptyAmount(defaultCurrency)
+        val usdCashAmount = cashFunds.remove(MAIN_CURRENCY) ?: emptyAmount(MAIN_CURRENCY)
 
         return DashboardRecord(
-            funds = funds,
-            fundsTotal = Amount(usdTotal.toAmountValue(), firstCurrency),
-            fundsTotalSecondary = Amount(rubTotal.toAmountValue(), secondCurrency)
+            defaultCurrencyAmount = defaultCurrencyAmount,
+            usdCashAmount = usdCashAmount.takeIf { defaultCurrencyAmount.currency != MAIN_CURRENCY },
+            cashFounds = cashFunds.values.toList().sortedBy { it.currency }
         )
     }
 
-    private fun Transaction.amountWithDirection(): Amount = if (type == TransactionType.OUT) -amount else amount
+    private companion object {
+        const val MAIN_CURRENCY = "USD"
+    }
 
 }

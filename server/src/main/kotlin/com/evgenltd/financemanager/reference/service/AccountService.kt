@@ -10,6 +10,7 @@ import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.record.toRecord
+import com.evgenltd.financemanager.reference.record.toReference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -21,16 +22,18 @@ class AccountService(private val accountRepository: AccountRepository) {
 
     fun listReference(mask: String? = null, id: UUID? = null, types: List<AccountType>): List<Reference> =
         if (id != null) {
-            accountRepository.findByIdOrNull(id)?.let { listOf(Reference(it.id!!, it.name, it.deleted)) } ?: emptyList()
+            accountRepository.findByIdOrNull(id)?.let { listOf(it.toReference()) } ?: emptyList()
         } else {
             accountRepository.findAllByCondition {
                 (Account.Companion::type inList types) and (Account.Companion::name like mask)
-            }.map { Reference(it.id!!, it.name, it.deleted) }
+            }.map { it.toReference() }
         }
 
     fun list(): List<AccountRecord> = accountRepository.findAll().map { it.toRecord() }
 
     fun byId(id: UUID): AccountRecord = accountRepository.find(id).toRecord()
+
+    fun byIdOrNull(id: UUID): Account? = accountRepository.findByIdOrNull(id)
 
     @Transactional
     fun update(record: AccountRecord) {

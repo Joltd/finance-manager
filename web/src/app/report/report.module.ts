@@ -14,11 +14,16 @@ import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {CurrentFundsChartComponent} from "./component/current-fund-chart/current-funds-chart.component";
+import {CumulativeFundsChartComponent} from "./component/cumulative-funds-chart/cumulative-funds-chart.component";
+import {RouterLink} from "@angular/router";
 
 @NgModule({
   declarations: [
     DashboardComponent,
-    FlowChartComponent
+    FlowChartComponent,
+    CurrentFundsChartComponent,
+    CumulativeFundsChartComponent
   ],
   imports: [
     MatCardModule,
@@ -34,11 +39,14 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
     MatDatepickerModule,
     MatButtonModule,
     MatIconModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    RouterLink
   ],
   exports: [
     DashboardComponent,
-    FlowChartComponent
+    FlowChartComponent,
+    CurrentFundsChartComponent,
+    CumulativeFundsChartComponent
   ]
 })
 export class ReportModule {}

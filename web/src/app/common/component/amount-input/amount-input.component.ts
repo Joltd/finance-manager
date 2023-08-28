@@ -67,10 +67,10 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
     if (!value || !currency) {
       return null
     }
-    let amount = new Amount()
-    amount.value = fromFractional(value)
-    amount.currency = currency
-    return amount
+    return {
+      value: fromFractional(value),
+      currency: currency
+    }
   }
   set value(amount: Amount | null) {
     let value = amount != null ? toFractional(amount) : ''

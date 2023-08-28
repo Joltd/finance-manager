@@ -34,10 +34,11 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(): void {
-    this.toolbarService.setup("Account", [
-      { name: 'save', icon: 'done', action: () => this.save() },
-      { name: 'close', icon: 'close', action: () => this.close() },
-    ])
+    this.toolbarService.setupSaveClose(
+      "Account",
+      () => this.save(),
+      () => this.close()
+    )
   }
 
   ngOnDestroy(): void {
@@ -52,6 +53,9 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
   }
 
   private save() {
+    if (this.form.invalid) {
+      return
+    }
     this.accountService.update(this.form.value)
       .subscribe(() => this.close())
   }

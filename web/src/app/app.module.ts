@@ -16,9 +16,7 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatInputModule} from "@angular/material/input";
 import {ReactiveFormsModule} from "@angular/forms";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {ImportDataModule} from "./import-data/import-data.module";
 import {MatSidenavModule} from "@angular/material/sidenav";
-import {DocumentModule} from "./document/document.module";
 import {MAT_DATE_LOCALE} from "@angular/material/core";
 import {MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule} from "@angular/material-moment-adapter";
 import {ReferenceModule} from "./reference/reference.module";
@@ -27,7 +25,6 @@ import {ReportModule} from "./report/report.module";
 import {MatListModule} from "@angular/material/list";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
-import {ExportDataModule} from "./export-data/export-data.module";
 import {ExchangeRateModule} from "./exchangerate/exchange-rate.module";
 import {SettingsModule} from "./settings/settings.module";
 
@@ -47,14 +44,12 @@ import {SettingsModule} from "./settings/settings.module";
     }),
     MatFormFieldModule,
     CommonModule,
-    ImportDataModule,
     MatCardModule,
     MatToolbarModule,
     MatInputModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
     MatSidenavModule,
-    DocumentModule,
     MatMomentDateModule,
     ReferenceModule,
     MatBadgeModule,
@@ -62,7 +57,6 @@ import {SettingsModule} from "./settings/settings.module";
     MatListModule,
     MatIconModule,
     MatButtonModule,
-    ExportDataModule,
     ExchangeRateModule,
     SettingsModule
   ],

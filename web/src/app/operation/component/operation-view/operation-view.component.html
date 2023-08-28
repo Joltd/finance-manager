@@ -1,5 +1,11 @@
 <mat-card>
 
+  <mat-button-toggle-group (valueChange)="type = $event">
+    <mat-button-toggle [value]="'EXCHANGE'">Exchange</mat-button-toggle>
+    <mat-button-toggle [value]="'EXPENSE'">Expense</mat-button-toggle>
+    <mat-button-toggle [value]="'INCOME'">Income</mat-button-toggle>
+  </mat-button-toggle-group>
+
   <form [formGroup]="exchange" *ngIf="type == 'EXCHANGE'">
 
     <mat-form-field>

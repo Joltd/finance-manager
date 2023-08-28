@@ -1,66 +1,110 @@
-import {Component, Input, OnDestroy, OnInit} from "@angular/core";
-import {ToolbarService} from "../../../common/service/toolbar.service";
+import {Component, OnInit} from "@angular/core";
 import {Operation} from "../../model/operation";
 import {OperationService} from "../../service/operation.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {combineLatest} from "rxjs";
+import {SettingsService} from "../../../settings/service/settings.service";
+import * as moment from "moment";
+import {Amount} from "../../../common/model/amount";
+import {Reference} from "../../../common/model/reference";
 
 @Component({
   selector: 'operation-editor',
   templateUrl: './operation-editor.component.html',
   styleUrls: ['./operation-editor.component.css']
 })
-export class OperationEditorComponent implements OnInit, OnDestroy {
+export class OperationEditorComponent implements OnInit {
 
   operation!: Operation
 
   constructor(
-    public operationService: OperationService,
-    private toolbarService: ToolbarService,
+    private settingsService: SettingsService,
+    private operationService: OperationService,
     private activatedRoute: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.toolbarService.setup('Operation', [
-      { name: 'save', icon: 'done', action: () => this.onSave() },
-      { name: 'close', icon: 'close', action: () => this.onClose() }
-    ])
-    this.activatedRoute.params
-      .subscribe(params => {
+    combineLatest([this.activatedRoute.params, this.activatedRoute.queryParams])
+      .subscribe(([params, queryParams]) => {
         let id = params['id']
-        if (id == 'new') {
-          this.activatedRoute.queryParams
-            .subscribe(queryParams => {
-              let copyId = queryParams['copy']
-              if (copyId != null) {
-                this.operationService.byId(id)
-                  .subscribe(result => {
-                    result.id = null
-                    this.operation = result
-                  })
-              }
-            })
-        } else {
-          this.operationService.byId(id)
-            .subscribe(result => this.operation = result)
+        if (id != 'new') {
+          this.viewById(id)
+          return
+        }
+
+        let copyId = queryParams['copy']
+        if (copyId != null) {
+          this.newByCopy(copyId)
+          return
+        }
+
+        let template = queryParams['template']
+        if (template != null) {
+          this.newByTemplate(template)
+          return
         }
       })
   }
 
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
+  save(operation: Operation) {
+    this.operationService.update(operation)
+      .subscribe(() => this.close())
   }
 
-  private save(operation: Operation) {
-    this.operationService.update(operation)
-      .subscribe(() => {
-        this.close()
+  close() {
+    this.router.navigate(['operation']).then()
+  }
+
+  private viewById(id: string) {
+    this.operationService.byId(id)
+      .subscribe(result => this.operation = result)
+  }
+
+  private newByCopy(copyId: string) {
+    this.operationService.byId(copyId)
+      .subscribe(result => {
+        result.id = null
+        this.operation = result
       })
   }
 
-  private close() {
-    this.router.navigate(['operation']).then()
+  private newByTemplate(template: 'EXPENSE_CASH' | 'EXCHANGE_TO_CASH' | 'EXCHANGE_FROM_CASH') {
+    let amount = null
+    let currency = this.settingsService.settings.operationDefaultCurrency
+    if (currency != null) {
+      amount = {
+        currency: currency,
+        value: 0
+      }
+    }
+
+    let cashAccount = this.settingsService.settings.operationCashAccount
+    let defaultAccount = this.settingsService.settings.operationDefaultAccount
+
+    if (template === 'EXPENSE_CASH') {
+      this.operationTemplate(amount, defaultAccount, null)
+    } else if (template === 'EXCHANGE_TO_CASH') {
+      this.operationTemplate(amount, defaultAccount, cashAccount)
+    } else if (template === 'EXCHANGE_FROM_CASH') {
+      this.operationTemplate(amount, cashAccount, defaultAccount)
+    }
+  }
+
+  private operationTemplate(
+    amount: Amount | null,
+    accountFrom: Reference | null,
+    accountTo: Reference | null,
+  ): any {
+    return {
+      id: null,
+      date: moment().format("yyyy-MM-DD"),
+      accountFrom: accountFrom,
+      amountFrom: amount,
+      accountTo: accountTo,
+      amountTo: amount,
+      description: '',
+    }
   }
 
 }

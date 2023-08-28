@@ -1,33 +1,60 @@
 package com.evgenltd.financemanager.settings.service
 
+import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.reference.record.toRecord
+import com.evgenltd.financemanager.reference.record.toReference
+import com.evgenltd.financemanager.reference.service.AccountService
 import com.evgenltd.financemanager.settings.entity.Setting
-import com.evgenltd.financemanager.settings.record.FastExpenseRecord
-import com.evgenltd.financemanager.settings.record.SettingRecord
+import com.evgenltd.financemanager.settings.record.ApplicationSettings
+import com.evgenltd.financemanager.settings.record.`setting-record`
 import com.evgenltd.financemanager.settings.repository.SettingRepository
 import jakarta.transaction.Transactional
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class SettingService(
-    private val settingRepository: SettingRepository
+    private val settingRepository: SettingRepository,
+    private val accountService: AccountService,
+    @Value("\${APP_VERSION}") private val version: String
 ) {
 
-    fun load(): List<SettingRecord> = settingRepository.findAll().map { it.toRecord() }
+    fun operationDefaultCurrency(): String? = getSetting(OPERATION_DEFAULT_CURRENCY)
+
+    fun operationDefaultAccount(): Account? = getSetting(OPERATION_DEFAULT_ACCOUNT)
+        ?.let { accountService.byIdOrNull(UUID.fromString(it)) }
+
+    fun operationCashAccount(): Account? = getSetting(OPERATION_CASH_ACCOUNT)
+        ?.let { accountService.byIdOrNull(UUID.fromString(it)) }
+
+    fun load(): ApplicationSettings = ApplicationSettings(
+        version = version,
+        operationDefaultCurrency = operationDefaultCurrency(),
+        operationDefaultAccount = operationDefaultAccount()?.toReference(),
+        operationCashAccount = operationCashAccount()?.toReference(),
+    )
 
     @Transactional
-    fun update(setting: SettingRecord) {
-        settingRepository.deleteByName(setting.name)
-        settingRepository.save(setting.toEntity())
+    fun update(request: ApplicationSettings) {
+        updateSetting(OPERATION_DEFAULT_CURRENCY, request.operationDefaultCurrency)
+        updateSetting(OPERATION_DEFAULT_ACCOUNT, request.operationDefaultAccount?.id?.toString())
+        updateSetting(OPERATION_CASH_ACCOUNT, request.operationCashAccount?.id?.toString())
     }
 
-    private fun Setting.toRecord(): SettingRecord = SettingRecord(
-        name = name,
-        value = value
-    )
+    private fun getSetting(name: String): String? = settingRepository.findByName(name)?.value
 
-    private fun SettingRecord.toEntity(): Setting = Setting(
-        name = name,
-        value = value
-    )
+    private fun updateSetting(name: String, value: String?) {
+        val setting = settingRepository.findByName(name)
+            ?.also { it.value = value }
+            ?: Setting(null, name, value)
+        settingRepository.save(setting)
+    }
+
+    companion object {
+        const val OPERATION_DEFAULT_CURRENCY = "operation.default.currency"
+        const val OPERATION_DEFAULT_ACCOUNT = "operation.default.account"
+        const val OPERATION_CASH_ACCOUNT = "operation.cash.account"
+    }
 
 }

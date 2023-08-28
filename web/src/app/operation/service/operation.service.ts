@@ -20,7 +20,7 @@ export class OperationService {
   operationPage: OperationPage = {
     total: 0,
     page: 0,
-    size: 0,
+    size: 20,
     operations: []
   }
 

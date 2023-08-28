@@ -1,17 +1,13 @@
-<div class="total-and-actions">
-  <mat-card>
-    <mat-card-content class="totals">
-      <h1>{{dashboard.fundsTotal | format:true}}</h1>
-      <h5>{{dashboard.fundsTotalSecondary | format:true}}</h5>
-    </mat-card-content>
-  </mat-card>
-
-  <div class="fast-actions">
-    <button mat-raised-button class="expense" (click)="fastExpense()">Expense</button>
-    <button mat-raised-button class="exchange" (click)="fastExchange()">Exchange</button>
-  </div>
-</div>
-
-<mat-card>
-  <div #chart [style.height]="chartHeight + 'em'"></div>
+<mat-card *ngIf="dashboard">
+  <h1>{{dashboard.defaultCurrencyAmount | format: true}}</h1>
+  <h3 *ngIf="dashboard.usdCashAmount">{{dashboard.usdCashAmount | format: true}}</h3>
+  <div *ngFor="let cashFound of dashboard.cashFounds">{{cashFound | format: true}}</div>
 </mat-card>
+
+<button mat-raised-button [routerLink]="['operation','new']" [queryParams]="{template: 'EXPENSE_CASH'}">Cash expense</button>
+<button mat-raised-button [routerLink]="['operation','new']" [queryParams]="{template: 'EXCHANGE_TO_CASH'}">Withdraw cash</button>
+<button mat-raised-button [routerLink]="['operation','new']" [queryParams]="{template: 'EXCHANGE_FROM_CASH'}">Topup cash</button>
+
+<button mat-raised-button [routerLink]="['flow-chart']">Flows</button>
+<button mat-raised-button [routerLink]="['current-funds-chart']">Current funds</button>
+<button mat-raised-button [routerLink]="['cumulative-funds-chart']">Cumulative funds</button>

@@ -8,6 +8,8 @@ import java.util.UUID
 @Repository
 interface SettingRepository : JpaRepository<Setting, UUID> {
 
+    fun findByName(name: String): Setting?
+
     fun deleteByName(name: String)
 
 }

@@ -2,24 +2,24 @@ import {Pipe, PipeTransform} from "@angular/core";
 
 const decimals = 4
 
-export class Amount {
-  value!: number
-  currency!: string
+export interface Amount {
+  value: number
+  currency: string
 }
 
 export function emptyAmount(currency: string): Amount {
-  let amount = new Amount()
-  amount.value = 0
-  amount.currency = currency
-  return amount
+  return {
+    value: 0,
+    currency: currency
+  }
 }
 
 export function plus(left: Amount, right: Amount): Amount {
   if (left.currency != right.currency) throw Error('Cannot add amounts with different currencies')
-  let amount = new Amount()
-  amount.value = left.value + right.value
-  amount.currency = left.currency
-  return amount
+  return {
+    value: left.value + right.value,
+    currency: left.currency
+  }
 }
 
 export function toFractional(amount: Amount): number {

@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.settings.controller
 
-import com.evgenltd.financemanager.settings.record.SettingRecord
+import com.evgenltd.financemanager.settings.record.ApplicationSettings
 import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.web.bind.annotation.*
 
@@ -9,13 +9,10 @@ class SettingController(
     private val settingService: SettingService
 ) {
 
-    @GetMapping("/settings")
-    fun load(): List<SettingRecord> = settingService.load()
+    @GetMapping("/setting")
+    fun setting(): ApplicationSettings = settingService.load()
 
-    @PostMapping("/settings")
-    fun update(@RequestBody record: SettingRecord) = settingService.update(record)
-
-    @DeleteMapping("/settings/database")
-    fun clearDatabase() {}
+    @PostMapping("/setting")
+    fun setting(@RequestBody request: ApplicationSettings) = settingService.update(request)
 
 }

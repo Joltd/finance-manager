@@ -33,10 +33,7 @@ export class CurrencyEditorComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(): void {
-    this.toolbarService.setup("Currency", [
-      { name: 'done', icon: 'done', action: () => this.save() },
-      { name: 'close', icon: 'close', action: () => this.close() },
-    ])
+    this.toolbarService.setupSaveClose('Currency', () => this.save(), () => this.close())
   }
 
   ngOnDestroy(): void {

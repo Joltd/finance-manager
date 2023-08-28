@@ -1,10 +1,9 @@
-import {Input, OnDestroy, OnInit} from "@angular/core";
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {Operation} from "../../model/operation";
-import {OperationService} from "../../service/operation.service";
+import {isExpense, isIncome, Operation} from "../../model/operation";
 import {ToolbarService} from "../../../common/service/toolbar.service";
-import {ActivatedRoute, Router} from "@angular/router";
-import {Document} from "../../../document/model/document";
+import {Reference} from "../../../common/model/reference";
+import {Account} from "../../../reference/model/account";
 
 @Component({
   selector: 'operation-view',
@@ -26,7 +25,7 @@ export class OperationViewComponent implements OnInit, OnDestroy {
     id: new FormControl(null),
     date: new FormControl(null, Validators.required),
     account: new FormControl(null, Validators.required),
-    category: new FromControl(null, Validators.required),
+    category: new FormControl(null, Validators.required),
     amount: new FormControl(null, Validators.required),
     description: new FormControl('')
   })
@@ -39,7 +38,7 @@ export class OperationViewComponent implements OnInit, OnDestroy {
     this._operation = operation
     if (isExpense(operation)) {
       this.type = 'EXPENSE'
-      this.expenseIncome.patch({
+      this.expenseIncome.patchValue({
         id: operation.id,
         date: operation.date,
         account: operation.accountFrom,
@@ -49,7 +48,7 @@ export class OperationViewComponent implements OnInit, OnDestroy {
       })
     } else if (isIncome(operation)) {
       this.type = 'INCOME'
-      this.expenseIncome.patch({
+      this.expenseIncome.patchValue({
         id: operation.id,
         date: operation.date,
         account: operation.accountTo,
@@ -62,11 +61,11 @@ export class OperationViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  @Input()
-  onSave!: (operation: Operation) => void
+  @Output()
+  onSave!: EventEmitter<Operation>
 
-  @Input()
-  onClose!: () => void
+  @Output()
+  onClose!: EventEmitter<void>
 
   constructor(
     private toolbarService: ToolbarService
@@ -83,46 +82,48 @@ export class OperationViewComponent implements OnInit, OnDestroy {
     this.toolbarService.reset()
   }
 
-  onChangeType(type: 'EXCHANGE' | 'EXPENSE' | 'INCOME') {
-    this.type = type
-  }
-
   private save() {
     if (this.type == 'EXCHANGE' && this.exchange.valid) {
-      this._operation.id = this.exchange.value.id
-      this._operation.date = this.exchange.value.date
-      this._operation.accountFrom = this.referenceAsAccount(this.exchange.value.accountFrom)
-      this._operation.amountFrom = this.exchange.value.ammountFrom
-      this._operation.accountTo = this.referenceAsAccount(this.exchange.value.accountTo)
-      this._operation.amountTo = this.exchange.value.ammount
-      this._operation.description = this.exchange.value.description
-      this.onSave.emmit(_operation)
+      this._operation = {
+        id: this.exchange.value.id,
+        date: this.exchange.value.date,
+        accountFrom: this.referenceAsAccount(this.exchange.value.accountFrom, 'ACCOUNT'),
+        amountFrom: this.exchange.value.ammountFrom,
+        accountTo: this.referenceAsAccount(this.exchange.value.accountTo, 'ACCOUNT'),
+        amountTo: this.exchange.value.ammount,
+        description: this.exchange.value.description,
+      }
+      this.onSave.emit(this._operation)
     } else if (this.type == 'EXPENSE' && this.expenseIncome.valid) {
-      this._operation.id = this.expenseIncome.value.id
-      this._operation.date = this.expenseIncome.value.date
-      this._operation.accountFrom = this.referenceAsAccount(this.expenseIncome.value.account)
-      this._operation.amountFrom = this.expenseIncome.value.ammount
-      this._operation.accountTo = this.referenceAsAccount(this.expenseIncome.value.category)
-      this._operation.amountTo = this.expenseIncome.value.ammount
-      this._operation.description = this.expenseIncome.value.description
-      this.onSave.emmit(_operation)
+      this._operation = {
+        id: this.expenseIncome.value.id,
+        date: this.expenseIncome.value.date,
+        accountFrom: this.referenceAsAccount(this.expenseIncome.value.account, 'ACCOUNT'),
+        amountFrom: this.expenseIncome.value.ammount,
+        accountTo: this.referenceAsAccount(this.expenseIncome.value.category, 'EXPENSE'),
+        amountTo: this.expenseIncome.value.ammount,
+        description: this.expenseIncome.value.description,
+      }
+      this.onSave.emit(this._operation)
     } else if (this.type == 'INCOME' && this.expenseIncome.valid) {
-      this._operation.id = this.expenseIncome.value.id
-      this._operation.date = this.expenseIncome.value.date
-      this._operation.accountFrom = this.referenceAsAccount(this.expenseIncome.value.category)
-      this._operation.amountFrom = this.expenseIncome.value.amount
-      this._operation.accountTo = this.referenceAsAccount(this.expenseIncome.value.account)
-      this._operation.amountTo = this.expenseIncome.value.amount
-      this._operation.description = this.expenseIncome.value.description
-      this.onSave.emmit(_operation)
+      this._operation = {
+        id: this.expenseIncome.value.id,
+        date: this.expenseIncome.value.date,
+        accountFrom: this.referenceAsAccount(this.expenseIncome.value.category, 'INCOME'),
+        amountFrom: this.expenseIncome.value.amount,
+        accountTo: this.referenceAsAccount(this.expenseIncome.value.account, 'ACCOUNT'),
+        amountTo: this.expenseIncome.value.amount,
+        description: this.expenseIncome.value.description,
+      }
+      this.onSave.emit(this._operation)
     }
   }
 
   private close() {
-    this.onClose.emmit()
+    this.onClose.emit()
   }
 
-  private referenceAsAccount(reference: Reference, type: 'EXCHANGE' | 'EXPENSE' | 'INCOME'): Account {
+  private referenceAsAccount(reference: Reference, type: 'EXPENSE' | 'INCOME' | 'ACCOUNT'): Account {
     return {
       id: reference.id,
       name: reference.name,

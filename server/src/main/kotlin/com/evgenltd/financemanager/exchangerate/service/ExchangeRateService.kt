@@ -69,8 +69,13 @@ class ExchangeRateService(
             return BigDecimal.ONE
         }
 
-        if ((from == "USDT" && to == "USD") || (from == "USD" && to == "USDT")) {
+        val pair = listOf(from, to)
+        if ("USDT" in pair && "USD" in pair) {
             return BigDecimal.ONE
+        }
+
+        if ("USD" !in pair) {
+            return rate(date, from, "USD") * rate(date, "USD", to)
         }
 
         val result = rate(date, from, listOf(to))

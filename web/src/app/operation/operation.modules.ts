@@ -16,11 +16,14 @@ import {MatPaginatorModule} from "@angular/material/paginator";
 import {MatCardModule} from "@angular/material/card";
 import {MatListModule} from "@angular/material/list";
 import {MatMenuModule} from "@angular/material/menu";
+import {OperationViewComponent} from "./component/operation-view/operation-view.component";
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
 @NgModule({
   declarations: [
     OperationBrowserComponent,
     OperationEditorComponent,
+    OperationViewComponent,
     OperationLabelComponent
   ],
   imports: [
@@ -38,7 +41,8 @@ import {MatMenuModule} from "@angular/material/menu";
     MatCardModule,
     MatListModule,
     MatMenuModule,
-    NgForOf
+    NgForOf,
+    MatButtonToggleModule
   ],
   providers: [],
   exports: [
