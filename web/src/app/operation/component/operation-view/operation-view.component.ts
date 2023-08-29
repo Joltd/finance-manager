@@ -30,11 +30,15 @@ export class OperationViewComponent implements OnInit, OnDestroy {
     description: new FormControl('')
   })
 
-  private _operation!: Operation
+  private _operation: Operation | null = null
   type: 'EXCHANGE' | 'EXPENSE' | 'INCOME' = 'EXCHANGE'
 
   @Input()
-  set operation(operation: Operation) {
+  set operation(operation: Operation | null) {
+    if (operation == null) {
+      return
+    }
+
     this._operation = operation
     if (isExpense(operation)) {
       this.type = 'EXPENSE'
@@ -62,10 +66,10 @@ export class OperationViewComponent implements OnInit, OnDestroy {
   }
 
   @Output()
-  onSave!: EventEmitter<Operation>
+  onSave: EventEmitter<Operation> = new EventEmitter<Operation>()
 
   @Output()
-  onClose!: EventEmitter<void>
+  onClose: EventEmitter<void> = new EventEmitter<void>()
 
   constructor(
     private toolbarService: ToolbarService
@@ -88,9 +92,9 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         id: this.exchange.value.id,
         date: this.exchange.value.date,
         accountFrom: this.referenceAsAccount(this.exchange.value.accountFrom, 'ACCOUNT'),
-        amountFrom: this.exchange.value.ammountFrom,
+        amountFrom: this.exchange.value.amountFrom,
         accountTo: this.referenceAsAccount(this.exchange.value.accountTo, 'ACCOUNT'),
-        amountTo: this.exchange.value.ammount,
+        amountTo: this.exchange.value.amountTo,
         description: this.exchange.value.description,
       }
       this.onSave.emit(this._operation)
@@ -99,9 +103,9 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         id: this.expenseIncome.value.id,
         date: this.expenseIncome.value.date,
         accountFrom: this.referenceAsAccount(this.expenseIncome.value.account, 'ACCOUNT'),
-        amountFrom: this.expenseIncome.value.ammount,
+        amountFrom: this.expenseIncome.value.amount,
         accountTo: this.referenceAsAccount(this.expenseIncome.value.category, 'EXPENSE'),
-        amountTo: this.expenseIncome.value.ammount,
+        amountTo: this.expenseIncome.value.amount,
         description: this.expenseIncome.value.description,
       }
       this.onSave.emit(this._operation)

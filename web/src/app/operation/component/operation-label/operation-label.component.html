@@ -1,12 +1,21 @@
-<div class="marker"
-     [class.expense]="isExpense()"
-     [class.income]="isIncome()"
-     [class.exchange]="isExchange()"></div>
 <date-label *ngIf="!hideDate" [date]="operation.date" [disabled]="disabled"></date-label>
-<div class="body">
+<div class="amount">
   <amount-label class="amount-from" [amount]="operation.amountFrom"></amount-label>
-  <amount-label class="amount-to" [amount]="operation.amountTo"></amount-label>
-  <mat-icon class="arrow-icon">arrow_right</mat-icon>
-  <div class="account-from">{{operation.accountFrom.name}}</div>
-  <div class="account-to">{{operation.accountTo.name}}</div>
+  <amount-label class="amount-to" *ngIf="isExchange()" [amount]="operation.amountTo"></amount-label>
+</div>
+<div class="account">
+  <div class="name">
+    <div class="marker"
+         [class.expense]="operation.accountFrom.type == 'EXPENSE'"
+         [class.income]="operation.accountFrom.type == 'INCOME'"
+         [class.exchange]="operation.accountFrom.type == 'ACCOUNT'"></div>
+    {{operation.accountFrom.name}}
+  </div>
+  <div class="name" *ngIf="operation.accountFrom.id != operation.accountTo.id">
+    <div class="marker"
+         [class.expense]="operation.accountTo.type == 'EXPENSE'"
+         [class.income]="operation.accountTo.type == 'INCOME'"
+         [class.exchange]="operation.accountTo.type == 'ACCOUNT'"></div>
+    {{operation.accountTo.name}}
+  </div>
 </div>

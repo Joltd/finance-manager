@@ -1,6 +1,7 @@
 <mat-toolbar color="primary">
   <button mat-icon-button (click)="left.toggle()"><mat-icon>menu</mat-icon></button>
-  <a class="app-title" href="/finance-manager">{{toolbarService.title}}</a>
+  <a class="app-title" href="/">{{toolbarService.title}}</a>
+  <span class="spacer"></span>
   <button mat-icon-button *ngFor="let command of toolbarService.commands" (click)="command.action()"><mat-icon>{{command.icon}}</mat-icon></button>
 </mat-toolbar>
 <mat-sidenav-container>

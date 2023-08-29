@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.operation.record
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.reference.record.AccountRecord
+import com.evgenltd.financemanager.reference.record.Reference
 import java.time.LocalDate
 import java.util.*
 
@@ -11,8 +12,8 @@ data class OperationFilter(
     val dateFrom: LocalDate? = null,
     val dateTo: LocalDate? = null,
     val type: OperationType? = null,
-    val account: UUID? = null,
-    val category: UUID? = null,
+    val account: Reference? = null,
+    val category: Reference? = null,
     val currency: String? = null,
 )
 

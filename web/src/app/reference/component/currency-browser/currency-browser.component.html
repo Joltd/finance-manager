@@ -1,8 +1,12 @@
 <mat-card>
   <mat-action-list>
-    <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let currency of currencies">
-      <currency-label [currency]="currency.name"></currency-label>
-      <mat-slide-toggle [checked]="currency.crypto" [disabled]="true"></mat-slide-toggle>
+    <button mat-list-item
+            [matMenuTriggerFor]="menu"
+            *ngFor="let currency of currencyService.currencies">
+      <div class="currency-list-item">
+        <currency-label [currency]="currency.name" [full]="true"></currency-label>
+        <span *ngIf="currency.crypto">Crypto</span>
+      </div>
       <mat-menu #menu>
         <button mat-menu-item (click)="edit(currency.id!)">Edit</button>
         <button mat-menu-item (click)="delete(currency.id!)">Delete</button>

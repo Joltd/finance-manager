@@ -3,7 +3,7 @@ import {MatFormFieldControl} from "@angular/material/form-field";
 import {ControlValueAccessor, NgControl, Validators} from "@angular/forms";
 import {Subject} from "rxjs";
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
-import {Reference} from "../../model/reference";
+import {Endpoint, Reference} from "../../model/reference";
 import {ReferenceService} from "../../service/reference.service";
 import {EntrySelectComponent} from "../entry-select/entry-select.component";
 
@@ -21,7 +21,7 @@ import {EntrySelectComponent} from "../entry-select/entry-select.component";
     '[id]': 'id',
   }
 })
-export class ReferenceInputComponent implements MatFormFieldControl<string>, ControlValueAccessor, OnDestroy {
+export class ReferenceInputComponent implements MatFormFieldControl<Reference>, ControlValueAccessor, OnDestroy {
 
   private static nextId = 0
 
@@ -30,7 +30,7 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
 
   @Input()
   references: Reference[] = []
-  private _value: string | null = null
+  private _value: Reference | null = null
   name: string = '-'
 
   stateChanges = new Subject<void>()
@@ -60,8 +60,11 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   }
 
   @Input()
-  set api(api: string) {
-    this.referenceService.list(api)
+  set api(api: string | Endpoint) {
+    let endpoint = typeof api == 'string'
+      ? {url: api} as Endpoint
+      : api as Endpoint
+    this.referenceService.list(endpoint)
       .subscribe(result => {
         this.references = result
         this.setupName()
@@ -69,10 +72,10 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
   }
 
   @Input()
-  get value(): string | null {
+  get value(): Reference | null {
     return this._value
   }
-  set value(value: string | null) {
+  set value(value: Reference | null) {
     this._value = value
     if (!value) {
       this.name = '-'
@@ -145,22 +148,21 @@ export class ReferenceInputComponent implements MatFormFieldControl<string>, Con
     this.disabled = isDisabled
   }
 
-  writeValue(value: string | null) {
+  writeValue(value: Reference | null) {
     this.value = value
   }
 
-  selectEntry(value: string | null) {
+  selectEntry(value: Reference | null) {
     this.value = value
     this.entrySelect.close()
     this.onChange(this.value)
   }
 
   private setupName() {
-    let found = this.references.find(reference => reference.id == this.value)
-    if (found) {
-      this.name = found.name
+    if (this.value != null) {
+      this.name = this.value.name
     } else {
-      this.name = `Unknown (${this.value})`
+      this.name = `Nothing`
     }
   }
 }

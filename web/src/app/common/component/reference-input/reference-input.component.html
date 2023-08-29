@@ -1,5 +1,5 @@
 <div class="name"
      [class.hide]="!shouldLabelFloat">{{name}}</div>
 <entry-select (select)="selectEntry($event)" [nullable]="true">
-  <entry-item *ngFor="let reference of references" [value]="reference.id">{{reference.name}}</entry-item>
+  <entry-item *ngFor="let reference of references" [value]="reference">{{reference.name}}</entry-item>
 </entry-select>

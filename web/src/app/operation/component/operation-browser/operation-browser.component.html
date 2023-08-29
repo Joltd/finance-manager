@@ -1,4 +1,4 @@
-<mat-expansion-panel>
+<mat-expansion-panel #filter>
   <mat-expansion-panel-header>
     <mat-panel-title>Filter</mat-panel-title>
   </mat-expansion-panel-header>
@@ -25,18 +25,18 @@
         <mat-option [value]="null">Nothing</mat-option>
         <mat-option [value]="'EXPENSE'">Expense</mat-option>
         <mat-option [value]="'INCOME'">Income</mat-option>
-        <mat-option [value]="'ACCOUNT'">Exchange</mat-option>
+        <mat-option [value]="'EXCHANGE'">Exchange</mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Account</mat-label>
-      <reference-input api="/account/reference?type=ACCOUNT" formControlName="account"></reference-input>
+      <reference-input [api]="{url: '/account/reference', queryParams: {type: 'ACCOUNT'}}" formControlName="account"></reference-input>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Category</mat-label>
-      <reference-input api="/category/reference?type=EXPENSE&type=INCOME" formControlName="category"></reference-input>
+      <reference-input [api]="{url: '/account/reference', queryParams: {type: ['EXPENSE','INCOME']}}" formControlName="category"></reference-input>
     </mat-form-field>
 
     <mat-form-field>

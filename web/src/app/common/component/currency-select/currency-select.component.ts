@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnInit, ViewChild} from "@angular/core";
+import {Component, forwardRef, ViewChild} from "@angular/core";
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
 import {EntrySelectComponent} from "../entry-select/entry-select.component";
 import {CurrencyService} from "../../../reference/service/currency.service";
@@ -16,22 +16,16 @@ import {Currency} from "../../../reference/model/currency";
     }
   ]
 })
-export class CurrencySelectComponent implements OnInit, ControlValueAccessor {
+export class CurrencySelectComponent implements ControlValueAccessor {
 
   @ViewChild(EntrySelectComponent)
   currencySelect!: EntrySelectComponent
 
-  currencies: Currency[] = []
   currency: string | null = null
   private disabled: boolean = false
   private onChange = (_: any) => {}
 
   constructor(public currencyService: CurrencyService) {}
-
-  ngOnInit(): void {
-    this.currencyService.list()
-      .subscribe(result => this.currencies = result)
-  }
 
   registerOnChange(fn: any) {
     this.onChange = fn
@@ -56,13 +50,13 @@ export class CurrencySelectComponent implements OnInit, ControlValueAccessor {
     }
   }
 
-  select(currency: string) {
+  select(currency: Currency | null) {
     if (this.disabled) {
       return
     }
-    this.currency = currency
+    this.currency = currency?.name || null
     this.currencySelect.close()
-    this.onChange(currency)
+    this.onChange(currency?.name || null)
   }
 
   visible(): boolean {

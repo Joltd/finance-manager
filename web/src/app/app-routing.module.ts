@@ -17,8 +17,12 @@ import {CurrentFundsChartComponent} from "./report/component/current-fund-chart/
 import {
   CumulativeFundsChartComponent
 } from "./report/component/cumulative-funds-chart/cumulative-funds-chart.component";
+import {CurrencyBrowserComponent} from "./reference/component/currency-browser/currency-browser.component";
+import {CurrencyEditorComponent} from "./reference/component/currency-editor/currency-editor.component";
 
 const routes: Routes = [
+  { path: 'currency', component: CurrencyBrowserComponent },
+  { path: 'currency/:id', component: CurrencyEditorComponent },
   { path: 'account', component: AccountBrowserComponent },
   { path: 'account/:id', component: AccountEditorComponent },
   { path: 'operation', component: OperationBrowserComponent },

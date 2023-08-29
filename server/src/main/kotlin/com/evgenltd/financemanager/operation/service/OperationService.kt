@@ -15,6 +15,7 @@ import com.evgenltd.financemanager.operation.record.OperationPage
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.record.OperationType
 import com.evgenltd.financemanager.operation.repository.OperationRepository
+import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.toRecord
 import com.evgenltd.financemanager.reference.repository.AccountRepository
@@ -35,18 +36,22 @@ class OperationService(
             (Operation.Companion::date gte filter.dateFrom) and
             (Operation.Companion::date lt filter.dateTo) and
             when (filter.type) {
-                OperationType.EXPENSE -> (Operation.Companion::accountFromType eq AccountType.EXPENSE)
-                OperationType.INCOME -> (Operation.Companion::accountToType eq AccountType.INCOME)
-                OperationType.EXCHANGE -> (Operation.Companion::accountFromType notEq AccountType.EXPENSE) and (Operation.Companion::accountToType notEq AccountType.INCOME)
+                OperationType.EXPENSE -> (Operation.Companion::accountToType eq AccountType.EXPENSE)
+                OperationType.INCOME -> (Operation.Companion::accountFromType eq AccountType.INCOME)
+                OperationType.EXCHANGE -> (Operation.Companion::accountFromType eq AccountType.ACCOUNT) and (Operation.Companion::accountToType eq AccountType.ACCOUNT)
                 null -> emptyCondition()
             } and
             (
-                (Operation.Companion::accountFromId eq filter.account) or
-                (Operation.Companion::accountToId eq filter.account)
+                filter.account?.let {
+                    ((Operation.Companion::accountFromType eq AccountType.ACCOUNT) and (Operation.Companion::accountFromId eq it.id)) or
+                    ((Operation.Companion::accountToType eq AccountType.ACCOUNT) and (Operation.Companion::accountToId eq it.id))
+                } ?: emptyCondition()
             ) and
             (
-                (Operation.Companion::accountFromId eq filter.category) or
-                (Operation.Companion::accountToId eq filter.category)
+                filter.category?.let {
+                    ((Operation.Companion::accountFromType notEq AccountType.ACCOUNT) and (Operation.Companion::accountFromId eq it.id)) or
+                    ((Operation.Companion::accountToType notEq AccountType.ACCOUNT) and (Operation.Companion::accountToId eq it.id))
+                } ?: emptyCondition()
             ) and
             (
                 (Operation.Companion::currencyFrom eq filter.currency) or

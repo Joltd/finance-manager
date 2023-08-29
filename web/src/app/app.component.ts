@@ -3,6 +3,7 @@ import {LoadingService} from "./common/service/loading.service";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {SettingsService} from "./settings/service/settings.service";
 import {ToolbarService} from "./common/service/toolbar.service";
+import {CurrencyService} from "./reference/service/currency.service";
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ export class AppComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private settingsService: SettingsService,
     public toolbarService: ToolbarService,
+    private currencyService: CurrencyService
   ) {}
 
   ngOnInit(): void {
@@ -28,6 +30,7 @@ export class AppComponent implements OnInit {
     this.breakpointObserver.observe(['(min-width: 40em)'])
       .subscribe(state => this.wide = state.matches)
     this.settingsService.load()
+    this.currencyService.load()
   }
 
 }

@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.time.LocalDate
+import java.util.UUID
 
 @Entity
 @Table(name = "transactions")
@@ -20,7 +21,7 @@ class Transaction(
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    var id: String? = null,
+    var id: UUID? = null,
 
     @Enumerated(EnumType.STRING)
     var type: TransactionType,

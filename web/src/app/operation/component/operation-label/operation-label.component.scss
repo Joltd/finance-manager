@@ -13,8 +13,8 @@
 
 .marker {
   min-width: .2em;
-  min-height: 3em;
   border-radius: .2em;
+  margin-right: .2em;
 }
 
 .income {
@@ -29,31 +29,21 @@
   background-color: #1e88e5;
 }
 
-.body {
-  display: grid;
-  grid-template-areas:
-    "amount-from arrow-icon amount-to"
-    "account-from arrow-icon account-to";
+.amount {
+  display: flex;
+  flex-direction: column;
+  min-width: 6em;
 }
 
-.amount-from {
-  grid-area: amount-from;
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: .6em;
+  line-height: 16px;
+  font-size: 12px;
+
+  .name {
+    display: flex;
+  }
 }
 
-.amount-to {
-  grid-area: amount-to;
-}
-
-.arrow-icon {
-  grid-area: arrow-icon;
-  min-width: 1em;
-  min-height: 1em;
-}
-
-.account-from {
-  grid-area: account-from;
-}
-
-.account-to {
-  grid-area: account-to;
-}

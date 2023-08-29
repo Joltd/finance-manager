@@ -1,8 +1,9 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {Component, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {Router} from "@angular/router";
 import {OperationService} from "../../service/operation.service";
 import {PageEvent} from "@angular/material/paginator";
 import {ToolbarService} from "../../../common/service/toolbar.service";
+import {MatExpansionPanel} from "@angular/material/expansion";
 
 @Component({
   selector: 'operation-browser',
@@ -10,6 +11,9 @@ import {ToolbarService} from "../../../common/service/toolbar.service";
   styleUrls: ['./operation-browser.component.scss']
 })
 export class OperationBrowserComponent implements OnInit,OnDestroy {
+
+  @ViewChild('filter')
+  filter!: MatExpansionPanel
 
   constructor(
     private router: Router,
@@ -19,7 +23,14 @@ export class OperationBrowserComponent implements OnInit,OnDestroy {
 
   ngOnInit(): void {
     this.toolbarService.setup('Operation', [
-      { name: 'load', icon: 'done', action: () => this.load() }
+      {
+        name: 'load',
+        icon: 'done',
+        action: () => {
+          this.filter.close()
+          this.load()
+        }
+      }
     ])
   }
 

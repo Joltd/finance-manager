@@ -15,7 +15,7 @@ import {Reference} from "../../../common/model/reference";
 })
 export class OperationEditorComponent implements OnInit {
 
-  operation!: Operation
+  operation: Operation | null = null
 
   constructor(
     private settingsService: SettingsService,

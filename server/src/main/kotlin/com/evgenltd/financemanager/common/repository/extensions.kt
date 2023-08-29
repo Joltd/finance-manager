@@ -33,7 +33,6 @@ inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
     crossinline block: () -> Condition<T>
 ): Page<T> = findAll(
     { root, query, cb ->
-        root.get<LocalDate>("").`in`(listOf(LocalDate.now()))
         val condition = block()
         condition(root, query, cb)
     },
@@ -43,13 +42,25 @@ inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
 inline infix fun <E> Condition<E>.and(
     crossinline spec: Condition<E>
 ): Condition<E> = { root, query, cb ->
-    cb.and(this(root, query, cb), spec(root, query, cb))
+    val left = this(root, query, cb)
+    val right = spec(root, query, cb)
+    if (left != null && right != null) {
+        cb.and(left, right)
+    } else {
+        left ?: right ?: cb.conjunction()
+    }
 }
 
 inline infix fun <E> Condition<E>.or(
     crossinline spec: Condition<E>
 ): Condition<E> = { root, query, cb ->
-    cb.or(this(root, query, cb), spec(root, query, cb))
+    val left = this(root, query, cb)
+    val right = spec(root, query, cb)
+    if (left != null && right != null) {
+        cb.or(left, right)
+    } else {
+        left ?: right ?: cb.conjunction()
+    }
 }
 
 private inline fun <T : Comparable<T>, E> compare(
@@ -75,10 +86,10 @@ infix fun <T : Comparable<T>, E> GetPath<T,E>.lte(value: T?): Condition<E> = com
 
 infix fun <T : Comparable<T>, E> GetPath<T,E>.lt(value: T?): Condition<E> = compare(this, value, CriteriaBuilder::lessThan)
 
-infix fun <T : Comparable<T>, E> GetPath<T,E>.inList(values: List<T>): Condition<E> = { root, _, cb ->
-    if (values.isEmpty()) {
-        cb.conjunction()
-    } else {
+infix fun <T : Comparable<T>, E> GetPath<T,E>.inList(values: List<T>?): Condition<E> = { root, _, cb ->
+    if (values?.isNotEmpty() == true) {
         this.invoke(root).`in`(values)
+    } else {
+        cb.conjunction()
     }
 }

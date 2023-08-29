@@ -42,9 +42,12 @@ class CurrencyService(
             currencyRepository.findAll()
         }
         return list.map { Reference(it.id!!, it.name, false) }
+            .sortedBy { it.name }
     }
 
-    fun list(): List<CurrencyRecord> = currencyRepository.findAll().map { it.toRecord() }
+    fun list(): List<CurrencyRecord> = currencyRepository.findAll()
+        .map { it.toRecord() }
+        .sortedBy { it.name }
 
     fun byId(id: UUID): CurrencyRecord = currencyRepository.find(id).toRecord()
 

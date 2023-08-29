@@ -20,7 +20,7 @@ import java.util.*
 @Service
 class AccountService(private val accountRepository: AccountRepository) {
 
-    fun listReference(mask: String? = null, id: UUID? = null, types: List<AccountType>): List<Reference> =
+    fun listReference(mask: String?, id: UUID?, types: List<AccountType>?): List<Reference> =
         if (id != null) {
             accountRepository.findByIdOrNull(id)?.let { listOf(it.toReference()) } ?: emptyList()
         } else {

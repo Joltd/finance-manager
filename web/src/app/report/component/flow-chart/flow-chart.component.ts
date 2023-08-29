@@ -52,9 +52,9 @@ export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.toolbarService.setup('Flow Chart', [
       { name: 'apply', icon: 'done', action: () => this.apply() }
     ])
-    this.referenceService.list('/expense/reference')
+    this.referenceService.list({url: '/account/reference', queryParams: {type: 'EXPENSE'}})
       .subscribe(result => this.expenseCategories = result)
-    this.referenceService.list('/income/reference')
+    this.referenceService.list({url: '/account/reference', queryParams: {type: 'INCOME'}})
       .subscribe(result => this.incomeCategories = result)
   }
 

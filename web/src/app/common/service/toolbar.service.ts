@@ -28,8 +28,10 @@ export class ToolbarService {
   }
 
   setup(title: string, commands: Command[] = []) {
-    this.title = title
-    this.commands = commands
+    setTimeout(() => {
+      this.title = title
+      this.commands = commands
+    }, 10)
   }
 
   reset() {

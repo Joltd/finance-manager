@@ -6,7 +6,7 @@ import {CommonModule} from "../common/common.module";
 import {NgForOf, NgIf} from "@angular/common";
 import {MatIconModule} from "@angular/material/icon";
 import {MatExpansionModule} from "@angular/material/expansion";
-import {ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatButtonModule} from "@angular/material/button";
@@ -42,7 +42,8 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
     MatListModule,
     MatMenuModule,
     NgForOf,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    FormsModule
   ],
   providers: [],
   exports: [

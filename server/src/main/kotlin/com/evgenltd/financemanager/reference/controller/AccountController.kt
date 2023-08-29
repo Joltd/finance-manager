@@ -22,7 +22,7 @@ class AccountController(
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,
         @RequestParam("id", required = false) id: UUID?,
-        @RequestParam("types", required = false) types: List<AccountType>,
+        @RequestParam("type", required = false) types: List<AccountType>?,
     ): List<Reference> = accountService.listReference(mask, id, types)
 
     @GetMapping("/account")

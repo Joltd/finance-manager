@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import {CurrencyService} from "../../../reference/service/currency.service";
 import {Currency} from "../../../reference/model/currency";
 
@@ -7,15 +7,13 @@ import {Currency} from "../../../reference/model/currency";
   templateUrl: 'currency-label.component.html',
   styleUrls: ['currency-label.component.scss']
 })
-export class CurrencyLabelComponent implements OnInit {
-
-  currencies: Currency[] = []
+export class CurrencyLabelComponent {
 
   _currency: Currency | null = null
 
   @Input()
   set currency(currency: string | null) {
-    this._currency = this.currencies.find(entry => entry.name == currency) || null
+    this._currency = this.currencyService.currencies.find(entry => entry.name == currency) || null
   }
 
   @Input()
@@ -25,17 +23,8 @@ export class CurrencyLabelComponent implements OnInit {
     private currencyService: CurrencyService
   ) {}
 
-  ngOnInit(): void {
-    this.currencyService.list()
-      .subscribe(result => this.currencies = result)
-  }
-
-  isCrypto(): boolean {
-    return this.currency != null && (this.currency == 'USDT' || this.currency == 'TRX')
-  }
-
   formatCurrency(): string {
-    switch (this.currency) {
+    switch (this._currency?.name) {
       case 'RUB': return 'fi-ru'
       case 'USD': return 'fi-us'
       case 'EUR': return 'fi-eu'
