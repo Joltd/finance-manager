@@ -31,17 +31,25 @@ export class OperationViewComponent implements OnInit, OnDestroy {
   })
 
   private _operation: Operation | null = null
+  @Input()
   type: 'EXCHANGE' | 'EXPENSE' | 'INCOME' = 'EXCHANGE'
 
   @Input()
   set operation(operation: Operation | null) {
     if (operation == null) {
+      this._operation = null
+      this.type = 'EXCHANGE'
       return
     }
 
-    this._operation = operation
     if (isExpense(operation)) {
       this.type = 'EXPENSE'
+    } else if (isIncome(operation)) {
+      this.type = 'INCOME'
+    }
+
+    this._operation = operation
+    if (this.type == 'EXPENSE') {
       this.expenseIncome.patchValue({
         id: operation.id,
         date: operation.date,
@@ -50,8 +58,7 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         amount: operation.amountFrom,
         description: operation.description
       })
-    } else if (isIncome(operation)) {
-      this.type = 'INCOME'
+    } else if (this.type == 'INCOME') {
       this.expenseIncome.patchValue({
         id: operation.id,
         date: operation.date,
@@ -60,7 +67,7 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         amount: operation.amountFrom,
         description: operation.description
       })
-    } else {
+    } else if (this.type == 'EXCHANGE') {
       this.exchange.patchValue(operation)
     }
   }

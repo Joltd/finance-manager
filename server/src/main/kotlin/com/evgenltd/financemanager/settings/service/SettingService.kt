@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.reference.record.toReference
 import com.evgenltd.financemanager.reference.service.AccountService
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.record.ApplicationSettings
+import com.evgenltd.financemanager.settings.record.UpdateApplicationSettings
 import com.evgenltd.financemanager.settings.repository.SettingRepository
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
@@ -34,7 +35,7 @@ class SettingService(
     )
 
     @Transactional
-    fun update(request: ApplicationSettings) {
+    fun update(request: UpdateApplicationSettings) {
         updateSetting(OPERATION_DEFAULT_CURRENCY, request.operationDefaultCurrency)
         updateSetting(OPERATION_DEFAULT_ACCOUNT, request.operationDefaultAccount?.id?.toString())
         updateSetting(OPERATION_CASH_ACCOUNT, request.operationCashAccount?.id?.toString())

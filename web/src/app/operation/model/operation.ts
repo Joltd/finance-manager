@@ -19,11 +19,11 @@ export interface Operation {
 }
 
 export function isExpense(operation: Operation): boolean {
-  return operation.accountFrom.type == 'ACCOUNT' && operation.accountTo.type == 'EXPENSE'
+  return operation.accountFrom?.type == 'ACCOUNT' && operation.accountTo?.type == 'EXPENSE'
 }
 
 export function isIncome(operation: Operation): boolean {
-  return operation.accountFrom.type == 'INCOME' && operation.accountTo.type == 'ACCOUNT'
+  return operation.accountFrom?.type == 'INCOME' && operation.accountTo?.type == 'ACCOUNT'
 }
 
 export function isExchange(operation: Operation): boolean {

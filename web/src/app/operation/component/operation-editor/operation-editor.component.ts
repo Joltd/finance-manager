@@ -15,6 +15,7 @@ import {Reference} from "../../../common/model/reference";
 })
 export class OperationEditorComponent implements OnInit {
 
+  type: 'EXCHANGE' | 'EXPENSE' | 'INCOME' = 'EXCHANGE'
   operation: Operation | null = null
 
   constructor(
@@ -71,7 +72,7 @@ export class OperationEditorComponent implements OnInit {
 
   private newByTemplate(template: 'EXPENSE_CASH' | 'EXCHANGE_TO_CASH' | 'EXCHANGE_FROM_CASH') {
     let amount = null
-    let currency = this.settingsService.settings.operationDefaultCurrency
+    let currency = this.settingsService.settings?.operationDefaultCurrency
     if (currency != null) {
       amount = {
         currency: currency,
@@ -79,14 +80,17 @@ export class OperationEditorComponent implements OnInit {
       }
     }
 
-    let cashAccount = this.settingsService.settings.operationCashAccount
-    let defaultAccount = this.settingsService.settings.operationDefaultAccount
+    let cashAccount = this.settingsService.settings?.operationCashAccount
+    let defaultAccount = this.settingsService.settings?.operationDefaultAccount
 
     if (template === 'EXPENSE_CASH') {
+      this.type = 'EXPENSE'
       this.operationTemplate(amount, defaultAccount, null)
     } else if (template === 'EXCHANGE_TO_CASH') {
+      this.type = 'EXCHANGE'
       this.operationTemplate(amount, defaultAccount, cashAccount)
     } else if (template === 'EXCHANGE_FROM_CASH') {
+      this.type = 'EXCHANGE'
       this.operationTemplate(amount, cashAccount, defaultAccount)
     }
   }
@@ -96,7 +100,7 @@ export class OperationEditorComponent implements OnInit {
     accountFrom: Reference | null,
     accountTo: Reference | null,
   ): any {
-    return {
+    this.operation = {
       id: null,
       date: moment().format("yyyy-MM-DD"),
       accountFrom: accountFrom,
@@ -104,7 +108,7 @@ export class OperationEditorComponent implements OnInit {
       accountTo: accountTo,
       amountTo: amount,
       description: '',
-    }
+    } as any
   }
 
 }

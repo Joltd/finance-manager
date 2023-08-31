@@ -8,3 +8,9 @@ data class ApplicationSettings(
     val operationDefaultAccount: Reference?,
     val operationCashAccount: Reference?
 )
+
+data class UpdateApplicationSettings(
+    val operationDefaultCurrency: String?,
+    val operationDefaultAccount: Reference?,
+    val operationCashAccount: Reference?
+)

@@ -13,6 +13,7 @@ export class SettingsService {
   constructor(private http: HttpClient) {}
 
   load() {
+    console.log('SettingsService.load()')
     this.http.get<ApplicationSettings>('/setting')
       .subscribe(result => this.settings = result)
   }

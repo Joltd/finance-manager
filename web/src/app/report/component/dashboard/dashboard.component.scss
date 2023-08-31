@@ -1,8 +1,44 @@
 :host {
-  display: grid;
-  grid-auto-flow: row;
-  grid-gap: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  justify-items: center;
+  align-items: center;
 }
+
+.cash {
+  width: 10em;
+}
+
+.button-section {
+  display: grid;
+  grid-template-rows: min-content min-content;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 1em;
+
+  .title {
+    grid-column: 1 / 4;
+  }
+
+  button {
+    width: 7em;
+    height: 5em;
+  }
+}
+
+.expense {
+  background-color: #ef5350!important;
+  color: #fff!important;
+}
+
+.exchange {
+  background-color: #1e88e5!important;
+  color: #fff!important;
+}
+
+
+
+
 
 .total-and-actions {
   display: grid;
@@ -32,12 +68,3 @@
   }
 }
 
-.expense {
-  background-color: #ef5350!important;
-  color: #fff!important;
-}
-
-.exchange {
-  background-color: #1e88e5!important;
-  color: #fff!important;
-}

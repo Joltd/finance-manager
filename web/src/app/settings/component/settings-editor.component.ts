@@ -37,7 +37,7 @@ export class SettingsEditorComponent implements OnInit,OnDestroy {
   }
 
   save() {
-    if (this.form.valid) {
+    if (this.form.invalid) {
       return
     }
     this.settingsService.update(this.form.value)
