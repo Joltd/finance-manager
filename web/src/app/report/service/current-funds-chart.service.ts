@@ -10,8 +10,8 @@ export class CurrentFundsChartService {
 
   constructor(private http: HttpClient) {}
 
-  load(): Observable<CurrentFundsChart> {
-    return this.http.get<CurrentFundsChart>('/current-funds-chart')
+  load(settings: any): Observable<CurrentFundsChart> {
+    return this.http.post<CurrentFundsChart>('/current-funds-chart', settings)
   }
 
 }

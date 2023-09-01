@@ -11,7 +11,7 @@ export class CumulativeFundsChartService {
   constructor(private http: HttpClient) {}
 
   load(settings: any): Observable<CumulativeFundsChart> {
-    return this.http.post<CumulativeFundsChart>('/api/report/current-funds-chart', settings);
+    return this.http.post<CumulativeFundsChart>('/cumulative-funds-chart', settings);
   }
 
 }

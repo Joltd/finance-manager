@@ -1,9 +1,10 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {isExpense, isIncome, Operation} from "../../model/operation";
+import {Operation} from "../../model/operation";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {Reference} from "../../../common/model/reference";
 import {Account} from "../../../reference/model/account";
+import * as moment from "moment";
 
 @Component({
   selector: 'operation-view',
@@ -21,6 +22,14 @@ export class OperationViewComponent implements OnInit, OnDestroy {
     accountTo: new FormControl(null, Validators.required),
     description: new FormControl('')
   })
+  transfer: FormGroup = new FormGroup({
+    id: new FormControl(null),
+    date: new FormControl(null, Validators.required),
+    amount: new FormControl(null, Validators.required),
+    accountFrom: new FormControl(null, Validators.required),
+    accountTo: new FormControl(null, Validators.required),
+    description: new FormControl('')
+  })
   expenseIncome: FormGroup = new FormGroup({
     id: new FormControl(null),
     date: new FormControl(null, Validators.required),
@@ -30,26 +39,27 @@ export class OperationViewComponent implements OnInit, OnDestroy {
     description: new FormControl('')
   })
 
-  private _operation: Operation | null = null
-  @Input()
-  type: 'EXCHANGE' | 'EXPENSE' | 'INCOME' = 'EXCHANGE'
+  private _operation: Operation = {
+    id: null,
+    date: moment().format('YYYY-MM-DD'),
+    type: 'EXCHANGE',
+    accountFrom: null,
+    amountFrom: null,
+    accountTo: null,
+    amountTo: null,
+    description: ''
+  } as any
+
+  get operation(): Operation {
+    return this._operation
+  }
 
   @Input()
   set operation(operation: Operation | null) {
     if (operation == null) {
-      this._operation = null
-      this.type = 'EXCHANGE'
       return
-    }
-
-    if (isExpense(operation)) {
-      this.type = 'EXPENSE'
-    } else if (isIncome(operation)) {
-      this.type = 'INCOME'
-    }
-
-    this._operation = operation
-    if (this.type == 'EXPENSE') {
+    } else if (operation.type == 'EXPENSE') {
+      this._operation = operation
       this.expenseIncome.patchValue({
         id: operation.id,
         date: operation.date,
@@ -58,7 +68,8 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         amount: operation.amountFrom,
         description: operation.description
       })
-    } else if (this.type == 'INCOME') {
+    } else if (operation.type == 'INCOME') {
+      this._operation = operation
       this.expenseIncome.patchValue({
         id: operation.id,
         date: operation.date,
@@ -67,7 +78,18 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         amount: operation.amountFrom,
         description: operation.description
       })
-    } else if (this.type == 'EXCHANGE') {
+    } else if (operation.type == 'TRANSFER') {
+      this._operation = operation
+      this.transfer.patchValue({
+        id: operation.id,
+        date: operation.date,
+        amount: operation.amountFrom,
+        accountFrom: operation.accountFrom,
+        accountTo: operation.accountTo,
+        description: operation.description
+      })
+    } else if (operation.type == 'EXCHANGE') {
+      this._operation = operation
       this.exchange.patchValue(operation)
     }
   }
@@ -94,10 +116,11 @@ export class OperationViewComponent implements OnInit, OnDestroy {
   }
 
   private save() {
-    if (this.type == 'EXCHANGE' && this.exchange.valid) {
+    if (this._operation?.type == 'EXCHANGE' && this.exchange.valid) {
       this._operation = {
         id: this.exchange.value.id,
         date: this.exchange.value.date,
+        type: 'EXCHANGE',
         accountFrom: this.referenceAsAccount(this.exchange.value.accountFrom, 'ACCOUNT'),
         amountFrom: this.exchange.value.amountFrom,
         accountTo: this.referenceAsAccount(this.exchange.value.accountTo, 'ACCOUNT'),
@@ -105,10 +128,23 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         description: this.exchange.value.description,
       }
       this.onSave.emit(this._operation)
-    } else if (this.type == 'EXPENSE' && this.expenseIncome.valid) {
+    } else if (this._operation?.type == 'TRANSFER' && this.transfer.valid) {
+      this._operation = {
+        id: this.transfer.value.id,
+        date: this.transfer.value.date,
+        type: 'TRANSFER',
+        accountFrom: this.referenceAsAccount(this.transfer.value.accountFrom, 'ACCOUNT'),
+        amountFrom: this.transfer.value.amount,
+        accountTo: this.referenceAsAccount(this.transfer.value.accountTo, 'ACCOUNT'),
+        amountTo: this.transfer.value.amount,
+        description: this.transfer.value.description,
+      }
+      this.onSave.emit(this._operation)
+    } else if (this._operation?.type == 'EXPENSE' && this.expenseIncome.valid) {
       this._operation = {
         id: this.expenseIncome.value.id,
         date: this.expenseIncome.value.date,
+        type: 'EXPENSE',
         accountFrom: this.referenceAsAccount(this.expenseIncome.value.account, 'ACCOUNT'),
         amountFrom: this.expenseIncome.value.amount,
         accountTo: this.referenceAsAccount(this.expenseIncome.value.category, 'EXPENSE'),
@@ -116,10 +152,11 @@ export class OperationViewComponent implements OnInit, OnDestroy {
         description: this.expenseIncome.value.description,
       }
       this.onSave.emit(this._operation)
-    } else if (this.type == 'INCOME' && this.expenseIncome.valid) {
+    } else if (this._operation?.type == 'INCOME' && this.expenseIncome.valid) {
       this._operation = {
         id: this.expenseIncome.value.id,
         date: this.expenseIncome.value.date,
+        type: 'INCOME',
         accountFrom: this.referenceAsAccount(this.expenseIncome.value.category, 'INCOME'),
         amountFrom: this.expenseIncome.value.amount,
         accountTo: this.referenceAsAccount(this.expenseIncome.value.account, 'ACCOUNT'),

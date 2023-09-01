@@ -18,6 +18,7 @@ import {MatListModule} from "@angular/material/list";
 import {MatMenuModule} from "@angular/material/menu";
 import {OperationViewComponent} from "./component/operation-view/operation-view.component";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {ReferenceModule} from "../reference/reference.module";
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
     MatMenuModule,
     NgForOf,
     MatButtonToggleModule,
-    FormsModule
+    FormsModule,
+    ReferenceModule
   ],
   providers: [],
   exports: [

@@ -13,9 +13,7 @@ import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationPage
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.operation.record.OperationType
 import com.evgenltd.financemanager.operation.repository.OperationRepository
-import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.toRecord
 import com.evgenltd.financemanager.reference.repository.AccountRepository
@@ -35,12 +33,7 @@ class OperationService(
         operationRepository.findAllByCondition(PageRequest.of(filter.page, filter.size)) {
             (Operation.Companion::date gte filter.dateFrom) and
             (Operation.Companion::date lt filter.dateTo) and
-            when (filter.type) {
-                OperationType.EXPENSE -> (Operation.Companion::accountToType eq AccountType.EXPENSE)
-                OperationType.INCOME -> (Operation.Companion::accountFromType eq AccountType.INCOME)
-                OperationType.EXCHANGE -> (Operation.Companion::accountFromType eq AccountType.ACCOUNT) and (Operation.Companion::accountToType eq AccountType.ACCOUNT)
-                null -> emptyCondition()
-            } and
+            (Operation.Companion::type eq filter.type) and
             (
                 filter.account?.let {
                     ((Operation.Companion::accountFromType eq AccountType.ACCOUNT) and (Operation.Companion::accountFromId eq it.id)) or
@@ -84,6 +77,7 @@ class OperationService(
     private fun Operation.toRecord(): OperationRecord = OperationRecord(
         id = id,
         date = date,
+        type = type,
         amountFrom = amountFrom,
         accountFrom = accountFrom.toRecord(),
         amountTo = amountTo,
@@ -94,6 +88,7 @@ class OperationService(
     private fun OperationRecord.toEntity(): Operation = Operation(
         id = id,
         date = date,
+        type = type,
         amountFrom = amountFrom,
         accountFrom = accountRepository.find(accountFrom.id!!),
         amountTo = amountTo,

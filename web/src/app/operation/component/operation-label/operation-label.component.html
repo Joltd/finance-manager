@@ -1,7 +1,7 @@
 <date-label *ngIf="!hideDate" [date]="operation.date" [disabled]="disabled"></date-label>
 <div class="amount">
   <amount-label class="amount-from" [amount]="operation.amountFrom"></amount-label>
-  <amount-label class="amount-to" *ngIf="isExchange()" [amount]="operation.amountTo"></amount-label>
+  <amount-label class="amount-to" *ngIf="!sameAmount()" [amount]="operation.amountTo"></amount-label>
 </div>
 <div class="account">
   <div class="name">

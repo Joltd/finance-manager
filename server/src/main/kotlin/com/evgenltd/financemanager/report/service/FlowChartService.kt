@@ -5,7 +5,6 @@ import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.service.TransactionService
-import com.evgenltd.financemanager.report.record.FLowChartAverageRecord
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSeriesRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
@@ -30,40 +29,35 @@ class FlowChartService(
         val series = transactionService.findTransactions(settings.dateFrom, settings.dateTo, settings.categories)
             .groupingBy {
                 if (settings.total) {
-                    it.account.type.name
+                    Key(it.account.type.name, it.account.type.name)
                 } else {
-                    it.account.name
+                    Key(it.account.id.toString(), it.account.name)
                 }
             }
             .aggregate { _, accumulator: MutableMap<LocalDate,Amount>?, transaction, _ ->
                 val date = transaction.date.withDayOfMonth(1)
                 val entries = accumulator ?: dates.associateWith { emptyAmount }.toMutableMap()
                 entries.compute(date) { _, accumulatedAmount ->
-                    (accumulatedAmount ?: emptyAmount) + transaction.signedAmount().convertTo(transaction.date, settings.currency)
+                    (accumulatedAmount ?: emptyAmount) + transaction.amount.convertTo(transaction.date, settings.currency)
                 }
                 entries
             }
             .map {
+                val values = it.value.entries
+                    .sortedBy { entry -> entry.key }
+                    .map { entry -> entry.value.toBigDecimal() }
+                val average = values.sumOf { value -> value } / values.size.toBigDecimal()
                 FlowChartSeriesRecord(
-                    name = it.key,
-                    values = it.value.entries
-                        .sortedBy { entry -> entry.key }
-                        .map { entry -> entry.value.toBigDecimal() }
+                    id = it.key.id,
+                    name = it.key.name,
+                    values = values + if (settings.showAverage) listOf(average) else emptyList()
                 )
             }
             .sortedBy { it.name }
 
-        val averages = series.map {
-            FLowChartAverageRecord(
-                name = it.name,
-                value = it.values.sumOf { value -> value } / it.values.size.toBigDecimal()
-            )
-        }.sortedBy { it.name }
-
         return FlowChartRecord(
-            dates = dates,
-            series = series,
-            averages = averages
+            dates = dates.map { it.toString() } + if (settings.showAverage) listOf("Average") else emptyList(),
+            series = series
         )
 
     }
@@ -72,5 +66,7 @@ class FlowChartService(
         val rate = exchangeRateService.rate(date, currency, target)
         return (toBigDecimal() * rate).fromFractional(target)
     }
+
+    private data class Key(val id: String, val name: String)
 
 }

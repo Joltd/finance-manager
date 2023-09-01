@@ -1,3 +1,5 @@
+@use "../../../../variables";
+
 :host {
   display: grid;
   grid-template-rows: min-content 1fr;
@@ -14,6 +16,10 @@
 form {
   display: flex;
   flex-direction: column;
+
+  mat-slide-toggle {
+    margin-bottom: 1em;
+  }
 }
 
 .hidden {
@@ -21,9 +27,9 @@ form {
 }
 
 .expense {
-  color: #ef5350;
+  color: variables.$expense-color;
 }
 
 .income {
-  color: #66bb6a;
+  color: variables.$income-color;
 }

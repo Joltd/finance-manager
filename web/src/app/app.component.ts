@@ -29,7 +29,7 @@ export class AppComponent implements OnInit {
     })
     this.breakpointObserver.observe(['(min-width: 40em)'])
       .subscribe(state => this.wide = state.matches)
-    this.settingsService.load()
+    this.settingsService.load().subscribe()
     this.currencyService.load()
   }
 

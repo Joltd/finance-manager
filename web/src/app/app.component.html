@@ -7,6 +7,8 @@
 <mat-sidenav-container>
   <mat-sidenav #left position="start" class="left-side" [class.left-side-narrow]="wide">
     <mat-nav-list>
+      <a mat-list-item [routerLink]="['dashboard']" (click)="left.close()">Dashboard</a>
+      <mat-divider></mat-divider>
       <a mat-list-item [routerLink]="['currency']" (click)="left.close()">Currency</a>
       <a mat-list-item [routerLink]="['account']" (click)="left.close()">Account</a>
       <mat-divider></mat-divider>

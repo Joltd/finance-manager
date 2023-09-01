@@ -1,0 +1,14 @@
+:host {
+  display: grid;
+  grid-template-rows: min-content 1fr;
+  gap: 1em;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart {
+  height: 20em;
+}

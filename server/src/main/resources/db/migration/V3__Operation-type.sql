@@ -1,0 +1,1 @@
+alter table operations add column type varchar(255) not null;

@@ -1,7 +1,7 @@
 <mat-expansion-panel>
   <mat-expansion-panel-header>Settings</mat-expansion-panel-header>
 
-  <form [formGroup]="settings">
+  <form [formGroup]="flowChartService.settings">
 
     <mat-form-field>
       <mat-label>From</mat-label>
@@ -40,6 +40,6 @@
   </form>
 </mat-expansion-panel>
 
-<mat-card *ngIf="flow">
+<mat-card [hidden]="!flow">
   <div #chart [style.height]="chartHeight + 'em'"></div>
 </mat-card>

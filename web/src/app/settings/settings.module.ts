@@ -9,6 +9,7 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {MatSelectModule} from "@angular/material/select";
 import {NgForOf} from "@angular/common";
 import {MatChipsModule} from "@angular/material/chips";
+import {ReferenceModule} from "../reference/reference.module";
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import {MatChipsModule} from "@angular/material/chips";
     ReactiveFormsModule,
     MatSelectModule,
     NgForOf,
-    MatChipsModule
+    MatChipsModule,
+    ReferenceModule
   ],
   exports: [
     SettingsEditorComponent

@@ -1,7 +1,7 @@
 import {NgModule} from "@angular/core";
 import {DashboardComponent} from "./component/dashboard/dashboard.component";
 import {MatCardModule} from "@angular/material/card";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf, NgStyle} from "@angular/common";
 import {CommonModule} from "../common/common.module";
 import {MatListModule} from "@angular/material/list";
 import {MatChipsModule} from "@angular/material/chips";
@@ -17,6 +17,7 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {CurrentFundsChartComponent} from "./component/current-fund-chart/current-funds-chart.component";
 import {CumulativeFundsChartComponent} from "./component/cumulative-funds-chart/cumulative-funds-chart.component";
 import {RouterLink} from "@angular/router";
+import {MatRippleModule} from "@angular/material/core";
 
 @NgModule({
   declarations: [
@@ -40,7 +41,9 @@ import {RouterLink} from "@angular/router";
     MatButtonModule,
     MatIconModule,
     MatSlideToggleModule,
-    RouterLink
+    RouterLink,
+    NgStyle,
+    MatRippleModule
   ],
   exports: [
     DashboardComponent,

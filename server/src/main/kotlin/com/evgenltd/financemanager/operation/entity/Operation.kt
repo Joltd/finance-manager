@@ -29,6 +29,8 @@ class Operation(
 
     var date: LocalDate,
 
+    var type: OperationType,
+
     @Embedded
     @AttributeOverrides(
         AttributeOverride(name = "value", column = Column(name = "amount_from_value")),
@@ -57,6 +59,8 @@ class Operation(
     companion object {
         fun date(root: Root<Operation>): Path<LocalDate> = root.get(Operation::date.name)
 
+        fun type(root: Root<Operation>): Path<OperationType> = root.get(Operation::type.name)
+
         fun accountFromId(root: Root<Operation>): Path<UUID> = root.get<Account>(Operation::accountFrom.name).get(Account::id.name)
 
         fun accountFromType(root: Root<Operation>): Path<AccountType> = root.get<Account>(Operation::accountFrom.name).get(Account::type.name)
@@ -70,4 +74,11 @@ class Operation(
         fun currencyTo(root: Root<Operation>): Path<String> = root.get<Amount>(Operation::amountTo.name).get(Amount::currency.name)
     }
 
+}
+
+enum class OperationType {
+    EXPENSE,
+    INCOME,
+    EXCHANGE,
+    TRANSFER,
 }

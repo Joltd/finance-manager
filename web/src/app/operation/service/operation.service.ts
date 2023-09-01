@@ -3,6 +3,8 @@ import {HttpClient} from "@angular/common/http";
 import {FormControl, FormGroup} from "@angular/forms";
 import {Operation, OperationPage} from "../model/operation";
 import {Observable} from "rxjs";
+import {Router} from "@angular/router";
+import * as moment from "moment";
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +12,8 @@ import {Observable} from "rxjs";
 export class OperationService {
 
   filter: FormGroup = new FormGroup({
-    dateFrom: new FormControl(null),
-    dateTo: new FormControl(null),
+    dateFrom: new FormControl(moment().subtract(3, 'month').format('yyyy-MM-DD')),
+    dateTo: new FormControl(moment().format('yyyy-MM-DD')),
     type: new FormControl(null),
     category: new FormControl(null),
     account: new FormControl(null),
@@ -24,7 +26,26 @@ export class OperationService {
     operations: []
   }
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
+
+  viewOperations(filter: any) {
+    this.filter.setValue({
+      ...{
+        dateFrom: null,
+        dateTo: null,
+        type: null,
+        category: null,
+        account: null,
+        currency: null,
+      },
+      ...filter
+    })
+    this.operationPage.page = 0
+    this.router.navigate(['operation']).then()
+  }
 
   list() {
     let filter = {

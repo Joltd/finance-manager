@@ -16,11 +16,15 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
 import {CurrencyBrowserComponent} from "./component/currency-browser/currency-browser.component";
 import {MatSelectModule} from "@angular/material/select";
 import {CurrencyEditorComponent} from "./component/currency-editor/currency-editor.component";
+import {AccountInputComponent} from "./component/account-input/account-input.component";
+import {PortalModule} from "@angular/cdk/portal";
+import {MatTabsModule} from "@angular/material/tabs";
 
 @NgModule({
   declarations: [
     AccountBrowserComponent,
     AccountEditorComponent,
+    AccountInputComponent,
     CurrencyBrowserComponent,
     CurrencyEditorComponent
   ],
@@ -38,11 +42,14 @@ import {CurrencyEditorComponent} from "./component/currency-editor/currency-edit
     CommonModule,
     MatSlideToggleModule,
     MatCheckboxModule,
-    MatSelectModule
+    MatSelectModule,
+    PortalModule,
+    MatTabsModule
   ],
   exports: [
     AccountBrowserComponent,
     AccountEditorComponent,
+    AccountInputComponent,
     CurrencyBrowserComponent,
     CurrencyEditorComponent
   ]

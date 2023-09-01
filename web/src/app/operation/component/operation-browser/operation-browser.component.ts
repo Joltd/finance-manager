@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {Router} from "@angular/router";
 import {OperationService} from "../../service/operation.service";
 import {PageEvent} from "@angular/material/paginator";
@@ -10,7 +10,7 @@ import {MatExpansionPanel} from "@angular/material/expansion";
   templateUrl: './operation-browser.component.html',
   styleUrls: ['./operation-browser.component.scss']
 })
-export class OperationBrowserComponent implements OnInit,OnDestroy {
+export class OperationBrowserComponent implements OnInit,AfterViewInit,OnDestroy {
 
   @ViewChild('filter')
   filter!: MatExpansionPanel
@@ -32,6 +32,10 @@ export class OperationBrowserComponent implements OnInit,OnDestroy {
         }
       }
     ])
+  }
+
+  ngAfterViewInit(): void {
+    this.load()
   }
 
   ngOnDestroy(): void {

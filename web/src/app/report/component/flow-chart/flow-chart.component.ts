@@ -19,7 +19,7 @@ import {OperationService} from "../../../operation/service/operation.service";
 })
 export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @ViewChild('filter')
+  @ViewChild(MatExpansionPanel)
   filter!: MatExpansionPanel
 
   @ViewChild('chart')
@@ -30,22 +30,13 @@ export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
   expenseCategories: Reference[] = []
   incomeCategories: Reference[] = []
 
-  settings: FormGroup = new FormGroup({
-    dateFrom: new FormControl(moment().subtract(3, 'month').format('yyyy-MM-DD')),
-    dateTo: new FormControl(moment().format('yyyy-MM-DD')),
-    categories: new FormControl([]),
-    currency: new FormControl('USD'),
-    total: new FormControl(true),
-    showAverage: new FormControl(false),
-  })
   flow!: FlowChart
 
   constructor(
-    private flowChartService: FlowChartService,
+    public flowChartService: FlowChartService,
     private referenceService: ReferenceService,
     private operationService: OperationService,
-    private toolbarService: ToolbarService,
-    private router: Router
+    private toolbarService: ToolbarService
   ) {}
 
   ngOnInit(): void {
@@ -63,8 +54,9 @@ export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
     window.onresize = function () {
       chart.resize()
     }
-    chart.on('click', params => this.forward(params))
+    chart.on('click', params => this.drillDown(params))
     this.chart = chart
+    this.apply()
   }
 
   ngOnDestroy(): void {
@@ -72,33 +64,38 @@ export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chart.dispose()
   }
 
-  forward(params: any) {
-    if (this.settings.value.total) {
-      this.settings.patchValue({
+  drillDown(params: any) {
+    if (this.flowChartService.settings.value.total) {
+      this.flowChartService.settings.patchValue({
         total: false
       })
-      // maybe add type setting
+      this.apply()
       return
     }
 
-    this.operationService.filter.setValue({
+    if (params.name == 'Average') {
+      return
+    }
+
+    this.operationService.viewOperations({
       dateFrom: moment(params.name).format('yyyy-MM-DD'),
       dateTo: moment(params.name).add(1, 'month').format('yyyy-MM-DD'),
-      category: params.seriesName
+      category: {
+        id: params.seriesId,
+        name: params.seriesName
+      }
     })
-    this.operationService.operationPage.page = 0
-    this.router.navigate(['operation']).then()
   }
 
   apply() {
     this.filter.close()
-    this.flowChartService.load(this.settings.value)
+    this.flowChartService.load()
       .subscribe(result => this.refreshChart(result))
   }
 
   private refreshChart(flow: FlowChart) {
     this.flow = flow
-    this.chartHeight = flow.dates.length * flow.series.length * 4
+    this.chartHeight = flow.dates.length * flow.series.length * 2
 
     let option = {
       xAxis: {
@@ -113,17 +110,43 @@ export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
         axisTick: {
           show: false
         },
+        axisLabel: {
+          formatter: (value: string) => {
+            return value == 'Average'
+              ? 'Average'
+              : moment(value).format('MMM YYYY');
+          }
+        },
         data: flow.dates
+      },
+      legend: {
+        show: true,
+        type: 'scroll',
+        orient: 'vertical',
+        right: '1%',
+      },
+      grid: {
+        left: '15%',
+        right: '25%',
+        top: '0%',
+        bottom: '0%',
       },
       series: flow.series.map(series => {
         return {
           type: 'bar',
-          name: series.name,
+          id: series.id,
+          name: series.name == 'EXPENSE' ? 'Expense'
+              : series.name == 'INCOME' ? 'Income'
+              : series.name,
           emphasis: {
             focus: 'series'
           },
           itemStyle: {
             borderRadius: 5,
+          },
+          label: {
+            show: true,
+            position: 'insideLeft'
           },
           barGap: '10%',
           barCategoryGap: '10%',
@@ -139,9 +162,7 @@ export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearCategories() {
-    this.settings.patchValue({
-      categories: []
-    })
+    this.flowChartService.clearCategories()
   }
 
 }

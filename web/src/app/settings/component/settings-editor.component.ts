@@ -29,11 +29,16 @@ export class SettingsEditorComponent implements OnInit,OnDestroy {
       'Settings',
       [{ name: 'save', icon: 'done', action: () => this.save() }]
     )
-    this.form.patchValue(this.settingsService.settings)
+    this.load()
   }
 
   ngOnDestroy(): void {
     this.toolbarService.reset()
+  }
+
+  private load() {
+    this.settingsService.load()
+      .subscribe(settings => this.form.patchValue(settings))
   }
 
   save() {
@@ -41,7 +46,10 @@ export class SettingsEditorComponent implements OnInit,OnDestroy {
       return
     }
     this.settingsService.update(this.form.value)
-      .subscribe(() => this.shortMessageService.show("Done"))
+      .subscribe(() => {
+        this.shortMessageService.show("Done")
+        this.load()
+      })
   }
 
 }

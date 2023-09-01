@@ -1,5 +1,5 @@
 import {Component, HostBinding, Input} from "@angular/core";
-import {isExchange, isExpense, isIncome, Operation} from "../../model/operation";
+import {Operation} from "../../model/operation";
 
 @Component({
   selector: 'operation-label',
@@ -18,16 +18,9 @@ export class OperationLabelComponent {
   @Input()
   hideDate: boolean = false
 
-  isExpense(): boolean {
-    return isExpense(this.operation)
-  }
-
-  isIncome(): boolean {
-    return isIncome(this.operation)
-  }
-
-  isExchange(): boolean {
-    return isExchange(this.operation)
+  sameAmount(): boolean {
+    return this.operation.amountFrom.currency == this.operation.amountTo.currency
+      && this.operation.amountFrom.value == this.operation.amountTo.value
   }
 
 }

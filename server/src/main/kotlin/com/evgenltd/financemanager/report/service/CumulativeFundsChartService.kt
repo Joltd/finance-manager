@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.service.TransactionService
+import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartRecord
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartSettingsRecord
 import org.springframework.stereotype.Service
@@ -23,7 +24,7 @@ class CumulativeFundsChartService(
             it.plusMonths(1).takeIf { date -> date < dateTo }
         }
 
-        val transactions = transactionService.findAll()
+        val transactions = transactionService.findTransactions(AccountType.ACCOUNT)
         var cumulativeAmount = transactions.filter { it.date <= dateFrom }
             .map { it.signedAmount().convertTo(it.date, settings.currency) }
             .fold(emptyAmount(settings.currency)) { acc, amount -> acc + amount }
@@ -42,7 +43,7 @@ class CumulativeFundsChartService(
             .map { entry ->
                 cumulativeAmount.also { cumulativeAmount =+ entry.value + cumulativeAmount }
             }
-            .map { it.value.toBigDecimal() }
+            .map { it.toBigDecimal() }
             .toList()
 
         return CumulativeFundsChartRecord(

@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.operation.record
 
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import java.time.LocalDate
@@ -27,15 +28,10 @@ data class OperationPage(
 data class OperationRecord(
     val id: UUID?,
     val date: LocalDate,
+    val type: OperationType,
     val amountFrom: Amount,
     val accountFrom: AccountRecord,
     val amountTo: Amount,
     val accountTo: AccountRecord,
     val description: String
 )
-
-enum class OperationType {
-    EXPENSE,
-    INCOME,
-    EXCHANGE,
-}

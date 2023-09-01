@@ -5,6 +5,7 @@ export interface FlowChart {
 }
 
 export interface FlowChartSeries {
+  id: string,
   name: string,
   values: number[]
 }

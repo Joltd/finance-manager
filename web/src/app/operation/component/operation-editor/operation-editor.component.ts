@@ -1,5 +1,5 @@
 import {Component, OnInit} from "@angular/core";
-import {Operation} from "../../model/operation";
+import {Operation, OperationType} from "../../model/operation";
 import {OperationService} from "../../service/operation.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {combineLatest} from "rxjs";
@@ -15,7 +15,6 @@ import {Reference} from "../../../common/model/reference";
 })
 export class OperationEditorComponent implements OnInit {
 
-  type: 'EXCHANGE' | 'EXPENSE' | 'INCOME' = 'EXCHANGE'
   operation: Operation | null = null
 
   constructor(
@@ -84,18 +83,16 @@ export class OperationEditorComponent implements OnInit {
     let defaultAccount = this.settingsService.settings?.operationDefaultAccount
 
     if (template === 'EXPENSE_CASH') {
-      this.type = 'EXPENSE'
-      this.operationTemplate(amount, defaultAccount, null)
+      this.operationTemplate('EXPENSE', amount, defaultAccount, null)
     } else if (template === 'EXCHANGE_TO_CASH') {
-      this.type = 'EXCHANGE'
-      this.operationTemplate(amount, defaultAccount, cashAccount)
+      this.operationTemplate('TRANSFER', amount, defaultAccount, cashAccount)
     } else if (template === 'EXCHANGE_FROM_CASH') {
-      this.type = 'EXCHANGE'
-      this.operationTemplate(amount, cashAccount, defaultAccount)
+      this.operationTemplate('TRANSFER', amount, cashAccount, defaultAccount)
     }
   }
 
   private operationTemplate(
+    type: OperationType,
     amount: Amount | null,
     accountFrom: Reference | null,
     accountTo: Reference | null,
@@ -103,6 +100,7 @@ export class OperationEditorComponent implements OnInit {
     this.operation = {
       id: null,
       date: moment().format("yyyy-MM-DD"),
+      type: type,
       accountFrom: accountFrom,
       amountFrom: amount,
       accountTo: accountTo,

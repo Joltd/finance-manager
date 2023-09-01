@@ -1,0 +1,45 @@
+<div class="name" [class.hide]="!shouldLabelFloat">{{name}}</div>
+<ng-template cdkPortal>
+  <mat-card>
+    <mat-card-content>
+
+      <mat-action-list *ngIf="isNoData()">
+        <button mat-list-item (click)="selectAccount(null)">Nothing</button>
+      </mat-action-list>
+
+      <mat-tab-group *ngIf="!isNoData()" animationDuration="0">
+
+        <mat-tab *ngIf="isAccountTypeEnabled()">
+          <ng-template mat-tab-label>
+            <mat-icon>account_balance_wallet</mat-icon>
+          </ng-template>
+          <mat-action-list>
+            <button mat-list-item (click)="selectAccount(null)">Nothing</button>
+            <button mat-list-item *ngFor="let account of accounts" [value]="account" (click)="selectAccount(account)">{{account.name}}</button>
+          </mat-action-list>
+        </mat-tab>
+
+        <mat-tab *ngIf="isExpenseTypeEnabled()">
+          <ng-template mat-tab-label>
+            <mat-icon class="expense">arrow_upward</mat-icon>
+          </ng-template>
+          <mat-action-list>
+            <button mat-list-item (click)="selectAccount(null)">Nothing</button>
+            <button mat-list-item *ngFor="let expense of expenses" [value]="expense" (click)="selectAccount(expense)">{{expense.name}}</button>
+          </mat-action-list>
+        </mat-tab>
+
+        <mat-tab *ngIf="isIncomeTypeEnabled()">
+          <ng-template mat-tab-label>
+            <mat-icon class="income">arrow_downward</mat-icon>
+          </ng-template>
+          <mat-action-list>
+            <button mat-list-item (click)="selectAccount(null)">Nothing</button>
+            <button mat-list-item *ngFor="let income of incomes" [value]="income" (click)="selectAccount(income)">{{income.name}}</button>
+          </mat-action-list>
+        </mat-tab>
+
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

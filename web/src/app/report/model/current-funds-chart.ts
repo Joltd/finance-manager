@@ -7,5 +7,11 @@ export interface CurrentFundsChart {
 
 export interface CurrentFundsChartEntry {
   account: Account
-  amounts: Amount[]
+  commonAmount: Amount
+  amounts: CurrentFundsChartEntryAmount[]
+}
+
+export interface CurrentFundsChartEntryAmount {
+  amount: Amount,
+  commonAmount: Amount
 }

@@ -8,6 +8,7 @@ import {CumulativeFundsChartService} from "../../service/cumulative-funds-chart.
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {Router} from "@angular/router";
 import {OperationService} from "../../../operation/service/operation.service";
+import * as moment from "moment";
 
 @Component({
   selector: 'cumulative-funds-chart',
@@ -16,7 +17,7 @@ import {OperationService} from "../../../operation/service/operation.service";
 })
 export class CumulativeFundsChartComponent implements OnInit,AfterViewInit,OnDestroy {
 
-  @ViewChild('filter')
+  @ViewChild(MatExpansionPanel)
   filter!: MatExpansionPanel
 
   @ViewChild('chart')
@@ -24,6 +25,7 @@ export class CumulativeFundsChartComponent implements OnInit,AfterViewInit,OnDes
   chart!: ECharts
 
   settings: FormGroup = new FormGroup({
+    dateFrom: new FormControl(moment().subtract(6, 'month').format('yyyy-MM-DD')),
     currency: new FormControl('USD')
   })
   chartData!: CumulativeFundsChart
@@ -48,7 +50,7 @@ export class CumulativeFundsChartComponent implements OnInit,AfterViewInit,OnDes
     }
     chart.on('click', params => this.forward(params))
     this.chart = chart
-
+    this.apply()
   }
 
   ngOnDestroy(): void {
@@ -57,12 +59,6 @@ export class CumulativeFundsChartComponent implements OnInit,AfterViewInit,OnDes
   }
 
   forward(params: any) {
-    // this.operationService.filter.setValue({
-    //   account: ,
-    //   currency:
-    // })
-    // this.operationService.operationPage.page = 0
-    // this.router.navigate(['operation']).then()
   }
 
   apply() {
@@ -77,14 +73,35 @@ export class CumulativeFundsChartComponent implements OnInit,AfterViewInit,OnDes
     let option = {
       xAxis: {
         type: 'category',
+        axisTick: {
+          show: false
+        },
+        axisLine: {
+          show: false
+        },
+        axisLabel: {
+          formatter: (value: string) => moment(value).format('MMM YYYY')
+        },
         data: chartData.dates
       },
       yAxis: {
-        type: 'value'
+        type: 'value',
+        show: false,
+        min: (value: any) => value.min - (value.max - value.min) * 0.2,
+        max: (value: any) => value.max + (value.max - value.min) * 0.2,
+      },
+      grid: {
+        left: '5%',
+        right: '5%',
+        top: '5%',
+        bottom: '10%',
       },
       series: [
         {
           type: 'line',
+          label: {
+            show: true,
+          },
           data: chartData.values
         }
       ]

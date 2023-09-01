@@ -11,6 +11,7 @@ export interface OperationPage {
 export interface Operation {
   id: string | null
   date: string
+  type: OperationType
   amountFrom: Amount
   accountFrom: Account
   amountTo: Amount
@@ -18,14 +19,4 @@ export interface Operation {
   description: string
 }
 
-export function isExpense(operation: Operation): boolean {
-  return operation.accountFrom?.type == 'ACCOUNT' && operation.accountTo?.type == 'EXPENSE'
-}
-
-export function isIncome(operation: Operation): boolean {
-  return operation.accountFrom?.type == 'INCOME' && operation.accountTo?.type == 'ACCOUNT'
-}
-
-export function isExchange(operation: Operation): boolean {
-  return !isExpense(operation) && !isIncome(operation)
-}
+export type OperationType = 'EXCHANGE' | 'TRANSFER' | 'EXPENSE' | 'INCOME'

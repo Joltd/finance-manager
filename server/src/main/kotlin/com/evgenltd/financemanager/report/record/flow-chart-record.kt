@@ -14,17 +14,12 @@ class FlowChartSettingsRecord(
 )
 
 data class FlowChartRecord(
-    val dates: List<LocalDate>,
-    val averages: List<FLowChartAverageRecord>,
+    val dates: List<String>,
     val series: List<FlowChartSeriesRecord>
 )
 
-data class FLowChartAverageRecord(
-    val name: String,
-    val value: BigDecimal
-)
-
 data class FlowChartSeriesRecord(
+    val id: String,
     val name: String,
     val values: List<BigDecimal>
 )

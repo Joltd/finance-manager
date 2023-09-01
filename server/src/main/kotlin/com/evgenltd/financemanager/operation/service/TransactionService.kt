@@ -45,8 +45,6 @@ class TransactionService(
         transactionRepository.deleteByOperationId(operationId)
     }
 
-    fun findAll(): List<Transaction> = transactionRepository.findAll()
-
     fun findCashTransactions(): List<Transaction> {
         val cashAccount = settingService.operationCashAccount() ?: return emptyList()
         return transactionRepository.findByAccount(cashAccount)

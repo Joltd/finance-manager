@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.exchangerate.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -19,8 +20,10 @@ class ExchangeRate(
 
     var date: LocalDate,
 
+    @Column(name = "\"from\"")
     var from: String,
 
+    @Column(name = "\"to\"")
     var to: String,
 
     var value: BigDecimal
