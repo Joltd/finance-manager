@@ -28,6 +28,7 @@ import {MatButtonModule} from "@angular/material/button";
 import {ExchangeRateModule} from "./exchangerate/exchange-rate.module";
 import {SettingsModule} from "./settings/settings.module";
 import {OperationModule} from "./operation/operation.modules";
+import {ImportExportModule} from "./importexport/import-export.module";
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import {OperationModule} from "./operation/operation.modules";
     MatButtonModule,
     ExchangeRateModule,
     SettingsModule,
-    OperationModule
+    OperationModule,
+    ImportExportModule
   ],
   providers: [
     restInterceptorProvider,

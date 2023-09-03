@@ -105,10 +105,11 @@ export class OperationViewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.toolbarService.setup('Operation', [
-      { name: 'save', icon: 'done', action: () => this.save() },
-      { name: 'close', icon: 'close', action: () => this.close() }
-    ])
+    this.toolbarService.setupSaveClose(
+      'Operation',
+      () => this.save(),
+      () => this.close()
+    )
   }
 
   ngOnDestroy(): void {

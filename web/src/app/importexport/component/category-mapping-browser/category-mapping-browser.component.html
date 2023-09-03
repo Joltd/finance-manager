@@ -1,0 +1,40 @@
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>Filters</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <form [formGroup]="settings">
+    <mat-form-field>
+      <mat-label>Parser</mat-label>
+      <reference-input api="/parser/reference" formControlName="parser"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Categories</mat-label>
+      <account-input [types]="['EXPENSE','INCOME']" formControlName="category"></account-input>
+    </mat-form-field>
+  </form>
+
+  <mat-paginator [hidePageSize]="true"
+                 [showFirstLastButtons]="true"
+                 [pageIndex]="categoryMappingPage.page"
+                 [length]="categoryMappingPage.total"
+                 (page)="onPage($event)"></mat-paginator>
+
+</mat-expansion-panel>
+
+<mat-card *ngIf="categoryMappingPage.mappings.length > 0">
+  <mat-action-list>
+    <button mat-list-item *ngFor="let mapping of categoryMappingPage.mappings" [matMenuTriggerFor]="menu">
+      <category-mapping-label [categoryMapping]="mapping" [hideParser]="settings.value.parser != null"></category-mapping-label>
+      <mat-menu #menu>
+        <button mat-menu-item (click)="edit(mapping.id!)">Edit</button>
+        <button mat-menu-item (click)="delete(mapping.id!)">Delete</button>
+      </mat-menu>
+    </button>
+  </mat-action-list>
+</mat-card>
+
+<button class="fab" mat-fab (click)="add()">
+  <mat-icon>add</mat-icon>
+</button>

@@ -19,6 +19,12 @@ import {
 } from "./report/component/cumulative-funds-chart/cumulative-funds-chart.component";
 import {CurrencyBrowserComponent} from "./reference/component/currency-browser/currency-browser.component";
 import {CurrencyEditorComponent} from "./reference/component/currency-editor/currency-editor.component";
+import {
+  CategoryMappingBrowserComponent
+} from "./importexport/component/category-mapping-browser/category-mapping-browser.component";
+import {
+  CategoryMappingEditorComponent
+} from "./importexport/component/category-mapping-editor/category-mapping-editor.component";
 
 const routes: Routes = [
   { path: 'currency', component: CurrencyBrowserComponent },
@@ -27,6 +33,8 @@ const routes: Routes = [
   { path: 'account/:id', component: AccountEditorComponent },
   { path: 'operation', component: OperationBrowserComponent },
   { path: 'operation/:id', component: OperationEditorComponent },
+  { path: 'category-mapping', component: CategoryMappingBrowserComponent },
+  { path: 'category-mapping/:id', component: CategoryMappingEditorComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'flow-chart', component: FlowChartComponent },
   { path: 'current-funds-chart', component: CurrentFundsChartComponent },
