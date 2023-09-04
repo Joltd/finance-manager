@@ -4,6 +4,7 @@ import {OperationService} from "../../service/operation.service";
 import {PageEvent} from "@angular/material/paginator";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {MatExpansionPanel} from "@angular/material/expansion";
+import {ImportData} from "../../../importexport/model/import-data";
 
 @Component({
   selector: 'operation-browser',

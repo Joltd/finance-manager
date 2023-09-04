@@ -33,5 +33,14 @@ export class AppComponent implements OnInit {
     this.currencyService.load()
   }
 
+  isWideMenu(): boolean {
+    return this.wide
+  }
+
+  isWideScreen(): boolean {
+    return this.settingsService.wideScreenToggle && this.wide
+  }
+
+
 }
 

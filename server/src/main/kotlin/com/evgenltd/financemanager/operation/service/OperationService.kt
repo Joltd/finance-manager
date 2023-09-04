@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.common.repository.gte
 import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.repository.or
+import com.evgenltd.financemanager.importexport.entity.SuggestedOperation
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationPage
@@ -30,7 +31,7 @@ class OperationService(
 ) {
 
     fun list(filter: OperationFilter): OperationPage =
-        operationRepository.findAllByCondition(PageRequest.of(filter.page, filter.size)) {
+        operationRepository.findAllByCondition(filter.page, filter.size) {
             (Operation.Companion::date gte filter.dateFrom) and
             (Operation.Companion::date lt filter.dateTo) and
             (Operation.Companion::type eq filter.type) and
@@ -73,6 +74,10 @@ class OperationService(
         operationRepository.deleteById(id)
         transactionService.deleteByOperation(id)
     }
+
+    fun findSimilar(operation: SuggestedOperation): List<Operation> =
+        operationRepository.findByDateAndAccountFromIdAndAccountToId(operation.date, operation.accountFrom, operation.accountTo)
+            .filter { it.amountFrom.isSimilar(operation.amountFrom) && it.amountTo.isSimilar(operation.amountTo) }
 
     private fun Operation.toRecord(): OperationRecord = OperationRecord(
         id = id,

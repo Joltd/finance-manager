@@ -4,7 +4,12 @@ import com.evgenltd.financemanager.operation.entity.Operation
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.*
 
 @Repository
-interface OperationRepository : JpaRepository<Operation,UUID>, JpaSpecificationExecutor<Operation>
+interface OperationRepository : JpaRepository<Operation,UUID>, JpaSpecificationExecutor<Operation> {
+
+    fun findByDateAndAccountFromIdAndAccountToId(date: LocalDate, accountFromId: UUID, accountToId: UUID): List<Operation>
+
+}

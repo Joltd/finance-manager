@@ -18,6 +18,7 @@ import {MatInputModule} from "@angular/material/input";
 import {ImportDataBrowserComponent} from "./component/import-data-browser/import-data-browser.component";
 import {ImportDataViewComponent} from "./component/import-data-view/import-data-view.component";
 import {ImportDataStartComponent} from "./component/import-data-start/import-data-start.component";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import {ImportDataStartComponent} from "./component/import-data-start/import-dat
     MatIconModule,
     MatButtonModule,
     MatInputModule,
-    NgClass
+    NgClass,
+    MatProgressSpinnerModule
   ],
   providers: [],
   exports: [

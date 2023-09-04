@@ -20,7 +20,7 @@ class ImportData(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
-    var parser: String,
+    var parser: UUID,
 
     @ManyToOne
     @JoinColumn(name = "account_id")

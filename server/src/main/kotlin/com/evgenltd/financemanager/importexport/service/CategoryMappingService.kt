@@ -24,7 +24,7 @@ class CategoryMappingService(
 ) {
 
     fun list(filter: CategoryMappingFilter): CategoryMappingPage =
-        categoryMappingRepository.findAllByCondition(PageRequest.of(filter.page, filter.size)) {
+        categoryMappingRepository.findAllByCondition(filter.page, filter.size) {
             (CategoryMapping.Companion::parser eq filter.parser) and
             (CategoryMapping.Companion::categoryId eq filter.category?.id)
         }.let {
@@ -45,6 +45,9 @@ class CategoryMappingService(
     fun delete(id: UUID) {
         categoryMappingRepository.deleteById(id)
     }
+
+    fun findByParser(parser: UUID): List<Pair<Regex, CategoryMapping>> =
+        categoryMappingRepository.findByParser(parser).map { it.pattern.toRegex() to it }
 
     private fun CategoryMapping.toRecord(): CategoryMappingRecord = CategoryMappingRecord(
         id = id,

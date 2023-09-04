@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.common.util
 
 import jakarta.persistence.Embeddable
 import java.math.BigDecimal
+import kotlin.math.absoluteValue
 
 @Embeddable
 data class Amount(val value: Long, val currency: String) {
@@ -34,11 +35,15 @@ data class Amount(val value: Long, val currency: String) {
         return value.compareTo(other.value)
     }
 
-    private fun checkCurrencySame(second: Amount) {
-        if (currency != second.currency) {
-            throw ArithmeticException("Unable to operate amount with different currencies first=$this, second=$second")
+    private fun checkCurrencySame(that: Amount) {
+        if (this.currency != that.currency) {
+            throw ArithmeticException("Unable to operate amount with different currencies first=$this, second=$that")
         }
     }
+
+    fun isSimilar(that: Amount): Boolean =
+        this.currency == that.currency
+                && (this.value - that.value).absoluteValue < this.value / 106
 
     fun toBigDecimal(): BigDecimal = value.toBigDecimal()
             .movePointLeft(4)

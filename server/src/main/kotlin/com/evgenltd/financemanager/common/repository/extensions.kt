@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.CrudRepository
@@ -29,14 +30,15 @@ inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
 }
 
 inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
-    pageable: Pageable,
+    page: Int,
+    size: Int,
     crossinline block: () -> Condition<T>
 ): Page<T> = findAll(
     { root, query, cb ->
         val condition = block()
         condition(root, query, cb)
     },
-    pageable
+    PageRequest.of(page, size)
 )
 
 inline infix fun <E> Condition<E>.and(

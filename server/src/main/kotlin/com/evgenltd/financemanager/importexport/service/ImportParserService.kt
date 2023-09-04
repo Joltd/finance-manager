@@ -26,6 +26,8 @@ class ImportParserService(
 
     fun byId(id: UUID): Reference = list().first { it.id == id }
 
+    fun resolve(id: UUID): ImportParser? = importParsers.firstOrNull { it.id == id }
+
     private fun ImportParser.toReference() = Reference(
         id = id,
         name = name,
