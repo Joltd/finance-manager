@@ -19,13 +19,16 @@ import {MatMenuModule} from "@angular/material/menu";
 import {OperationViewComponent} from "./component/operation-view/operation-view.component";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {ReferenceModule} from "../reference/reference.module";
+import {OperationEditorDialogComponent} from "./component/operation-editor-dialog/operation-editor-dialog.component";
+import {MatDialogModule} from "@angular/material/dialog";
 
 @NgModule({
   declarations: [
     OperationBrowserComponent,
     OperationEditorComponent,
     OperationViewComponent,
-    OperationLabelComponent
+    OperationLabelComponent,
+    OperationEditorDialogComponent
   ],
   imports: [
     CommonModule,
@@ -45,14 +48,16 @@ import {ReferenceModule} from "../reference/reference.module";
     NgForOf,
     MatButtonToggleModule,
     FormsModule,
-    ReferenceModule
+    ReferenceModule,
+    MatDialogModule
   ],
   providers: [],
   exports: [
     OperationBrowserComponent,
     OperationEditorComponent,
     OperationViewComponent,
-    OperationLabelComponent
+    OperationLabelComponent,
+    OperationEditorDialogComponent
   ]
 })
 export class OperationModule {}

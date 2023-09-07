@@ -21,3 +21,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .spacer {
   flex-grow: 1;
 }
+
+.small-icon-button {
+  padding: 0!important;
+  min-width: 32px!important;
+
+  mat-icon {
+    margin: 0!important;
+  }
+}

@@ -1,0 +1,7 @@
+<div matDialogContent>
+  <category-mapping-view #categoryMappingView [categoryMapping]="categoryMapping"></category-mapping-view>
+</div>
+<div matDialogActions>
+  <button mat-button mat-dialog-close>Close</button>
+  <button mat-button [mat-dialog-close]="categoryMappingView.categoryMapping" [disabled]="!categoryMappingView.valid">Save</button>
+</div>

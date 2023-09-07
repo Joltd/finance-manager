@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.exchangerate.service
 
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.exchangerate.converter.ExchangeRateConverter
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
@@ -12,6 +13,7 @@ import java.time.LocalDate
 @Service
 class ExchangeRateService(
     private val exchangeRateRepository: ExchangeRateRepository,
+    private val exchangeRateConverter: ExchangeRateConverter,
     private val exchangeRateProviders: List<ExchangeRateProvider>
 ) {
 
@@ -30,15 +32,17 @@ class ExchangeRateService(
 //        }
 //    }
 
-    fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll().map { it.toRecord() }
+    fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll()
+        .map { exchangeRateConverter.toRecord(it) }
 
-    fun byId(id: String): ExchangeRateRecord = exchangeRateRepository.find(id).toRecord()
+    fun byId(id: String): ExchangeRateRecord = exchangeRateRepository.find(id)
+        .let { exchangeRateConverter.toRecord(it) }
 
     fun update(record: ExchangeRateRecord) {
         if (record.from == record.to) {
             return
         }
-        val entity = record.toEntity()
+        val entity = exchangeRateConverter.toEntity(record)
         exchangeRateRepository.save(entity)
     }
 
@@ -89,21 +93,5 @@ class ExchangeRateService(
                 it.key to BigDecimal.ONE.divide(it.value, 10, RoundingMode.HALF_UP)
             }
     }
-
-    private fun ExchangeRate.toRecord(): ExchangeRateRecord = ExchangeRateRecord(
-            id = id,
-            date = date,
-            from = from,
-            to = to,
-            value = value
-    )
-
-    private fun ExchangeRateRecord.toEntity(): ExchangeRate = ExchangeRate(
-            id = id,
-            date = date,
-            from = from,
-            to = to,
-            value = value
-    )
 
 }

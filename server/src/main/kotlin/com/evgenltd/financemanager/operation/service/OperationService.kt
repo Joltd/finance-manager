@@ -10,23 +10,21 @@ import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.importexport.entity.SuggestedOperation
+import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationPage
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.reference.entity.AccountType
-import com.evgenltd.financemanager.reference.record.toRecord
-import com.evgenltd.financemanager.reference.repository.AccountRepository
 import jakarta.transaction.Transactional
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class OperationService(
     private val operationRepository: OperationRepository,
-    private val accountRepository: AccountRepository,
+    private val operationConverter: OperationConverter,
     private val transactionService: TransactionService
 ) {
 
@@ -56,49 +54,27 @@ class OperationService(
                 total = page.totalElements,
                 page = filter.page,
                 size = filter.size,
-                operations = page.content.map { it.toRecord() }
+                operations = page.content.map { operationConverter.toRecord(it) }
             )
         }
 
-    fun byId(id: UUID): OperationRecord = operationRepository.find(id).toRecord()
+    fun byId(id: UUID): OperationRecord = operationRepository.find(id).let { operationConverter.toRecord(it) }
 
     @Transactional
     fun update(record: OperationRecord) {
-        val entity = record.toEntity()
+        val entity = operationConverter.toEntity(record)
         operationRepository.save(entity)
         transactionService.refillByOperation(entity)
     }
 
     @Transactional
     fun delete(id: UUID) {
-        operationRepository.deleteById(id)
         transactionService.deleteByOperation(id)
+        operationRepository.deleteById(id)
     }
 
-    fun findSimilar(operation: SuggestedOperation): List<Operation> =
-        operationRepository.findByDateAndAccountFromIdAndAccountToId(operation.date, operation.accountFrom, operation.accountTo)
+    fun findSimilar(operation: OperationRecord): List<Operation> =
+        operationRepository.findByDateAndAccountFromIdAndAccountToId(operation.date, operation.accountFrom.id!!, operation.accountTo.id!!)
             .filter { it.amountFrom.isSimilar(operation.amountFrom) && it.amountTo.isSimilar(operation.amountTo) }
-
-    private fun Operation.toRecord(): OperationRecord = OperationRecord(
-        id = id,
-        date = date,
-        type = type,
-        amountFrom = amountFrom,
-        accountFrom = accountFrom.toRecord(),
-        amountTo = amountTo,
-        accountTo = accountTo.toRecord(),
-        description = description
-    )
-
-    private fun OperationRecord.toEntity(): Operation = Operation(
-        id = id,
-        date = date,
-        type = type,
-        amountFrom = amountFrom,
-        accountFrom = accountRepository.find(accountFrom.id!!),
-        amountTo = amountTo,
-        accountTo = accountRepository.find(accountTo.id!!),
-        description = description
-    )
 
 }

@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.reference.service
 
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.reference.converter.CurrencyConverter
 import com.evgenltd.financemanager.reference.entity.Currency
 import com.evgenltd.financemanager.reference.record.CurrencyRecord
 import com.evgenltd.financemanager.reference.record.Reference
@@ -11,7 +12,8 @@ import java.util.*
 
 @Service
 class CurrencyService(
-    private val currencyRepository: CurrencyRepository
+    private val currencyRepository: CurrencyRepository,
+    private val currencyConverter: CurrencyConverter
 ) {
 
     @PostConstruct
@@ -46,25 +48,13 @@ class CurrencyService(
     }
 
     fun list(): List<CurrencyRecord> = currencyRepository.findAll()
-        .map { it.toRecord() }
+        .map { currencyConverter.toRecord(it) }
         .sortedBy { it.name }
 
-    fun byId(id: UUID): CurrencyRecord = currencyRepository.find(id).toRecord()
+    fun byId(id: UUID): CurrencyRecord = currencyRepository.find(id).let { currencyConverter.toRecord(it) }
 
-    fun update(record: CurrencyRecord) = currencyRepository.save(record.toEntity())
+    fun update(record: CurrencyRecord) = currencyRepository.save(currencyConverter.toEntity(record))
 
     fun delete(id: UUID) = currencyRepository.deleteById(id)
-
-    private fun Currency.toRecord(): CurrencyRecord = CurrencyRecord(
-        id = id,
-        name = name,
-        crypto = crypto
-    )
-
-    private fun CurrencyRecord.toEntity(): Currency = Currency(
-        id = id,
-        name = name,
-        crypto = crypto
-    )
 
 }

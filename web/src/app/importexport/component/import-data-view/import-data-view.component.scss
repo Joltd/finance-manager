@@ -1,0 +1,152 @@
+@use '../../../../variables';
+
+:host {
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  grid-gap: 1rem;
+  height: 100%;
+  overflow: hidden;
+}
+
+.preparation-error {
+  background-color: #fbc02d;
+}
+
+.import-error {
+  background-color: #d32f2f;
+}
+
+.import-done {
+  background-color: #388e3c;
+}
+
+.entries-card {
+  overflow: hidden;
+
+  mat-tab-group {
+    overflow: hidden;
+
+    .mat-mdc-tab-body-content {
+      overflow: hidden!important;
+    }
+  }
+}
+
+.entries {
+  overflow: hidden;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr min-content;
+
+  mat-action-list {
+    overflow-y: auto;
+
+    .marker {
+      display: inline-block;
+      width: .2rem;
+      height: 3rem;
+      border-radius: .2rem;
+      margin-right: 16px;
+    }
+
+    .no-suggestion {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mdc-list-item.mdc-list-item--with-one-line {
+      height: 4rem;
+    }
+  }
+}
+
+.entry {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.error-content {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+
+.suggested-operation {
+  mat-card-content {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+
+    operation-label {
+      flex-grow: 1;
+    }
+  }
+}
+
+.parsed-entry {
+  overflow: visible;
+
+  .parsed-entry-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    button {
+      width: 16rem;
+    }
+  }
+}
+
+.token-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5em;
+
+  .token {
+    display: flex;
+    flex-direction: column;
+    background-color: lightgrey;
+    border-radius: 1.6em;
+    padding: .4em 1em 0.4em 1em;
+
+    .name {
+      font-size: 7px;
+      line-height: 7px;
+    }
+
+    .value {
+      white-space: nowrap;
+      max-width: 10em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+}
+
+.raw-entries {
+  overflow-x: auto;
+
+  .raw-entry {
+    white-space: nowrap;
+  }
+}
+
+.additional-info {
+  display: flex;
+  gap: 1rem;
+
+  mat-card-subtitle {
+    color: rgba(0,0,0,.87);
+  }
+}
+
+.similar-operations {
+  flex-grow: 1;
+}
+
+.category-mappings {
+  flex-grow: 1;
+}

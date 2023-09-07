@@ -1,6 +1,10 @@
 package com.evgenltd.financemanager
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.hibernate.cfg.AvailableSettings
+import org.hibernate.type.format.jackson.JacksonJsonFormatMapper
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer
 import org.springframework.boot.runApplication
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean
@@ -19,6 +23,11 @@ class Application : SpringBootServletInitializer() {
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE")
                 .allowedOrigins("*")
         }
+    }
+
+    @Bean
+    fun hibernatePropertiesCustomizer(objectMapper: ObjectMapper): HibernatePropertiesCustomizer = HibernatePropertiesCustomizer {
+        it[AvailableSettings.JSON_FORMAT_MAPPER] = JacksonJsonFormatMapper(objectMapper)
     }
 
 }

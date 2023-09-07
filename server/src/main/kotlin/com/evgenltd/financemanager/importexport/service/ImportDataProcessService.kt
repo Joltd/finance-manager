@@ -17,6 +17,7 @@ import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationService
+import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import org.springframework.data.domain.PageRequest
@@ -34,6 +35,7 @@ class ImportDataProcessService(
     private val importParserService: ImportParserService,
     private val categoryMappingService: CategoryMappingService,
     private val operationService: OperationService,
+    private val accountConverter: AccountConverter,
     private val transactionTemplate: TransactionTemplate
 ) : Loggable() {
 
@@ -201,7 +203,8 @@ class ImportDataProcessService(
         val accountFrom = parsedEntry.accountFrom
         val accountTo = parsedEntry.accountTo
         if (accountFrom != null && accountTo != null) {
-            importDataEntry.suggestedOperation = SuggestedOperation(
+            importDataEntry.suggestedOperation = OperationRecord(
+                id = null,
                 date = parsedEntry.date,
                 type = parsedEntry.type,
                 amountFrom = parsedEntry.amountFrom,
@@ -229,13 +232,14 @@ class ImportDataProcessService(
 
         val categoryMapping = importDataEntry.matchedCategoryMappings.first()
         if (categoryMapping.category.type == AccountType.EXPENSE) {
-            importDataEntry.suggestedOperation = SuggestedOperation(
+            importDataEntry.suggestedOperation = OperationRecord(
+                id = null,
                 date = parsedEntry.date,
                 type = parsedEntry.type,
                 amountFrom = parsedEntry.amountFrom,
-                accountFrom = importData.account.id!!,
+                accountFrom = accountConverter.toRecord(importData.account),
                 amountTo = parsedEntry.amountTo,
-                accountTo = categoryMapping.category.id!!,
+                accountTo = accountConverter.toRecord(categoryMapping.category),
                 description = parsedEntry.description
             )
             importDataEntry.preparationResult = true
@@ -243,13 +247,14 @@ class ImportDataProcessService(
         }
 
         if (categoryMapping.category.type == AccountType.INCOME) {
-            importDataEntry.suggestedOperation = SuggestedOperation(
+            importDataEntry.suggestedOperation = OperationRecord(
+                id = null,
                 date = parsedEntry.date,
                 type = parsedEntry.type,
                 amountFrom = parsedEntry.amountFrom,
-                accountFrom = categoryMapping.category.id!!,
+                accountFrom = accountConverter.toRecord(categoryMapping.category),
                 amountTo = parsedEntry.amountTo,
-                accountTo = importData.account.id!!,
+                accountTo = accountConverter.toRecord(importData.account),
                 description = parsedEntry.description
             )
             importDataEntry.preparationResult = true
@@ -287,8 +292,8 @@ class ImportDataProcessService(
         val similarOperation = similarOperations.first()
         val operationIsEqual = similarOperation.date == suggestedOperation.date
                 && similarOperation.type == suggestedOperation.type
-                && similarOperation.accountFrom.id == suggestedOperation.accountFrom
-                && similarOperation.accountTo.id == suggestedOperation.accountTo
+                && similarOperation.accountFrom.id == suggestedOperation.accountFrom.id
+                && similarOperation.accountTo.id == suggestedOperation.accountTo.id
                 && similarOperation.amountFrom == suggestedOperation.amountFrom
                 && similarOperation.amountTo == suggestedOperation.amountFrom
         if (operationIsEqual) {
@@ -323,9 +328,9 @@ class ImportDataProcessService(
             date = suggestedOperation.date,
             type = suggestedOperation.type,
             amountFrom = suggestedOperation.amountFrom,
-            accountFrom = dummyAccount(suggestedOperation.accountFrom),
+            accountFrom = suggestedOperation.accountFrom,
             amountTo = suggestedOperation.amountTo,
-            accountTo = dummyAccount(suggestedOperation.accountTo),
+            accountTo = suggestedOperation.accountTo,
             description = suggestedOperation.description
         )
         operationService.update(operationRecord)
@@ -334,11 +339,6 @@ class ImportDataProcessService(
     }
 
     //
-
-    private fun updateStatus(id: UUID, newStatus: ImportDataStatus, vararg expectedStatuses: ImportDataStatus): ImportData? =
-        update(id, expectedStatuses.toList()) {
-            it.status = newStatus
-        }
 
     private fun update(id: UUID, expectedStatus: ImportDataStatus, block: (ImportData) -> Unit = {}): ImportData? =
         update(id, listOf(expectedStatus), block)
@@ -361,7 +361,5 @@ class ImportDataProcessService(
             importData
         }
     }
-
-    private fun dummyAccount(id: UUID): AccountRecord = AccountRecord(id, "", AccountType.ACCOUNT, false)
 
 }

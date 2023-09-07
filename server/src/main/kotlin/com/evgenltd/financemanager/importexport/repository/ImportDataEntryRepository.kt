@@ -8,4 +8,7 @@ import java.util.UUID
 
 @Repository
 interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>,JpaSpecificationExecutor<ImportDataEntry> {
+
+    fun deleteByImportDataId(importDataId: UUID)
+
 }

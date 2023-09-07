@@ -1,8 +1,14 @@
 package com.evgenltd.financemanager.importexport.entity
 
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.operation.record.OperationRecord
+import com.evgenltd.financemanager.reference.record.AccountRecord
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -32,7 +38,7 @@ class ImportDataEntry(
     var parsedEntry: ImportDataParsedEntry,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    var suggestedOperation: SuggestedOperation? = null,
+    var suggestedOperation: OperationRecord? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
     var similarOperations: List<UUID> = emptyList(),
@@ -44,8 +50,10 @@ class ImportDataEntry(
 
     var preparationError: String? = null,
 
+    @Enumerated(EnumType.STRING)
     var option: ImportOption = ImportOption.NONE,
 
+    @Enumerated(EnumType.STRING)
     var importResult: ImportResult = ImportResult.NOT_IMPORTED,
 
     var importError: String? = null
@@ -65,9 +73,9 @@ data class ImportDataParsedEntry(
     val rawEntries: List<String>,
     val date: LocalDate,
     val type: OperationType,
-    val accountFrom: UUID?,
+    val accountFrom: AccountRecord?,
     val amountFrom: Amount,
-    val accountTo: UUID?,
+    val accountTo: AccountRecord?,
     val amountTo: Amount,
     val description: String
 )

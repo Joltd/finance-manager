@@ -1,0 +1,165 @@
+<mat-card class="entries-card">
+  <mat-tab-group>
+
+    <mat-tab label="Entries">
+      <div class="entries">
+        <mat-action-list>
+          <button mat-list-item
+                  *ngFor="let entry of importDataEntryPage.entries"
+                  (click)="viewEntry(entry)">
+            <span matListItemIcon class="marker"
+                  [class.preparation-error]="!entry.preparationResult"
+                  [class.import-error]="entry.importResult == 'FAILED'"></span>
+            <operation-label *ngIf="entry.suggestedOperation" [operation]="entry.suggestedOperation"></operation-label>
+            <span class="no-suggestion" *ngIf="!entry.suggestedOperation">
+              <span>{{entry.parsedEntry.date}}</span>
+              <span>{{entry.parsedEntry.description}}</span>
+            </span>
+          </button>
+        </mat-action-list>
+        <mat-paginator [hidePageSize]="true"
+                       [pageSize]="10"
+                       [pageIndex]="importDataEntryPage.page"
+                       [length]="importDataEntryPage.total"
+                       (page)="onPage($event)"
+        ></mat-paginator>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Filter">
+      <form [formGroup]="importDataEntryFilter">
+        <mat-form-field>
+          <mat-label>Preparation result</mat-label>
+          <mat-select formControlName="preparationResult">
+            <mat-option [value]="null">Nothing</mat-option>
+            <mat-option [value]="false">Not prepared</mat-option>
+            <mat-option [value]="true">Prepared</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Option</mat-label>
+          <mat-select formControlName="option">
+            <mat-option [value]="null">Nothing</mat-option>
+            <mat-option [value]="'NONE'">None</mat-option>
+            <mat-option [value]="'SKIP'">Skip</mat-option>
+            <mat-option [value]="'CREATE_NEW'">Add</mat-option>
+            <mat-option [value]="'REPLACE'">Replace</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Import result</mat-label>
+          <mat-select formControlName="importResult">
+            <mat-option [value]="null">Nothing</mat-option>
+            <mat-option [value]="'NOT_IMPORTED'">Not imported</mat-option>
+            <mat-option [value]="'DONE'">Done</mat-option>
+            <mat-option [value]="'FAILED'">Failed</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </mat-tab>
+
+  </mat-tab-group>
+</mat-card>
+
+<div *ngIf="!importDataEntry"></div>
+<div *ngIf="importDataEntry" class="entry">
+
+  <mat-card *ngIf="!importDataEntry.preparationResult" class="preparation-error">
+    <mat-card-content class="error-content">
+      <mat-icon>warning</mat-icon>
+      {{importDataEntry.preparationError}}
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="importDataEntry.importResult == 'FAILED'" class="import-error">
+    <mat-card-content class="error-content">
+      <mat-icon>warning</mat-icon>
+      {{importDataEntry.importError}}
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-content>
+      <mat-slide-toggle [(ngModel)]="importDataEntry.preparationResult">
+        <span *ngIf="importDataEntry.preparationResult">Prepared</span>
+        <span *ngIf="!importDataEntry.preparationResult">Not prepared</span>
+      </mat-slide-toggle>
+      <button mat-button class="small-icon-button"><mat-icon>add</mat-icon></button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="suggested-operation">
+    <mat-card-content>
+      <button mat-button *ngIf="!importDataEntry.suggestedOperation" (click)="viewOperation()">Suggest operation</button>
+      <operation-label *ngIf="importDataEntry.suggestedOperation"
+                       [operation]="suggestedOperation()"
+                       (click)="viewOperation()"></operation-label>
+
+      <mat-button-toggle-group *ngIf="importDataEntry.suggestedOperation"
+                               [ngModel]="importDataEntry.option"
+                               (ngModelChange)="changeOption($event)">
+        <mat-button-toggle value="NONE">None</mat-button-toggle>
+        <mat-button-toggle value="SKIP">Skip</mat-button-toggle>
+        <mat-button-toggle value="CREATE_NEW">Add</mat-button-toggle>
+        <mat-button-toggle value="REPLACE">Replace</mat-button-toggle>
+      </mat-button-toggle-group>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-expansion-panel class="parsed-entry">
+    <mat-expansion-panel-header>Parsed entry</mat-expansion-panel-header>
+    <div class="parsed-entry-content">
+      <div class="token-list">
+        <div class="token">
+          <div class="name">Type</div><div class="value">{{importDataEntry.parsedEntry.type}}</div>
+        </div>
+        <div class="token">
+          <div class="name">Date</div><div class="value">{{importDataEntry.parsedEntry.date}}</div>
+        </div>
+        <div class="token" [matTooltip]="importDataEntry.parsedEntry.description">
+          <div class="name">Description</div><div class="value">{{importDataEntry.parsedEntry.description}}</div>
+        </div>
+        <div class="token" *ngIf="importDataEntry.parsedEntry.accountFrom">
+          <div class="name">Account from</div><div>{{importDataEntry.parsedEntry.accountFrom.name}}</div>
+        </div>
+        <div class="token" *ngIf="importDataEntry.parsedEntry.accountTo">
+          <div class="name">Account to</div><div>{{importDataEntry.parsedEntry.accountTo.name}}</div>
+        </div>
+        <div class="token">
+          <div class="name">Amount from</div><amount-label class="value" [amount]="importDataEntry.parsedEntry.amountFrom"></amount-label>
+        </div>
+        <div class="token">
+          <div class="name">Amount to</div><amount-label class="value" [amount]="importDataEntry.parsedEntry.amountTo"></amount-label>
+        </div>
+      </div>
+      <div class="raw-entries">
+        <div class="raw-entry" *ngFor="let row of importDataEntry.parsedEntry.rawEntries">{{row}}</div>
+      </div>
+      <button mat-raised-button color="primary" (click)="addCategoryMapping()">Add category mapping</button>
+    </div>
+  </mat-expansion-panel>
+
+  <div class="additional-info">
+    <!--  <mat-card *ngIf="importDataEntry.similarOperations.length > 0">-->
+    <mat-card class="similar-operations">
+      <mat-card-header>
+        <mat-card-subtitle>Similar operations <button mat-button class="small-icon-button"><mat-icon>add</mat-icon></button></mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <operation-label [operation]="similarOperation"
+                         *ngFor="let similarOperation of importDataEntry.similarOperations"></operation-label>
+      </mat-card-content>
+    </mat-card>
+
+    <!--  <mat-card *ngIf="importDataEntry.matchedCategoryMappings.length > 0">-->
+    <mat-card class="category-mappings">
+      <mat-card-header>
+        <mat-card-subtitle>Category mappings</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <category-mapping-label [categoryMapping]="categoryMapping" *ngFor="let categoryMapping of importDataEntry.matchedCategoryMappings"></category-mapping-label>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

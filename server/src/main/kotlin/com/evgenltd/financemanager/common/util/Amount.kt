@@ -28,6 +28,8 @@ data class Amount(val value: Long, val currency: String) {
             currency
     )
 
+    fun abs(): Amount = Amount(value.absoluteValue, currency)
+
 //    operator fun div(other: Number): Amount = Amount(value / other.toLong(), currency)
 
     operator fun compareTo(other: Amount): Int {

@@ -1,8 +1,10 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {Component, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {FormControl, FormGroup} from "@angular/forms";
 import {CategoryMappingService} from "../../service/category-mapping.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ToolbarService} from "../../../common/service/toolbar.service";
+import {CategoryMapping} from "../../model/category-mapping";
+import {CategoryMappingViewComponent} from "../category-mapping-view/category-mapping-view.component";
 
 @Component({
   selector: 'category-mapping-editor',
@@ -11,12 +13,10 @@ import {ToolbarService} from "../../../common/service/toolbar.service";
 })
 export class CategoryMappingEditorComponent implements OnInit, OnDestroy {
 
-  form: FormGroup = new FormGroup({
-    id: new FormControl(null),
-    parser: new FormControl(null),
-    pattern: new FormControl(null),
-    category: new FormControl(null)
-  })
+  categoryMapping!: CategoryMapping
+
+  @ViewChild(CategoryMappingViewComponent)
+  categoryMappingView!: CategoryMappingViewComponent
 
   constructor(
     private router: Router,
@@ -27,8 +27,8 @@ export class CategoryMappingEditorComponent implements OnInit, OnDestroy {
     this.activatedRoute.params.subscribe(params => {
       let id = params['id']
       if (id != 'new') {
-        this.form.patchValue({id})
-        this.load()
+        this.categoryMappingService.byId(id)
+          .subscribe(result => this.categoryMapping = result)
       }
     })
   }
@@ -45,19 +45,12 @@ export class CategoryMappingEditorComponent implements OnInit, OnDestroy {
     this.toolbarService.reset()
   }
 
-  private load() {
-    this.categoryMappingService.byId(this.form.value.id)
-      .subscribe(result => {
-        this.form.patchValue(result)
-      })
-  }
-
   save() {
-    if (this.form.invalid) {
+    if (!this.categoryMappingView.valid) {
       return
     }
 
-    this.categoryMappingService.update(this.form.value)
+    this.categoryMappingService.update(this.categoryMappingView.categoryMapping)
       .subscribe(() => this.close())
   }
 

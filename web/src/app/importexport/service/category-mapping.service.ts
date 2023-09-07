@@ -18,7 +18,7 @@ export class CategoryMappingService {
     return this.http.get<CategoryMapping>('/category-mapping/' + id)
   }
 
-  update(categoryMapping: CategoryMapping): Observable<void> {
+  update(categoryMapping: any): Observable<void> {
     return this.http.post<void>('/category-mapping', categoryMapping)
   }
 

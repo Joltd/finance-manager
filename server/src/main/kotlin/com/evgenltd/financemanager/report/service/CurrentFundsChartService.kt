@@ -5,9 +5,9 @@ import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.service.TransactionService
+import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
-import com.evgenltd.financemanager.reference.record.toRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartAmountEntryRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartEntryRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartRecord
@@ -18,7 +18,8 @@ import java.time.LocalDate
 @Service
 class CurrentFundsChartService(
     private val transactionService: TransactionService,
-    private val exchangeRateService: ExchangeRateService
+    private val exchangeRateService: ExchangeRateService,
+    private val accountConverter: AccountConverter
 ) {
 
     fun load(settings: CurrentFundsChartSettingsRecord): CurrentFundsChartRecord = transactionService.findTransactions(AccountType.ACCOUNT)
@@ -41,7 +42,7 @@ class CurrentFundsChartService(
                 .toList()
                 .sortedByDescending { entry -> entry.amount.value }
             CurrentFundsChartEntryRecord(
-                account = it.key.account.toRecord(),
+                account = accountConverter.toRecord(it.key.account),
                 commonAmount = amounts.fold(emptyAmount(settings.currency)) { acc, entry -> acc + entry.commonAmount },
                 amounts = amounts
             )

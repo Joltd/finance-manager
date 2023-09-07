@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.settings.service
 
+import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.reference.record.toReference
 import com.evgenltd.financemanager.reference.service.AccountService
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.record.ApplicationSettings
@@ -16,6 +16,7 @@ import java.util.*
 class SettingService(
     private val settingRepository: SettingRepository,
     private val accountService: AccountService,
+    private val accountConverter: AccountConverter,
     @Value("\${APP_VERSION}") private val version: String
 ) {
 
@@ -30,8 +31,8 @@ class SettingService(
     fun load(): ApplicationSettings = ApplicationSettings(
         version = version,
         operationDefaultCurrency = operationDefaultCurrency(),
-        operationDefaultAccount = operationDefaultAccount()?.toReference(),
-        operationCashAccount = operationCashAccount()?.toReference(),
+        operationDefaultAccount = operationDefaultAccount()?.let { accountConverter.toReference(it) },
+        operationCashAccount = operationCashAccount()?.let { accountConverter.toReference(it) },
     )
 
     @Transactional

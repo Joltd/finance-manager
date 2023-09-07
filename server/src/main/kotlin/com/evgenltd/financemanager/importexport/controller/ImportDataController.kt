@@ -23,7 +23,7 @@ class ImportDataController(
     @GetMapping("/import-data")
     fun list(): List<ImportDataRecord> = importDataService.list()
 
-    @GetMapping("/import-data/{id}/entry")
+    @PostMapping("/import-data/{id}/entry")
     fun entryList(
         @PathVariable("id") id: UUID,
         @RequestBody filter: ImportDataEntryFilter
@@ -31,6 +31,11 @@ class ImportDataController(
 
     @GetMapping("/import-data/{id}")
     fun byId(@PathVariable("id") id: UUID): ImportDataRecord = importDataService.byId(id)
+
+    @DeleteMapping("/import-data/{id}")
+    fun delete(@PathVariable("id") id: UUID) {
+        importDataService.delete(id)
+    }
 
     @PostMapping("/import-data")
     fun preparationStart(

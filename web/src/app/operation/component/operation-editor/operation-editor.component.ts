@@ -1,4 +1,4 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {Operation, OperationType} from "../../model/operation";
 import {OperationService} from "../../service/operation.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -7,24 +7,31 @@ import {SettingsService} from "../../../settings/service/settings.service";
 import * as moment from "moment";
 import {Amount} from "../../../common/model/amount";
 import {Reference} from "../../../common/model/reference";
+import {ToolbarService} from "../../../common/service/toolbar.service";
+import {OperationViewComponent} from "../operation-view/operation-view.component";
 
 @Component({
   selector: 'operation-editor',
   templateUrl: './operation-editor.component.html',
   styleUrls: ['./operation-editor.component.scss']
 })
-export class OperationEditorComponent implements OnInit {
+export class OperationEditorComponent implements OnInit, OnDestroy {
 
-  operation: Operation | null = null
+  operation!: Operation
+
+  @ViewChild(OperationViewComponent)
+  operationView!: OperationViewComponent
 
   constructor(
     private settingsService: SettingsService,
     private operationService: OperationService,
     private activatedRoute: ActivatedRoute,
+    private toolbarService: ToolbarService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.toolbarService.setupSaveClose('Operation', () => this.save(), () => this.close())
     combineLatest([this.activatedRoute.params, this.activatedRoute.queryParams])
       .subscribe(([params, queryParams]) => {
         let id = params['id']
@@ -47,8 +54,15 @@ export class OperationEditorComponent implements OnInit {
       })
   }
 
-  save(operation: Operation) {
-    this.operationService.update(operation)
+  ngOnDestroy(): void {
+    this.toolbarService.reset()
+  }
+
+  save() {
+    if (!this.operationView.valid) {
+      return
+    }
+    this.operationService.update(this.operationView.operation)
       .subscribe(() => this.close())
   }
 

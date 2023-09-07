@@ -1,5 +1,7 @@
 package com.evgenltd.financemanager.importexport.service
 
+import com.evgenltd.financemanager.importexport.converter.ImportParserConverter
+import com.evgenltd.financemanager.importexport.repository.ImportParserRepository
 import com.evgenltd.financemanager.importexport.service.parser.ImportParser
 import com.evgenltd.financemanager.reference.record.Reference
 import org.springframework.stereotype.Service
@@ -7,7 +9,8 @@ import java.util.UUID
 
 @Service
 class ImportParserService(
-    private val importParsers: List<ImportParser>
+    private val importParserConverter: ImportParserConverter,
+    private val importParserRepository: ImportParserRepository
 ) {
 
     fun listReference(mask: String? = null, id: UUID? = null): List<Reference> {
@@ -22,16 +25,10 @@ class ImportParserService(
         return list.sortedBy { it.name }
     }
 
-    fun list(): List<Reference> = importParsers.map { it.toReference() }
+    fun list(): List<Reference> = importParserRepository.findAll().map { importParserConverter.toReference(it) }
 
-    fun byId(id: UUID): Reference = list().first { it.id == id }
+    fun byId(id: UUID): Reference = importParserRepository.find(id).let { importParserConverter.toReference(it) }
 
-    fun resolve(id: UUID): ImportParser? = importParsers.firstOrNull { it.id == id }
-
-    private fun ImportParser.toReference() = Reference(
-        id = id,
-        name = name,
-        deleted = false
-    )
+    fun resolve(id: UUID): ImportParser? = importParserRepository.findById(id)
 
 }

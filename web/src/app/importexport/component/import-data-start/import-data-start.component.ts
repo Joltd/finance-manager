@@ -35,7 +35,12 @@ export class ImportDataStartComponent implements OnInit, OnDestroy {
     if (this.form.invalid) {
       return
     }
-    this.importDataService.preparationStart(this.form.value)
+    let request = {
+      parser: this.form.value.parser.id,
+      account: this.form.value.account.id,
+      file: this.form.value.file
+    }
+    this.importDataService.preparationStart(request)
       .subscribe(() => this.close())
   }
 

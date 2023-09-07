@@ -4,19 +4,19 @@ import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.findAllByCondition
+import com.evgenltd.financemanager.importexport.converter.ImportDataConverter
+import com.evgenltd.financemanager.importexport.converter.ImportDataEntryConverter
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryFilter
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryPage
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.reference.record.toRecord
 import com.evgenltd.financemanager.reference.repository.AccountRepository
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
@@ -24,13 +24,14 @@ import java.util.UUID
 class ImportDataService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
-    private val importParserService: ImportParserService,
+    private val importDataConverter: ImportDataConverter,
+    private val importDataEntryConverter: ImportDataEntryConverter,
     private val importDataProcessService: ImportDataProcessService,
     private val accountRepository: AccountRepository
 ) {
 
     fun list(): List<ImportDataRecord> = importDataRepository.findAll()
-        .map { it.toRecord() }
+        .map { importDataConverter.toRecord(it) }
 
     fun entryList(id: UUID, filter: ImportDataEntryFilter): ImportDataEntryPage =
         importDataEntryRepository.findAllByCondition(filter.page, filter.size) {
@@ -42,12 +43,18 @@ class ImportDataService(
                 total = it.totalElements,
                 page = filter.page,
                 size = filter.size,
-                entries = it.content.map { entry -> entry.toRecord() }
+                entries = it.content.map { entry -> importDataEntryConverter.toRecord(entry) }
             )
         }
 
     fun byId(id: UUID): ImportDataRecord = importDataRepository.find(id)
-        .toRecord()
+        .let { importDataConverter.toRecord(it) }
+
+    @Transactional
+    fun delete(id: UUID) {
+        importDataEntryRepository.deleteByImportDataId(id)
+        importDataRepository.deleteById(id)
+    }
 
     fun preparationStart(
         parser: UUID,
@@ -81,18 +88,5 @@ class ImportDataService(
     fun importCancel(id: UUID) {
         importDataProcessService.importCancel(id)
     }
-
-    private fun ImportData.toRecord(): ImportDataRecord = ImportDataRecord(
-        id = id!!,
-        parser = importParserService.byId(parser),
-        account = account.toRecord(),
-        status = status,
-        message = message,
-        progress = progress
-    )
-
-    private fun ImportDataEntry.toRecord(): ImportDataEntryRecord = ImportDataEntryRecord(
-        id = id!!
-    )
 
 }

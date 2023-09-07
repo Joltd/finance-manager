@@ -4,21 +4,20 @@ import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.findAllByCondition
+import com.evgenltd.financemanager.importexport.converter.CategoryMappingConverter
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
 import com.evgenltd.financemanager.importexport.record.CategoryMappingFilter
 import com.evgenltd.financemanager.importexport.record.CategoryMappingPage
 import com.evgenltd.financemanager.importexport.record.CategoryMappingRecord
 import com.evgenltd.financemanager.importexport.repository.CategoryMappingRepository
-import com.evgenltd.financemanager.importexport.service.parser.ImportParser
-import com.evgenltd.financemanager.reference.record.toRecord
 import com.evgenltd.financemanager.reference.repository.AccountRepository
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class CategoryMappingService(
     private val categoryMappingRepository: CategoryMappingRepository,
+    private val categoryMappingConverter: CategoryMappingConverter,
     private val importParserService: ImportParserService,
     private val accountRepository: AccountRepository
 ) {
@@ -32,14 +31,14 @@ class CategoryMappingService(
                 total = it.totalElements,
                 page = filter.page,
                 size = filter.size,
-                mappings = it.content.map { it.toRecord() }
+                mappings = it.content.map { categoryMappingConverter.toRecord(it) }
             )
         }
 
-    fun byId(id: UUID): CategoryMappingRecord = categoryMappingRepository.find(id).toRecord()
+    fun byId(id: UUID): CategoryMappingRecord = categoryMappingRepository.find(id).let { categoryMappingConverter.toRecord(it) }
 
     fun update(record: CategoryMappingRecord) {
-        categoryMappingRepository.save(record.toEntity())
+        categoryMappingRepository.save(categoryMappingConverter.toEntity(record))
     }
 
     fun delete(id: UUID) {
@@ -48,19 +47,5 @@ class CategoryMappingService(
 
     fun findByParser(parser: UUID): List<Pair<Regex, CategoryMapping>> =
         categoryMappingRepository.findByParser(parser).map { it.pattern.toRegex() to it }
-
-    private fun CategoryMapping.toRecord(): CategoryMappingRecord = CategoryMappingRecord(
-        id = id,
-        parser = importParserService.byId(parser),
-        pattern = pattern,
-        category = category.toRecord()
-    )
-
-    private fun CategoryMappingRecord.toEntity(): CategoryMapping = CategoryMapping(
-        id = id,
-        parser = parser.id,
-        pattern = pattern,
-        category = accountRepository.find(category.id)
-    )
 
 }
