@@ -9,7 +9,7 @@ import {CommonModule} from "../common/common.module";
 import {ReferenceModule} from "../reference/reference.module";
 import {MatPaginatorModule} from "@angular/material/paginator";
 import {MatCardModule} from "@angular/material/card";
-import {NgClass, NgForOf, NgIf} from "@angular/common";
+import {NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
 import {MatListModule} from "@angular/material/list";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatIconModule} from "@angular/material/icon";
@@ -68,7 +68,8 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
         MatButtonToggleModule,
         FormsModule,
         MatTooltipModule,
-        MatSlideToggleModule
+        MatSlideToggleModule,
+        NgStyle
     ],
   providers: [],
   exports: [

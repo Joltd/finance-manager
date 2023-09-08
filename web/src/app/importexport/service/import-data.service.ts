@@ -54,6 +54,10 @@ export class ImportDataService {
     }
   }
 
+  importStart(id: string): Observable<void> {
+    return this.httpClient.post<void>(`/import-data/${id}/import`, null)
+  }
+
   cancel(importData: ImportData): Observable<void> {
     if (importData.status == 'PREPARE_IN_PROGRESS') {
       return this.httpClient.delete<void>(`/import-data/${importData.id}/preparation`)

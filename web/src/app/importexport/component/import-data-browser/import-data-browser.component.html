@@ -2,7 +2,11 @@
   <mat-action-list>
     <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let importData of importDataList">
 
-      <mat-spinner matListItemIcon class="icon" *ngIf="isInProgress(importData)" diameter="24" mode="determinate" [value]="importData.progress"></mat-spinner>
+      <mat-spinner matListItemIcon class="icon"
+                   *ngIf="isInProgress(importData)"
+                   diameter="24"
+                   mode="determinate"
+                   [value]="importData.progress * 100"></mat-spinner>
       <mat-icon matListItemIcon
                 class="icon"
                 *ngIf="isDone(importData)">done</mat-icon>
@@ -10,8 +14,8 @@
                 class="icon"
                 *ngIf="importData.status == 'FAILED'">warning</mat-icon>
 
-      <div matListItemTitle>{{importData.parser.name}} ({{importData.account.name}})</div>
-      <div matListItemLine *ngIf="importData.message != null">{{importData.message}}</div>
+      <span matListItemTitle>{{importData.parser.name}} ({{importData.account.name}})</span>
+      <span matListItemLine *ngIf="importData.message != null">{{importData.message}}</span>
 
       <mat-menu #menu>
         <button mat-menu-item (click)="edit(importData.id)" *ngIf="isEditAvailable(importData)">Edit</button>

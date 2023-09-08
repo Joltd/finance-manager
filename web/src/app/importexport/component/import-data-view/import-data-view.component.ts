@@ -60,7 +60,8 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.toolbarService.setup('Import', [
-      { name: 'repeatPreparation', icon: 'carpenter', action: () => this.repeatPreparation() }
+      { name: 'repeatPreparation', icon: 'carpenter', action: () => this.repeatPreparation() },
+      { name: 'startImport', icon: 'publish', action: () => this.startImport() },
     ])
   }
 
@@ -94,12 +95,18 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
 
   updatePreparationResult(preparationResult: boolean) {
     this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {preparationResult})
-      .subscribe(() => this.entryById())
+      .subscribe(() => {
+        this.entryLoad()
+        this.entryById()
+      })
   }
 
   updateOption(option: ImportOption) {
     this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {option})
-      .subscribe(() => this.entryById())
+      .subscribe(() => {
+        this.entryLoad()
+        this.entryById()
+      })
   }
 
   onPage(event: PageEvent) {
@@ -126,6 +133,9 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
   }
 
   viewOperation() {
+    if (this.importDataEntry.importResult == 'DONE') {
+      return
+    }
     this.dialog.open(OperationEditorDialogComponent, {
       data: this.importDataEntry.suggestedOperation
     }).afterClosed().subscribe(result => {
@@ -137,6 +147,10 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
 
   suggestedOperation(): Operation {
     return this.importDataEntry.suggestedOperation as Operation
+  }
+
+  isInProgress(): boolean {
+    return this.importData.status == 'PREPARE_IN_PROGRESS' || this.importData.status == 'IMPORT_IN_PROGRESS'
   }
 
   addCategoryMapping() {
@@ -155,10 +169,12 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
   }
 
   private repeatPreparation() {
+    if (this.isInProgress()) {
+      return
+    }
     this.importDataService.preparationRepeat(this.importData.id, null)
       .subscribe(() => {
-        this.entryLoad()
-        this.entryById()
+        this.importData.status = 'PREPARE_IN_PROGRESS'
       })
   }
 
@@ -167,6 +183,16 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.entryLoad()
         this.entryById()
+      })
+  }
+
+  private startImport() {
+    if (this.isInProgress()) {
+      return
+    }
+    this.importDataService.importStart(this.importData.id)
+      .subscribe(() => {
+        this.importData.status = 'IMPORT_IN_PROGRESS'
       })
   }
 

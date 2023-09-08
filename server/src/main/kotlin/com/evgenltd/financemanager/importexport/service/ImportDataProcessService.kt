@@ -197,7 +197,7 @@ class ImportDataProcessService(
                 (ImportDataEntry.Companion::importDataId eq id) and
                 (ImportDataEntry.Companion::preparationResult eq true) and
                 (ImportDataEntry.Companion::option inList listOf(ImportOption.REPLACE, ImportOption.CREATE_NEW)) and
-                (ImportDataEntry.Companion::importResult eq ImportResult.NOT_IMPORTED)
+                (ImportDataEntry.Companion::importResult inList  listOf(ImportResult.NOT_IMPORTED, ImportResult.FAILED))
             }
 
             if (++pageIndex >= page.totalPages) {
@@ -205,7 +205,7 @@ class ImportDataProcessService(
             }
 
             for (importDataEntry in page.content) {
-                update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
+                update(id, ImportDataStatus.IMPORT_IN_PROGRESS) {
                     it.progress = ++work / page.content.size.toDouble()
                 } ?: return
 
@@ -384,6 +384,7 @@ class ImportDataProcessService(
         operationService.update(operationRecord)
 
         importDataEntry.importResult = ImportResult.DONE
+        importDataEntry.importError = null
     }
 
     //

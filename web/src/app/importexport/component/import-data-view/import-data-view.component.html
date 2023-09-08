@@ -6,10 +6,16 @@
         <mat-action-list>
           <button mat-list-item
                   *ngFor="let entry of importDataEntryPage.entries"
-                  (click)="viewEntry(entry)">
+                  (click)="viewEntry(entry)" [class.skip]="entry.preparationResult && entry.option == 'SKIP'">
             <span matListItemIcon class="marker"
                   [class.preparation-error]="!entry.preparationResult"
-                  [class.import-error]="entry.importResult == 'FAILED'"></span>
+                  [class.import-error]="entry.importResult == 'FAILED'"
+                  [class.import-done]="entry.importResult == 'DONE'"></span>
+            <mat-icon class="option-icon" matListItemIcon>
+              <ng-container *ngIf="entry.preparationResult && entry.option == 'NONE'">question_mark</ng-container>
+              <ng-container *ngIf="entry.preparationResult && entry.option == 'CREATE_NEW'">add</ng-container>
+              <ng-container *ngIf="entry.preparationResult && entry.option == 'REPLACE'">edit</ng-container>
+            </mat-icon>
             <operation-label *ngIf="entry.suggestedOperation" [operation]="entry.suggestedOperation"></operation-label>
             <span class="no-suggestion" *ngIf="!entry.suggestedOperation">
               <span>{{entry.parsedEntry.date}}</span>
@@ -76,43 +82,44 @@
 
 <div *ngIf="!importDataEntry"></div>
 <div *ngIf="importDataEntry" class="entry">
+  <div class="in-progress" *ngIf="isInProgress()"></div>
 
-  <mat-card *ngIf="!importDataEntry.preparationResult" class="preparation-error">
+  <mat-card *ngIf="!importDataEntry.preparationResult && importDataEntry.preparationError" class="preparation-error">
     <mat-card-content class="error-content">
       <mat-icon>warning</mat-icon>
       {{importDataEntry.preparationError}}
     </mat-card-content>
   </mat-card>
 
-  <mat-card *ngIf="importDataEntry.importResult == 'FAILED'" class="import-error">
+  <mat-card *ngIf="importDataEntry.importResult == 'FAILED' && importDataEntry.importError" class="import-error">
     <mat-card-content class="error-content">
       <mat-icon>warning</mat-icon>
       {{importDataEntry.importError}}
     </mat-card-content>
   </mat-card>
 
-  <mat-card>
-    <mat-card-content class="command-toolbar">
-      <mat-slide-toggle [ngModel]="importDataEntry.preparationResult" (ngModelChange)="updatePreparationResult($event)">
+  <mat-card class="suggested-operation">
+    <mat-card-content>
+      <button mat-button
+              *ngIf="!importDataEntry.suggestedOperation"
+              (click)="viewOperation()">Suggest operation</button>
+      <operation-label *ngIf="importDataEntry.suggestedOperation"
+                       [operation]="suggestedOperation()"
+                       (click)="viewOperation()"></operation-label>
+      <div class="spacer"></div>
+      <mat-slide-toggle [ngModel]="importDataEntry.preparationResult"
+                        [disabled]="importDataEntry.importResult == 'DONE'"
+                        (ngModelChange)="updatePreparationResult($event)">
         <span *ngIf="importDataEntry.preparationResult">Prepared</span>
         <span *ngIf="!importDataEntry.preparationResult">Not prepared</span>
       </mat-slide-toggle>
       <button mat-button
-              *ngIf="importDataEntry.preparationResult"
+              *ngIf="!importDataEntry.preparationResult && importDataEntry.importResult != 'DONE'"
               class="small-icon-button"
               (click)="repeatPreparationEntry()"><mat-icon>carpenter</mat-icon></button>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card class="suggested-operation">
-    <mat-card-content>
-      <button mat-button *ngIf="!importDataEntry.suggestedOperation" (click)="viewOperation()">Suggest operation</button>
-      <operation-label *ngIf="importDataEntry.suggestedOperation"
-                       [operation]="suggestedOperation()"
-                       (click)="viewOperation()"></operation-label>
-
-      <mat-button-toggle-group *ngIf="importDataEntry.suggestedOperation"
+      <mat-button-toggle-group *ngIf="importDataEntry.preparationResult && importDataEntry.suggestedOperation"
                                [ngModel]="importDataEntry.option"
+                               [disabled]="importDataEntry.importResult == 'DONE'"
                                (ngModelChange)="updateOption($event)">
         <mat-button-toggle value="NONE">None</mat-button-toggle>
         <mat-button-toggle value="SKIP">Skip</mat-button-toggle>
@@ -160,7 +167,7 @@
       <mat-card-header>
         <mat-card-subtitle>
           Similar operations
-          <button mat-button class="small-icon-button" (click)="searchSimilar()"><mat-icon>refresh</mat-icon></button>
+          <button mat-button class="small-icon-button" *ngIf="importDataEntry.importResult != 'DONE'" (click)="searchSimilar()"><mat-icon>refresh</mat-icon></button>
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
