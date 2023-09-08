@@ -61,6 +61,8 @@ class ImportDataEntry(
     companion object {
         fun importDataId(root: Root<ImportDataEntry>): Path<UUID> = root.get<ImportData>(ImportDataEntry::importData.name).get(ImportData::id.name)
 
+        fun suggestedOperationType(root: Root<ImportDataEntry>): Path<OperationType> = root.get<ImportData>(ImportDataEntry::suggestedOperation.name).get(Operation::type.name)
+
         fun preparationResult(root: Root<ImportDataEntry>): Path<Boolean> = root.get(ImportDataEntry::preparationResult.name)
 
         fun option(root: Root<ImportDataEntry>): Path<ImportOption> = root.get(ImportDataEntry::option.name)

@@ -17,14 +17,12 @@ import java.util.UUID
 @Service
 class CategoryMappingService(
     private val categoryMappingRepository: CategoryMappingRepository,
-    private val categoryMappingConverter: CategoryMappingConverter,
-    private val importParserService: ImportParserService,
-    private val accountRepository: AccountRepository
+    private val categoryMappingConverter: CategoryMappingConverter
 ) {
 
     fun list(filter: CategoryMappingFilter): CategoryMappingPage =
         categoryMappingRepository.findAllByCondition(filter.page, filter.size) {
-            (CategoryMapping.Companion::parser eq filter.parser) and
+            (CategoryMapping.Companion::parser eq filter.parser?.id) and
             (CategoryMapping.Companion::categoryId eq filter.category?.id)
         }.let {
             CategoryMappingPage(
@@ -46,6 +44,6 @@ class CategoryMappingService(
     }
 
     fun findByParser(parser: UUID): List<Pair<Regex, CategoryMapping>> =
-        categoryMappingRepository.findByParser(parser).map { it.pattern.toRegex() to it }
+        categoryMappingRepository.findByParser(parser).map { ".*${it.pattern}.*".toRegex() to it }
 
 }

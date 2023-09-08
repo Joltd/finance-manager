@@ -25,10 +25,6 @@
 
   mat-tab-group {
     overflow: hidden;
-
-    .mat-mdc-tab-body-content {
-      overflow: hidden!important;
-    }
   }
 }
 
@@ -60,6 +56,14 @@
   }
 }
 
+.filter {
+  padding: 1rem;
+
+  form {
+    display: grid;
+  }
+}
+
 .entry {
   overflow: auto;
   display: flex;
@@ -70,6 +74,12 @@
 .error-content {
   display: flex;
   gap: .5rem;
+  align-items: center;
+}
+
+.command-toolbar {
+  display: flex;
+  gap: 1rem;
   align-items: center;
 }
 

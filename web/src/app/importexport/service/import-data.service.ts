@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {EMPTY, Observable} from "rxjs";
-import {ImportData, ImportDataEntryPage} from "../model/import-data";
+import {ImportData, ImportDataEntry, ImportDataEntryPage} from "../model/import-data";
 import {HttpClient} from "@angular/common/http";
 
 @Injectable({
@@ -18,8 +18,20 @@ export class ImportDataService {
     return this.httpClient.post<ImportDataEntryPage>(`/import-data/${id}/entry`, filter)
   }
 
+  entryUpdate(id: string, entryId: string, request: any): Observable<void> {
+    return this.httpClient.patch<void>(`/import-data/${id}/entry/${entryId}`, request)
+  }
+
+  entryUpdateSimilar(id: string, entryId: string): Observable<void> {
+    return this.httpClient.patch<void>(`/import-data/${id}/entry/${entryId}/similar`, null)
+  }
+
   byId(id: string): Observable<ImportData> {
     return this.httpClient.get<ImportData>(`/import-data/${id}`)
+  }
+
+  byIdEntry(id: string, entryId: string): Observable<ImportDataEntry> {
+      return this.httpClient.get<ImportDataEntry>(`/import-data/${id}/entry/${entryId}`)
   }
 
   delete(id: string): Observable<void> {
@@ -34,8 +46,12 @@ export class ImportDataService {
     return this.httpClient.post<void>('/import-data', formData)
   }
 
-  preparationRepeat(id: string): Observable<void> {
-    return this.httpClient.put<void>('/import-data/{id}/preparation', null)
+  preparationRepeat(id: string, entryId: string | null): Observable<void> {
+    if (entryId == null) {
+      return this.httpClient.put<void>(`/import-data/${id}/preparation`, null)
+    } else {
+      return this.httpClient.put<void>(`/import-data/${id}/preparation/${entryId}`, null)
+    }
   }
 
   cancel(importData: ImportData): Observable<void> {

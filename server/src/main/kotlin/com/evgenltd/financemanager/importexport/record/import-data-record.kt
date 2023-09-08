@@ -38,6 +38,7 @@ data class ImportDataEntryRecord(
 data class ImportDataEntryFilter(
     val page: Int,
     val size: Int = 20,
+    val operationType: OperationType? = null,
     val preparationResult: Boolean? = null,
     val option: ImportOption? = null,
     val importResult: ImportResult? = null,
@@ -48,4 +49,10 @@ data class ImportDataEntryPage(
     val size: Int,
     val total: Long,
     val entries: List<ImportDataEntryRecord>,
+)
+
+data class ImportDataEntryUpdateRequest(
+    val suggestedOperation: OperationRecord? = null,
+    val preparationResult: Boolean? = null,
+    val option: ImportOption? = null,
 )

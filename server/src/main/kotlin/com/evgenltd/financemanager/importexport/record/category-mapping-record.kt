@@ -7,7 +7,7 @@ import java.util.UUID
 data class CategoryMappingFilter(
     val page: Int,
     val size: Int = 50,
-    val parser: String? = null,
+    val parser: Reference? = null,
     val category: AccountRecord? = null,
 )
 

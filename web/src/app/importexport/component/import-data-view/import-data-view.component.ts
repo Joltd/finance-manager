@@ -16,6 +16,7 @@ import {
 import {
   CategoryMappingEditorDialogComponent
 } from "../category-mapping-editor-dialog/category-mapping-editor-dialog.component";
+import {CategoryMappingService} from "../../service/category-mapping.service";
 
 @Component({
   selector: "import-data-view",
@@ -34,16 +35,19 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
   }
   importDataEntry!: ImportDataEntry
   importDataEntryFilter = new FormGroup({
+    operationType: new FormControl(null),
     preparationResult: new FormControl(null),
     option: new FormControl(null),
     importResult: new FormControl(null)
   })
+  tabIndex: number = 0
 
   constructor(
     private settingsService: SettingsService,
     private toolbarService: ToolbarService,
     private activatedRoute: ActivatedRoute,
     private importDataService: ImportDataService,
+    private categoryMappingService: CategoryMappingService,
     private router: Router,
     private dialog: MatDialog
   ) {
@@ -56,7 +60,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.toolbarService.setup('Import', [
-      { name: 'repeatPreparation', icon: '', action: () => this.repeatPreparation() }
+      { name: 'repeatPreparation', icon: 'carpenter', action: () => this.repeatPreparation() }
     ])
   }
 
@@ -68,11 +72,12 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
   private load() {
     this.importDataService.byId(this.id).subscribe(result => {
       this.importData = result
+      this.toolbarService.setupTitle(`Import - ${this.importData.parser.name} (${this.importData.account.name})`)
       this.entryLoad()
     })
   }
 
-  private entryLoad() {
+  entryLoad() {
     let filter = {
       page: this.importDataEntryPage.page,
       size: this.importDataEntryPage.size,
@@ -82,9 +87,34 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       .subscribe(result => this.importDataEntryPage = result)
   }
 
+  private entryById() {
+    this.importDataService.byIdEntry(this.id, this.importDataEntry.id)
+      .subscribe(result => this.importDataEntry = result)
+  }
+
+  updatePreparationResult(preparationResult: boolean) {
+    this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {preparationResult})
+      .subscribe(() => this.entryById())
+  }
+
+  updateOption(option: ImportOption) {
+    this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {option})
+      .subscribe(() => this.entryById())
+  }
+
   onPage(event: PageEvent) {
     this.importDataEntryPage.page = event.pageIndex
     this.entryLoad()
+  }
+
+  filter() {
+    this.tabIndex = 0
+    this.entryLoad()
+  }
+
+  searchSimilar() {
+    this.importDataService.entryUpdateSimilar(this.importData.id, this.importDataEntry.id)
+      .subscribe(() => this.entryById())
   }
 
   viewEntry(entry: ImportDataEntry) {
@@ -100,13 +130,9 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       data: this.importDataEntry.suggestedOperation
     }).afterClosed().subscribe(result => {
       if (result) {
-        this.importDataEntry.suggestedOperation = result
+        this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {suggestedOperation: result})
       }
     })
-  }
-
-  changeOption(option: ImportOption) {
-    this.importDataEntry.option = option
   }
 
   suggestedOperation(): Operation {
@@ -121,12 +147,27 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
         pattern: this.importDataEntry.parsedEntry.description
       }
     }).afterClosed().subscribe(result => {
-
+      if (result) {
+        this.categoryMappingService.update(result)
+          .subscribe(() => {})
+      }
     })
   }
 
   private repeatPreparation() {
+    this.importDataService.preparationRepeat(this.importData.id, null)
+      .subscribe(() => {
+        this.entryLoad()
+        this.entryById()
+      })
+  }
 
+  repeatPreparationEntry() {
+    this.importDataService.preparationRepeat(this.importData.id, this.importDataEntry.id)
+      .subscribe(() => {
+        this.entryLoad()
+        this.entryById()
+      })
   }
 
 }

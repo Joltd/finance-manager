@@ -27,6 +27,10 @@ export class ToolbarService {
     )
   }
 
+  setupTitle(title: string) {
+    setTimeout(() => this.title = title, 100)
+  }
+
   setup(title: string, commands: Command[] = []) {
     setTimeout(() => {
       this.title = title

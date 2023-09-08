@@ -1,5 +1,5 @@
 <mat-card class="entries-card">
-  <mat-tab-group>
+  <mat-tab-group [(selectedIndex)]="tabIndex">
 
     <mat-tab label="Entries">
       <div class="entries">
@@ -18,7 +18,7 @@
           </button>
         </mat-action-list>
         <mat-paginator [hidePageSize]="true"
-                       [pageSize]="10"
+                       [pageSize]="importDataEntryPage.size"
                        [pageIndex]="importDataEntryPage.page"
                        [length]="importDataEntryPage.total"
                        (page)="onPage($event)"
@@ -27,35 +27,48 @@
     </mat-tab>
 
     <mat-tab label="Filter">
-      <form [formGroup]="importDataEntryFilter">
-        <mat-form-field>
-          <mat-label>Preparation result</mat-label>
-          <mat-select formControlName="preparationResult">
-            <mat-option [value]="null">Nothing</mat-option>
-            <mat-option [value]="false">Not prepared</mat-option>
-            <mat-option [value]="true">Prepared</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Option</mat-label>
-          <mat-select formControlName="option">
-            <mat-option [value]="null">Nothing</mat-option>
-            <mat-option [value]="'NONE'">None</mat-option>
-            <mat-option [value]="'SKIP'">Skip</mat-option>
-            <mat-option [value]="'CREATE_NEW'">Add</mat-option>
-            <mat-option [value]="'REPLACE'">Replace</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Import result</mat-label>
-          <mat-select formControlName="importResult">
-            <mat-option [value]="null">Nothing</mat-option>
-            <mat-option [value]="'NOT_IMPORTED'">Not imported</mat-option>
-            <mat-option [value]="'DONE'">Done</mat-option>
-            <mat-option [value]="'FAILED'">Failed</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
+      <div class="filter">
+        <form [formGroup]="importDataEntryFilter">
+<!--          <mat-form-field>-->
+<!--            <mat-label>Suggested operation type</mat-label>-->
+<!--            <mat-select formControlName="operationType">-->
+<!--              <mat-option [value]="null">Nothing</mat-option>-->
+<!--              <mat-option [value]="'EXCHANGE'">Exchange</mat-option>-->
+<!--              <mat-option [value]="'TRANSFER'">Transfer</mat-option>-->
+<!--              <mat-option [value]="'EXPENSE'">Expense</mat-option>-->
+<!--              <mat-option [value]="'INCOME'">Income</mat-option>-->
+<!--            </mat-select>-->
+<!--          </mat-form-field>-->
+          <mat-form-field>
+            <mat-label>Preparation result</mat-label>
+            <mat-select formControlName="preparationResult">
+              <mat-option [value]="null">Nothing</mat-option>
+              <mat-option [value]="false">Not prepared</mat-option>
+              <mat-option [value]="true">Prepared</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Option</mat-label>
+            <mat-select formControlName="option">
+              <mat-option [value]="null">Nothing</mat-option>
+              <mat-option [value]="'NONE'">None</mat-option>
+              <mat-option [value]="'SKIP'">Skip</mat-option>
+              <mat-option [value]="'CREATE_NEW'">Add</mat-option>
+              <mat-option [value]="'REPLACE'">Replace</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Import result</mat-label>
+            <mat-select formControlName="importResult">
+              <mat-option [value]="null">Nothing</mat-option>
+              <mat-option [value]="'NOT_IMPORTED'">Not imported</mat-option>
+              <mat-option [value]="'DONE'">Done</mat-option>
+              <mat-option [value]="'FAILED'">Failed</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </form>
+        <button mat-raised-button color="primary" (click)="filter()">Filter</button>
+      </div>
     </mat-tab>
 
   </mat-tab-group>
@@ -79,12 +92,15 @@
   </mat-card>
 
   <mat-card>
-    <mat-card-content>
-      <mat-slide-toggle [(ngModel)]="importDataEntry.preparationResult">
+    <mat-card-content class="command-toolbar">
+      <mat-slide-toggle [ngModel]="importDataEntry.preparationResult" (ngModelChange)="updatePreparationResult($event)">
         <span *ngIf="importDataEntry.preparationResult">Prepared</span>
         <span *ngIf="!importDataEntry.preparationResult">Not prepared</span>
       </mat-slide-toggle>
-      <button mat-button class="small-icon-button"><mat-icon>add</mat-icon></button>
+      <button mat-button
+              *ngIf="importDataEntry.preparationResult"
+              class="small-icon-button"
+              (click)="repeatPreparationEntry()"><mat-icon>carpenter</mat-icon></button>
     </mat-card-content>
   </mat-card>
 
@@ -97,7 +113,7 @@
 
       <mat-button-toggle-group *ngIf="importDataEntry.suggestedOperation"
                                [ngModel]="importDataEntry.option"
-                               (ngModelChange)="changeOption($event)">
+                               (ngModelChange)="updateOption($event)">
         <mat-button-toggle value="NONE">None</mat-button-toggle>
         <mat-button-toggle value="SKIP">Skip</mat-button-toggle>
         <mat-button-toggle value="CREATE_NEW">Add</mat-button-toggle>
@@ -140,10 +156,12 @@
   </mat-expansion-panel>
 
   <div class="additional-info">
-    <!--  <mat-card *ngIf="importDataEntry.similarOperations.length > 0">-->
     <mat-card class="similar-operations">
       <mat-card-header>
-        <mat-card-subtitle>Similar operations <button mat-button class="small-icon-button"><mat-icon>add</mat-icon></button></mat-card-subtitle>
+        <mat-card-subtitle>
+          Similar operations
+          <button mat-button class="small-icon-button" (click)="searchSimilar()"><mat-icon>refresh</mat-icon></button>
+        </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <operation-label [operation]="similarOperation"
@@ -151,7 +169,6 @@
       </mat-card-content>
     </mat-card>
 
-    <!--  <mat-card *ngIf="importDataEntry.matchedCategoryMappings.length > 0">-->
     <mat-card class="category-mappings">
       <mat-card-header>
         <mat-card-subtitle>Category mappings</mat-card-subtitle>

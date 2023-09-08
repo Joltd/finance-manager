@@ -1,9 +1,6 @@
 package com.evgenltd.financemanager.importexport.service
 
-import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.eq
-import com.evgenltd.financemanager.common.repository.findAllByCondition
-import com.evgenltd.financemanager.common.repository.inList
+import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
 import com.evgenltd.financemanager.importexport.entity.ImportData
@@ -12,6 +9,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.entity.ImportResult
 import com.evgenltd.financemanager.importexport.entity.SuggestedOperation
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRequest
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -38,6 +36,46 @@ class ImportDataProcessService(
     private val accountConverter: AccountConverter,
     private val transactionTemplate: TransactionTemplate
 ) : Loggable() {
+
+    fun entryUpdate(id: UUID, entryId: UUID, request: ImportDataEntryUpdateRequest) {
+        update(id, ImportDataStatus.PREPARE_DONE) {
+            it.status = ImportDataStatus.PREPARE_IN_PROGRESS
+        } ?: return
+
+        val importDataEntry = importDataEntryRepository.find(entryId)
+
+        request.preparationResult?.let {
+            importDataEntry.preparationResult = it
+        }
+        request.option?.let {
+            importDataEntry.option = it
+        }
+        request.suggestedOperation?.let {
+            importDataEntry.suggestedOperation = it
+        }
+
+        update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
+            it.status = ImportDataStatus.PREPARE_DONE
+        }
+    }
+
+    fun entryUpdateSimilar(id: UUID, entryId: UUID) {
+        update(id, ImportDataStatus.PREPARE_DONE) {
+            it.status = ImportDataStatus.PREPARE_IN_PROGRESS
+        } ?: return
+
+        val importDataEntry = importDataEntryRepository.find(entryId)
+        try {
+            searchSimilarOperations(importDataEntry)
+        } catch (e: Exception) {
+            importDataEntry.preparationError = "Unable to search similar operations: ${e.message ?: "Unknown error"}"
+        }
+        importDataEntryRepository.save(importDataEntry)
+
+        update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
+            it.status = ImportDataStatus.PREPARE_DONE
+        }
+    }
 
     @Async
     fun preparationStart(id: UUID, file: InputStream) {
@@ -85,7 +123,6 @@ class ImportDataProcessService(
         }
     }
 
-    @Async
     fun preparationRepeat(id: UUID) {
         val importData = update(id, listOf(ImportDataStatus.PREPARE_DONE)) {
             it.status = ImportDataStatus.PREPARE_IN_PROGRESS
@@ -122,6 +159,20 @@ class ImportDataProcessService(
         update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
             it.status = ImportDataStatus.PREPARE_DONE
             it.progress = 1.0
+        }
+    }
+
+    fun preparationRepeat(id: UUID, entryId: UUID) {
+        val importData = update(id, ImportDataStatus.PREPARE_DONE) {
+            it.status = ImportDataStatus.PREPARE_IN_PROGRESS
+        } ?: return
+
+        val categoryMappings = categoryMappingService.findByParser(importData.parser)
+        val importDataEntry = importDataEntryRepository.find(entryId)
+        prepareEntry(importDataEntry, importData, categoryMappings)
+
+        update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
+            it.status = ImportDataStatus.PREPARE_DONE
         }
     }
 
@@ -185,8 +236,10 @@ class ImportDataProcessService(
     ) {
         try {
             suggestOperation(importDataEntry, importData, categoryMappings)
-            val similarOperations = searchSimilarOperations(importDataEntry)
-            decideImportOption(importDataEntry, similarOperations)
+            if (importDataEntry.preparationResult) {
+                val similarOperations = searchSimilarOperations(importDataEntry)
+                decideImportOption(importDataEntry, similarOperations)
+            }
         } catch (e: RuntimeException) {
             importDataEntry.preparationResult = false
             importDataEntry.preparationError = "Unable to prepare entry: ${e.message ?: "Unknown error"}"
@@ -266,7 +319,6 @@ class ImportDataProcessService(
     }
 
     private fun searchSimilarOperations(importDataEntry: ImportDataEntry): List<Operation> {
-        if (!importDataEntry.preparationResult) return emptyList()
         val suggestedOperation = importDataEntry.suggestedOperation ?: return emptyList()
         val similarOperations = operationService.findSimilar(suggestedOperation)
         importDataEntry.similarOperations = similarOperations.map { it.id!! }
@@ -274,10 +326,6 @@ class ImportDataProcessService(
     }
 
     private fun decideImportOption(importDataEntry: ImportDataEntry, similarOperations: List<Operation>) {
-        if (!importDataEntry.preparationResult) {
-            return
-        }
-
         val suggestedOperation = importDataEntry.suggestedOperation ?: return
 
         if (similarOperations.isEmpty()) {

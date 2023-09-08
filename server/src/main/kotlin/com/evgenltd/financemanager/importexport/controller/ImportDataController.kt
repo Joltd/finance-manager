@@ -1,11 +1,10 @@
 package com.evgenltd.financemanager.importexport.controller
 
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryFilter
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryPage
-import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.importexport.record.*
 import com.evgenltd.financemanager.importexport.service.ImportDataService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -32,6 +31,29 @@ class ImportDataController(
     @GetMapping("/import-data/{id}")
     fun byId(@PathVariable("id") id: UUID): ImportDataRecord = importDataService.byId(id)
 
+    @GetMapping("/import-data/{id}/entry/{entryId}")
+    fun byIdEntry(
+        @PathVariable("id") id: UUID,
+        @PathVariable("entryId") entryId: UUID
+    ): ImportDataEntryRecord = importDataService.byIdEntry(id, entryId)
+
+    @PatchMapping("/import-data/{id}/entry/{entryId}")
+    fun entryUpdate(
+        @PathVariable("id") id: UUID,
+        @PathVariable("entryId") entryId: UUID,
+        @RequestBody request: ImportDataEntryUpdateRequest
+    ) {
+        importDataService.entryUpdate(id, entryId, request)
+    }
+
+    @PatchMapping("/import-data/{id}/entry/{entryId}/similar")
+    fun entryUpdateSimilar(
+        @PathVariable("id") id: UUID,
+        @PathVariable("entryId") entryId: UUID
+    ) {
+        importDataService.entryUpdateSimilar(id, entryId)
+    }
+
     @DeleteMapping("/import-data/{id}")
     fun delete(@PathVariable("id") id: UUID) {
         importDataService.delete(id)
@@ -49,6 +71,14 @@ class ImportDataController(
     @PutMapping("/import-data/{id}/preparation")
     fun preparationRepeat(@PathVariable("id") id: UUID) {
         importDataService.preparationRepeat(id)
+    }
+
+    @PutMapping("/import-data/{id}/preparation/{entryId}")
+    fun preparationRepeat(
+        @PathVariable("id") id: UUID,
+        @PathVariable("entryId") entryId: UUID
+    ) {
+        importDataService.preparationRepeat(id, entryId)
     }
 
     @DeleteMapping("/import-data/{id}/preparation")

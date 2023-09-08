@@ -31,7 +31,7 @@ class CategoryMapping(
 ) {
 
     companion object {
-        fun parser(root: Root<CategoryMapping>): Path<String> = root.get(CategoryMapping::parser.name)
+        fun parser(root: Root<CategoryMapping>): Path<UUID> = root.get(CategoryMapping::parser.name)
 
         fun categoryId(root: Root<CategoryMapping>): Path<UUID> = root.get<UUID?>(CategoryMapping::category.name).get(Account::id.name)
     }

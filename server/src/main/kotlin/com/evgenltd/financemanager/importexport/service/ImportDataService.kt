@@ -9,9 +9,7 @@ import com.evgenltd.financemanager.importexport.converter.ImportDataEntryConvert
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryFilter
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryPage
-import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.importexport.record.*
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.reference.repository.AccountRepository
@@ -35,6 +33,7 @@ class ImportDataService(
 
     fun entryList(id: UUID, filter: ImportDataEntryFilter): ImportDataEntryPage =
         importDataEntryRepository.findAllByCondition(filter.page, filter.size) {
+            (ImportDataEntry.Companion::suggestedOperationType eq filter.operationType) and
             (ImportDataEntry.Companion::preparationResult eq filter.preparationResult) and
             (ImportDataEntry.Companion::option eq filter.option) and
             (ImportDataEntry.Companion::importResult eq filter.importResult)
@@ -49,6 +48,17 @@ class ImportDataService(
 
     fun byId(id: UUID): ImportDataRecord = importDataRepository.find(id)
         .let { importDataConverter.toRecord(it) }
+
+    fun byIdEntry(id: UUID, entryId: UUID): ImportDataEntryRecord = importDataEntryRepository.find(entryId)
+        .let { importDataEntryConverter.toRecord(it) }
+
+    fun entryUpdate(id: UUID, entryId: UUID, request: ImportDataEntryUpdateRequest) {
+        importDataProcessService.entryUpdate(id, entryId, request)
+    }
+
+    fun entryUpdateSimilar(id: UUID, entryId: UUID) {
+        importDataProcessService.entryUpdateSimilar(id, entryId)
+    }
 
     @Transactional
     fun delete(id: UUID) {
@@ -75,6 +85,10 @@ class ImportDataService(
 
     fun preparationRepeat(id: UUID) {
         importDataProcessService.preparationRepeat(id)
+    }
+
+    fun preparationRepeat(id: UUID, entryId: UUID) {
+        importDataProcessService.preparationRepeat(id, entryId)
     }
 
     fun preparationCancel(id: UUID) {

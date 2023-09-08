@@ -1,5 +1,5 @@
 import {Component, Input} from "@angular/core";
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {CategoryMapping} from "../../model/category-mapping";
 
 @Component({
@@ -11,9 +11,9 @@ export class CategoryMappingViewComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
-    parser: new FormControl(null),
-    pattern: new FormControl(null),
-    category: new FormControl(null)
+    parser: new FormControl(null, Validators.required),
+    pattern: new FormControl(null, Validators.required),
+    category: new FormControl(null, Validators.required)
   })
 
   get categoryMapping(): CategoryMapping | null {
