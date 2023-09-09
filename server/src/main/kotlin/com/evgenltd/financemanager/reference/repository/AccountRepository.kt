@@ -16,4 +16,6 @@ interface AccountRepository : JpaRepository<Account, UUID>,JpaSpecificationExecu
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     fun findAndLock(id: UUID): Account?
 
+    fun findByName(name: String): Account?
+
 }

@@ -48,5 +48,9 @@ class AccountService(
         val account = accountRepository.findAndLock(id) ?: return
         account.deleted = true
     }
-    
+
+    @Transactional
+    fun getOrCreate(name: String, type: AccountType): Account =
+        accountRepository.findByName(name)
+            ?: accountRepository.save(Account(name = name, type = type))
 }

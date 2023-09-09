@@ -11,6 +11,7 @@ import com.evgenltd.financemanager.importexport.record.CategoryMappingPage
 import com.evgenltd.financemanager.importexport.record.CategoryMappingRecord
 import com.evgenltd.financemanager.importexport.repository.CategoryMappingRepository
 import com.evgenltd.financemanager.reference.repository.AccountRepository
+import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import java.util.UUID
 
