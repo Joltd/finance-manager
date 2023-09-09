@@ -21,7 +21,7 @@
 
         <mat-tab *ngIf="isExpenseTypeEnabled()">
           <ng-template mat-tab-label>
-            <mat-icon class="expense">arrow_upward</mat-icon>
+            <mat-icon class="expense">money_off</mat-icon>
           </ng-template>
           <mat-action-list>
             <button mat-list-item (click)="selectAccount(null)">Nothing</button>
@@ -31,7 +31,7 @@
 
         <mat-tab *ngIf="isIncomeTypeEnabled()">
           <ng-template mat-tab-label>
-            <mat-icon class="income">arrow_downward</mat-icon>
+            <mat-icon class="income">attach_money</mat-icon>
           </ng-template>
           <mat-action-list>
             <button mat-list-item (click)="selectAccount(null)">Nothing</button>

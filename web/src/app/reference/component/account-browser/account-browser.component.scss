@@ -1,0 +1,9 @@
+@use "../../../../variables";
+
+.expense {
+  color: variables.$expense-color!important;
+}
+
+.income {
+  color: variables.$income-color!important;
+}

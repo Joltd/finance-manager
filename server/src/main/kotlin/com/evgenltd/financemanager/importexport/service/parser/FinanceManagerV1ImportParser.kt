@@ -1,10 +1,15 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
+import com.evgenltd.financemanager.common.util.parseAmount
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.repository.CategoryMappingRepository
 import com.evgenltd.financemanager.importexport.service.ImportParserService
+import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.reference.converter.AccountConverter
+import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
+import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.service.AccountService
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
@@ -16,6 +21,7 @@ import java.util.UUID
 class FinanceManagerV1ImportParser(
     private val categoryMappingRepository: CategoryMappingRepository,
     private val accountService: AccountService,
+    private val accountConverter: AccountConverter,
     private val tbcImportParser: TbcImportParser,
     private val bccImportParser: BccImportParser,
     private val tinkoffImportParser: TinkoffImportParser,
@@ -31,15 +37,67 @@ class FinanceManagerV1ImportParser(
             return
         }
 
-        importRule("tbc", tbcImportParser.id)
+        importRule("bcc", bccImportParser.id)
         importRule("sber", sberImportParser.id)
         importRule("tbc", tbcImportParser.id)
         importRule("tinkoff-rub", tinkoffImportParser.id)
     }
 
     override fun parse(stream: InputStream): List<ImportDataParsedEntry> {
-        TODO("Not yet implemented")
+
+        val accountIndex = accountService.list()
+            .associateBy { it.name }
+            .toMutableMap()
+
+        return stream.readCsv()
+            .map {
+                val amount = it["amount"].parseAmount()
+                when (it["type"]) {
+                    "expense" -> ImportDataParsedEntry(
+                        rawEntries = listOf(it.toString()),
+                        date = it["date"].date("yyyy-MM-dd"),
+                        type = OperationType.EXPENSE,
+                        accountFrom = accountIndex.find(it["accountName"]),
+                        amountFrom = amount,
+                        accountTo = accountIndex.find(it["expenseCategoryName"]),
+                        amountTo = amount,
+                        description = it["description"].nonNull(),
+                    )
+                    "income" -> ImportDataParsedEntry(
+                        rawEntries = listOf(it.toString()),
+                        date = it["date"].date("yyyy-MM-dd"),
+                        type = OperationType.INCOME,
+                        accountFrom = accountIndex.find(it["incomeCategoryName"]),
+                        amountFrom = amount,
+                        accountTo = accountIndex.find(it["accountName"]),
+                        amountTo = amount,
+                        description = it["description"].nonNull(),
+                    )
+                    else -> {
+                        val amountFrom = it["amountFrom"].parseAmount()
+                        val amountTo = it["amountTo"].parseAmount()
+                        ImportDataParsedEntry(
+                            rawEntries = listOf(it.toString()),
+                            date = it["date"].date("yyyy-MM-dd"),
+                            type = if (amountFrom == amountTo) OperationType.TRANSFER else OperationType.EXCHANGE,
+                            accountFrom = accountIndex.find(it["accountFromName"]),
+                            amountFrom = amountFrom,
+                            accountTo = accountIndex.find(it["accountToName"]),
+                            amountTo = amountTo,
+                            description = it["description"].nonNull(),
+                        )
+                    }
+                }
+
+            }
     }
+
+    private fun MutableMap<String, AccountRecord>.find(name: String): AccountRecord = computeIfAbsent(name) {
+        val account = accountService.getOrCreate(name, AccountType.ACCOUNT)
+        accountConverter.toRecord(account)
+    }
+
+    private fun String.nonNull(): String = if (this == "null") "" else this
 
     private fun importRule(rule: String, parser: UUID) {
         readRules("$rule/main.csv")

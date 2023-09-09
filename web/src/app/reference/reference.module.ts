@@ -7,7 +7,7 @@ import {MatCardModule} from "@angular/material/card";
 import {ReactiveFormsModule} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgClass, NgForOf, NgIf} from "@angular/common";
 import {AccountBrowserComponent} from "./component/account-browser/account-browser.component";
 import {AccountEditorComponent} from "./component/account-editor/account-editor.component";
 import {CommonModule} from "../common/common.module";
@@ -44,7 +44,8 @@ import {MatTabsModule} from "@angular/material/tabs";
     MatCheckboxModule,
     MatSelectModule,
     PortalModule,
-    MatTabsModule
+    MatTabsModule,
+    NgClass
   ],
   exports: [
     AccountBrowserComponent,

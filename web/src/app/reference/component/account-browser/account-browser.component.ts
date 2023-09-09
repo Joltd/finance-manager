@@ -1,7 +1,7 @@
 import {Component, OnInit} from "@angular/core";
 import {AccountService} from "../../service/account.service";
 import {Router} from "@angular/router";
-import {Account} from "../../model/account";
+import {Account, AccountType} from "../../model/account";
 
 @Component({
   selector: 'account-browser',
@@ -11,6 +11,8 @@ import {Account} from "../../model/account";
 export class AccountBrowserComponent implements OnInit {
 
   accounts: Account[] = []
+  expenses: Account[] = []
+  incomes: Account[] = []
 
   constructor(
     private accountService: AccountService,
@@ -23,7 +25,11 @@ export class AccountBrowserComponent implements OnInit {
 
   private load() {
     this.accountService.list()
-      .subscribe(result => this.accounts = result.sort((left,right) => left.name > right.name ? 1 : -1))
+      .subscribe(result => {
+        this.accounts = result.filter(account => account.type == 'ACCOUNT')
+        this.expenses = result.filter(account => account.type == 'EXPENSE')
+        this.incomes = result.filter(account => account.type == 'INCOME')
+      })
   }
 
   add() {

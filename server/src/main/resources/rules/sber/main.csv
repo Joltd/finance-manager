@@ -1,13 +1,6 @@
 type,category,oppositeAccount,oppositeAmount,date,amount,description,source
-exchange,,Сбер Карта (0234),~,2021-09-06,50384.25,5228....0234,
-exchange,,Tinkoff Black Card,~,,,5213....4661,
-exchange,,Сбер Платежный Счет,~,,,..7551 Л. ЕВГЕНИЙ ОЛЕГОВИЧ,
-exchange,,Сбер Платежный Счет,~,,,..0234 Л. ЕВГЕНИЙ ОЛЕГОВИЧ,
-exchange,,Tinkoff Black Card,55000 RUB,2020-01-23,,4276....4151,
 income,Проценты,,,,,VKLAD,
-income,Другое,,,2019-11-25,,4276....3533 С. ЮЛИЯ ВЛАДИМИРОВНА,
 expense,Поездки,,,,,5469....8590 Б. АНАСТАСИЯ АЛЕКСЕЕВНА,
-expense,Поездки,,,2020-01-20,,4276....3533 С. ЮЛИЯ ВЛАДИМИРОВНА,
 expense,Аренда квартиры,,,,,SUTOCHNO.RU,
 expense,Самокат,,,,,hoosh.bike,
 expense,Развлечения,,,,,KINOTEKA,
