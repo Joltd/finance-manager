@@ -16,7 +16,10 @@ import java.util.UUID
 class FinanceManagerV1ImportParser(
     private val categoryMappingRepository: CategoryMappingRepository,
     private val accountService: AccountService,
-    private val tbcImportParser: TbcImportParser
+    private val tbcImportParser: TbcImportParser,
+    private val bccImportParser: BccImportParser,
+    private val tinkoffImportParser: TinkoffImportParser,
+    private val sberImportParser: SberImportParser
 ) : ImportParser {
 
     override val id: UUID = UUID.fromString("f51b0bd4-8fbd-45c8-8709-12266a846b17")
@@ -29,6 +32,9 @@ class FinanceManagerV1ImportParser(
         }
 
         importRule("tbc", tbcImportParser.id)
+        importRule("sber", sberImportParser.id)
+        importRule("tbc", tbcImportParser.id)
+        importRule("tinkoff-rub", tinkoffImportParser.id)
     }
 
     override fun parse(stream: InputStream): List<ImportDataParsedEntry> {

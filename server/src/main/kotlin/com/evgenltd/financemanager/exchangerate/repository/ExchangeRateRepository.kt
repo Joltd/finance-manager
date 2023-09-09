@@ -8,6 +8,6 @@ import java.time.LocalDate
 @Repository
 interface ExchangeRateRepository : JpaRepository<ExchangeRate, String> {
 
-    fun findByDateGreaterThanEqualAndDateLessThan(from: LocalDate, to: LocalDate): List<ExchangeRate>
+    fun findByDate(date: LocalDate): List<ExchangeRate>
 
 }
