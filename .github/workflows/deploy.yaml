@@ -66,6 +66,7 @@ jobs:
           -e 's/localhost:5432/${{ secrets.DB_HOST }}/' \
           -e 's/root_user/${{ secrets.DB_USER }}/' \
           -e 's/root_password/${{ secrets.DB_PASSWORD }}/' \
+          -e 's/exchange_api_key/${{ secrets.EXCHANGE_API_KEY }}/' \
           -i docker-compose.yml
 
       - name: Send Docker Compose file
