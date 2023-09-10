@@ -8,6 +8,9 @@ services:
       - "9500:8080"
     environment:
       APP_VERSION: 2.0.0-SNAPSHOT
+      DB_HOST: localhost:5432
+      DB_USER: root_user
+      DB_PASSWORD: root_password
 
   web:
     image: joltd/finance-manager:web-2.0.0-SNAPSHOT
