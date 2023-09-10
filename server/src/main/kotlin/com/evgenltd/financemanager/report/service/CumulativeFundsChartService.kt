@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartRecord
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartSettingsRecord
 import org.springframework.stereotype.Service
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @Service
@@ -25,13 +26,13 @@ class CumulativeFundsChartService(
         }
 
         val transactions = transactionService.findTransactions(AccountType.ACCOUNT)
-        var cumulativeAmount = transactions.filter { it.date <= dateFrom }
+        var cumulativeAmount = transactions.filter { it.date < dateFrom }
             .map { it.signedAmount().convertTo(it.date, settings.currency) }
             .fold(emptyAmount(settings.currency)) { acc, amount -> acc + amount }
 
         val amounts = dates.associateWith { emptyAmount(settings.currency) }.toMutableMap()
 
-        transactions.filter { it.date > dateFrom }
+        transactions.filter { it.date >= dateFrom }
             .onEach {
                 val date = it.date.withDayOfMonth(1)
                 val amount = it.signedAmount().convertTo(it.date, settings.currency)
@@ -43,7 +44,7 @@ class CumulativeFundsChartService(
             .map { entry ->
                 cumulativeAmount.also { cumulativeAmount =+ entry.value + cumulativeAmount }
             }
-            .map { it.toBigDecimal() }
+            .map { it.toBigDecimal().setScale(0, RoundingMode.HALF_UP) }
             .toList()
 
         return CumulativeFundsChartRecord(
@@ -53,6 +54,9 @@ class CumulativeFundsChartService(
     }
 
     private fun Amount.convertTo(date: LocalDate, target: String): Amount {
+        if (currency == "TRX") {
+            return emptyAmount(target)
+        }
         val rate = exchangeRateService.rate(date, currency, target)
         return (toBigDecimal() * rate).fromFractional(target)
     }

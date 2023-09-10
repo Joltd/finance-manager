@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
+import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.parseAmount
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
@@ -26,7 +27,7 @@ class FinanceManagerV1ImportParser(
     private val bccImportParser: BccImportParser,
     private val tinkoffImportParser: TinkoffImportParser,
     private val sberImportParser: SberImportParser
-) : ImportParser {
+) : ImportParser, Loggable() {
 
     override val id: UUID = UUID.fromString("f51b0bd4-8fbd-45c8-8709-12266a846b17")
     override val name: String = "Finance Manager v1.x"
@@ -51,28 +52,34 @@ class FinanceManagerV1ImportParser(
 
         return stream.readCsv()
             .map {
-                val amount = it["amount"].parseAmount()
+                log.info("Parse $it")
                 when (it["type"]) {
-                    "expense" -> ImportDataParsedEntry(
-                        rawEntries = listOf(it.toString()),
-                        date = it["date"].date("yyyy-MM-dd"),
-                        type = OperationType.EXPENSE,
-                        accountFrom = accountIndex.find(it["accountName"]),
-                        amountFrom = amount,
-                        accountTo = accountIndex.find(it["expenseCategoryName"]),
-                        amountTo = amount,
-                        description = it["description"].nonNull(),
-                    )
-                    "income" -> ImportDataParsedEntry(
-                        rawEntries = listOf(it.toString()),
-                        date = it["date"].date("yyyy-MM-dd"),
-                        type = OperationType.INCOME,
-                        accountFrom = accountIndex.find(it["incomeCategoryName"]),
-                        amountFrom = amount,
-                        accountTo = accountIndex.find(it["accountName"]),
-                        amountTo = amount,
-                        description = it["description"].nonNull(),
-                    )
+                    "expense" -> {
+                        val amount = it["amount"].parseAmount()
+                        ImportDataParsedEntry(
+                            rawEntries = listOf(it.toString()),
+                            date = it["date"].date("yyyy-MM-dd"),
+                            type = OperationType.EXPENSE,
+                            accountFrom = accountIndex.find(it["accountName"]),
+                            amountFrom = amount,
+                            accountTo = accountIndex.find(it["expenseCategoryName"]),
+                            amountTo = amount,
+                            description = it["description"].nonNull(),
+                        )
+                    }
+                    "income" -> {
+                        val amount = it["amount"].parseAmount()
+                        ImportDataParsedEntry(
+                            rawEntries = listOf(it.toString()),
+                            date = it["date"].date("yyyy-MM-dd"),
+                            type = OperationType.INCOME,
+                            accountFrom = accountIndex.find(it["incomeCategoryName"]),
+                            amountFrom = amount,
+                            accountTo = accountIndex.find(it["accountName"]),
+                            amountTo = amount,
+                            description = it["description"].nonNull(),
+                        )
+                    }
                     else -> {
                         val amountFrom = it["amountFrom"].parseAmount()
                         val amountTo = it["amountTo"].parseAmount()

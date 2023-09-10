@@ -27,7 +27,7 @@ class CurrentFundsChartService(
         .aggregate { _, accumulator: MutableMap<String,Amount>?, transaction, _ ->
             val entries = (accumulator ?: mutableMapOf())
             entries.compute(transaction.amount.currency) {
-                _, amount -> amount?.plus(transaction.amount) ?: transaction.amount
+                _, amount -> amount?.plus(transaction.signedAmount()) ?: transaction.signedAmount()
             }
             entries
         }
@@ -39,6 +39,7 @@ class CurrentFundsChartService(
                         commonAmount = amount.convertTo(LocalDate.now(), settings.currency)
                     )
                 }
+                .filter { entry -> entry.amount.isNotEmpty() }
                 .toList()
                 .sortedByDescending { entry -> entry.amount.value }
             CurrentFundsChartEntryRecord(
@@ -47,10 +48,14 @@ class CurrentFundsChartService(
                 amounts = amounts
             )
         }
+        .filter { it.commonAmount.isNotEmpty() }
         .sortedByDescending { it.commonAmount.value }
         .let { CurrentFundsChartRecord(it) }
 
     private fun Amount.convertTo(date: LocalDate, target: String): Amount {
+        if (currency == "TRX") {
+            return emptyAmount(target)
+        }
         val rate = exchangeRateService.rate(date, currency, target)
         return (toBigDecimal() * rate).fromFractional(target)
     }

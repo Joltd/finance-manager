@@ -18,6 +18,7 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -29,7 +30,7 @@ class OperationService(
 ) {
 
     fun list(filter: OperationFilter): OperationPage =
-        operationRepository.findAllByCondition(filter.page, filter.size) {
+        operationRepository.findAllByCondition(filter.page, filter.size, Sort.by(Sort.Direction.DESC, Operation::date.name)) {
             (Operation.Companion::date gte filter.dateFrom) and
             (Operation.Companion::date lt filter.dateTo) and
             (Operation.Companion::type eq filter.type) and

@@ -106,11 +106,14 @@ class ImportDataProcessService(
 
         var work = 0
         for (parsedEntry in parsedEntries) {
-            val actualImportData = update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
-                it.progress = ++work / parsedEntries.size.toDouble()
-            } ?: return
+            if (work % BATCH_SIZE == 0) {
+                update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
+                    it.progress = ++work / parsedEntries.size.toDouble()
+                } ?: return
+            }
+            
             val importDataEntry = ImportDataEntry(
-                importData = actualImportData,
+                importData = importData,
                 parsedEntry = parsedEntry
             )
             importDataEntryRepository.save(importDataEntry)
@@ -132,27 +135,18 @@ class ImportDataProcessService(
 
         val categoryMappings = categoryMappingService.findByParser(importData.parser)
 
-        var pageIndex = 0
-        var work = 0
-        while (true) {
-            val page = importDataEntryRepository.findAllByCondition(pageIndex, 20) {
-                (ImportDataEntry.Companion::importDataId eq id) and (ImportDataEntry.Companion::preparationResult eq false)
-            }
-            if (++pageIndex >= page.totalPages) {
-                break
-            }
+        val chunks = importDataEntryRepository.findForRepeatPreparation(id).chunked(BATCH_SIZE)
+        chunks.onEachIndexed { index, ids ->
+            update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
+                it.progress = index / chunks.size.toDouble()
+            } ?: return
 
-            for (importDataEntry in page.content) {
-                update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
-                    it.progress = ++work / page.content.size.toDouble()
-                } ?: return
-
-                importDataEntry.preparationError = null
-                importDataEntry.suggestedOperation = null
-                importDataEntry.matchedCategoryMappings = emptyList()
-                importDataEntry.similarOperations = emptyList()
-
-                prepareEntry(importDataEntry, importData, categoryMappings)
+            importDataEntryRepository.findByIdIn(ids).onEach {
+                it.preparationError = null
+                it.suggestedOperation = null
+                it.matchedCategoryMappings = emptyList()
+                it.similarOperations = emptyList()
+                prepareEntry(it, importData, categoryMappings)
             }
         }
 
@@ -185,32 +179,20 @@ class ImportDataProcessService(
 
     @Async
     fun importStart(id: UUID) {
-        update(id, ImportDataStatus.PREPARE_DONE) {
+        update(id, listOf(ImportDataStatus.PREPARE_DONE, ImportDataStatus.IMPORT_DONE)) {
             it.status = ImportDataStatus.IMPORT_IN_PROGRESS
             it.progress = .0
         } ?: return
 
-        var pageIndex = 0
-        var work = 0
-        while (true) {
-            val page = importDataEntryRepository.findAllByCondition(pageIndex, 20) {
-                (ImportDataEntry.Companion::importDataId eq id) and
-                (ImportDataEntry.Companion::preparationResult eq true) and
-                (ImportDataEntry.Companion::option inList listOf(ImportOption.REPLACE, ImportOption.CREATE_NEW)) and
-                (ImportDataEntry.Companion::importResult inList  listOf(ImportResult.NOT_IMPORTED, ImportResult.FAILED))
-            }
 
-            if (++pageIndex >= page.totalPages) {
-                break
-            }
-
-            for (importDataEntry in page.content) {
-                update(id, ImportDataStatus.IMPORT_IN_PROGRESS) {
-                    it.progress = ++work / page.content.size.toDouble()
-                } ?: return
-
-                importEntry(importDataEntry)
-                importDataEntryRepository.save(importDataEntry)
+        val chunks = importDataEntryRepository.findForStartImport(id).chunked(BATCH_SIZE)
+        chunks.onEachIndexed { index, ids ->
+            update(id, ImportDataStatus.IMPORT_IN_PROGRESS) {
+                it.progress = index / chunks.size.toDouble()
+            } ?: return
+            importDataEntryRepository.findByIdIn(ids).onEach {
+                importEntry(it)
+                importDataEntryRepository.save(it)
             }
         }
 
@@ -266,6 +248,7 @@ class ImportDataProcessService(
                 accountTo = accountTo,
                 description = parsedEntry.description
             )
+            importDataEntry.preparationResult = true
             return
         }
 
@@ -409,6 +392,10 @@ class ImportDataProcessService(
 
             importData
         }
+    }
+    
+    private companion object {
+        const val BATCH_SIZE = 100
     }
 
 }

@@ -1,17 +1,12 @@
 package com.evgenltd.financemanager.common.repository
 
-import jakarta.persistence.criteria.CriteriaBuilder
-import jakarta.persistence.criteria.CriteriaQuery
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Predicate
-import jakarta.persistence.criteria.Root
+import jakarta.persistence.criteria.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
-import java.time.LocalDate
 
 typealias GetPath<T,E> = Root<E>.() -> Path<T>
 
@@ -32,13 +27,14 @@ inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
 inline fun <T> JpaSpecificationExecutor<T>.findAllByCondition(
     page: Int,
     size: Int,
+    sort: Sort = Sort.unsorted(),
     crossinline block: () -> Condition<T>
 ): Page<T> = findAll(
     { root, query, cb ->
         val condition = block()
         condition(root, query, cb)
     },
-    PageRequest.of(page, size)
+    PageRequest.of(page, size, sort)
 )
 
 inline infix fun <E> Condition<E>.and(

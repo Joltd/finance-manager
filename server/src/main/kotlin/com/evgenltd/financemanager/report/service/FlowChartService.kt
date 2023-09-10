@@ -63,6 +63,9 @@ class FlowChartService(
     }
 
     private fun Amount.convertTo(date: LocalDate, target: String): Amount {
+        if (currency == "TRX") {
+            return emptyAmount(target)
+        }
         val rate = exchangeRateService.rate(date, currency, target)
         return (toBigDecimal() * rate).fromFractional(target)
     }

@@ -47,6 +47,8 @@ data class Amount(val value: Long, val currency: String) {
         this.currency == that.currency
                 && (this.value - that.value).absoluteValue < this.value / 106
 
+    fun isNotEmpty(): Boolean = value != 0L
+
     fun toBigDecimal(): BigDecimal = value.toBigDecimal()
             .movePointLeft(4)
 
