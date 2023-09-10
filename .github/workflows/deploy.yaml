@@ -19,66 +19,72 @@ jobs:
     steps:
       - name: Checkout-
         uses: actions/checkout@v3
-      - name: Setup Java
-        uses: actions/setup-java@v3
+#      - name: Setup Java
+#        uses: actions/setup-java@v3
+#        with:
+#          distribution: 'corretto'
+#          java-version: '17'
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: 16
+#          cache: npm
+#          cache-dependency-path: '**/package-lock.json'
+#
+#      - name: Build Server
+#        uses: gradle/gradle-build-action@v2
+#        with:
+#          arguments: bootJar
+#          build-root-directory: ./server
+#
+#      - name: Build Web
+#        working-directory: ./web
+#        run: |
+#          npm install -g @angular/cli
+#          npm update
+#          ng build --base-href /${{ env.PROJECT_NAME }}/
+#
+#      - name: Build Docker images
+#        run: |
+#          docker build -t joltd/${{ env.PROJECT_NAME }}:server-${{ env.PROJECT_VERSION }} ./server
+#          docker build -t joltd/${{ env.PROJECT_NAME }}:web-${{ env.PROJECT_VERSION }} ./web
+
+#      - name: Push to Docker Hub
+#        run: |
+#          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+#          docker push joltd/${{ env.PROJECT_NAME }}:server-${{ env.PROJECT_VERSION }}
+#          docker push joltd/${{ env.PROJECT_NAME }}:web-${{ env.PROJECT_VERSION }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
-          distribution: 'corretto'
-          java-version: '17'
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: npm
-          cache-dependency-path: '**/package-lock.json'
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Server
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: bootJar
-          build-root-directory: ./server
-
-      - name: Build Web
-        working-directory: ./web
-        run: |
-          npm install -g @angular/cli
-          npm update
-          ng build --base-href /${{ env.PROJECT_NAME }}/
-
-      - name: Build Docker images
-        run: |
-          docker build -t joltd/${{ env.PROJECT_NAME }}:server-${{ env.PROJECT_VERSION }} ./server
-          docker build -t joltd/${{ env.PROJECT_NAME }}:web-${{ env.PROJECT_VERSION }} ./web
-
-      - name: Push to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker push joltd/${{ env.PROJECT_NAME }}:server-${{ env.PROJECT_VERSION }}
-          docker push joltd/${{ env.PROJECT_NAME }}:web-${{ env.PROJECT_VERSION }}
-
-      - name: Prepare Docker Compose
-        run: |
-          sed -e 's/2.0.0-SNAPSHOT/${{ env.PROJECT_VERSION }}/' \
-          -e 's/localhost:5432/${{ secrets.DB_HOST }}/' \
-          -e 's/root_user/${{ secrets.DB_USER }}/' \
-          -e 's/root_password/${{ secrets.DB_PASSWORD }}/' \
-          -i docker-compose.yml
-
-      - name: Send Docker Compose file
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
-          source: docker-compose.yml
-          target: ~/build/${{ env.PROJECT_NAME }}
-
-      - name: Deploy
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
-          script: |
-            cd ~/build/${{ env.PROJECT_NAME }}
-            docker compose pull server web
-            docker compose up -d
+#      - name: Prepare Docker Compose
+#        run: |
+#          sed -e 's/2.0.0-SNAPSHOT/${{ env.PROJECT_VERSION }}/' \
+#          -e 's/localhost:5432/${{ secrets.DB_HOST }}/' \
+#          -e 's/root_user/${{ secrets.DB_USER }}/' \
+#          -e 's/root_password/${{ secrets.DB_PASSWORD }}/' \
+#          -i docker-compose.yml
+#
+#      - name: Send Docker Compose file
+#        uses: appleboy/scp-action@v0.1.4
+#        with:
+#          host: ${{ secrets.REMOTE_HOST }}
+#          username: ${{ secrets.REMOTE_USER }}
+#          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+#          source: docker-compose.yml
+#          target: ~/build/${{ env.PROJECT_NAME }}
+#
+#      - name: Deploy
+#        uses: appleboy/ssh-action@v1.0.0
+#        with:
+#          host: ${{ secrets.REMOTE_HOST }}
+#          username: ${{ secrets.REMOTE_USER }}
+#          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+#          script: |
+#            cd ~/build/${{ env.PROJECT_NAME }}
+#            docker compose pull server web
+#            docker compose up -d
