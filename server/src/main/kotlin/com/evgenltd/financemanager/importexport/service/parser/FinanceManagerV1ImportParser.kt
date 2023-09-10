@@ -125,8 +125,7 @@ class FinanceManagerV1ImportParser(
     }
 }
 
-private fun readRules(rules: String): List<Rule> = File("./server/src/main/resources/rules/$rules")
-    .inputStream()
+private fun readRules(rules: String): List<Rule> = {}.javaClass.getResourceAsStream("/rules/$rules")
     .readCsv()
     .flatMap {
         val type = it["type"]
