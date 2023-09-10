@@ -56,7 +56,12 @@ jobs:
           docker push joltd/${{ env.PROJECT_NAME }}:web-${{ env.PROJECT_VERSION }}
 
       - name: Prepare Docker Compose
-        run: sed -i 's/2.0.0-SNAPSHOT/${{ env.PROJECT_VERSION }}/' docker-compose.yml
+        run: |
+          sed -e 's/2.0.0-SNAPSHOT/${{ env.PROJECT_VERSION }}/' \
+          -e 's/localhost:5432/${{ secrets.DB_HOST }}/' \
+          -e 's/root_user/${{ secrets.DB_USER }}/' \
+          -e 's/root_password/${{ secrets.DB_PASSWORD }}/' \
+          -i docker-compose.yml
 
       - name: Send Docker Compose file
         uses: appleboy/scp-action@v0.1.4
