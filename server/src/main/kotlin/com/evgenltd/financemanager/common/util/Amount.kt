@@ -49,6 +49,10 @@ data class Amount(val value: Long, val currency: String) {
 
     fun isNotEmpty(): Boolean = value != 0L
 
+    fun isPositive(): Boolean = value > 0L
+
+    fun isNegative(): Boolean = value < 0L
+
     fun toBigDecimal(): BigDecimal = value.toBigDecimal()
             .movePointLeft(4)
 

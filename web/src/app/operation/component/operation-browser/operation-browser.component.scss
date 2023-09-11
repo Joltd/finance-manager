@@ -8,6 +8,12 @@ form {
   flex-direction: column;
 }
 
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
 .mdc-list-item.mdc-list-item--with-one-line {
   height: 4em;
 }

@@ -1,25 +1,29 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.common.util.fromFractionalString
+import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.reference.converter.AccountConverter
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.util.*
 
 
 @Service
-class TbcImportParser : ImportParser {
+class TbcImportParser(
+    private val accountConverter: AccountConverter
+) : ImportParser {
 
     override val id: UUID = UUID.fromString("4cedb5cf-d946-4702-8c78-1b0c47c225a0")
     override val name: String = "TBC"
 
-    override fun parse(stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
         val lines = stream.readCsv(skip = 1)
-        return lines.parseExchanges() + lines.parseRegularOperations()
+        return lines.parseExchanges(importData) + lines.parseRegularOperations()
     }
 
-    private fun List<CsvRow>.parseExchanges(): List<ImportDataParsedEntry> {
+    private fun List<CsvRow>.parseExchanges(importData: ImportData): List<ImportDataParsedEntry> {
         val iterator = filter { it[TRANSACTION_TYPE] == EXCHANGE_OPERATION }.iterator()
         val result = mutableListOf<ImportDataParsedEntry>()
         while (iterator.hasNext()) {
@@ -43,9 +47,9 @@ class TbcImportParser : ImportParser {
                 rawEntries = listOf(first.toString(), second.toString()),
                 date = date,
                 type = OperationType.EXCHANGE,
-                accountFrom = null,
+                accountFrom = accountConverter.toRecord(importData.account),
                 amountFrom = from,
-                accountTo = null,
+                accountTo = accountConverter.toRecord(importData.account),
                 amountTo = to,
                 description = description,
             )
@@ -61,7 +65,11 @@ class TbcImportParser : ImportParser {
                 ImportDataParsedEntry(
                     rawEntries = listOf(it.toString()),
                     date = it[DATE].date("dd/MM/yyyy"),
-                    type = OperationType.EXCHANGE,
+                    type = when {
+                        amount.isNegative() -> OperationType.EXPENSE
+                        amount.isPositive() -> OperationType.INCOME
+                        else -> OperationType.EXCHANGE
+                    },
                     accountFrom = null,
                     amountFrom = amount.abs(),
                     accountTo = null,

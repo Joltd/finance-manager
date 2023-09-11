@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
+import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import org.springframework.stereotype.Service
@@ -12,7 +13,7 @@ class TinkoffImportParser : ImportParser {
     override val id: UUID = UUID.fromString("2ba06a21-4e00-4625-82c1-d81f56c89177")
     override val name: String = "Tinkoff"
 
-    override fun parse(stream: InputStream): List<ImportDataParsedEntry> = stream
+    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> = stream
         .readCsv(delimiter = ";")
         .filter { it[3].clean() == "OK" }
         .map {

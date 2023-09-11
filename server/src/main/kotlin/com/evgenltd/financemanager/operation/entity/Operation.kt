@@ -19,7 +19,7 @@ class Operation(
 
     var date: LocalDate,
 
-    //@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     var type: OperationType,
 
     @Embedded

@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.reference.record.AccountRecord
+import jakarta.persistence.Column
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -29,6 +30,9 @@ class ImportDataEntry(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
+
+    @Column
+    var date: LocalDate,
 
     @ManyToOne
     @JoinColumn(name = "import_data_id")
@@ -61,6 +65,8 @@ class ImportDataEntry(
     companion object {
         fun importDataId(root: Root<ImportDataEntry>): Path<UUID> = root.get<ImportData>(ImportDataEntry::importData.name).get(ImportData::id.name)
 
+        fun date(root: Root<ImportDataEntry>): Path<LocalDate> = root.get(ImportDataEntry::date.name)
+
         fun suggestedOperationType(root: Root<ImportDataEntry>): Path<OperationType> = root.get<ImportData>(ImportDataEntry::suggestedOperation.name).get(Operation::type.name)
 
         fun preparationResult(root: Root<ImportDataEntry>): Path<Boolean> = root.get(ImportDataEntry::preparationResult.name)
@@ -80,16 +86,6 @@ data class ImportDataParsedEntry(
     val accountTo: AccountRecord?,
     val amountTo: Amount,
     val description: String
-)
-
-data class SuggestedOperation(
-    val date: LocalDate,
-    val type: OperationType,
-    val amountFrom: Amount,
-    val accountFrom: UUID,
-    val amountTo: Amount,
-    val accountTo: UUID,
-    val description: String,
 )
 
 enum class ImportOption {

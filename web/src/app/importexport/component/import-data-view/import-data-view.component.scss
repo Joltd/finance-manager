@@ -173,4 +173,13 @@
 
 .category-mappings {
   flex-grow: 1;
+
+  .row {
+    display: flex;
+    flex-direction: row;
+
+    category-mapping-label {
+      flex-grow: 1;
+    }
+  }
 }

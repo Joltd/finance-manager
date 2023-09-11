@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef, ViewChild} from "@angular/core";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {ImportData, ImportDataEntry, ImportDataEntryPage, ImportOption} from "../../model/import-data";
 import {FormControl, FormGroup} from "@angular/forms";
@@ -51,7 +51,8 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     private categoryMappingService: CategoryMappingService,
     private shortMessageService: ShortMessageService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {
     this.settingsService.wideScreenToggle = false
     this.activatedRoute.params.subscribe(params => {
@@ -96,20 +97,47 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       .subscribe(result => this.importDataEntry = result)
   }
 
+  private entryLoadAndById() {
+    let filter = {
+      page: this.importDataEntryPage.page,
+      size: this.importDataEntryPage.size,
+      ...this.importDataEntryFilter.value
+    }
+    this.importDataService.entryList(this.id, filter)
+      .subscribe(result => {
+        this.importDataEntryPage = result
+        if (!this.importDataEntry?.id) {
+          return
+        }
+
+        let updateImportDataEntry = this.importDataEntryPage
+          .entries
+          .find(entry => entry.id == this.importDataEntry.id)
+        if (updateImportDataEntry) {
+          this.importDataEntry = null as any
+          setTimeout(() => {
+            this.importDataEntry = updateImportDataEntry as any
+          })
+          return
+        }
+
+        if (this.importDataEntryPage.entries.length > 0) {
+          this.importDataEntry = null as any
+          setTimeout(() => {
+            this.importDataEntry = this.importDataEntryPage.entries[0]
+          })
+        }
+      })
+  }
+
   updatePreparationResult(preparationResult: boolean) {
     this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {preparationResult})
-      .subscribe(() => {
-        this.entryLoad()
-        this.entryById()
-      })
+      .subscribe(() => this.entryLoadAndById())
   }
 
   updateOption(option: ImportOption) {
     this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {option})
-      .subscribe(() => {
-        this.entryLoad()
-        this.entryById()
-      })
+      .subscribe(() => this.entryLoadAndById())
   }
 
   onPage(event: PageEvent) {
@@ -139,11 +167,28 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     if (this.importDataEntry.importResult == 'DONE') {
       return
     }
+    let suggestedOperation = this.importDataEntry.suggestedOperation
+    if (!suggestedOperation) {
+      suggestedOperation = {
+        date: this.importDataEntry.parsedEntry.date,
+        type: this.importDataEntry.parsedEntry.type,
+        accountFrom: this.importDataEntry.parsedEntry.type == 'EXPENSE' ? this.importData.account : null,
+        amountFrom: this.importDataEntry.parsedEntry.amountFrom,
+        accountTo: this.importDataEntry.parsedEntry.type == 'INCOME' ? this.importData.account : null,
+        amountTo: this.importDataEntry.parsedEntry.amountTo,
+        description: this.importDataEntry.parsedEntry.description,
+      } as any
+    }
     this.dialog.open(OperationEditorDialogComponent, {
-      data: this.importDataEntry.suggestedOperation
+      data: suggestedOperation
     }).afterClosed().subscribe(result => {
       if (result) {
-        this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, {suggestedOperation: result})
+        let request: any = { suggestedOperation: result }
+        if (this.importDataEntry.suggestedOperation == null) {
+          request.preparationResult = true
+        }
+        this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, request)
+          .subscribe(() => this.entryLoadAndById())
       }
     })
   }
@@ -171,6 +216,13 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     })
   }
 
+  deleteCategoryMapping(id: string | null) {
+    this.importDataEntry.matchedCategoryMappings = this.importDataEntry
+      .matchedCategoryMappings
+      .filter(mapping => mapping.id != id)
+    this.categoryMappingService.delete(id!!).subscribe()
+  }
+
   private repeatPreparation() {
     if (this.isInProgress()) {
       this.shortMessageService.show('Already in progress')
@@ -185,10 +237,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
 
   repeatPreparationEntry() {
     this.importDataService.preparationRepeat(this.importData.id, this.importDataEntry.id)
-      .subscribe(() => {
-        this.entryLoad()
-        this.entryById()
-      })
+      .subscribe(() => this.entryLoadAndById())
   }
 
   private startImport() {

@@ -1,16 +1,13 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.entity.ImportResult
-import com.evgenltd.financemanager.importexport.entity.SuggestedOperation
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
-import java.time.LocalDate
 import java.util.UUID
 
 data class ImportDataRecord(

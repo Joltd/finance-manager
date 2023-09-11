@@ -13,6 +13,7 @@ import com.evgenltd.financemanager.importexport.record.*
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.reference.repository.AccountRepository
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -32,8 +33,8 @@ class ImportDataService(
         .map { importDataConverter.toRecord(it) }
 
     fun entryList(id: UUID, filter: ImportDataEntryFilter): ImportDataEntryPage =
-        importDataEntryRepository.findAllByCondition(filter.page, filter.size) {
-            (ImportDataEntry.Companion::suggestedOperationType eq filter.operationType) and
+        importDataEntryRepository.findAllByCondition(filter.page, filter.size, Sort.by(Sort.Direction.DESC, ImportDataEntry::date.name)) {
+//            (ImportDataEntry.Companion::suggestedOperationType eq filter.operationType) and
             (ImportDataEntry.Companion::preparationResult eq filter.preparationResult) and
             (ImportDataEntry.Companion::option eq filter.option) and
             (ImportDataEntry.Companion::importResult eq filter.importResult)
@@ -43,7 +44,7 @@ class ImportDataService(
                 page = filter.page,
                 size = filter.size,
                 entries = it.content
-                    .sortedBy { entry -> entry.parsedEntry.date }
+                    .sortedByDescending { entry -> entry.parsedEntry.date }
                     .map { entry -> importDataEntryConverter.toRecord(entry) }
             )
         }

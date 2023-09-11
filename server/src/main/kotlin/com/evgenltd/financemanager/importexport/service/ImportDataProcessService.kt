@@ -8,7 +8,6 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.entity.ImportResult
-import com.evgenltd.financemanager.importexport.entity.SuggestedOperation
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRequest
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
@@ -17,9 +16,6 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.AccountType
-import com.evgenltd.financemanager.reference.record.AccountRecord
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
@@ -95,7 +91,7 @@ class ImportDataProcessService(
         val categoryMappings = categoryMappingService.findByParser(importData.parser)
 
         val parsedEntries = try {
-            parser.parse(file)
+            parser.parse(importData, file)
         } catch (e: RuntimeException) {
             update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
                 it.status = ImportDataStatus.FAILED
@@ -114,7 +110,8 @@ class ImportDataProcessService(
             
             val importDataEntry = ImportDataEntry(
                 importData = importData,
-                parsedEntry = parsedEntry
+                parsedEntry = parsedEntry,
+                date = parsedEntry.date
             )
             importDataEntryRepository.save(importDataEntry)
             prepareEntry(importDataEntry, importData, categoryMappings)

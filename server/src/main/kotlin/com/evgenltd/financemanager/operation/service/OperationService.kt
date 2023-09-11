@@ -9,7 +9,6 @@ import com.evgenltd.financemanager.common.repository.gte
 import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.repository.or
-import com.evgenltd.financemanager.importexport.entity.SuggestedOperation
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
@@ -56,7 +55,7 @@ class OperationService(
                 page = filter.page,
                 size = filter.size,
                 operations = page.content
-                    .sortedBy { it.date }
+                    .sortedByDescending { it.date }
                     .map { operationConverter.toRecord(it) }
             )
         }

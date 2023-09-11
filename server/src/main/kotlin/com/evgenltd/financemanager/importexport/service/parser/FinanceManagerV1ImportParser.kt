@@ -3,12 +3,11 @@ package com.evgenltd.financemanager.importexport.service.parser
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.parseAmount
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
+import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.repository.CategoryMappingRepository
-import com.evgenltd.financemanager.importexport.service.ImportParserService
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.reference.converter.AccountConverter
-import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.service.AccountService
@@ -44,7 +43,7 @@ class FinanceManagerV1ImportParser(
         importRule("tinkoff-rub", tinkoffImportParser.id)
     }
 
-    override fun parse(stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
 
         val accountIndex = accountService.list()
             .associateBy { it.name }

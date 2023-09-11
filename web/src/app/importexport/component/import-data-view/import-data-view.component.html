@@ -24,6 +24,7 @@
           </button>
         </mat-action-list>
         <mat-paginator [hidePageSize]="true"
+                       [showFirstLastButtons]="true"
                        [pageSize]="importDataEntryPage.size"
                        [pageIndex]="importDataEntryPage.page"
                        [length]="importDataEntryPage.total"
@@ -181,7 +182,10 @@
         <mat-card-subtitle>Category mappings</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <category-mapping-label [categoryMapping]="categoryMapping" *ngFor="let categoryMapping of importDataEntry.matchedCategoryMappings"></category-mapping-label>
+        <div class="row" *ngFor="let categoryMapping of importDataEntry.matchedCategoryMappings">
+          <category-mapping-label [categoryMapping]="categoryMapping"></category-mapping-label>
+          <button mat-button class="small-icon-button" (click)="deleteCategoryMapping(categoryMapping.id)"><mat-icon>delete</mat-icon></button>
+        </div>
       </mat-card-content>
     </mat-card>
   </div>

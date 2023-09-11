@@ -21,6 +21,7 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {ReferenceModule} from "../reference/reference.module";
 import {OperationEditorDialogComponent} from "./component/operation-editor-dialog/operation-editor-dialog.component";
 import {MatDialogModule} from "@angular/material/dialog";
+import {MatCheckboxModule} from "@angular/material/checkbox";
 
 @NgModule({
   declarations: [
@@ -30,27 +31,28 @@ import {MatDialogModule} from "@angular/material/dialog";
     OperationLabelComponent,
     OperationEditorDialogComponent
   ],
-  imports: [
-    CommonModule,
-    NgIf,
-    MatIconModule,
-    MatExpansionModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatDatepickerModule,
-    MatButtonModule,
-    MatInputModule,
-    MatSelectModule,
-    MatPaginatorModule,
-    MatCardModule,
-    MatListModule,
-    MatMenuModule,
-    NgForOf,
-    MatButtonToggleModule,
-    FormsModule,
-    ReferenceModule,
-    MatDialogModule
-  ],
+    imports: [
+        CommonModule,
+        NgIf,
+        MatIconModule,
+        MatExpansionModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatDatepickerModule,
+        MatButtonModule,
+        MatInputModule,
+        MatSelectModule,
+        MatPaginatorModule,
+        MatCardModule,
+        MatListModule,
+        MatMenuModule,
+        NgForOf,
+        MatButtonToggleModule,
+        FormsModule,
+        ReferenceModule,
+        MatDialogModule,
+        MatCheckboxModule
+    ],
   providers: [],
   exports: [
     OperationBrowserComponent,
