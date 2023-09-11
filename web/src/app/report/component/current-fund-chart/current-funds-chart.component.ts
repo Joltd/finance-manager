@@ -21,6 +21,7 @@ export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
     currency: new FormControl('USD')
   })
   currentFund!: CurrentFundsChart
+  minCommonAmount: number = 0
   maxCommonAmount: number = 0
 
   constructor(
@@ -44,14 +45,20 @@ export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
     this.currentFundsChartService.load(this.settings.value)
       .subscribe(result => {
         this.currentFund = result
-        this.maxCommonAmount = Math.max(...this.currentFund.entries
+        let commonValues = this.currentFund.entries
           .flatMap(entry => entry.amounts)
-          .map(entryAmount => entryAmount.commonAmount.value))
+          .map(entryAmount => entryAmount.commonAmount.value)
+        this.minCommonAmount = Math.min(...commonValues, 0)
+        this.maxCommonAmount = Math.max(...commonValues)
       })
   }
 
   amountRelativeWidth(commonAmount: Amount): number {
-    return commonAmount.value / this.maxCommonAmount * 100
+    return Math.abs(commonAmount.value) / (this.maxCommonAmount - this.minCommonAmount) * 100
+  }
+
+  amountRelativeOffset(commonAmount: Amount): number {
+    return (Math.min(commonAmount.value,0) - this.minCommonAmount) / (this.maxCommonAmount - this.minCommonAmount) * 100
   }
 
   drillDown(entry: CurrentFundsChartEntry, amountEntry: CurrentFundsChartEntryAmount) {

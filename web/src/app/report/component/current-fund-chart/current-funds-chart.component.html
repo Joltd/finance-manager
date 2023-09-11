@@ -19,7 +19,8 @@
                       *ngIf="amountEntry.commonAmount.currency != amountEntry.amount.currency"></amount-label>
         <div *ngIf="amountEntry.commonAmount.currency == amountEntry.amount.currency"></div>
         <div class="bar" matRipple (click)="drillDown(entry, amountEntry)"
-             [style.width]="amountRelativeWidth(amountEntry.commonAmount) + '%'"></div>
+             [style.width]="amountRelativeWidth(amountEntry.commonAmount) + '%'"
+             [style.margin-left]="amountRelativeOffset(amountEntry.commonAmount) + '%'"></div>
       </ng-container>
     </ng-container>
   </mat-card-content>
