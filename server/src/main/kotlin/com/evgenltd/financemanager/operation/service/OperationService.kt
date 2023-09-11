@@ -55,7 +55,9 @@ class OperationService(
                 total = page.totalElements,
                 page = filter.page,
                 size = filter.size,
-                operations = page.content.map { operationConverter.toRecord(it) }
+                operations = page.content
+                    .sortedBy { it.date }
+                    .map { operationConverter.toRecord(it) }
             )
         }
 

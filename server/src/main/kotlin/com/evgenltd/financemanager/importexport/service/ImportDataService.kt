@@ -42,7 +42,9 @@ class ImportDataService(
                 total = it.totalElements,
                 page = filter.page,
                 size = filter.size,
-                entries = it.content.map { entry -> importDataEntryConverter.toRecord(entry) }
+                entries = it.content
+                    .sortedBy { entry -> entry.parsedEntry.date }
+                    .map { entry -> importDataEntryConverter.toRecord(entry) }
             )
         }
 

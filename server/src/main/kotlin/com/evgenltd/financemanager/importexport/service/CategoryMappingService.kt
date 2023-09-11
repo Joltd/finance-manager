@@ -30,7 +30,9 @@ class CategoryMappingService(
                 total = it.totalElements,
                 page = filter.page,
                 size = filter.size,
-                mappings = it.content.map { categoryMappingConverter.toRecord(it) }
+                mappings = it.content
+                    .sortedBy { it.pattern }
+                    .map { entry -> categoryMappingConverter.toRecord(entry) }
             )
         }
 

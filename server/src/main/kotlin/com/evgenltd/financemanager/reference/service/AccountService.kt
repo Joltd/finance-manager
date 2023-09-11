@@ -29,9 +29,11 @@ class AccountService(
             accountRepository.findAllByCondition {
                 (Account.Companion::type inList types) and (Account.Companion::name like mask)
             }.map { accountConverter.toReference(it) }
-        }
+        }.sortedBy { it.name }
 
-    fun list(): List<AccountRecord> = accountRepository.findAll().map { accountConverter.toRecord(it) }
+    fun list(): List<AccountRecord> = accountRepository.findAll()
+        .map { accountConverter.toRecord(it) }
+        .sortedBy { it.name }
 
     fun byId(id: UUID): AccountRecord = accountRepository.find(id).let { accountConverter.toRecord(it) }
 

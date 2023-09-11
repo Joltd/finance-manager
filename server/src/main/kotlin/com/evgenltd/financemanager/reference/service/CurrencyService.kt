@@ -22,34 +22,35 @@ class CurrencyService(
             return
         }
 
-        currencyRepository.save(Currency(name = "USD", crypto = false))
-        currencyRepository.save(Currency(name = "EUR", crypto = false))
-        currencyRepository.save(Currency(name = "KZT", crypto = false))
-        currencyRepository.save(Currency(name = "TRY", crypto = false))
-        currencyRepository.save(Currency(name = "RSD", crypto = false))
-        currencyRepository.save(Currency(name = "GEL", crypto = false))
-        currencyRepository.save(Currency(name = "RUB", crypto = false))
-        currencyRepository.save(Currency(name = "USDT", crypto = true))
-        currencyRepository.save(Currency(name = "TRX", crypto = true))
+        currencyRepository.save(Currency(name = "USD", crypto = false, position = 0))
+        currencyRepository.save(Currency(name = "EUR", crypto = false, position = 3))
+        currencyRepository.save(Currency(name = "KZT", crypto = false, position = 10))
+        currencyRepository.save(Currency(name = "TRY", crypto = false, position = 10))
+        currencyRepository.save(Currency(name = "RSD", crypto = false, position = 10))
+        currencyRepository.save(Currency(name = "GEL", crypto = false, position = 1))
+        currencyRepository.save(Currency(name = "RUB", crypto = false, position = 10))
+        currencyRepository.save(Currency(name = "USDT", crypto = true, position = 2))
+        currencyRepository.save(Currency(name = "TRX", crypto = true, position = 10))
     }
 
     fun listReference(mask: String? = null, id: UUID? = null): List<Reference> {
         val list = if (mask?.isNotEmpty() == true) {
             currencyRepository.findByNameLike(mask)
+                .sortedWith(compareBy( { it.position }, { it.name }))
         } else if (id != null) {
             currencyRepository.findById(id)
                 .map { listOf(it) }
                 .orElse(emptyList())
         } else {
             currencyRepository.findAll()
+                .sortedWith(compareBy( { it.position }, { it.name }))
         }
         return list.map { Reference(it.id!!, it.name, false) }
-            .sortedBy { it.name }
     }
 
     fun list(): List<CurrencyRecord> = currencyRepository.findAll()
+        .sortedWith(compareBy( { it.position }, { it.name }))
         .map { currencyConverter.toRecord(it) }
-        .sortedBy { it.name }
 
     fun byId(id: UUID): CurrencyRecord = currencyRepository.find(id).let { currencyConverter.toRecord(it) }
 

@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {every, Observable, pipe, tap} from "rxjs";
 import {Currency} from "../model/currency";
 import {map} from "rxjs/operators";
 
@@ -13,9 +13,9 @@ export class CurrencyService {
 
   constructor(private http: HttpClient) {}
 
-  load() {
-    this.http.get<Currency[]>('/currency')
-      .subscribe(result => this.currencies = result)
+  load(): Observable<Currency[]> {
+    return this.http.get<Currency[]>('/currency')
+      .pipe(tap(result => this.currencies = result))
   }
 
   byId(id: string): Observable<Currency> {
@@ -24,15 +24,12 @@ export class CurrencyService {
 
   update(currency: Currency): Observable<void> {
     return this.http.post<void>('/currency', currency)
-      .pipe(map(result => {
-        this.load()
-        return result
-      }))
+      .pipe(tap(() => this.load().subscribe()))
   }
 
   delete(id: string) {
     this.http.delete<void>('/currency/' + id)
-      .subscribe(() => this.load())
+      .subscribe(() => this.load().subscribe())
   }
 
 }

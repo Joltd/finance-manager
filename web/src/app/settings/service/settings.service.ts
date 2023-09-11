@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, tap} from "rxjs";
 import {ApplicationSettings} from "../model/application-settings";
 import {map} from "rxjs/operators";
 
@@ -16,10 +16,7 @@ export class SettingsService {
 
   load(): Observable<ApplicationSettings> {
     return this.http.get<ApplicationSettings>('/setting')
-      .pipe(map(result => {
-        this.settings = result
-        return result
-      }))
+      .pipe(tap(result => this.settings = result))
   }
 
   update(settings: any): Observable<void> {

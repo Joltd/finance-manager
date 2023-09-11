@@ -17,6 +17,7 @@ import {
   CategoryMappingEditorDialogComponent
 } from "../category-mapping-editor-dialog/category-mapping-editor-dialog.component";
 import {CategoryMappingService} from "../../service/category-mapping.service";
+import {ShortMessageService} from "../../../common/service/short-message.service";
 
 @Component({
   selector: "import-data-view",
@@ -48,6 +49,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private importDataService: ImportDataService,
     private categoryMappingService: CategoryMappingService,
+    private shortMessageService: ShortMessageService,
     private router: Router,
     private dialog: MatDialog
   ) {
@@ -62,6 +64,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     this.toolbarService.setup('Import', [
       { name: 'repeatPreparation', icon: 'carpenter', action: () => this.repeatPreparation() },
       { name: 'startImport', icon: 'publish', action: () => this.startImport() },
+      { name: 'close', icon: 'close', action: () => this.close() }
     ])
   }
 
@@ -170,11 +173,13 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
 
   private repeatPreparation() {
     if (this.isInProgress()) {
+      this.shortMessageService.show('Already in progress')
       return
     }
     this.importDataService.preparationRepeat(this.importData.id, null)
       .subscribe(() => {
         this.importData.status = 'PREPARE_IN_PROGRESS'
+        this.shortMessageService.show('Preparation started')
       })
   }
 
@@ -188,11 +193,13 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
 
   private startImport() {
     if (this.isInProgress()) {
+      this.shortMessageService.show('Already in progress')
       return
     }
     this.importDataService.importStart(this.importData.id)
       .subscribe(() => {
         this.importData.status = 'IMPORT_IN_PROGRESS'
+        this.shortMessageService.show('Import started')
       })
   }
 

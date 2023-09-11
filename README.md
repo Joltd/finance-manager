@@ -9,3 +9,7 @@ GitHub Actions secrets, that should be specified
 * REMOTE_HOST - host for deploy and run docker compse
 * REMOTE_USER
 * REMOTE_PRIVATE_KEY - private key for ssh connection
+
+Logs available by command
+
+```docker cp <container_id>:/app/logs .```

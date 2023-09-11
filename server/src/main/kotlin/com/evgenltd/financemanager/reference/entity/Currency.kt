@@ -19,4 +19,6 @@ class Currency(
 
     var crypto: Boolean,
 
+    var position: Int = 0
+
 )

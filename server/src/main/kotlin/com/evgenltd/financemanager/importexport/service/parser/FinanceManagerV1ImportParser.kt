@@ -62,7 +62,7 @@ class FinanceManagerV1ImportParser(
                             type = OperationType.EXPENSE,
                             accountFrom = accountIndex.find(it["accountName"]),
                             amountFrom = amount,
-                            accountTo = accountIndex.find(it["expenseCategoryName"]),
+                            accountTo = accountIndex.find(it["expenseCategoryName"], AccountType.EXPENSE),
                             amountTo = amount,
                             description = it["description"].nonNull(),
                         )
@@ -73,7 +73,7 @@ class FinanceManagerV1ImportParser(
                             rawEntries = listOf(it.toString()),
                             date = it["date"].date("yyyy-MM-dd"),
                             type = OperationType.INCOME,
-                            accountFrom = accountIndex.find(it["incomeCategoryName"]),
+                            accountFrom = accountIndex.find(it["incomeCategoryName"], AccountType.INCOME),
                             amountFrom = amount,
                             accountTo = accountIndex.find(it["accountName"]),
                             amountTo = amount,
@@ -99,8 +99,8 @@ class FinanceManagerV1ImportParser(
             }
     }
 
-    private fun MutableMap<String, AccountRecord>.find(name: String): AccountRecord = computeIfAbsent(name) {
-        val account = accountService.getOrCreate(name, AccountType.ACCOUNT)
+    private fun MutableMap<String, AccountRecord>.find(name: String, type: AccountType = AccountType.ACCOUNT): AccountRecord = computeIfAbsent(name) {
+        val account = accountService.getOrCreate(name, type)
         accountConverter.toRecord(account)
     }
 

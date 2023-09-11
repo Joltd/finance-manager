@@ -4,6 +4,7 @@ import {BreakpointObserver} from "@angular/cdk/layout";
 import {SettingsService} from "./settings/service/settings.service";
 import {ToolbarService} from "./common/service/toolbar.service";
 import {CurrencyService} from "./reference/service/currency.service";
+import {lastValueFrom} from "rxjs";
 
 @Component({
   selector: 'app-root',
@@ -18,7 +19,7 @@ export class AppComponent implements OnInit {
   constructor(
     public loadingService: LoadingService,
     private breakpointObserver: BreakpointObserver,
-    private settingsService: SettingsService,
+    public settingsService: SettingsService,
     public toolbarService: ToolbarService,
     private currencyService: CurrencyService
   ) {}
@@ -29,8 +30,8 @@ export class AppComponent implements OnInit {
     })
     this.breakpointObserver.observe(['(min-width: 40em)'])
       .subscribe(state => this.wide = state.matches)
-    this.settingsService.load().subscribe()
-    this.currencyService.load()
+    lastValueFrom(this.settingsService.load()).then()
+    lastValueFrom(this.currencyService.load()).then()
   }
 
   isWideMenu(): boolean {
@@ -40,7 +41,6 @@ export class AppComponent implements OnInit {
   isWideScreen(): boolean {
     return this.settingsService.wideScreenToggle && this.wide
   }
-
 
 }
 

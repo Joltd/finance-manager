@@ -46,6 +46,7 @@ class ExchangeRateService(
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll()
         .map { exchangeRateConverter.toRecord(it) }
+        .sortedBy { it.date }
 
     fun byId(id: String): ExchangeRateRecord = exchangeRateRepository.find(id)
         .let { exchangeRateConverter.toRecord(it) }
