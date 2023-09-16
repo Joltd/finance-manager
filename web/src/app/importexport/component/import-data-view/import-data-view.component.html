@@ -142,7 +142,13 @@
       </mat-card-header>
       <mat-card-content>
         <operation-label [operation]="similarOperation"
-                         *ngFor="let similarOperation of importDataEntry.similarOperations"></operation-label>
+                         [matMenuTriggerFor]="menu"
+                         *ngFor="let similarOperation of importDataEntry.similarOperations">
+          <mat-menu #menu>
+            <button mat-menu-item (click)="editSimilarOperation(similarOperation)">Edit</button>
+            <button mat-menu-item (click)="deleteSimilarOperation(similarOperation)">Delete</button>
+          </mat-menu>
+        </operation-label>
       </mat-card-content>
     </mat-card>
 
@@ -163,3 +169,5 @@
   </div>
 
 </div>
+
+<mat-progress-bar [value]="progress()"></mat-progress-bar>

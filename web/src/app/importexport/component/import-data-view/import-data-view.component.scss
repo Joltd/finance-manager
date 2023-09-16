@@ -2,7 +2,7 @@
 
 :host {
   display: grid;
-  grid-template-columns: 30% 1fr;
+  grid-template-columns: min-content 1fr;
   grid-gap: 1rem;
   height: 100%;
   overflow: hidden;
@@ -22,6 +22,7 @@
 
 .entries-card {
   overflow: hidden;
+  resize: horizontal;
 
   mat-tab-group {
     overflow: hidden;
@@ -137,4 +138,11 @@
       flex-grow: 1;
     }
   }
+}
+
+mat-progress-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }

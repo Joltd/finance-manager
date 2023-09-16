@@ -1,29 +1,43 @@
-import {Component, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from "@angular/core";
 import {ImportDataService} from "../../service/import-data.service";
 import {Router} from "@angular/router";
-import {ImportData} from "../../model/import-data";
+import {ImportData, ImportDataState} from "../../model/import-data";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: "import-data-browser",
   templateUrl: "./import-data-browser.component.html",
   styleUrls: ["./import-data-browser.component.scss"]
 })
-export class ImportDataBrowserComponent implements OnInit {
+export class ImportDataBrowserComponent implements OnInit,OnDestroy {
 
   importDataList: ImportData[] = []
+  private subscription!: Subscription
 
   constructor(
     private importDataService: ImportDataService,
-    private router: Router
+    private router: Router,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.load()
   }
 
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe()
+  }
+
   private load() {
     this.importDataService.list()
-      .subscribe(result => this.importDataList = result)
+      .subscribe(result => {
+        this.importDataList = result
+        let foundInProgress = result.find(importData => this.isInProgress(importData) || importData.status == 'NEW')
+        if (foundInProgress) {
+          this.subscription = this.importDataService.importDataState()
+            .subscribe(result => this.updateImportDataState(result))
+        }
+      })
   }
 
   add() {
@@ -58,6 +72,16 @@ export class ImportDataBrowserComponent implements OnInit {
 
   isDone(importData: ImportData): boolean {
     return importData.status == 'PREPARE_DONE' || importData.status == 'IMPORT_DONE'
+  }
+
+  private updateImportDataState(importDataState: ImportDataState) {
+    let importData = this.importDataList
+      .find(importData => importData.id == importDataState.id)
+    if (importData) {
+      importData.status = importDataState.status
+      importData.progress = importDataState.progress
+      this.changeDetectorRef.detectChanges()
+    }
   }
 
 }

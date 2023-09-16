@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.util.UUID
 
 @Service
@@ -26,6 +27,8 @@ class ImportDataService(
     private val importDataProcessService: ImportDataProcessService,
     private val accountRepository: AccountRepository
 ) {
+
+    fun subscribe(): SseEmitter = importDataProcessService.subscribe()
 
     fun list(): List<ImportDataRecord> = importDataRepository.findAll()
         .map { importDataConverter.toRecord(it) }

@@ -16,6 +16,8 @@ import {
 } from "../category-mapping-editor-dialog/category-mapping-editor-dialog.component";
 import {CategoryMappingService} from "../../service/category-mapping.service";
 import {ShortMessageService} from "../../../common/service/short-message.service";
+import {Subscription} from "rxjs";
+import {OperationService} from "../../../operation/service/operation.service";
 
 @Component({
   selector: "import-data-view",
@@ -41,6 +43,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     importResult: new FormControl(null)
   })
   tabIndex: number = 0
+  private subscription!: Subscription
 
   constructor(
     private settingsService: SettingsService,
@@ -51,6 +54,8 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     private shortMessageService: ShortMessageService,
     private router: Router,
     private dialog: MatDialog,
+    private changeDetectorRef: ChangeDetectorRef,
+    private operationService: OperationService
   ) {
     this.settingsService.wideScreenToggle = false
     this.activatedRoute.params.subscribe(params => {
@@ -68,6 +73,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.subscription?.unsubscribe()
     this.toolbarService.reset()
     this.settingsService.wideScreenToggle = true
   }
@@ -77,6 +83,9 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       this.importData = result
       this.toolbarService.setupTitle(`Import - ${this.importData.parser.name} (${this.importData.account.name})`)
       this.entryLoad()
+      if (this.isInProgress() || this.importData.status == 'NEW') {
+        this.updateImportDataState()
+      }
     })
   }
 
@@ -195,6 +204,22 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     return this.importData.status == 'PREPARE_IN_PROGRESS' || this.importData.status == 'IMPORT_IN_PROGRESS'
   }
 
+  editSimilarOperation(operation: Operation) {
+    this.dialog.open(OperationEditorDialogComponent, {
+      data: operation
+    }).afterClosed().subscribe(result => {
+      if (result) {
+        this.operationService.update(result)
+          .subscribe(() => this.entryLoadAndById())
+      }
+    })
+  }
+
+  deleteSimilarOperation(operation: Operation) {
+    this.operationService.delete(operation.id!)
+      .subscribe(() => this.searchSimilar())
+  }
+
   addCategoryMapping() {
     this.dialog.open(CategoryMappingEditorDialogComponent, {
       width: '30rem',
@@ -226,6 +251,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.importData.status = 'PREPARE_IN_PROGRESS'
         this.shortMessageService.show('Preparation started')
+        this.updateImportDataState()
       })
   }
 
@@ -238,6 +264,21 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.importData.status = 'IMPORT_IN_PROGRESS'
         this.shortMessageService.show('Import started')
+        this.updateImportDataState()
+      })
+  }
+
+  progress(): number {
+    let progress = this.importData?.progress || 0;
+    return progress >= 1 ? 0 : progress * 100
+  }
+
+  private updateImportDataState() {
+    this.subscription = this.importDataService.importDataState()
+      .subscribe(result => {
+        this.importData.status = result.status
+        this.importData.progress = result.progress
+        this.changeDetectorRef.detectChanges()
       })
   }
 

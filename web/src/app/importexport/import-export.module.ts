@@ -39,6 +39,7 @@ import {MatRippleModule} from "@angular/material/core";
 import {
   ImportDataParsedEntryDialogComponent
 } from "./component/import-data-parsed-entry-dialog/import-data-parsed-entry-dialog.component";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
 
 @NgModule({
   declarations: [
@@ -55,36 +56,37 @@ import {
     OperationReviseBrowserComponent,
     OperationReviseViewComponent
   ],
-  imports: [
-    MatExpansionModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    CommonModule,
-    ReferenceModule,
-    MatPaginatorModule,
-    MatCardModule,
-    NgIf,
-    MatListModule,
-    NgForOf,
-    MatMenuModule,
-    MatIconModule,
-    MatButtonModule,
-    MatInputModule,
-    NgClass,
-    MatProgressSpinnerModule,
-    PortalModule,
-    MatDialogModule,
-    MatTabsModule,
-    MatSelectModule,
-    MatButtonToggleModule,
-    FormsModule,
-    MatTooltipModule,
-    MatSlideToggleModule,
-    NgStyle,
-    OperationModule,
-    MatDatepickerModule,
-    MatRippleModule
-  ],
+    imports: [
+        MatExpansionModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        CommonModule,
+        ReferenceModule,
+        MatPaginatorModule,
+        MatCardModule,
+        NgIf,
+        MatListModule,
+        NgForOf,
+        MatMenuModule,
+        MatIconModule,
+        MatButtonModule,
+        MatInputModule,
+        NgClass,
+        MatProgressSpinnerModule,
+        PortalModule,
+        MatDialogModule,
+        MatTabsModule,
+        MatSelectModule,
+        MatButtonToggleModule,
+        FormsModule,
+        MatTooltipModule,
+        MatSlideToggleModule,
+        NgStyle,
+        OperationModule,
+        MatDatepickerModule,
+        MatRippleModule,
+        MatProgressBarModule
+    ],
   providers: [],
   exports: [
     CategoryMappingBrowserComponent,

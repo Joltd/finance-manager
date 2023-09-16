@@ -55,3 +55,9 @@ data class ImportDataEntryUpdateRequest(
     val preparationResult: Boolean? = null,
     val option: ImportOption? = null,
 )
+
+data class ImportDataState(
+    val id: UUID,
+    val status: ImportDataStatus,
+    val progress: Double,
+)

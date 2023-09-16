@@ -1,14 +1,43 @@
 import {Injectable} from "@angular/core";
-import {EMPTY, Observable} from "rxjs";
-import {ImportData, ImportDataEntry, ImportDataEntryPage} from "../model/import-data";
+import {EMPTY, Observable, Subject} from "rxjs";
+import {ImportData, ImportDataEntry, ImportDataEntryPage, ImportDataState} from "../model/import-data";
 import {HttpClient} from "@angular/common/http";
+import {environment} from "../../../environments/environment";
+import {Location} from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImportDataService {
 
-  constructor(private httpClient: HttpClient) {}
+  private eventSource: EventSource | null = null
+  private stateSubject: Subject<ImportDataState> = new Subject<ImportDataState>()
+
+  constructor(
+    private httpClient: HttpClient,
+    private location: Location
+  ) {}
+
+  private importDataStateSubscription() {
+    let url = environment.backend + '/import-data/subscribe'
+    if (environment.production) {
+      url = this.location.prepareExternalUrl(url)
+    }
+    this.eventSource = new EventSource(url)
+    this.eventSource.onmessage = (event) => {
+      this.stateSubject.next(JSON.parse(event.data)[1].data)
+    }
+    this.eventSource.onerror = (error) => {
+      this.eventSource?.close()
+    }
+  }
+
+  importDataState(): Observable<ImportDataState> {
+    if (this.eventSource == null) {
+      this.importDataStateSubscription()
+    }
+    return this.stateSubject.asObservable()
+  }
 
   list(): Observable<ImportData[]> {
     return this.httpClient.get<ImportData[]>('/import-data')

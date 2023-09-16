@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.entity.ImportResult
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRequest
+import com.evgenltd.financemanager.importexport.record.ImportDataState
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -19,8 +20,10 @@ import com.evgenltd.financemanager.reference.entity.AccountType
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.io.InputStream
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
 class ImportDataProcessService(
@@ -32,6 +35,22 @@ class ImportDataProcessService(
     private val accountConverter: AccountConverter,
     private val transactionTemplate: TransactionTemplate
 ) : Loggable() {
+
+    private val subscribers: MutableList<SseEmitter> = CopyOnWriteArrayList()
+
+    fun subscribe(): SseEmitter {
+        val emitter = SseEmitter()
+        emitter.onTimeout {
+            log.info("onTimeout")
+            emitter.complete()
+        }
+        emitter.onCompletion {
+            log.info("onCompletion")
+            subscribers.remove(emitter)
+        }
+        subscribers.add(emitter)
+        return emitter
+    }
 
     fun entryUpdate(id: UUID, entryId: UUID, request: ImportDataEntryUpdateRequest) {
         update(id, ImportDataStatus.PREPARE_DONE) {
@@ -133,6 +152,7 @@ class ImportDataProcessService(
         }
     }
 
+    @Async
     fun preparationRepeat(id: UUID) {
         val importData = update(id, listOf(ImportDataStatus.PREPARE_DONE)) {
             it.status = ImportDataStatus.PREPARE_IN_PROGRESS
@@ -140,22 +160,30 @@ class ImportDataProcessService(
             it.progress = .0
         } ?: return
 
-        val categoryMappings = categoryMappingService.findByParser(importData.parser)
-
-        val chunks = importDataEntryRepository.findForRepeatPreparation(id).chunked(BATCH_SIZE)
-        chunks.onEachIndexed { index, ids ->
+        var counter = 0
+        while (counter < 100) {
+            Thread.sleep(100)
+            counter++
             update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
-                it.progress = index / chunks.size.toDouble()
+                it.progress = counter / 100.0
             } ?: return
-
-            importDataEntryRepository.findByIdIn(ids).onEach {
-                it.preparationError = null
-                it.suggestedOperation = null
-                it.matchedCategoryMappings = emptyList()
-                it.similarOperations = emptyList()
-                prepareEntry(it, importData, categoryMappings)
-            }
         }
+//        val categoryMappings = categoryMappingService.findByParser(importData.parser)
+//
+//        val chunks = importDataEntryRepository.findForRepeatPreparation(id).chunked(BATCH_SIZE)
+//        chunks.onEachIndexed { index, ids ->
+//            update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
+//                it.progress = index / chunks.size.toDouble()
+//            } ?: return
+//
+//            importDataEntryRepository.findByIdIn(ids).onEach {
+//                it.preparationError = null
+//                it.suggestedOperation = null
+//                it.matchedCategoryMappings = emptyList()
+//                it.similarOperations = emptyList()
+//                prepareEntry(it, importData, categoryMappings)
+//            }
+//        }
 
         update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
             it.status = ImportDataStatus.PREPARE_DONE
@@ -395,8 +423,18 @@ class ImportDataProcessService(
             block(importData)
 
             importData
+        }?.also {
+            val state = ImportDataState(it.id!!, it.status, it.progress)
+            for (subscriber in subscribers) {
+                val message = SseEmitter.event()
+                    .data(state)
+                    .build()
+                subscriber.send(message)
+            }
         }
     }
+
+
     
     private companion object {
         const val BATCH_SIZE = 100

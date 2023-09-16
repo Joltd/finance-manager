@@ -49,3 +49,9 @@ export interface ImportDataParsedEntry {
   amountTo: Amount
   description: string
 }
+
+export interface ImportDataState {
+  id: string,
+  status: ImportDataStatus,
+  progress: number,
+}
