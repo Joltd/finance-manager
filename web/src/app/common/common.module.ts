@@ -24,6 +24,7 @@ import {EditorComponent} from "./component/editor/editor.component";
 import {OverlayModule} from "@angular/cdk/overlay";
 import {PortalModule} from "@angular/cdk/portal";
 import {BadgeComponent} from "./component/badge/badge.component";
+import {NoDataComponent} from "./component/no-data/no-data.component";
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import {BadgeComponent} from "./component/badge/badge.component";
     EntrySelectComponent,
     EntryItemComponent,
     EditorComponent,
-    BadgeComponent
+    BadgeComponent,
+    NoDataComponent
   ],
   imports: [
     ReactiveFormsModule,
@@ -70,7 +72,8 @@ import {BadgeComponent} from "./component/badge/badge.component";
     EntrySelectComponent,
     EntryItemComponent,
     EditorComponent,
-    BadgeComponent
+    BadgeComponent,
+    NoDataComponent
   ]
 })
 export class CommonModule {}

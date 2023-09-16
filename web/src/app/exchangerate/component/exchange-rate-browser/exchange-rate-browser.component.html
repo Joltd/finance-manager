@@ -1,5 +1,8 @@
-<mat-card *ngIf="exchangeRates.length > 0">
-  <mat-list>
+<mat-card>
+  <ng-template #noData>
+    <no-data></no-data>
+  </ng-template>
+  <mat-list *ngIf="exchangeRates.length > 0; else noData">
     <mat-list-item *ngFor="let exchangeRate of exchangeRates">
       <div matLine class="mat-line-with-menu">
         <date-label [date]="exchangeRate.date"></date-label>

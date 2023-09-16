@@ -113,6 +113,7 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
 
   selectDate(date: string) {
     this.date = date
+    this.toolbarService.setupTitle('Operation Revise - ' + date)
     this.entryLoad()
   }
 

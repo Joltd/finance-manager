@@ -12,6 +12,7 @@ import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatListModule} from "@angular/material/list";
 import {MatMenuModule} from "@angular/material/menu";
 import {CommonModule} from "../common/common.module";
+import {MatLineModule} from "@angular/material/core";
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import {CommonModule} from "../common/common.module";
         MatListModule,
         MatMenuModule,
         NgIf,
-        CommonModule
+        CommonModule,
+        MatLineModule
     ],
   exports: [
     ExchangeRateBrowserComponent,

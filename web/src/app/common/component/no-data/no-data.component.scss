@@ -1,0 +1,25 @@
+:host {
+  min-width: 20em;
+  min-height: 20em;
+  flex-grow: 1;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  opacity: .3;
+}
+
+.container {
+  display: grid;
+  grid-template-rows: 8em min-content;
+  align-items: center;
+  justify-items: center;
+}
+
+.icon {
+  color: gray;
+  transform: scale(5);
+}
+
+.label {
+  font-size: 1.5em;
+}

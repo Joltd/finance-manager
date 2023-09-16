@@ -1,12 +1,12 @@
 <mat-card>
-  <mat-action-list>
+  <mat-action-list *ngIf="currencyService.currencies. length > 0; else noData">
     <button mat-list-item
             [matMenuTriggerFor]="menu"
             *ngFor="let currency of currencyService.currencies">
-      <div class="currency-list-item">
+      <span class="currency-list-item">
         <currency-label [currency]="currency.name" [full]="true"></currency-label>
         <span *ngIf="currency.crypto">Crypto</span>
-      </div>
+      </span>
       <mat-menu #menu>
         <button mat-menu-item (click)="edit(currency.id!)">Edit</button>
         <button mat-menu-item (click)="delete(currency.id!)">Delete</button>
@@ -15,3 +15,7 @@
   </mat-action-list>
 </mat-card>
 <button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>
+
+<ng-template #noData>
+  <no-data></no-data>
+</ng-template>

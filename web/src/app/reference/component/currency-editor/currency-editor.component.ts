@@ -14,7 +14,8 @@ export class CurrencyEditorComponent implements OnInit,OnDestroy {
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
     name: new FormControl(null, Validators.required),
-    crypto: new FormControl(false)
+    crypto: new FormControl(false),
+    style: new FormControl(null),
   })
 
   constructor(

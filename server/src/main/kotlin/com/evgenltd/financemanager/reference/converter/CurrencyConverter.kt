@@ -10,13 +10,15 @@ class CurrencyConverter {
     fun toRecord(entity: Currency): CurrencyRecord = CurrencyRecord(
         id = entity.id,
         name = entity.name,
-        crypto = entity.crypto
+        crypto = entity.crypto,
+        style = entity.style
     )
 
     fun toEntity(record: CurrencyRecord): Currency = Currency(
         id = record.id,
         name = record.name,
-        crypto = record.crypto
+        crypto = record.crypto,
+        style = record.style
     )
 
 }

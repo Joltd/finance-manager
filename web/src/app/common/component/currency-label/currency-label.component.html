@@ -1,3 +1,8 @@
-<span *ngIf="!_currency?.crypto" class="fi" [ngClass]="formatCurrency()"></span>
-<i *ngIf="_currency?.crypto" class="cf" [ngClass]="formatCryptoCurrency()"></i>
+<ng-container *ngIf="_currency?.style; else noStyle">
+  <span *ngIf="!_currency?.crypto" class="fi" [ngClass]="_currency?.style"></span>
+  <i *ngIf="_currency?.crypto" class="cf" [ngClass]="_currency?.style"></i>
+</ng-container>
+<ng-template #noStyle>
+  <mat-icon class="unknown">question_mark</mat-icon>
+</ng-template>
 <span class="label" *ngIf="full">{{_currency?.name || ''}}</span>

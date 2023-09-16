@@ -24,8 +24,11 @@
 
 </mat-expansion-panel>
 
-<mat-card *ngIf="categoryMappingPage.mappings.length > 0">
-  <mat-action-list>
+<mat-card>
+  <ng-template #noData>
+    <no-data></no-data>
+  </ng-template>
+  <mat-action-list *ngIf="categoryMappingPage.mappings.length > 0; else noData">
     <button mat-list-item *ngFor="let mapping of categoryMappingPage.mappings" [matMenuTriggerFor]="menu">
       <category-mapping-label [categoryMapping]="mapping" [hideParser]="settings.value.parser != null"></category-mapping-label>
       <mat-menu #menu>

@@ -9,6 +9,13 @@
 
       <mat-slide-toggle formControlName="crypto">Crypto</mat-slide-toggle>
 
+      <mat-form-field>
+        <mat-label>Style</mat-label>
+        <input matInput formControlName="style">
+        <currency-label matSuffix [currency]="form.value" [full]="false"></currency-label>
+        <mat-hint>fi-xx for fiat, cf-xxx for crypto</mat-hint>
+      </mat-form-field>
+
     </form>
   </mat-card-content>
 </mat-card>

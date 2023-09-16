@@ -9,8 +9,11 @@
   </form>
 </mat-expansion-panel>
 
-<mat-card *ngIf="currentFund">
-  <mat-card-content class="funds">
+<mat-card >
+  <ng-template #noData>
+    <no-data></no-data>
+  </ng-template>
+  <mat-card-content class="funds" *ngIf="currentFund; else noData">
     <ng-container *ngFor="let entry of currentFund.entries">
       <h4 class="account">{{entry.account.name}}</h4>
       <ng-container *ngFor="let amountEntry of entry.amounts">

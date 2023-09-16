@@ -18,5 +18,6 @@
 </mat-expansion-panel>
 
 <mat-card>
-  <div #chart class="chart"></div>
+  <no-data *ngIf="!chartData"></no-data>
+  <div #chart class="chart" [class.omit]="!chartData"></div>
 </mat-card>

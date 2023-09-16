@@ -40,6 +40,7 @@
   </form>
 </mat-expansion-panel>
 
-<mat-card [hidden]="!flow">
-  <div #chart [style.height]="chartHeight + 'em'"></div>
+<mat-card>
+  <no-data *ngIf="!flow"></no-data>
+  <div #chart [style.height]="chartHeight + 'em'" [class.omit]="!flow"></div>
 </mat-card>

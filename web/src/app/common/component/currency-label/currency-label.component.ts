@@ -12,8 +12,14 @@ export class CurrencyLabelComponent {
   _currency: Currency | null = null
 
   @Input()
-  set currency(currency: string | null) {
-    this._currency = this.currencyService.currencies.find(entry => entry.name == currency) || null
+  set currency(currency: Currency | string | null) {
+    if (typeof currency == 'string') {
+      this._currency = this.currencyService
+        .currencies
+        .find(entry => entry.name == currency) || null
+    } else {
+      this._currency = currency || null
+    }
   }
 
   @Input()
@@ -22,22 +28,5 @@ export class CurrencyLabelComponent {
   constructor(
     private currencyService: CurrencyService
   ) {}
-
-  formatCurrency(): string {
-    switch (this._currency?.name) {
-      case 'RUB': return 'fi-ru'
-      case 'USD': return 'fi-us'
-      case 'EUR': return 'fi-eu'
-      case 'KZT': return 'fi-kz'
-      case 'TRY': return 'fi-tr'
-      case 'RSD': return 'fi-rs'
-      case 'GEL': return 'fi-ge'
-      default: return ''
-    }
-  }
-
-  formatCryptoCurrency(): string {
-    return 'cf-' + this._currency?.name?.toLowerCase()
-  }
 
 }
