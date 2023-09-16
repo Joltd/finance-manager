@@ -7,8 +7,6 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {ImportDataService} from "../../service/import-data.service";
 import {PageEvent} from "@angular/material/paginator";
 import {Operation} from "../../../operation/model/operation";
-import {CdkPortal} from "@angular/cdk/portal";
-import {Overlay, OverlayConfig, OverlayRef} from "@angular/cdk/overlay";
 import {MatDialog} from "@angular/material/dialog";
 import {
   OperationEditorDialogComponent
@@ -39,6 +37,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     operationType: new FormControl(null),
     preparationResult: new FormControl(null),
     option: new FormControl(null),
+    hideSkip: new FormControl(false),
     importResult: new FormControl(null)
   })
   tabIndex: number = 0
@@ -52,7 +51,6 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     private shortMessageService: ShortMessageService,
     private router: Router,
     private dialog: MatDialog,
-    private changeDetectorRef: ChangeDetectorRef,
   ) {
     this.settingsService.wideScreenToggle = false
     this.activatedRoute.params.subscribe(params => {
@@ -183,11 +181,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       data: suggestedOperation
     }).afterClosed().subscribe(result => {
       if (result) {
-        let request: any = { suggestedOperation: result }
-        if (this.importDataEntry.suggestedOperation == null) {
-          request.preparationResult = true
-        }
-        this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, request)
+        this.importDataService.entryUpdate(this.importData.id, this.importDataEntry.id, { suggestedOperation: result })
           .subscribe(() => this.entryLoadAndById())
       }
     })
@@ -228,16 +222,11 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       this.shortMessageService.show('Already in progress')
       return
     }
-    this.importDataService.preparationRepeat(this.importData.id, null)
+    this.importDataService.preparationRepeat(this.importData.id)
       .subscribe(() => {
         this.importData.status = 'PREPARE_IN_PROGRESS'
         this.shortMessageService.show('Preparation started')
       })
-  }
-
-  repeatPreparationEntry() {
-    this.importDataService.preparationRepeat(this.importData.id, this.importDataEntry.id)
-      .subscribe(() => this.entryLoadAndById())
   }
 
   private startImport() {

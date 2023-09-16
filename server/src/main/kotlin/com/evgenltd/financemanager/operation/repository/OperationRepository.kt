@@ -10,6 +10,6 @@ import java.util.*
 @Repository
 interface OperationRepository : JpaRepository<Operation,UUID>, JpaSpecificationExecutor<Operation> {
 
-    fun findByDateAndAccountFromIdAndAccountToId(date: LocalDate, accountFromId: UUID, accountToId: UUID): List<Operation>
+    fun findByDate(date: LocalDate): List<Operation>
 
 }

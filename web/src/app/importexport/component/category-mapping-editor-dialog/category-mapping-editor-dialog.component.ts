@@ -11,9 +11,7 @@ export class CategoryMappingEditorDialogComponent {
 
   categoryMapping!: CategoryMapping
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) data: CategoryMapping
-  ) {
+  constructor(@Inject(MAT_DIALOG_DATA) data: CategoryMapping) {
     this.categoryMapping = data
   }
 

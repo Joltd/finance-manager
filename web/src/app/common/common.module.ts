@@ -23,6 +23,7 @@ import {CurrencyInputComponent} from "./component/currency-input/currency-input.
 import {EditorComponent} from "./component/editor/editor.component";
 import {OverlayModule} from "@angular/cdk/overlay";
 import {PortalModule} from "@angular/cdk/portal";
+import {BadgeComponent} from "./component/badge/badge.component";
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import {PortalModule} from "@angular/cdk/portal";
     DateLabelComponent,
     EntrySelectComponent,
     EntryItemComponent,
-    EditorComponent
+    EditorComponent,
+    BadgeComponent
   ],
   imports: [
     ReactiveFormsModule,
@@ -67,7 +69,8 @@ import {PortalModule} from "@angular/cdk/portal";
     DateLabelComponent,
     EntrySelectComponent,
     EntryItemComponent,
-    EditorComponent
+    EditorComponent,
+    BadgeComponent
   ]
 })
 export class CommonModule {}

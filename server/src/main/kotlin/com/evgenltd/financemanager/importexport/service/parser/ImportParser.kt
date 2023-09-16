@@ -10,6 +10,6 @@ interface ImportParser {
     val id: UUID
     val name: String
 
-    fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry>
+    fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry>
 
 }

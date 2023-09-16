@@ -18,12 +18,12 @@ class TbcImportParser(
     override val id: UUID = UUID.fromString("4cedb5cf-d946-4702-8c78-1b0c47c225a0")
     override val name: String = "TBC"
 
-    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry> {
         val lines = stream.readCsv(skip = 1)
         return lines.parseExchanges(importData) + lines.parseRegularOperations()
     }
 
-    private fun List<CsvRow>.parseExchanges(importData: ImportData): List<ImportDataParsedEntry> {
+    private fun List<CsvRow>.parseExchanges(importData: ImportData?): List<ImportDataParsedEntry> {
         val iterator = filter { it[TRANSACTION_TYPE] == EXCHANGE_OPERATION }.iterator()
         val result = mutableListOf<ImportDataParsedEntry>()
         while (iterator.hasNext()) {
@@ -47,9 +47,9 @@ class TbcImportParser(
                 rawEntries = listOf(first.toString(), second.toString()),
                 date = date,
                 type = OperationType.EXCHANGE,
-                accountFrom = accountConverter.toRecord(importData.account),
+                accountFrom = importData?.account?.let { accountConverter.toRecord(it) },
                 amountFrom = from,
-                accountTo = accountConverter.toRecord(importData.account),
+                accountTo = importData?.account?.let { accountConverter.toRecord(it) },
                 amountTo = to,
                 description = description,
             )

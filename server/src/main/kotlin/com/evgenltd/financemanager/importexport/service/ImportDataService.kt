@@ -1,14 +1,12 @@
 package com.evgenltd.financemanager.importexport.service
 
-import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.eq
-import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.repository.findAllByCondition
+import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.importexport.converter.ImportDataConverter
 import com.evgenltd.financemanager.importexport.converter.ImportDataEntryConverter
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
+import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.record.*
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
@@ -34,9 +32,11 @@ class ImportDataService(
 
     fun entryList(id: UUID, filter: ImportDataEntryFilter): ImportDataEntryPage =
         importDataEntryRepository.findAllByCondition(filter.page, filter.size, Sort.by(Sort.Direction.DESC, ImportDataEntry::date.name)) {
+            (ImportDataEntry.Companion::importDataId eq id) and
 //            (ImportDataEntry.Companion::suggestedOperationType eq filter.operationType) and
             (ImportDataEntry.Companion::preparationResult eq filter.preparationResult) and
             (ImportDataEntry.Companion::option eq filter.option) and
+            (if (filter.hideSkip) (ImportDataEntry.Companion::option notEq ImportOption.SKIP) else emptyCondition()) and
             (ImportDataEntry.Companion::importResult eq filter.importResult)
         }.let {
             ImportDataEntryPage(
@@ -88,10 +88,6 @@ class ImportDataService(
 
     fun preparationRepeat(id: UUID) {
         importDataProcessService.preparationRepeat(id)
-    }
-
-    fun preparationRepeat(id: UUID, entryId: UUID) {
-        importDataProcessService.preparationRepeat(id, entryId)
     }
 
     fun preparationCancel(id: UUID) {

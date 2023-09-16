@@ -50,6 +50,15 @@ class ImportDataProcessService(
             importDataEntry.suggestedOperation = it
         }
 
+        if (request.suggestedOperation != null) {
+            importDataEntry.preparationResult = true
+            importDataEntry.preparationError = null
+            val similarOperations = searchSimilarOperations(importDataEntry)
+            if (importDataEntry.preparationResult) {
+                decideImportOption(importDataEntry, similarOperations)
+            }
+        }
+
         update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
             it.status = ImportDataStatus.PREPARE_DONE
         }
@@ -102,9 +111,10 @@ class ImportDataProcessService(
 
         var work = 0
         for (parsedEntry in parsedEntries) {
+            work++
             if (work % BATCH_SIZE == 0) {
                 update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
-                    it.progress = ++work / parsedEntries.size.toDouble()
+                    it.progress = work / parsedEntries.size.toDouble()
                 } ?: return
             }
             
@@ -150,20 +160,6 @@ class ImportDataProcessService(
         update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
             it.status = ImportDataStatus.PREPARE_DONE
             it.progress = 1.0
-        }
-    }
-
-    fun preparationRepeat(id: UUID, entryId: UUID) {
-        val importData = update(id, ImportDataStatus.PREPARE_DONE) {
-            it.status = ImportDataStatus.PREPARE_IN_PROGRESS
-        } ?: return
-
-        val categoryMappings = categoryMappingService.findByParser(importData.parser)
-        val importDataEntry = importDataEntryRepository.find(entryId)
-        prepareEntry(importDataEntry, importData, categoryMappings)
-
-        update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
-            it.status = ImportDataStatus.PREPARE_DONE
         }
     }
 
@@ -215,8 +211,8 @@ class ImportDataProcessService(
     ) {
         try {
             suggestOperation(importDataEntry, importData, categoryMappings)
+            val similarOperations = searchSimilarOperations(importDataEntry)
             if (importDataEntry.preparationResult) {
-                val similarOperations = searchSimilarOperations(importDataEntry)
                 decideImportOption(importDataEntry, similarOperations)
             }
         } catch (e: RuntimeException) {
@@ -299,8 +295,19 @@ class ImportDataProcessService(
     }
 
     private fun searchSimilarOperations(importDataEntry: ImportDataEntry): List<Operation> {
-        val suggestedOperation = importDataEntry.suggestedOperation ?: return emptyList()
-        val similarOperations = operationService.findSimilar(suggestedOperation)
+        val suggestedOperation = importDataEntry.suggestedOperation
+        val similarOperations = if (suggestedOperation != null) {
+            operationService.findSimilar(suggestedOperation)
+        } else {
+            importDataEntry.parsedEntry
+                .let {
+                    operationService.findSimilar(
+                        date = it.date,
+                        amountFrom = it.amountFrom,
+                        amountTo = it.amountTo
+                    )
+                }
+        }
         importDataEntry.similarOperations = similarOperations.map { it.id!! }
         return similarOperations
     }
@@ -323,7 +330,7 @@ class ImportDataProcessService(
                 && similarOperation.accountFrom.id == suggestedOperation.accountFrom.id
                 && similarOperation.accountTo.id == suggestedOperation.accountTo.id
                 && similarOperation.amountFrom == suggestedOperation.amountFrom
-                && similarOperation.amountTo == suggestedOperation.amountFrom
+                && similarOperation.amountTo == suggestedOperation.amountTo
         if (operationIsEqual) {
             importDataEntry.option = ImportOption.SKIP
         } else {

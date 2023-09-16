@@ -14,7 +14,7 @@ class SberImportParser : ImportParser {
     override val id: UUID = UUID.fromString("eb1869ad-7d1c-45c1-a4a3-a96c6b9d2855")
     override val name: String = "Sber"
 
-    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry> {
         val lines = Jsoup.parse(stream, null, "")
             .select("tr")
             .map { element -> element.select("td")

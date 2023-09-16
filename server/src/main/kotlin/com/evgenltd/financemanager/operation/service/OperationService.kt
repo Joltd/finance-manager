@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.common.repository.gte
 import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.repository.or
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
@@ -19,6 +20,7 @@ import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -63,10 +65,11 @@ class OperationService(
     fun byId(id: UUID): OperationRecord = operationRepository.find(id).let { operationConverter.toRecord(it) }
 
     @Transactional
-    fun update(record: OperationRecord) {
+    fun update(record: OperationRecord): OperationRecord {
         val entity = operationConverter.toEntity(record)
         operationRepository.save(entity)
         transactionService.refillByOperation(entity)
+        return operationConverter.toRecord(entity)
     }
 
     @Transactional
@@ -75,8 +78,43 @@ class OperationService(
         operationRepository.deleteById(id)
     }
 
-    fun findSimilar(operation: OperationRecord): List<Operation> =
-        operationRepository.findByDateAndAccountFromIdAndAccountToId(operation.date, operation.accountFrom.id!!, operation.accountTo.id!!)
-            .filter { it.amountFrom.isSimilar(operation.amountFrom) && it.amountTo.isSimilar(operation.amountTo) }
+    fun findSimilar(operation: OperationRecord): List<Operation> = findSimilar(
+        date = operation.date,
+        accountFromId = operation.accountFrom.id,
+        amountFrom = operation.amountFrom,
+        accountToId = operation.accountTo.id,
+        amountTo = operation.amountTo
+    )
+
+    fun findSimilar(
+        date: LocalDate,
+        accountFromId: UUID? = null,
+        amountFrom: Amount,
+        accountToId: UUID? = null,
+        amountTo: Amount
+    ): List<Operation> {
+        val result = LinkedList<List<Operation>>()
+
+        var operations = operationRepository.findByDate(date)
+        result.push(operations)
+
+        operations = operations.filter { it.amountFrom.isSimilar(amountFrom) && it.amountTo.isSimilar(amountTo) }
+        result.push(operations)
+
+        operations = operations.filter { it.amountFrom == amountFrom && it.amountTo == amountTo }
+        result.push(operations)
+
+        operations = operations.filter { it.accountFrom.id == accountFromId && it.accountTo.id == accountToId }
+        result.push(operations)
+
+        while (result.isNotEmpty()) {
+            val possiblyOperation = result.poll()
+            if (possiblyOperation.isNotEmpty()) {
+                return possiblyOperation
+            }
+        }
+
+        return emptyList()
+    }
 
 }

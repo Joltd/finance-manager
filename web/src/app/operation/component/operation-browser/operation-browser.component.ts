@@ -4,7 +4,7 @@ import {OperationService} from "../../service/operation.service";
 import {PageEvent} from "@angular/material/paginator";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {MatExpansionPanel} from "@angular/material/expansion";
-import {ImportData} from "../../../importexport/model/import-data";
+import {Amount} from "../../../common/model/amount";
 
 @Component({
   selector: 'operation-browser',
@@ -13,7 +13,7 @@ import {ImportData} from "../../../importexport/model/import-data";
 })
 export class OperationBrowserComponent implements OnInit,AfterViewInit,OnDestroy {
 
-  @ViewChild('filter')
+  @ViewChild(MatExpansionPanel)
   filter!: MatExpansionPanel
 
   constructor(

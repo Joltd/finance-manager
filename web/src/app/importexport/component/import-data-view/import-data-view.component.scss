@@ -111,51 +111,6 @@
 
 .parsed-entry {
   overflow: visible;
-
-  .parsed-entry-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-
-    button {
-      width: 16rem;
-    }
-  }
-}
-
-.token-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5em;
-
-  .token {
-    display: flex;
-    flex-direction: column;
-    background-color: lightgrey;
-    border-radius: 1.6em;
-    padding: .4em 1em 0.4em 1em;
-
-    .name {
-      font-size: 7px;
-      line-height: 7px;
-    }
-
-    .value {
-      white-space: nowrap;
-      max-width: 10em;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-}
-
-.raw-entries {
-  overflow-x: auto;
-
-  .raw-entry {
-    white-space: nowrap;
-  }
 }
 
 .additional-info {

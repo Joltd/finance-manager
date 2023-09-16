@@ -20,7 +20,6 @@ import {ImportDataViewComponent} from "./component/import-data-view/import-data-
 import {ImportDataStartComponent} from "./component/import-data-start/import-data-start.component";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {PortalModule} from "@angular/cdk/portal";
-import {OperationModule} from "../operation/operation.modules";
 import {CategoryMappingViewComponent} from "./component/category-mapping-view/category-mapping-view.component";
 import {
   CategoryMappingEditorDialogComponent
@@ -31,6 +30,15 @@ import {MatSelectModule} from "@angular/material/select";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {ImportDataParsedEntryComponent} from "./component/import-data-parsed-entry/import-data-parsed-entry.component";
+import {OperationReviseViewComponent} from "./component/operation-revise-view/operation-revise-view.component";
+import {OperationModule} from "../operation/operation.modules";
+import {MatDatepickerModule} from "@angular/material/datepicker";
+import {OperationReviseBrowserComponent} from "./component/operation-revise-browser/operation-revise-browser.component";
+import {MatRippleModule} from "@angular/material/core";
+import {
+  ImportDataParsedEntryDialogComponent
+} from "./component/import-data-parsed-entry-dialog/import-data-parsed-entry-dialog.component";
 
 @NgModule({
   declarations: [
@@ -41,36 +49,42 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
     CategoryMappingLabelComponent,
     ImportDataBrowserComponent,
     ImportDataViewComponent,
-    ImportDataStartComponent
+    ImportDataStartComponent,
+    ImportDataParsedEntryComponent,
+    ImportDataParsedEntryDialogComponent,
+    OperationReviseBrowserComponent,
+    OperationReviseViewComponent
   ],
-    imports: [
-        MatExpansionModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        CommonModule,
-        ReferenceModule,
-        MatPaginatorModule,
-        MatCardModule,
-        NgIf,
-        MatListModule,
-        NgForOf,
-        MatMenuModule,
-        MatIconModule,
-        MatButtonModule,
-        MatInputModule,
-        NgClass,
-        MatProgressSpinnerModule,
-        PortalModule,
-        OperationModule,
-        MatDialogModule,
-        MatTabsModule,
-        MatSelectModule,
-        MatButtonToggleModule,
-        FormsModule,
-        MatTooltipModule,
-        MatSlideToggleModule,
-        NgStyle
-    ],
+  imports: [
+    MatExpansionModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    CommonModule,
+    ReferenceModule,
+    MatPaginatorModule,
+    MatCardModule,
+    NgIf,
+    MatListModule,
+    NgForOf,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    NgClass,
+    MatProgressSpinnerModule,
+    PortalModule,
+    MatDialogModule,
+    MatTabsModule,
+    MatSelectModule,
+    MatButtonToggleModule,
+    FormsModule,
+    MatTooltipModule,
+    MatSlideToggleModule,
+    NgStyle,
+    OperationModule,
+    MatDatepickerModule,
+    MatRippleModule
+  ],
   providers: [],
   exports: [
     CategoryMappingBrowserComponent,
@@ -80,7 +94,11 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
     CategoryMappingLabelComponent,
     ImportDataBrowserComponent,
     ImportDataViewComponent,
-    ImportDataStartComponent
+    ImportDataStartComponent,
+    ImportDataParsedEntryComponent,
+    ImportDataParsedEntryDialogComponent,
+    OperationReviseBrowserComponent,
+    OperationReviseViewComponent
   ]
 })
 export class ImportExportModule {}

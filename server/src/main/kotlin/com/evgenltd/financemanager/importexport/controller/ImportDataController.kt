@@ -73,14 +73,6 @@ class ImportDataController(
         importDataService.preparationRepeat(id)
     }
 
-    @PutMapping("/import-data/{id}/preparation/{entryId}")
-    fun preparationRepeat(
-        @PathVariable("id") id: UUID,
-        @PathVariable("entryId") entryId: UUID
-    ) {
-        importDataService.preparationRepeat(id, entryId)
-    }
-
     @DeleteMapping("/import-data/{id}/preparation")
     fun preparationCancel(@PathVariable("id") id: UUID) {
         importDataService.preparationCancel(id)

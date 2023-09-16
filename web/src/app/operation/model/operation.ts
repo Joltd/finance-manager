@@ -1,5 +1,6 @@
 import {Amount} from "../../common/model/amount";
 import {Account} from "../../reference/model/account";
+import {ImportDataParsedEntry} from "../../importexport/model/import-data";
 
 export interface OperationPage {
   total: number

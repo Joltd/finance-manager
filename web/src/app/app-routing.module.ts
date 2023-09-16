@@ -28,6 +28,12 @@ import {
 import {ImportDataBrowserComponent} from "./importexport/component/import-data-browser/import-data-browser.component";
 import {ImportDataViewComponent} from "./importexport/component/import-data-view/import-data-view.component";
 import {ImportDataStartComponent} from "./importexport/component/import-data-start/import-data-start.component";
+import {
+  OperationReviseViewComponent
+} from "./importexport/component/operation-revise-view/operation-revise-view.component";
+import {
+  OperationReviseBrowserComponent
+} from "./importexport/component/operation-revise-browser/operation-revise-browser.component";
 
 const routes: Routes = [
   { path: 'currency', component: CurrencyBrowserComponent },
@@ -36,6 +42,8 @@ const routes: Routes = [
   { path: 'account/:id', component: AccountEditorComponent },
   { path: 'operation', component: OperationBrowserComponent },
   { path: 'operation/:id', component: OperationEditorComponent },
+  { path: 'operation-revise', component: OperationReviseBrowserComponent },
+  { path: 'operation-revise/:id', component: OperationReviseViewComponent },
   { path: 'category-mapping', component: CategoryMappingBrowserComponent },
   { path: 'category-mapping/:id', component: CategoryMappingEditorComponent },
   { path: 'import-data', component: ImportDataBrowserComponent },

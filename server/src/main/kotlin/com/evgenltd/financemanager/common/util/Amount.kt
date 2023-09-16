@@ -44,8 +44,7 @@ data class Amount(val value: Long, val currency: String) {
     }
 
     fun isSimilar(that: Amount): Boolean =
-        this.currency == that.currency
-                && (this.value - that.value).absoluteValue < this.value / 106
+        this.currency == that.currency && (this.value - that.value).absoluteValue < this.value / 10
 
     fun isNotEmpty(): Boolean = value != 0L
 

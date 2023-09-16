@@ -64,6 +64,7 @@
               <mat-option [value]="'REPLACE'">Replace</mat-option>
             </mat-select>
           </mat-form-field>
+          <mat-slide-toggle formControlName="hideSkip">Hide skip</mat-slide-toggle>
           <mat-form-field>
             <mat-label>Import result</mat-label>
             <mat-select formControlName="importResult">
@@ -114,10 +115,6 @@
         <span *ngIf="importDataEntry.preparationResult">Prepared</span>
         <span *ngIf="!importDataEntry.preparationResult">Not prepared</span>
       </mat-slide-toggle>
-      <button mat-button
-              *ngIf="!importDataEntry.preparationResult && importDataEntry.importResult != 'DONE'"
-              class="small-icon-button"
-              (click)="repeatPreparationEntry()"><mat-icon>carpenter</mat-icon></button>
       <mat-button-toggle-group *ngIf="importDataEntry.preparationResult && importDataEntry.suggestedOperation"
                                [ngModel]="importDataEntry.option"
                                [disabled]="importDataEntry.importResult == 'DONE'"
@@ -132,35 +129,7 @@
 
   <mat-expansion-panel class="parsed-entry">
     <mat-expansion-panel-header>Parsed entry</mat-expansion-panel-header>
-    <div class="parsed-entry-content">
-      <div class="token-list">
-        <div class="token">
-          <div class="name">Type</div><div class="value">{{importDataEntry.parsedEntry.type}}</div>
-        </div>
-        <div class="token">
-          <div class="name">Date</div><div class="value">{{importDataEntry.parsedEntry.date}}</div>
-        </div>
-        <div class="token" [matTooltip]="importDataEntry.parsedEntry.description">
-          <div class="name">Description</div><div class="value">{{importDataEntry.parsedEntry.description}}</div>
-        </div>
-        <div class="token" *ngIf="importDataEntry.parsedEntry.accountFrom">
-          <div class="name">Account from</div><div>{{importDataEntry.parsedEntry.accountFrom.name}}</div>
-        </div>
-        <div class="token" *ngIf="importDataEntry.parsedEntry.accountTo">
-          <div class="name">Account to</div><div>{{importDataEntry.parsedEntry.accountTo.name}}</div>
-        </div>
-        <div class="token">
-          <div class="name">Amount from</div><amount-label class="value" [amount]="importDataEntry.parsedEntry.amountFrom"></amount-label>
-        </div>
-        <div class="token">
-          <div class="name">Amount to</div><amount-label class="value" [amount]="importDataEntry.parsedEntry.amountTo"></amount-label>
-        </div>
-      </div>
-      <div class="raw-entries">
-        <div class="raw-entry" *ngFor="let row of importDataEntry.parsedEntry.rawEntries">{{row}}</div>
-      </div>
-      <button mat-raised-button color="primary" (click)="addCategoryMapping()">Add category mapping</button>
-    </div>
+    <import-data-parsed-entry [parsedEntry]="importDataEntry.parsedEntry"></import-data-parsed-entry>
   </mat-expansion-panel>
 
   <div class="additional-info">
@@ -179,7 +148,10 @@
 
     <mat-card class="category-mappings">
       <mat-card-header>
-        <mat-card-subtitle>Category mappings</mat-card-subtitle>
+        <mat-card-subtitle>
+          Category mappings
+          <button mat-button class="small-icon-button" *ngIf="importDataEntry.importResult != 'DONE'" (click)="addCategoryMapping()"><mat-icon>add</mat-icon></button>
+        </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <div class="row" *ngFor="let categoryMapping of importDataEntry.matchedCategoryMappings">

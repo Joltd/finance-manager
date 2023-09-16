@@ -22,6 +22,8 @@ import {ReferenceModule} from "../reference/reference.module";
 import {OperationEditorDialogComponent} from "./component/operation-editor-dialog/operation-editor-dialog.component";
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatCheckboxModule} from "@angular/material/checkbox";
+import {OperationReviseViewComponent} from "../importexport/component/operation-revise-view/operation-revise-view.component";
+import {ImportExportModule} from "../importexport/import-export.module";
 
 @NgModule({
   declarations: [
@@ -31,28 +33,28 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
     OperationLabelComponent,
     OperationEditorDialogComponent
   ],
-    imports: [
-        CommonModule,
-        NgIf,
-        MatIconModule,
-        MatExpansionModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatDatepickerModule,
-        MatButtonModule,
-        MatInputModule,
-        MatSelectModule,
-        MatPaginatorModule,
-        MatCardModule,
-        MatListModule,
-        MatMenuModule,
-        NgForOf,
-        MatButtonToggleModule,
-        FormsModule,
-        ReferenceModule,
-        MatDialogModule,
-        MatCheckboxModule
-    ],
+  imports: [
+    CommonModule,
+    NgIf,
+    MatIconModule,
+    MatExpansionModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatDatepickerModule,
+    MatButtonModule,
+    MatInputModule,
+    MatSelectModule,
+    MatPaginatorModule,
+    MatCardModule,
+    MatListModule,
+    MatMenuModule,
+    NgForOf,
+    MatButtonToggleModule,
+    FormsModule,
+    ReferenceModule,
+    MatDialogModule,
+    MatCheckboxModule
+  ],
   providers: [],
   exports: [
     OperationBrowserComponent,

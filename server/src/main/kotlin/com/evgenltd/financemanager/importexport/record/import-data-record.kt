@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.record
 
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.entity.ImportOption
@@ -38,7 +39,8 @@ data class ImportDataEntryFilter(
     val operationType: OperationType? = null,
     val preparationResult: Boolean? = null,
     val option: ImportOption? = null,
-    val importResult: ImportResult? = null,
+    val hideSkip: Boolean = false,
+    val importResult: ImportResult? = null
 )
 
 data class ImportDataEntryPage(

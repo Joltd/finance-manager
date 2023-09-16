@@ -1,0 +1,14 @@
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5em;
+}
+
+.raw-entries {
+  overflow-x: auto;
+  padding-top: 1em;
+
+  div {
+    white-space: nowrap;
+  }
+}

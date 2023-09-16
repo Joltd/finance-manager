@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  background-color: lightgrey;
+  border-radius: 1.6em;
+  padding: .4em 1em 0.4em 1em;
+}
+
+.label {
+  font-size: 7px;
+  line-height: 7px;
+}
+
+.value {
+  white-space: nowrap;
+  max-width: 10em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

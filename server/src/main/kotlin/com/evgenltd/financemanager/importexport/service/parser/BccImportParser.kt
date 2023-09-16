@@ -14,7 +14,7 @@ class BccImportParser : ImportParser {
     override val id: UUID = UUID.fromString("cdc75c19-c79d-4b9b-b54e-581b52750e5b")
     override val name: String = "Bank Center Credit"
 
-    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> = Jsoup.parse(stream, null, "")
+    override fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry> = Jsoup.parse(stream, null, "")
         .select(".history__list__item")
         .map {
             val descriptionNode = it[1][1]

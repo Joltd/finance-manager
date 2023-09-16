@@ -46,12 +46,8 @@ export class ImportDataService {
     return this.httpClient.post<void>('/import-data', formData)
   }
 
-  preparationRepeat(id: string, entryId: string | null): Observable<void> {
-    if (entryId == null) {
-      return this.httpClient.put<void>(`/import-data/${id}/preparation`, null)
-    } else {
-      return this.httpClient.put<void>(`/import-data/${id}/preparation/${entryId}`, null)
-    }
+  preparationRepeat(id: string): Observable<void> {
+    return this.httpClient.put<void>(`/import-data/${id}/preparation`, null)
   }
 
   importStart(id: string): Observable<void> {
