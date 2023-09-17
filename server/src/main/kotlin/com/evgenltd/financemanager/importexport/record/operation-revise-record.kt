@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.importexport.record
 
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport.entity.OperationReviseDate
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
@@ -14,7 +15,7 @@ data class OperationReviseRecord(
     val currency: String?,
     val account: AccountRecord,
     val parser: Reference,
-    val dates: List<LocalDate>
+    val dates: List<OperationReviseDate>
 )
 
 data class OperationReviseEntryRecord(

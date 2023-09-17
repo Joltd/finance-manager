@@ -19,7 +19,8 @@ class AccountConverter(
         id = entity.id,
         name = entity.name,
         type = entity.type,
-        deleted = entity.deleted
+        deleted = entity.deleted,
+        reviseDate = entity.reviseDate,
     )
 
     fun toReference(entity: Account): Reference = Reference(
@@ -32,7 +33,8 @@ class AccountConverter(
         id = record.id,
         name = record.name,
         type = record.type,
-        deleted = record.deleted
+        deleted = record.deleted,
+        reviseDate = record.reviseDate,
     )
 
 }

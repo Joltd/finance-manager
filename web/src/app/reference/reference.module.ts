@@ -19,6 +19,7 @@ import {CurrencyEditorComponent} from "./component/currency-editor/currency-edit
 import {AccountInputComponent} from "./component/account-input/account-input.component";
 import {PortalModule} from "@angular/cdk/portal";
 import {MatTabsModule} from "@angular/material/tabs";
+import {MatDatepickerModule} from "@angular/material/datepicker";
 
 @NgModule({
   declarations: [
@@ -28,25 +29,26 @@ import {MatTabsModule} from "@angular/material/tabs";
     CurrencyBrowserComponent,
     CurrencyEditorComponent
   ],
-  imports: [
-    MatListModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatIconModule,
-    MatCardModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    NgForOf,
-    NgIf,
-    CommonModule,
-    MatSlideToggleModule,
-    MatCheckboxModule,
-    MatSelectModule,
-    PortalModule,
-    MatTabsModule,
-    NgClass
-  ],
+    imports: [
+        MatListModule,
+        MatButtonModule,
+        MatMenuModule,
+        MatIconModule,
+        MatCardModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        NgForOf,
+        NgIf,
+        CommonModule,
+        MatSlideToggleModule,
+        MatCheckboxModule,
+        MatSelectModule,
+        PortalModule,
+        MatTabsModule,
+        NgClass,
+        MatDatepickerModule
+    ],
   exports: [
     AccountBrowserComponent,
     AccountEditorComponent,

@@ -9,6 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Root
+import java.time.LocalDate
 import java.util.*
 
 @Entity
@@ -25,6 +26,8 @@ class Account(
     var type: AccountType,
 
     var deleted: Boolean = false,
+
+    var reviseDate: LocalDate? = null,
 
 ) {
     companion object {

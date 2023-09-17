@@ -18,6 +18,13 @@
 
       <mat-slide-toggle formControlName="deleted">Deleted</mat-slide-toggle>
 
+      <mat-form-field>
+        <mat-label>Revised</mat-label>
+        <input formControlName="reviseDate" matInput [matDatepicker]="reviseDate" readonly (click)="reviseDate.open()">
+        <mat-datepicker touchUi #reviseDate></mat-datepicker>
+        <button mat-icon-button matSuffix (click)="form.patchValue({reviseDate: null})"><mat-icon>close</mat-icon></button>
+      </mat-form-field>
+
     </form>
   </mat-card-content>
 </mat-card>

@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {OperationRevise, OperationReviseEntry} from "../model/operation-revise";
+import {OperationRevise, OperationReviseDate, OperationReviseEntry} from "../model/operation-revise";
 import {Operation} from "../../operation/model/operation";
 
 @Injectable({
@@ -21,6 +21,10 @@ export class OperationReviseService {
 
   byId(id: string): Observable<OperationRevise> {
     return this.http.get<OperationRevise>(`/operation-revise/${id}`)
+  }
+
+  updateDate(id: string, date: OperationReviseDate): Observable<void> {
+      return this.http.patch<void>(`/operation-revise/${id}/date`, date)
   }
 
   delete(id: string): Observable<any> {

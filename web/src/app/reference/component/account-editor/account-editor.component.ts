@@ -15,7 +15,8 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
     id: new FormControl(null),
     type: new FormControl(null, Validators.required),
     name: new FormControl(null, Validators.required),
-    deleted: new FormControl(false)
+    deleted: new FormControl(false),
+    reviseDate: new FormControl(null),
   })
 
   constructor(

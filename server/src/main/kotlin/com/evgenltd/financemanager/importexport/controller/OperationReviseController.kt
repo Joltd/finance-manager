@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.controller
 
+import com.evgenltd.financemanager.importexport.entity.OperationReviseDate
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryFilter
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryRecord
 import com.evgenltd.financemanager.importexport.record.OperationReviseRecord
@@ -18,6 +19,12 @@ class OperationReviseController(
 
     @GetMapping("/operation-revise")
     fun list(): List<OperationReviseRecord> = operationReviseService.list()
+
+    @PatchMapping("/operation-revise/{id}/date")
+    fun updateDate(
+        @PathVariable("id") id: UUID,
+        @RequestBody request: OperationReviseDate
+    ) = operationReviseService.updateDate(id, request)
 
     @PostMapping("/operation-revise/{id}/entry")
     fun entryList(

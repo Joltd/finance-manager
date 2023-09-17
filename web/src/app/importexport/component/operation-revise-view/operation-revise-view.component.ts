@@ -5,7 +5,7 @@ import {FormControl, FormGroup} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {SettingsService} from "../../../settings/service/settings.service";
 import {OperationReviseService} from "../../service/operation-revise.service";
-import {OperationRevise, OperationReviseEntry} from "../../model/operation-revise";
+import {OperationRevise, OperationReviseDate, OperationReviseEntry} from "../../model/operation-revise";
 import {Operation} from "../../../operation/model/operation";
 import {MatDialog} from "@angular/material/dialog";
 import {
@@ -38,7 +38,8 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
   id!: string
   operationRevise!: OperationRevise
   hideMatched: boolean = false
-  date: string | null = null
+  showHidden: boolean = false
+  date: OperationReviseDate | null = null
   entries: OperationReviseEntry[] = []
 
   constructor(
@@ -85,8 +86,11 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
   }
 
   private entryLoad() {
+    if (this.date == null) {
+      return
+    }
     let filter = {
-      date: this.date,
+      date: this.date.date,
       hideMatched: this.hideMatched
     }
     this.operationReviseService.entryList(this.operationRevise.id!, filter)
@@ -111,9 +115,16 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
     this.router.navigate(['operation-revise']).then()
   }
 
-  selectDate(date: string) {
+  dates(): OperationReviseDate[] {
+    return this.operationRevise.dates
+      .filter(date => {
+        return (!this.hideMatched || !date.revised) && (this.showHidden || !date.hidden)
+      })
+  }
+
+  selectDate(date: OperationReviseDate) {
     this.date = date
-    this.toolbarService.setupTitle('Operation Revise - ' + date)
+    this.toolbarService.setupTitle('Operation Revise - ' + date.date)
     this.entryLoad()
   }
 
@@ -128,9 +139,18 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
     }
   }
 
+  toggleDateVisibility() {
+    if (this.date == null) {
+      return
+    }
+    this.date.hidden = !this.date.hidden
+    this.operationReviseService.updateDate(this.id, this.date)
+      .subscribe(() => {})
+  }
+
   addOperation() {
     let operation = {
-      date: this.date,
+      date: this.date?.date,
       type: 'EXCHANGE',
       description: '',
     } as any

@@ -1,0 +1,1 @@
+alter table accounts add column revise_date date;

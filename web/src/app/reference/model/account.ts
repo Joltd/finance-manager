@@ -3,6 +3,7 @@ export interface Account {
   name: string
   type: AccountType
   deleted: boolean
+  reviseDate: string | null
 }
 
 export type AccountType = 'ACCOUNT' | 'EXPENSE' | 'INCOME'

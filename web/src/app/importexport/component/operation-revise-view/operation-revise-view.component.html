@@ -44,11 +44,15 @@
   <mat-card class="dates">
     <mat-card-header>
       <mat-slide-toggle [ngModel]="hideMatched" (ngModelChange)="toggleHideMatched()">Hide matched</mat-slide-toggle>
+      <mat-slide-toggle [(ngModel)]="showHidden">Show hidden</mat-slide-toggle>
     </mat-card-header>
     <mat-card-content>
       <mat-action-list>
-        <button mat-list-item *ngFor="let date of operationRevise.dates" (click)="selectDate(date)">
-          <date-label [date]="date"></date-label>
+        <button mat-list-item *ngFor="let date of dates()" (click)="selectDate(date)">
+          <span class="row" [class.hidden]="date.hidden">
+            <mat-icon [class.hide]="!date.revised">done</mat-icon>
+            <date-label [date]="date.date"></date-label>
+          </span>
         </button>
       </mat-action-list>
     </mat-card-content>
@@ -83,7 +87,10 @@
     </mat-list>
   </mat-card>
 
-  <button class="fab" mat-fab (click)="addOperation()"><mat-icon>add</mat-icon></button>
+  <div class="fab">
+    <button mat-mini-fab (click)="toggleDateVisibility()"><mat-icon>visibility</mat-icon></button>
+    <button mat-fab (click)="addOperation()"><mat-icon>add</mat-icon></button>
+  </div>
 
 </div>
 

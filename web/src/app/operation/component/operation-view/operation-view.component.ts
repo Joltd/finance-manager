@@ -1,8 +1,5 @@
 import {Component, Input} from "@angular/core";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {Operation} from "../../model/operation";
-import {Reference} from "../../../common/model/reference";
-import {Account, AccountType} from "../../../reference/model/account";
 import * as moment from "moment";
 import {Amount} from "../../../common/model/amount";
 

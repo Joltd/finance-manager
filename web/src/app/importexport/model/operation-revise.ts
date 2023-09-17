@@ -10,7 +10,7 @@ export interface OperationRevise {
   currency: string | null,
   account: Account,
   parser: Reference,
-  dates: string[],
+  dates: OperationReviseDate[],
 }
 
 export interface OperationReviseEntry {
@@ -18,4 +18,10 @@ export interface OperationReviseEntry {
   date: string | null,
   operation: Operation | null,
   parsedEntry: ImportDataParsedEntry | null,
+}
+
+export interface OperationReviseDate {
+  date: string,
+  revised: boolean,
+  hidden: boolean
 }

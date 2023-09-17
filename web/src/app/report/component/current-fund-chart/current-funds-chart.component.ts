@@ -6,6 +6,7 @@ import {FormControl, FormGroup} from "@angular/forms";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {Amount} from "../../../common/model/amount";
 import {OperationService} from "../../../operation/service/operation.service";
+import * as moment from "moment";
 
 @Component({
   selector: 'current-funds-chart',
@@ -66,6 +67,10 @@ export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
       account: entry.account,
       currency: amountEntry.amount.currency
     })
+  }
+
+  reviseDateAgo(date: string): number {
+    return moment().diff(moment(date), 'days')
   }
 
 }

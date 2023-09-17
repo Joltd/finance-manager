@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.importexport.converter.OperationReviseConverter
 import com.evgenltd.financemanager.importexport.converter.OperationReviseEntryConverter
 import com.evgenltd.financemanager.importexport.entity.OperationRevise
+import com.evgenltd.financemanager.importexport.entity.OperationReviseDate
 import com.evgenltd.financemanager.importexport.entity.OperationReviseEntry
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryFilter
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryRecord
@@ -41,6 +42,19 @@ class OperationReviseService(
 
     fun byId(id: UUID): OperationReviseRecord =
         operationReviseRepository.find(id).let { operationReviseConverter.toRecord(it) }
+
+    @Transactional
+    fun updateDate(id: UUID, date: OperationReviseDate) {
+        val operationRevise = operationReviseRepository.find(id)
+        operationRevise.dates = operationRevise.dates
+            .map {
+                if (it.date == date.date) {
+                    date
+                } else {
+                    it
+                }
+            }
+    }
 
     @Transactional
     fun delete(id: UUID) {
@@ -135,11 +149,16 @@ class OperationReviseService(
 
         }
 
-        operationRevise.dates = actualEntries
-            .filter { it.operation == null || it.parsedEntry == null }
-            .map { it.date }
-            .distinct()
-            .sorted()
+        operationRevise.dates = actualEntries.groupBy { it.date }
+            .entries
+            .map {
+                OperationReviseDate(
+                    date = it.key,
+                    revised = it.value.all { entry -> entry.operation != null && entry.parsedEntry != null },
+                    hidden = false
+                )
+            }
+            .sortedBy { it.date }
     }
 
 }

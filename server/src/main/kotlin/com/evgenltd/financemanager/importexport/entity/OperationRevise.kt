@@ -28,5 +28,11 @@ class OperationRevise(
     var parser: UUID,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    var dates: List<LocalDate>
+    var dates: List<OperationReviseDate>
+)
+
+data class OperationReviseDate(
+    val date: LocalDate,
+    val revised: Boolean,
+    val hidden: Boolean,
 )

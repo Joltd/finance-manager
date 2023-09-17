@@ -17,8 +17,27 @@ form {
 .dates {
   overflow: hidden;
 
+  mat-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 10em;
+    padding: 0 16px;
+  }
+
   mat-card-content {
     overflow-y: auto;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: min-content min-content;
+    align-items: center;
+    gap: 1em;
+  }
+
+  .hidden {
+    opacity: .5;
   }
 }
 
@@ -38,4 +57,11 @@ form {
       cursor: pointer;
     }
   }
+}
+
+.fab {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  align-items: center;
 }

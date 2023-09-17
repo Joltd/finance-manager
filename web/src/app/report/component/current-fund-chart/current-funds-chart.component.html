@@ -16,6 +16,11 @@
   <mat-card-content class="funds" *ngIf="currentFund; else noData">
     <ng-container *ngFor="let entry of currentFund.entries">
       <h4 class="account">{{entry.account.name}}</h4>
+      <div class="revised">
+        <span *ngIf="entry.account.reviseDate"
+              [matTooltip]="entry.account.reviseDate"
+              [class.warn]="reviseDateAgo(entry.account.reviseDate) > 14">{{reviseDateAgo(entry.account.reviseDate)}} days ago</span>
+      </div>
       <ng-container *ngFor="let amountEntry of entry.amounts">
         <amount-label [amount]="amountEntry.amount"></amount-label>
         <amount-label [amount]="amountEntry.commonAmount" class="common-amount"

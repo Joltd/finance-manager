@@ -18,6 +18,7 @@ import {CurrentFundsChartComponent} from "./component/current-fund-chart/current
 import {CumulativeFundsChartComponent} from "./component/cumulative-funds-chart/cumulative-funds-chart.component";
 import {RouterLink} from "@angular/router";
 import {MatRippleModule} from "@angular/material/core";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -26,25 +27,26 @@ import {MatRippleModule} from "@angular/material/core";
     CurrentFundsChartComponent,
     CumulativeFundsChartComponent
   ],
-  imports: [
-    MatCardModule,
-    NgForOf,
-    CommonModule,
-    MatListModule,
-    MatChipsModule,
-    NgIf,
-    MatExpansionModule,
-    MatInputModule,
-    MatSelectModule,
-    ReactiveFormsModule,
-    MatDatepickerModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSlideToggleModule,
-    RouterLink,
-    NgStyle,
-    MatRippleModule
-  ],
+    imports: [
+        MatCardModule,
+        NgForOf,
+        CommonModule,
+        MatListModule,
+        MatChipsModule,
+        NgIf,
+        MatExpansionModule,
+        MatInputModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+        MatDatepickerModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSlideToggleModule,
+        RouterLink,
+        NgStyle,
+        MatRippleModule,
+        MatTooltipModule
+    ],
   exports: [
     DashboardComponent,
     FlowChartComponent,

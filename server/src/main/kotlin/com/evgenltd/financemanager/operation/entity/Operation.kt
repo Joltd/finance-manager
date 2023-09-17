@@ -44,7 +44,7 @@ class Operation(
     @JoinColumn(name = "account_to_id")
     var accountTo: Account,
 
-    var description: String,
+    var description: String?,
 ) {
 
     companion object {

@@ -17,7 +17,7 @@ export interface Operation {
   accountFrom: Account
   amountTo: Amount
   accountTo: Account,
-  description: string
+  description: string | null
 }
 
 export type OperationType = 'EXCHANGE' | 'TRANSFER' | 'EXPENSE' | 'INCOME'
