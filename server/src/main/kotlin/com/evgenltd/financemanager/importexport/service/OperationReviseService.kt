@@ -149,13 +149,14 @@ class OperationReviseService(
 
         }
 
+        val previousState = operationRevise.dates.associateBy { it.date }
         operationRevise.dates = actualEntries.groupBy { it.date }
             .entries
             .map {
                 OperationReviseDate(
                     date = it.key,
                     revised = it.value.all { entry -> entry.operation != null && entry.parsedEntry != null },
-                    hidden = false
+                    hidden = previousState[it.key]?.hidden ?: false
                 )
             }
             .sortedBy { it.date }
