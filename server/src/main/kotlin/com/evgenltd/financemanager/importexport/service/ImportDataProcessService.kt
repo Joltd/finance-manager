@@ -160,30 +160,22 @@ class ImportDataProcessService(
             it.progress = .0
         } ?: return
 
-        var counter = 0
-        while (counter < 100) {
-            Thread.sleep(100)
-            counter++
+        val categoryMappings = categoryMappingService.findByParser(importData.parser)
+
+        val chunks = importDataEntryRepository.findForRepeatPreparation(id).chunked(BATCH_SIZE)
+        chunks.onEachIndexed { index, ids ->
             update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
-                it.progress = counter / 100.0
+                it.progress = index / chunks.size.toDouble()
             } ?: return
+
+            importDataEntryRepository.findByIdIn(ids).onEach {
+                it.preparationError = null
+                it.suggestedOperation = null
+                it.matchedCategoryMappings = emptyList()
+                it.similarOperations = emptyList()
+                prepareEntry(it, importData, categoryMappings)
+            }
         }
-//        val categoryMappings = categoryMappingService.findByParser(importData.parser)
-//
-//        val chunks = importDataEntryRepository.findForRepeatPreparation(id).chunked(BATCH_SIZE)
-//        chunks.onEachIndexed { index, ids ->
-//            update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
-//                it.progress = index / chunks.size.toDouble()
-//            } ?: return
-//
-//            importDataEntryRepository.findByIdIn(ids).onEach {
-//                it.preparationError = null
-//                it.suggestedOperation = null
-//                it.matchedCategoryMappings = emptyList()
-//                it.similarOperations = emptyList()
-//                prepareEntry(it, importData, categoryMappings)
-//            }
-//        }
 
         update(id, ImportDataStatus.PREPARE_IN_PROGRESS) {
             it.status = ImportDataStatus.PREPARE_DONE
