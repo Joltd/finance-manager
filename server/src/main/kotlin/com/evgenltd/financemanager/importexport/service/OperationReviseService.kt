@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.importexport.service
 
-import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.importexport.converter.OperationReviseConverter
 import com.evgenltd.financemanager.importexport.converter.OperationReviseEntryConverter
 import com.evgenltd.financemanager.importexport.entity.OperationRevise
@@ -12,13 +12,18 @@ import com.evgenltd.financemanager.importexport.record.OperationReviseRecord
 import com.evgenltd.financemanager.importexport.repository.OperationReviseEntryRepository
 import com.evgenltd.financemanager.importexport.repository.OperationReviseRepository
 import com.evgenltd.financemanager.operation.converter.OperationConverter
+import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
+import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.reference.converter.AccountConverter
+import com.evgenltd.financemanager.reference.entity.AccountType
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.UUID
+import kotlin.reflect.jvm.internal.impl.utils.SmartSet.Companion
 
 @Service
 class OperationReviseService(
@@ -29,7 +34,8 @@ class OperationReviseService(
     private val operationService: OperationService,
     private val importParserService: ImportParserService,
     private val accountConverter: AccountConverter,
-    private val operationConverter: OperationConverter
+    private val operationConverter: OperationConverter,
+    private val operationRepository: OperationRepository
 ) {
 
     fun list(): List<OperationReviseRecord> = operationReviseRepository.findAll()
@@ -100,28 +106,24 @@ class OperationReviseService(
             }
         }
 
-        val usedOperations = mutableSetOf<UUID>()
         val account = accountConverter.toReference(operationRevise.account)
         var pageNumber = 0
         while (true) {
 
             val filter = OperationFilter(
-                page = pageNumber++,
+                page = pageNumber,
                 dateFrom = operationRevise.dateFrom,
                 dateTo = operationRevise.dateTo,
                 currency = operationRevise.currency,
                 account = account
             )
-            val page = operationService.list(filter)
-            if (page.operations.isEmpty()) {
+            val page = operationService.pagedList(filter)
+            pageNumber++
+            if (page.content.isEmpty()) {
                 break
             }
 
-            for (operation in page.operations) {
-                if (operation.id in usedOperations) {
-                    continue
-                }
-                usedOperations.add(operation.id!!)
+            for (operation in page.content) {
 
                 val operationReviseEntry = actualEntries.find {
                     val parsedEntry = it.parsedEntry
@@ -133,12 +135,12 @@ class OperationReviseService(
                 }
 
                 if (operationReviseEntry != null) {
-                    operationReviseEntry.operation = operationConverter.toEntity(operation)
+                    operationReviseEntry.operation = operation
                 } else {
                     val newEntry = OperationReviseEntry(
                         operationRevise = operationRevise,
                         date = operation.date,
-                        operation = operationConverter.toEntity(operation),
+                        operation = operation,
                         parsedEntry = null,
                     )
                     operationReviseEntryRepository.save(newEntry)
@@ -163,3 +165,7 @@ class OperationReviseService(
     }
 
 }
+
+class Info(
+    var count: Int = 0
+)

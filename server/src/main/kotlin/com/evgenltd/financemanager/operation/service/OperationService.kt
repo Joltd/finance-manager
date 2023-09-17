@@ -18,6 +18,7 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -30,8 +31,20 @@ class OperationService(
     private val transactionService: TransactionService
 ) {
 
-    fun list(filter: OperationFilter): OperationPage =
-        operationRepository.findAllByCondition(filter.page, filter.size, Sort.by(Sort.Direction.DESC, Operation::date.name)) {
+    fun list(filter: OperationFilter): OperationPage = pagedList(filter, Sort.by(Sort.Direction.DESC, Operation::date.name))
+        .let { page ->
+            OperationPage(
+                total = page.totalElements,
+                page = filter.page,
+                size = filter.size,
+                operations = page.content
+                    .sortedByDescending { it.date }
+                    .map { operationConverter.toRecord(it) }
+            )
+        }
+
+    fun pagedList(filter: OperationFilter, sort: Sort = Sort.unsorted()): Page<Operation> =
+        operationRepository.findAllByCondition(filter.page, filter.size, sort) {
             (Operation.Companion::date gte filter.dateFrom) and
             (Operation.Companion::date lt filter.dateTo) and
             (Operation.Companion::type eq filter.type) and
@@ -50,15 +63,6 @@ class OperationService(
             (
                 (Operation.Companion::currencyFrom eq filter.currency) or
                 (Operation.Companion::currencyTo eq filter.currency)
-            )
-        }.let { page ->
-            OperationPage(
-                total = page.totalElements,
-                page = filter.page,
-                size = filter.size,
-                operations = page.content
-                    .sortedByDescending { it.date }
-                    .map { operationConverter.toRecord(it) }
             )
         }
 
