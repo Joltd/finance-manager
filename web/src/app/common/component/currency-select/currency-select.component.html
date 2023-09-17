@@ -1,4 +1,5 @@
-<currency-label [currency]="currency"
+<currency-label *ngIf="currency != null"
+                [currency]="currency"
                 [full]="true"
                 (click)="showCurrencySelect()"></currency-label>
 <entry-select [nullable]="true" (select)="select($event)">

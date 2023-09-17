@@ -74,7 +74,7 @@ export class AmountInputComponent implements MatFormFieldControl<Amount>, Contro
   }
   set value(amount: Amount | null) {
     let value = amount != null ? toFractional(amount) : ''
-    let currency = amount != null ? amount.currency : ''
+    let currency = amount?.currency
     this.amount.patchValue({
       value: value,
       currency: currency

@@ -112,6 +112,7 @@ export class CurrencyInputComponent implements MatFormFieldControl<string>, Cont
   setDescribedByIds(ids: string[]) {}
 
   onContainerClick(event: MouseEvent) {
+    this.currencySelect.showCurrencySelect()
     this.touched = true
     this.onTouched()
   }
