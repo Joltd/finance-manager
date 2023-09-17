@@ -15,16 +15,24 @@ class TronScanImportParser : ImportParser {
 
     override fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry> = stream
         .readCsv()
-        .filter { it["Token Symbol"] == "USDT" && it["Result"] == "SUCCESS" && it["Status"] == "CONFIRMED" }
-        .map {
+        .filter {
+            it["Token Symbol"] == "USDT"
+                    && it["Result"] == "SUCCESS"
+                    && it["Status"] == "CONFIRMED"
+        }
+        .mapNotNull {
+            val amount = it["Amount/TokenID"].amount("USDT")
+            if (amount.isZero()) {
+                return@mapNotNull null
+            }
             ImportDataParsedEntry(
                 rawEntries = listOf(it.toString()),
                 date = it["Time(UTC)"].dateTime("yyyy-MM-dd HH:mm:ss"),
                 type = OperationType.EXCHANGE,
                 accountFrom = null,
-                amountFrom = it["Amount/TokenID"].amount("USDT"),
+                amountFrom = amount,
                 accountTo = null,
-                amountTo = it["Amount/TokenID"].amount("USDT"),
+                amountTo = amount,
                 description = it["Txn Hash"],
             )
         }

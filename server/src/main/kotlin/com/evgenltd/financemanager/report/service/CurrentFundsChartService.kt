@@ -39,7 +39,7 @@ class CurrentFundsChartService(
                         commonAmount = amount.convertTo(LocalDate.now(), settings.currency)
                     )
                 }
-                .filter { entry -> entry.amount.isNotEmpty() }
+                .filter { entry -> entry.amount.isNotZero() }
                 .toList()
                 .sortedByDescending { entry -> entry.amount.value }
             CurrentFundsChartEntryRecord(
@@ -48,7 +48,7 @@ class CurrentFundsChartService(
                 amounts = amounts
             )
         }
-        .filter { it.commonAmount.isNotEmpty() }
+        .filter { it.commonAmount.isNotZero() }
         .sortedByDescending { it.commonAmount.value }
         .let { CurrentFundsChartRecord(it) }
 

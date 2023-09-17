@@ -30,7 +30,7 @@ class DashboardService(
             defaultCurrencyAmount = defaultCurrencyAmount,
             usdCashAmount = usdCashAmount.takeIf { defaultCurrencyAmount.currency != MAIN_CURRENCY },
             cashFounds = cashFunds.values
-                .filter { it.isNotEmpty() }
+                .filter { it.isNotZero() }
                 .toList()
                 .sortedBy { it.currency }
         )
