@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@Service
-@Profile("prod")
-@Order(5)
+//@Service
+//@Profile("prod")
+//@Order(5)
 class ExchangeRatesDataProvider(
     private val rest: IntegrationRestTemplate
 ) : ExchangeRateProvider, Loggable() {
@@ -64,6 +64,6 @@ data class ExchangeRateDataResponse(
 )
 
 data class ExchangeRateDataError(
-    val code: String,
-    val message: String
+    val code: String?,
+    val message: String?
 )
