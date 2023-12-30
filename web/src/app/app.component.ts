@@ -5,6 +5,7 @@ import {SettingsService} from "./settings/service/settings.service";
 import {ToolbarService} from "./common/service/toolbar.service";
 import {CurrencyService} from "./reference/service/currency.service";
 import {lastValueFrom} from "rxjs";
+import { AdaptiveService } from "./common/service/adaptive.service";
 
 @Component({
   selector: 'app-root',
@@ -14,11 +15,10 @@ import {lastValueFrom} from "rxjs";
 export class AppComponent implements OnInit {
 
   loading: boolean = false
-  wide: boolean = false
 
   constructor(
-    public loadingService: LoadingService,
-    private breakpointObserver: BreakpointObserver,
+    public adaptiveService: AdaptiveService,
+    private loadingService: LoadingService,
     public settingsService: SettingsService,
     public toolbarService: ToolbarService,
     private currencyService: CurrencyService
@@ -28,18 +28,8 @@ export class AppComponent implements OnInit {
     this.loadingService.onLoading.subscribe(result => {
       setTimeout(() => this.loading = result)
     })
-    this.breakpointObserver.observe(['(min-width: 40em)'])
-      .subscribe(state => this.wide = state.matches)
-    lastValueFrom(this.settingsService.load()).then()
-    lastValueFrom(this.currencyService.load()).then()
-  }
-
-  isWideMenu(): boolean {
-    return this.wide
-  }
-
-  isWideScreen(): boolean {
-    return this.settingsService.wideScreenToggle && this.wide
+    // lastValueFrom(this.settingsService.load()).then()
+    // lastValueFrom(this.currencyService.load()).then()
   }
 
 }

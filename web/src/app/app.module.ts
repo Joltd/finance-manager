@@ -29,6 +29,7 @@ import {ExchangeRateModule} from "./exchangerate/exchange-rate.module";
 import {SettingsModule} from "./settings/settings.module";
 import {OperationModule} from "./operation/operation.modules";
 import {ImportExportModule} from "./importexport/import-export.module";
+import { EntityModule } from "./entity/entity.module";
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import {ImportExportModule} from "./importexport/import-export.module";
     ExchangeRateModule,
     SettingsModule,
     OperationModule,
-    ImportExportModule
+    ImportExportModule,
+    EntityModule
   ],
   providers: [
     restInterceptorProvider,

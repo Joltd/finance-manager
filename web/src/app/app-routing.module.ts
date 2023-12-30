@@ -34,8 +34,10 @@ import {
 import {
   OperationReviseBrowserComponent
 } from "./importexport/component/operation-revise-browser/operation-revise-browser.component";
+import { EntityBrowserComponent } from "./entity/component/entity-browser/entity-browser.component";
 
 const routes: Routes = [
+  { path: 'entity', component: EntityBrowserComponent },
   { path: 'currency', component: CurrencyBrowserComponent },
   { path: 'currency/:id', component: CurrencyEditorComponent },
   { path: 'account', component: AccountBrowserComponent },
@@ -56,7 +58,7 @@ const routes: Routes = [
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: 'settings', component: SettingsEditorComponent },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
+  { path: '', redirectTo: '/entity', pathMatch: 'full' }
 ];
 
 @NgModule({

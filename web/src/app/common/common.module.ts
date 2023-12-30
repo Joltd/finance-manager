@@ -25,6 +25,9 @@ import {OverlayModule} from "@angular/cdk/overlay";
 import {PortalModule} from "@angular/cdk/portal";
 import {BadgeComponent} from "./component/badge/badge.component";
 import {NoDataComponent} from "./component/no-data/no-data.component";
+import { ToolbarContentComponent } from "./component/toolbar-content/toolbar-content.component";
+import { ToolbarButtonComponent } from "./component/toolbar-button/toolbar-button.component";
+import { FabGroupComponent } from "./component/fab-group/fab-group.component";
 
 @NgModule({
   declarations: [
@@ -41,7 +44,10 @@ import {NoDataComponent} from "./component/no-data/no-data.component";
     EntryItemComponent,
     EditorComponent,
     BadgeComponent,
-    NoDataComponent
+    NoDataComponent,
+    ToolbarContentComponent,
+    ToolbarButtonComponent,
+    FabGroupComponent
   ],
   imports: [
     ReactiveFormsModule,
@@ -73,7 +79,10 @@ import {NoDataComponent} from "./component/no-data/no-data.component";
     EntryItemComponent,
     EditorComponent,
     BadgeComponent,
-    NoDataComponent
+    NoDataComponent,
+    ToolbarContentComponent,
+    ToolbarButtonComponent,
+    FabGroupComponent
   ]
 })
 export class CommonModule {}

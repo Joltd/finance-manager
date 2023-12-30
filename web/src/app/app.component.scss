@@ -14,8 +14,8 @@
 
 .loading {
   background-color: #00000070;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   position: absolute;
   top: 0;
   z-index: 1;
@@ -28,22 +28,17 @@
   width: 100%;
 }
 
-.left-side-narrow {
-  width: 30em;
+.left-side-desktop {
+  width: 300px;
 }
 
 .content {
   background-color: #bdbdbd;
   width: 100%;
-  padding: 1em;
   box-sizing: border-box;
   overflow-x: hidden;
 }
 
-.content-wide {
-  padding: 1em calc((100vw - 40em)/2)!important;
-}
-
 .version {
-  font-size: .6em;
+  font-size: 8px;
 }
