@@ -35,9 +35,11 @@ import {
   OperationReviseBrowserComponent
 } from "./importexport/component/operation-revise-browser/operation-revise-browser.component";
 import { EntityBrowserComponent } from "./entity/component/entity-browser/entity-browser.component";
+import { EntityListComponent } from "./entity/component/entity-list/entity-list.component";
 
 const routes: Routes = [
-  { path: 'entity', component: EntityBrowserComponent },
+  { path: 'entity', component: EntityListComponent },
+  { path: 'entity/:name', component: EntityBrowserComponent },
   { path: 'currency', component: CurrencyBrowserComponent },
   { path: 'currency/:id', component: CurrencyEditorComponent },
   { path: 'account', component: AccountBrowserComponent },

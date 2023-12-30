@@ -21,15 +21,15 @@ export class AppComponent implements OnInit {
     private loadingService: LoadingService,
     public settingsService: SettingsService,
     public toolbarService: ToolbarService,
-    private currencyService: CurrencyService
+    private currencyService: CurrencyService,
   ) {}
 
   ngOnInit(): void {
     this.loadingService.onLoading.subscribe(result => {
       setTimeout(() => this.loading = result)
     })
-    // lastValueFrom(this.settingsService.load()).then()
-    // lastValueFrom(this.currencyService.load()).then()
+    lastValueFrom(this.settingsService.load()).then()
+    lastValueFrom(this.currencyService.load()).then()
   }
 
 }

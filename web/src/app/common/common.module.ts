@@ -28,6 +28,7 @@ import {NoDataComponent} from "./component/no-data/no-data.component";
 import { ToolbarContentComponent } from "./component/toolbar-content/toolbar-content.component";
 import { ToolbarButtonComponent } from "./component/toolbar-button/toolbar-button.component";
 import { FabGroupComponent } from "./component/fab-group/fab-group.component";
+import { IfHasDataDirective } from "./component/if-has-data/if-has-data.directive";
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { FabGroupComponent } from "./component/fab-group/fab-group.component";
     NoDataComponent,
     ToolbarContentComponent,
     ToolbarButtonComponent,
-    FabGroupComponent
+    FabGroupComponent,
+    IfHasDataDirective
   ],
   imports: [
     ReactiveFormsModule,
@@ -82,7 +84,8 @@ import { FabGroupComponent } from "./component/fab-group/fab-group.component";
     NoDataComponent,
     ToolbarContentComponent,
     ToolbarButtonComponent,
-    FabGroupComponent
+    FabGroupComponent,
+    IfHasDataDirective
   ]
 })
 export class CommonModule {}

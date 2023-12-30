@@ -1,10 +1,28 @@
+<toolbar-content>
+  <toolbar-button name="Filter" icon="filter_alt" (click)="openFilter()"></toolbar-button>
+  <toolbar-button name="Sort" icon="sort" (click)="openSort()"></toolbar-button>
+</toolbar-content>
 
-<!--<toolbar-content>-->
-<!--  <toolbar-button name="Test#1" icon="add" (click)="onFirst()"></toolbar-button>-->
-<!--  <toolbar-button name="Test#2" icon="home" (click)="onSecond()"></toolbar-button>-->
-<!--</toolbar-content>-->
+<mat-action-list *ifHasData="entities.length > 0">
+  <button
+    mat-list-item
+    (click)="openEntityAction()"
+    *ngFor="let value of page.values"
+  >
+    <entity-label [entity]="entity" [value]="value"></entity-label>
+  </button>
+</mat-action-list>
 
-<!--<fab-group>-->
+<ng-template>
+  <no-data></no-data>
+</ng-template>
+
+<entry-select>
+  <entry-item (select)="edit()">Edit</entry-item>
+  <entry-item (select)="delete()">Delete</entry-item>
+</entry-select>
+
+<fab-group>
 <!--  <button mat-mini-fab (click)="onFirst()"><mat-icon>add</mat-icon></button>-->
-<!--  <button mat-fab (click)="onSecond()"><mat-icon>home</mat-icon></button>-->
-<!--</fab-group>-->
+  <button mat-fab (click)="add()"><mat-icon>add</mat-icon></button>
+</fab-group>
