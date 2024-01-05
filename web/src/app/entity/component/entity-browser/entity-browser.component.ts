@@ -1,7 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { EntityService } from "../../service/entity.service";
 import { ActivatedRoute } from "@angular/router";
-import { Entity, EntityPage } from "../../model/entity";
+import { PageEvent } from "@angular/material/paginator";
+import { firstValueFrom } from "rxjs";
+import { ArrayDataSource } from "@angular/cdk/collections";
 
 @Component({
   selector: 'entity-browser',
@@ -10,37 +12,44 @@ import { Entity, EntityPage } from "../../model/entity";
 })
 export class EntityBrowserComponent implements OnInit {
 
-  entities: Entity[] = []
-  entity!: Entity
-  page: EntityPage = {
-    total: 0,
+  fields: string[] = []
+  page = {
     page: 0,
     size: 20,
-    values: []
+    total: 0
   }
+  dataSource: ArrayDataSource<any> = new ArrayDataSource<any>([])
+  hasData: boolean = false
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private entityService: EntityService
-  ) {
-    this.entityService.entityList()
-      .subscribe(result => {
-        this.entities = result
-        this.activatedRoute.params.subscribe(params => {
-          let name = params['name']
-          this.entity = this.entities.find(entity => entity.name == name)!
-          this.entityService.list(name)
-            .subscribe(result => this.page = result)
-        })
-      })
-  }
+    public entityService: EntityService
+  ) {}
 
   ngOnInit(): void {
-    this.load()
+    this.onInit().then()
   }
 
-  load() {
+  private async onInit() {
+    let params = await firstValueFrom(this.activatedRoute.params)
+    await this.entityService.setEntity(params['name'])
+    this.fields = this.entityService.entity.fields.map(field => field.name)
+    await this.load()
+  }
 
+  onPage(event: PageEvent) {
+    this.load(event.pageIndex, event.pageSize).then()
+  }
+
+  private async load(page: number | null = null, size: number | null = null) {
+    await this.entityService.load(page, size)
+    this.page = {
+      page: this.entityService.page.page,
+      size: this.entityService.page.size,
+      total: this.entityService.page.total
+    }
+    this.hasData = this.entityService.page.values.length > 0
+    this.dataSource = new ArrayDataSource<any>(this.entityService.page.values)
   }
 
   openFilter() {

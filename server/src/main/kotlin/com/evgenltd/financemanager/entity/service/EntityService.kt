@@ -56,7 +56,7 @@ class EntityService(
             .map { toRecord(type, it) }
 
         return EntityPage(
-            total = 0L,
+            total = 10000L,
             page = filter.page,
             size = filter.size,
             values = result

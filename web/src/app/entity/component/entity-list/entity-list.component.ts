@@ -13,13 +13,17 @@ export class EntityListComponent implements OnInit {
   entities: Entity[] = []
 
   constructor(
-    public entityService: EntityService,
+    private entityService: EntityService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.entityService.entityList()
-      .subscribe(result => this.entities = result)
+    this.onInit().then()
+  }
+
+  private async onInit() {
+    await this.entityService.entityLoad()
+    this.entities = this.entityService.entities
   }
 
   openEntity(entity: Entity) {
