@@ -1,0 +1,81 @@
+<toolbar-content>
+  <toolbar-button name="Save" icon="done" (click)="save()"></toolbar-button>
+  <toolbar-button name="Close" icon="close" (click)="close()"></toolbar-button>
+</toolbar-content>
+
+@if (form) {
+  <form [formGroup]="form">
+    @for (field of entity().fields; track field.name) {
+
+      @switch (field.type) {
+
+        @case ('ID') {
+          @if (!isNew) {
+            <mat-form-field>
+              <mat-label>{{field.name}}</mat-label>
+              <input matInput [formControlName]="field.name">
+            </mat-form-field>
+          }
+        }
+
+        @case ('STRING') {
+          <mat-form-field>
+            <mat-label>{{field.name}}</mat-label>
+            <input matInput [formControlName]="field.name">
+          </mat-form-field>
+        }
+
+        @case ('NUMBER') {
+          <mat-form-field>
+            <mat-label>{{field.name}}</mat-label>
+            <input matInput type="number" [formControlName]="field.name">
+          </mat-form-field>
+        }
+
+        @case ('BOOLEAN') {
+          <mat-slide-toggle class="toggle" [formControlName]="field.name">{{field.name}}</mat-slide-toggle>
+        }
+
+        @case ('DATE') {
+          <mat-form-field>
+            <mat-label>{{field.name}}</mat-label>
+            <input matInput [formControlName]="field.name" [matDatepicker]="picker" readonly (click)="picker.open()">
+            <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+          </mat-form-field>
+        }
+
+        @case ('AMOUNT') {
+          <mat-form-field>
+            <mat-label>{{field.name}}</mat-label>
+            <amount-input [formControlName]="field.name"></amount-input>
+          </mat-form-field>
+        }
+
+        @case ('ENUM') {
+          <mat-form-field>
+            <mat-label>{{field.name}}</mat-label>
+            <mat-select [formControlName]="field.name">
+              <mat-option *ngFor="let option of field.enumConstants" [value]="option">{{option}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        }
+
+        @case ('REFERENCE') {
+          <mat-form-field>
+            <mat-label>{{field.name}}</mat-label>
+            <reference-input
+              [api]="'/entity/' + field.referenceName + '/reference'"
+              [formControlName]="field.name"
+            ></reference-input>
+          </mat-form-field>
+        }
+
+        @case ('JSON') {
+
+        }
+
+      }
+
+    }
+  </form>
+}

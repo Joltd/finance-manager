@@ -3,6 +3,8 @@ package com.evgenltd.financemanager.entity.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.entity.record.*
 import com.evgenltd.financemanager.reference.record.Reference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import jakarta.annotation.PostConstruct
 import jakarta.persistence.EntityManager
 import jakarta.persistence.metamodel.Attribute
@@ -20,7 +22,8 @@ import kotlin.reflect.full.memberProperties
 
 @Service
 class EntityService(
-    private val entityManager: EntityManager
+    private val entityManager: EntityManager,
+    private val mapper: ObjectMapper,
 ) {
 
     private lateinit var entities: List<EntityRecord>
@@ -35,15 +38,24 @@ class EntityService(
 
     fun entityList(): List<EntityRecord> = entities.sortedBy { it.name }
 
-    fun list(name: String, request: EntityListRequest): EntityListPage {
-        val type = entityManager.metamodel
-            .entities
-            .first { it.name == name }
+    fun referenceList(name: String, mask: String?, id: UUID?): List<Reference> {
         val entity = entities.first { it.name == name }
 
         val cb = entityManager.criteriaBuilder
         val query = cb.createQuery()
-        val root = query.from(type)
+        val root = query.from(entity.type)
+
+        return entityManager.createQuery(query)
+            .resultList
+            .map { toReferenceValue(it) }
+    }
+
+    fun list(name: String, request: EntityListRequest): EntityListPage {
+        val entity = entities.first { it.name == name }
+
+        val cb = entityManager.criteriaBuilder
+        val query = cb.createQuery()
+        val root = query.from(entity.type)
 
         val sort = request.sort
             .map {
@@ -58,7 +70,7 @@ class EntityService(
         }
 
         val countQuery = cb.createQuery(Long::class.java)
-        countQuery.select(cb.count(countQuery.from(type)))
+        countQuery.select(cb.count(countQuery.from(entity.type)))
 //        countQuery.where()
         if (sort.isNotEmpty()) {
             query.orderBy(sort)
@@ -69,7 +81,7 @@ class EntityService(
             .setFirstResult(request.page * request.size)
             .setMaxResults(request.size)
             .resultList
-            .map { toRecord(type, entity, it) }
+            .map { toRecord(entity, it) }
 
         return EntityListPage(
             total = count,
@@ -79,23 +91,70 @@ class EntityService(
         )
     }
 
-    fun byId() {
+    fun byId(name: String, id: UUID): Map<String,Any?> {
+        val entity = entities.first { it.name == name }
 
+        val cb = entityManager.criteriaBuilder
+        val query = cb.createQuery()
+        val root = query.from(entity.type)
+        query.where(cb.equal(root.get<Any>("id"), id))
+
+        return entityManager.createQuery(query)
+            .singleResult
+            .let { toRecord(entity, it) }
     }
 
-    fun update() {
+    @Transactional
+    fun update(name: String, value: String) {
+        val entity = entities.first { it.name == name }
 
+        val valueNode = mapper.readTree(value)
+        val entityValue = entity.type.javaType.getDeclaredConstructor().newInstance()
+
+        var isNew = false
+        for (field in entity.fields) {
+
+            if (!valueNode.has(field.name)) {
+                continue
+            }
+
+            var fieldValueNode = valueNode.get(field.name)
+            val declaredField = entity.type.javaType.getDeclaredField(field.name)
+            declaredField.trySetAccessible()
+
+            if (fieldValueNode.isNull) {
+                declaredField.set(entityValue, null)
+                if (field.type == EntityFieldType.ID) {
+                    isNew = true
+                }
+                continue
+            }
+
+            if (field.type == EntityFieldType.REFERENCE) {
+                val reference = mapper.treeToValue<Reference>(fieldValueNode)
+                val referenceValue = entityManager.find(field.attribute.javaType, reference.id)
+                declaredField.set(entityValue, referenceValue)
+                continue
+            }
+
+            declaredField.set(entityValue, mapper.treeToValue(fieldValueNode, field.attribute.javaType))
+        }
+
+        if (isNew) {
+            entityManager.persist(entityValue)
+        } else {
+            entityManager.merge(entityValue)
+        }
     }
 
     @Transactional
     fun delete(name: String, id: UUID) {
-        val type = entityManager.metamodel.entities.first { it.name == name }
+        val entity = entities.first { it.name == name }
         val cb = entityManager.criteriaBuilder
-        cb.createQuery()
-            .let { it.where(cb.equal(it.from(type.javaType).get<UUID>("id"), id)) }
-            .let { entityManager.createQuery(it) }
-            .singleResult
-            .let { entityManager.remove(it) }
+        val query = cb.createCriteriaDelete(entity.type.javaType as Class<Any>)
+        val root = query.from(entity.type.javaType as Class<Any>)
+        query.where(cb.equal(root.get<Any>("id"), id))
+        entityManager.createQuery(query).executeUpdate()
     }
 
 //    private fun qwe(field: String, root: Root<*>, cb: CriteriaBuilder, operator: Operator, value: Any): Predicate {
@@ -117,14 +176,11 @@ class EntityService(
 //        }
 //    }
 
-    private fun toRecord(type: EntityType<*>, entity: EntityRecord, value: Any): Map<String,Any?> {
-        val fields = entity.fields.associateBy { it.name }
-        return type.singularAttributes
-            .associate { it.name to toValue(it, fields[it.name]!!, value) }
-    }
+    private fun toRecord(entity: EntityRecord, value: Any): Map<String,Any?> = entity.fields
+        .associate { it.name to toValue(it, value) }
 
-    private fun toValue(attribute: SingularAttribute<*,*>, field: EntityFieldRecord, value: Any): Any? {
-        val attributeField = attribute.javaMember as Field
+    private fun toValue(field: EntityFieldRecord, value: Any): Any? {
+        val attributeField = field.attribute.javaMember as Field
         if (field.type == EntityFieldType.REFERENCE) {
             val referenceValue = attributeField.get(value)
             return toReferenceValue(referenceValue)
@@ -136,14 +192,17 @@ class EntityService(
     private fun toReferenceValue(value: Any): Reference {
         val properties = value::class.memberProperties
         val id = properties.first { it.name == "id" }.getter.call(value)
+        val name = (properties.firstOrNull { it.name == "name" }?.getter?.call(value) ?: id).toString()
+        val deleted = (properties.firstOrNull { it.name == "deleted" }?.getter?.call(value) ?: false) as Boolean
         return Reference(
             id = id as UUID,
-            name = (properties.firstOrNull { it.name == "name" }?.getter?.call(value) ?: id).toString(),
-            deleted = false
+            name = name,
+            deleted = deleted
         )
     }
 
     private fun toEntity(type: EntityType<*>): EntityRecord = EntityRecord(
+        type,
         type.name,
         type.name,
         type.attributes
@@ -154,6 +213,7 @@ class EntityService(
     private fun toField(attribute: SingularAttribute<*,*>): EntityFieldRecord {
         if (attribute.isId) {
             return EntityFieldRecord(
+                attribute = attribute,
                 name = attribute.name,
                 type = EntityFieldType.ID,
                 nullable = false,
@@ -161,8 +221,20 @@ class EntityService(
         }
 
         if (attribute.persistentAttributeType == Attribute.PersistentAttributeType.BASIC) {
+
             val attributeType = attribute.javaType
             val attributeField = attribute.javaMember as? Field
+
+            if (attributeType.isEnum) {
+                return EntityFieldRecord(
+                    attribute = attribute,
+                    name = attribute.name,
+                    type = EntityFieldType.ENUM,
+                    nullable = attribute.isOptional,
+                    enumConstants = attributeType.enumConstants.toList()
+                )
+            }
+
             val type = if (attributeType in listOf(String::class.java, UUID::class.java)) {
                 EntityFieldType.STRING
             } else if (attributeType in listOf(Long::class.java, Int::class.java, BigDecimal::class.java, Double::class.java, Float::class.java)) {
@@ -171,8 +243,6 @@ class EntityService(
                 EntityFieldType.BOOLEAN
             } else if (attributeType == LocalDate::class.java) {
                 EntityFieldType.DATE
-            } else if (attributeType.isEnum) {
-                EntityFieldType.ENUM
             } else if (attributeField?.getDeclaredAnnotation(JdbcTypeCode::class.java)?.value == SqlTypes.JSON) {
                 EntityFieldType.JSON
             } else {
@@ -180,6 +250,7 @@ class EntityService(
             }
 
             return EntityFieldRecord(
+                attribute = attribute,
                 name = attribute.name,
                 type = type,
                 nullable = attribute.isOptional,
@@ -188,6 +259,7 @@ class EntityService(
 
         if (attribute.persistentAttributeType == Attribute.PersistentAttributeType.MANY_TO_ONE) {
             return EntityFieldRecord(
+                attribute = attribute,
                 name = attribute.name,
                 type = EntityFieldType.REFERENCE,
                 nullable = attribute.isOptional,
@@ -198,6 +270,7 @@ class EntityService(
         if (attribute.persistentAttributeType == Attribute.PersistentAttributeType.EMBEDDED) {
             if (attribute.javaType == Amount::class.java) {
                 return EntityFieldRecord(
+                    attribute = attribute,
                     name = attribute.name,
                     type = EntityFieldType.AMOUNT,
                     nullable = attribute.isOptional,

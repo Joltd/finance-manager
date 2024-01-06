@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { EntityService } from "../../service/entity.service";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { PageEvent } from "@angular/material/paginator";
 import { firstValueFrom } from "rxjs";
 import { ArrayDataSource } from "@angular/cdk/collections";
@@ -16,7 +16,6 @@ import { Entity } from "../../model/entity";
 })
 export class EntityBrowserComponent implements OnInit {
 
-  entity!: Entity
   fieldNames: string[] = []
   page = {
     page: 0,
@@ -30,7 +29,8 @@ export class EntityBrowserComponent implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private entityService: EntityService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -40,9 +40,12 @@ export class EntityBrowserComponent implements OnInit {
   private async onInit() {
     let params = await firstValueFrom(this.activatedRoute.params)
     await this.entityService.setEntity(params['name'])
-    this.entity = this.entityService.entity
     this.fieldNames = this.entityService.entity.fields.map(field => field.name)
     await this.load()
+  }
+
+  entity(): Entity {
+    return this.entityService.entity
   }
 
   onPage(event: PageEvent) {
@@ -88,11 +91,11 @@ export class EntityBrowserComponent implements OnInit {
   }
 
   add() {
-
+    this.router.navigate(['entity', this.entity().name, 'new']).then()
   }
 
   edit() {
-
+    this.router.navigate(['entity', this.entity().name, this.currentValue.id]).then()
   }
 
   delete() {

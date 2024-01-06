@@ -4,12 +4,8 @@ import com.evgenltd.financemanager.entity.record.EntityListRequest
 import com.evgenltd.financemanager.entity.record.EntityListPage
 import com.evgenltd.financemanager.entity.record.EntityRecord
 import com.evgenltd.financemanager.entity.service.EntityService
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import com.evgenltd.financemanager.reference.record.Reference
+import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
@@ -20,11 +16,29 @@ class EntityController(
     @GetMapping("/entity")
     fun entityList(): List<EntityRecord> = entityService.entityList()
 
-    @PostMapping("/entity/{name}")
+    @GetMapping("/entity/{name}/reference")
+    fun references(
+        @PathVariable name: String,
+        @RequestParam("mask", required = false) mask: String?,
+        @RequestParam("id", required = false) id: UUID?
+    ): List<Reference> = entityService.referenceList(name, mask, id)
+
+    @PostMapping("/entity/{name}/list")
     fun list(
         @PathVariable name: String,
         @RequestBody filter: EntityListRequest
     ): EntityListPage = entityService.list(name, filter)
+
+    @GetMapping("/entity/{name}/{id}")
+    fun byId(
+        @PathVariable name: String,
+        @PathVariable id: UUID
+    ): Map<String,Any?> = entityService.byId(name, id)
+
+    @PostMapping("/entity/{name}")
+    fun update(@PathVariable name: String, @RequestBody value: String) {
+        entityService.update(name, value)
+    }
 
     @DeleteMapping("/entity/{name}/{id}")
     fun delete(

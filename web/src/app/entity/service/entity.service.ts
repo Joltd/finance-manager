@@ -46,7 +46,15 @@ export class EntityService {
       size: this.page.size,
       sort: this.sort,
     }
-    return this.http.post<EntityPage>('/entity/' + this.entity.name, request)
+    return this.http.post<EntityPage>('/entity/' + this.entity.name + '/list', request)
+  }
+
+  byId(id: string): Observable<any> {
+    return this.http.get('/entity/' + this.entity.name + '/' + id)
+  }
+
+  update(value: any): Observable<void> {
+    return this.http.post<void>('/entity/' + this.entity.name, value)
   }
 
   delete(id: any): Observable<void> {

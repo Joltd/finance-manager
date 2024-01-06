@@ -15,13 +15,15 @@ import { MatDialogActions, MatDialogContent } from "@angular/material/dialog";
 import { MatSelectModule } from "@angular/material/select";
 import { EntityFilterInputComponent } from "./component/entity-filter-input/entity-filter-input.component";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatInputModule } from "@angular/material/input";
 import { EntityFilterConditionComponent } from "./component/entity-filter-condition/entity-filter-condition.component";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { RouterLink } from "@angular/router";
 import { MatSortModule } from "@angular/material/sort";
 import { MatRippleModule } from "@angular/material/core";
+import { EntityEditorComponent } from "./component/entity-editor/entity-editor.component";
+import { MatDatepickerModule } from "@angular/material/datepicker";
 
 @NgModule({
   declarations: [
@@ -31,7 +33,8 @@ import { MatRippleModule } from "@angular/material/core";
     EntityFilterComponent,
     EntityFilterConditionComponent,
     EntityFilterInputComponent,
-    EntitySortComponent
+    EntitySortComponent,
+    EntityEditorComponent
   ],
   imports: [
     CommonModule,
@@ -51,7 +54,9 @@ import { MatRippleModule } from "@angular/material/core";
     MatTooltipModule,
     RouterLink,
     MatSortModule,
-    MatRippleModule
+    MatRippleModule,
+    MatDatepickerModule,
+    ReactiveFormsModule
   ],
   providers: [],
   exports: [
@@ -61,7 +66,8 @@ import { MatRippleModule } from "@angular/material/core";
     EntityFilterComponent,
     EntityFilterConditionComponent,
     EntityFilterInputComponent,
-    EntitySortComponent
+    EntitySortComponent,
+    EntityEditorComponent
   ]
 })
 export class EntityModule {}

@@ -4,13 +4,14 @@ export interface Entity {
   fields: EntityField[]
 }
 
-type EntityFieldType = 'ID' | 'STRING' | 'NUMBER' | 'BOOLEAN' | 'DATE' | 'AMOUNT' | 'REFERENCE' | 'JSON'
+type EntityFieldType = 'ID' | 'STRING' | 'NUMBER' | 'BOOLEAN' | 'DATE' | 'AMOUNT' | 'ENUM' | 'REFERENCE' | 'JSON'
 
 export interface EntityField {
   name: string
   type: EntityFieldType
   nullable: boolean
   referenceName: string | null
+  enumConstants: string[]
 }
 
 export interface EntityPage {
