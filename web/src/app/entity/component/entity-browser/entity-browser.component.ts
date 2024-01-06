@@ -7,7 +7,7 @@ import { ArrayDataSource } from "@angular/cdk/collections";
 import { MatDialog } from "@angular/material/dialog";
 import { EntityFilterComponent } from "../entity-filter/entity-filter.component";
 import { EntitySortComponent } from "../entity-sort/entity-sort.component";
-import { Entity, EntityField } from "../../model/entity";
+import { Entity } from "../../model/entity";
 
 @Component({
   selector: 'entity-browser',
@@ -25,6 +25,7 @@ export class EntityBrowserComponent implements OnInit {
   }
   dataSource: ArrayDataSource<any> = new ArrayDataSource<any>([])
   hasData: boolean = false
+  currentValue: any = null
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -45,11 +46,26 @@ export class EntityBrowserComponent implements OnInit {
   }
 
   onPage(event: PageEvent) {
-    this.load(event.pageIndex, event.pageSize).then()
+    this.entityService.page.page = event.pageIndex
+    this.entityService.page.size = event.pageSize
+    this.load().then()
   }
 
-  private async load(page: number | null = null, size: number | null = null) {
-    await this.entityService.load(page, size)
+  onSort(event: any) {
+    this.entityService.sort = []
+    if (event.direction != '') {
+      this.entityService.sort = [
+        {
+          field: event.active,
+          direction: event.direction.toUpperCase()
+        }
+      ]
+    }
+    this.load().then()
+  }
+
+  private async load() {
+    await this.entityService.load()
     this.page = {
       page: this.entityService.page.page,
       size: this.entityService.page.size,
@@ -71,10 +87,6 @@ export class EntityBrowserComponent implements OnInit {
       .subscribe(() => this.load())
   }
 
-  openEntityAction() {
-
-  }
-
   add() {
 
   }
@@ -84,7 +96,8 @@ export class EntityBrowserComponent implements OnInit {
   }
 
   delete() {
-
+    this.entityService.delete(this.currentValue.id)
+      .subscribe(() => this.load().then())
   }
 
 }

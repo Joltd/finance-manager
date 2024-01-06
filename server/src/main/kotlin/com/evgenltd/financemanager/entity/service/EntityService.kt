@@ -2,21 +2,16 @@ package com.evgenltd.financemanager.entity.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.entity.record.*
-import com.evgenltd.financemanager.operation.entity.Operation
-import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.record.Reference
 import jakarta.annotation.PostConstruct
 import jakarta.persistence.EntityManager
-import jakarta.persistence.criteria.CriteriaBuilder
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Predicate
-import jakarta.persistence.criteria.Root
 import jakarta.persistence.metamodel.Attribute
 import jakarta.persistence.metamodel.EntityType
 import jakarta.persistence.metamodel.SingularAttribute
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.lang.reflect.Field
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -40,7 +35,7 @@ class EntityService(
 
     fun entityList(): List<EntityRecord> = entities.sortedBy { it.name }
 
-    fun list(name: String, filter: EntityFilter): EntityPage {
+    fun list(name: String, request: EntityListRequest): EntityListPage {
         val type = entityManager.metamodel
             .entities
             .first { it.name == name }
@@ -50,7 +45,7 @@ class EntityService(
         val query = cb.createQuery()
         val root = query.from(type)
 
-        val sort = filter.sort
+        val sort = request.sort
             .map {
                 when (it.direction) {
                     SortDirection.ASC -> cb.asc(root.get<Any>(it.field))
@@ -71,15 +66,15 @@ class EntityService(
         val count = entityManager.createQuery(countQuery).singleResult
 
         val result = entityManager.createQuery(query)
-            .setFirstResult(filter.page * filter.size)
-            .setMaxResults(filter.size)
+            .setFirstResult(request.page * request.size)
+            .setMaxResults(request.size)
             .resultList
             .map { toRecord(type, entity, it) }
 
-        return EntityPage(
+        return EntityListPage(
             total = count,
-            page = filter.page,
-            size = filter.size,
+            page = request.page,
+            size = request.size,
             values = result
         )
     }
@@ -92,8 +87,15 @@ class EntityService(
 
     }
 
-    fun delete() {
-
+    @Transactional
+    fun delete(name: String, id: UUID) {
+        val type = entityManager.metamodel.entities.first { it.name == name }
+        val cb = entityManager.criteriaBuilder
+        cb.createQuery()
+            .let { it.where(cb.equal(it.from(type.javaType).get<UUID>("id"), id)) }
+            .let { entityManager.createQuery(it) }
+            .singleResult
+            .let { entityManager.remove(it) }
     }
 
 //    private fun qwe(field: String, root: Root<*>, cb: CriteriaBuilder, operator: Operator, value: Any): Predicate {

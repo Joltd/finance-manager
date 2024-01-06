@@ -44,14 +44,14 @@ enum class SortDirection {
     DESC
 }
 
-data class EntityFilter(
+data class EntityListRequest(
     val page: Int = 0,
     val size: Int = 50,
     val filter: List<FilterRecord> = emptyList(),
     val sort: List<SortRecord> = emptyList(),
 )
 
-data class EntityPage(
+data class EntityListPage(
     val total: Long,
     val page: Int,
     val size: Int,

@@ -20,6 +20,11 @@ export interface EntityPage {
   values: any[]
 }
 
+export interface EntitySortEntry {
+  field: string
+  direction: 'ASC' | 'DESC'
+}
+
 export interface EntityFilterEntry {
   id: string
   field: string

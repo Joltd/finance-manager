@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Entity, EntityFilterEntry, EntityPage } from "../model/entity";
+import { Entity, EntityFilterEntry, EntityPage, EntitySortEntry } from "../model/entity";
 import { lastValueFrom, Observable } from "rxjs";
 
 @Injectable({
@@ -11,7 +11,7 @@ export class EntityService {
   entities: Entity[] = []
   entity!: Entity
   filter: EntityFilterEntry[] = []
-  sort: any[] = []
+  sort: EntitySortEntry[] = []
   page: EntityPage = {
     total: 0,
     page: 0,
@@ -32,20 +32,25 @@ export class EntityService {
     this.entity = this.entities.find(entity => entity.name == name)!
   }
 
-  async load(page: number | null, size: number | null) {
-    this.page = await lastValueFrom(this.list(
-      this.entity.name,
-      page != null ? page : this.page.page,
-      size != null ? size : this.page.size
-    ))
+  async load() {
+    this.page = await lastValueFrom(this.list())
   }
 
   private entityList(): Observable<Entity[]> {
     return this.http.get<Entity[]>('/entity')
   }
 
-  private list(name: string, page: number, size: number): Observable<EntityPage> {
-    return this.http.post<EntityPage>('/entity/' + name, { page, size })
+  private list(): Observable<EntityPage> {
+    let request = {
+      page: this.page.page,
+      size: this.page.size,
+      sort: this.sort,
+    }
+    return this.http.post<EntityPage>('/entity/' + this.entity.name, request)
+  }
+
+  delete(id: any): Observable<void> {
+    return this.http.delete<void>('/entity/' + this.entity.name + '/' + id)
   }
 
 }
