@@ -22,6 +22,7 @@ data class EntityFieldRecord(
     val name: String,
     val type: EntityFieldType,
     val nullable: Boolean = false,
+    val referenceName: String? = null,
 )
 
 enum class Operator {

@@ -1,9 +1,13 @@
 :host {
   display: flex;
+}
+
+.container {
+  display: flex;
   flex-direction: column;
   background-color: lightgrey;
-  border-radius: 1.6em;
-  padding: .4em 1em 0.4em 1em;
+  border-radius: 20px;
+  padding: 4px 10px;
 }
 
 .label {
@@ -13,7 +17,7 @@
 
 .value {
   white-space: nowrap;
-  max-width: 10em;
+  max-width: 70px;
   overflow: hidden;
   text-overflow: ellipsis;
 }

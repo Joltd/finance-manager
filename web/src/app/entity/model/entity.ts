@@ -10,6 +10,7 @@ export interface EntityField {
   name: string
   type: EntityFieldType
   nullable: boolean
+  referenceName: string | null
 }
 
 export interface EntityPage {

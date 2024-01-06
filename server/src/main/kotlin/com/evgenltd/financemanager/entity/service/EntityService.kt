@@ -38,7 +38,7 @@ class EntityService(
             .toList()
     }
 
-    fun entityList(): List<EntityRecord> = entities
+    fun entityList(): List<EntityRecord> = entities.sortedBy { it.name }
 
     fun list(name: String, filter: EntityFilter): EntityPage {
         val type = entityManager.metamodel
@@ -131,11 +131,15 @@ class EntityService(
         return attributeField.get(value)
     }
 
-    private fun toReferenceValue(value: Any): Reference = Reference(
-        id = value::class.memberProperties.first { it.name == "id" }.getter.call(value) as UUID,
-        name = value::class.memberProperties.first { it.name == "name" }.getter.call(value) as String,
-        deleted = false
-    )
+    private fun toReferenceValue(value: Any): Reference {
+        val properties = value::class.memberProperties
+        val id = properties.first { it.name == "id" }.getter.call(value)
+        return Reference(
+            id = id as UUID,
+            name = (properties.firstOrNull { it.name == "name" }?.getter?.call(value) ?: id).toString(),
+            deleted = false
+        )
+    }
 
     private fun toEntity(type: EntityType<*>): EntityRecord = EntityRecord(
         type.name,
@@ -185,6 +189,7 @@ class EntityService(
                 name = attribute.name,
                 type = EntityFieldType.REFERENCE,
                 nullable = attribute.isOptional,
+                referenceName = (attribute.type as? EntityType)?.name,
             )
         }
 

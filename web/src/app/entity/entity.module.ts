@@ -18,6 +18,8 @@ import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { FormsModule } from "@angular/forms";
 import { MatInputModule } from "@angular/material/input";
 import { EntityFilterConditionComponent } from "./component/entity-filter-condition/entity-filter-condition.component";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { RouterLink } from "@angular/router";
 
 @NgModule({
   declarations: [
@@ -29,22 +31,24 @@ import { EntityFilterConditionComponent } from "./component/entity-filter-condit
     EntityFilterInputComponent,
     EntitySortComponent
   ],
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatListModule,
-    NgForOf,
-    NgIf,
-    MatTableModule,
-    MatPaginatorModule,
-    MatDialogContent,
-    MatDialogActions,
-    MatSelectModule,
-    MatSlideToggleModule,
-    FormsModule,
-    MatInputModule
-  ],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        MatListModule,
+        NgForOf,
+        NgIf,
+        MatTableModule,
+        MatPaginatorModule,
+        MatDialogContent,
+        MatDialogActions,
+        MatSelectModule,
+        MatSlideToggleModule,
+        FormsModule,
+        MatInputModule,
+        MatTooltipModule,
+        RouterLink
+    ],
   providers: [],
   exports: [
     EntityListComponent,

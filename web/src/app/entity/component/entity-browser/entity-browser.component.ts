@@ -7,6 +7,7 @@ import { ArrayDataSource } from "@angular/cdk/collections";
 import { MatDialog } from "@angular/material/dialog";
 import { EntityFilterComponent } from "../entity-filter/entity-filter.component";
 import { EntitySortComponent } from "../entity-sort/entity-sort.component";
+import { Entity, EntityField } from "../../model/entity";
 
 @Component({
   selector: 'entity-browser',
@@ -15,7 +16,8 @@ import { EntitySortComponent } from "../entity-sort/entity-sort.component";
 })
 export class EntityBrowserComponent implements OnInit {
 
-  fields: string[] = []
+  entity!: Entity
+  fieldNames: string[] = []
   page = {
     page: 0,
     size: 20,
@@ -37,7 +39,8 @@ export class EntityBrowserComponent implements OnInit {
   private async onInit() {
     let params = await firstValueFrom(this.activatedRoute.params)
     await this.entityService.setEntity(params['name'])
-    this.fields = this.entityService.entity.fields.map(field => field.name)
+    this.entity = this.entityService.entity
+    this.fieldNames = this.entityService.entity.fields.map(field => field.name)
     await this.load()
   }
 
