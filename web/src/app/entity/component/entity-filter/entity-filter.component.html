@@ -1,3 +1,22 @@
-<fab-group>
-  <button mat-fab (click)="add()"><mat-icon>add</mat-icon></button>
-</fab-group>
+<div matDialogContent>
+  @for (entry of filters(); track entry.id) {
+    <div class="entry">
+      <mat-select [(value)]="entry.field" placeholder="Field">
+        @for (field of entity().fields; track field.name) {
+          <mat-option [value]="field.name">{{field.name}}</mat-option>
+        }
+      </mat-select>
+      <mat-select [(value)]="entry.operator" placeholder="Operator">
+        @for (operator of operators(); track operator.name) {
+          <mat-option [value]="operator.name">{{operator.label}}</mat-option>
+        }
+      </mat-select>
+      <entity-filter-input [(value)]="entry.value"></entity-filter-input>
+    </div>
+  }
+</div>
+<div matDialogActions>
+  <button mat-button (click)="add()">Add</button>
+  <button mat-button (click)="apply()">Apply</button>
+  <button mat-button (click)="close()">Close</button>
+</div>

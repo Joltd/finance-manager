@@ -11,6 +11,13 @@ import { MatTableModule } from "@angular/material/table";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { EntityFilterComponent } from "./component/entity-filter/entity-filter.component";
 import { EntitySortComponent } from "./component/entity-sort/entity-sort.component";
+import { MatDialogActions, MatDialogContent } from "@angular/material/dialog";
+import { MatSelectModule } from "@angular/material/select";
+import { EntityFilterInputComponent } from "./component/entity-filter-input/entity-filter-input.component";
+import { MatSlideToggleModule } from "@angular/material/slide-toggle";
+import { FormsModule } from "@angular/forms";
+import { MatInputModule } from "@angular/material/input";
+import { EntityFilterConditionComponent } from "./component/entity-filter-condition/entity-filter-condition.component";
 
 @NgModule({
   declarations: [
@@ -18,6 +25,8 @@ import { EntitySortComponent } from "./component/entity-sort/entity-sort.compone
     EntityBrowserComponent,
     EntityLabelComponent,
     EntityFilterComponent,
+    EntityFilterConditionComponent,
+    EntityFilterInputComponent,
     EntitySortComponent
   ],
   imports: [
@@ -28,7 +37,13 @@ import { EntitySortComponent } from "./component/entity-sort/entity-sort.compone
     NgForOf,
     NgIf,
     MatTableModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatDialogContent,
+    MatDialogActions,
+    MatSelectModule,
+    MatSlideToggleModule,
+    FormsModule,
+    MatInputModule
   ],
   providers: [],
   exports: [
@@ -36,6 +51,8 @@ import { EntitySortComponent } from "./component/entity-sort/entity-sort.compone
     EntityBrowserComponent,
     EntityLabelComponent,
     EntityFilterComponent,
+    EntityFilterConditionComponent,
+    EntityFilterInputComponent,
     EntitySortComponent
   ]
 })

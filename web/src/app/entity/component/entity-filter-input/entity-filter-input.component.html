@@ -1,0 +1,11 @@
+@switch (type) {
+  @case ('boolean') {
+    <mat-slide-toggle [(ngModel)]="value"></mat-slide-toggle>
+  }
+  @case ('number') {
+    <input matInput [(ngModel)]="value" type="number">
+  }
+  @case ('string') {
+    <input matInput [(ngModel)]="value" type="text">
+  }
+}

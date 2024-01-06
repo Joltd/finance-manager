@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Entity, EntityPage } from "../model/entity";
+import { Entity, EntityFilterEntry, EntityPage } from "../model/entity";
 import { lastValueFrom, Observable } from "rxjs";
-import { ArrayDataSource } from "@angular/cdk/collections";
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +10,8 @@ export class EntityService {
 
   entities: Entity[] = []
   entity!: Entity
+  filter: EntityFilterEntry[] = []
+  sort: any[] = []
   page: EntityPage = {
     total: 0,
     page: 0,

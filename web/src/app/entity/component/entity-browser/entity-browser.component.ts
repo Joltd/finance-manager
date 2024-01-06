@@ -4,6 +4,9 @@ import { ActivatedRoute } from "@angular/router";
 import { PageEvent } from "@angular/material/paginator";
 import { firstValueFrom } from "rxjs";
 import { ArrayDataSource } from "@angular/cdk/collections";
+import { MatDialog } from "@angular/material/dialog";
+import { EntityFilterComponent } from "../entity-filter/entity-filter.component";
+import { EntitySortComponent } from "../entity-sort/entity-sort.component";
 
 @Component({
   selector: 'entity-browser',
@@ -23,7 +26,8 @@ export class EntityBrowserComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    public entityService: EntityService
+    private entityService: EntityService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -53,11 +57,15 @@ export class EntityBrowserComponent implements OnInit {
   }
 
   openFilter() {
-
+    this.dialog.open(EntityFilterComponent)
+      .afterClosed()
+      .subscribe(() => this.load())
   }
 
   openSort() {
-
+    this.dialog.open(EntitySortComponent)
+      .afterClosed()
+      .subscribe(() => this.load())
   }
 
   openEntityAction() {
