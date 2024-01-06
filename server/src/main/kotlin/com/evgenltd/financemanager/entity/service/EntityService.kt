@@ -18,6 +18,8 @@ import java.lang.reflect.Field
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberProperties
 
 @Service
@@ -201,16 +203,19 @@ class EntityService(
         )
     }
 
-    private fun toEntity(type: EntityType<*>): EntityRecord = EntityRecord(
-        type,
-        type.name,
-        type.name,
-        type.attributes
-            .mapNotNull { it as? SingularAttribute }
-            .map { toField(it) }
-    )
+    private fun toEntity(type: EntityType<*>): EntityRecord {
+        val fields = type.javaType.kotlin.declaredMemberProperties.associateBy { it.name }
+        return EntityRecord(
+            type,
+            type.name,
+            type.name,
+            type.attributes
+                .mapNotNull { it as? SingularAttribute }
+                .map { toField(it, fields[it.name]!!) }
+        )
+    }
 
-    private fun toField(attribute: SingularAttribute<*,*>): EntityFieldRecord {
+    private fun toField(attribute: SingularAttribute<*, *>, field: KProperty1<out Any, *>): EntityFieldRecord {
         if (attribute.isId) {
             return EntityFieldRecord(
                 attribute = attribute,
@@ -230,7 +235,7 @@ class EntityService(
                     attribute = attribute,
                     name = attribute.name,
                     type = EntityFieldType.ENUM,
-                    nullable = attribute.isOptional,
+                    nullable = field.returnType.isMarkedNullable,
                     enumConstants = attributeType.enumConstants.toList()
                 )
             }
@@ -253,7 +258,7 @@ class EntityService(
                 attribute = attribute,
                 name = attribute.name,
                 type = type,
-                nullable = attribute.isOptional,
+                nullable = field.returnType.isMarkedNullable,
             )
         }
 
@@ -262,7 +267,7 @@ class EntityService(
                 attribute = attribute,
                 name = attribute.name,
                 type = EntityFieldType.REFERENCE,
-                nullable = attribute.isOptional,
+                nullable = field.returnType.isMarkedNullable,
                 referenceName = (attribute.type as? EntityType)?.name,
             )
         }
@@ -273,7 +278,7 @@ class EntityService(
                     attribute = attribute,
                     name = attribute.name,
                     type = EntityFieldType.AMOUNT,
-                    nullable = attribute.isOptional,
+                    nullable = field.returnType.isMarkedNullable,
                 )
             }
         }

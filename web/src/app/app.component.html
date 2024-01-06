@@ -2,7 +2,11 @@
   <button mat-icon-button (click)="left.toggle()"><mat-icon>menu</mat-icon></button>
   <a class="app-title" href="/">{{toolbarService.title}}</a>
   <span class="spacer"></span>
-  <button mat-icon-button *ngFor="let command of toolbarService.commands" (click)="command.action()"><mat-icon>{{command.icon}}</mat-icon></button>
+  @for (command of toolbarService.commands; track command.name) {
+    <button mat-icon-button (click)="command.action()" [disabled]="command.disabled">
+      <mat-icon>{{command.icon}}</mat-icon>
+    </button>
+  }
 </mat-toolbar>
 <mat-sidenav-container>
   <mat-sidenav #left position="start" class="left-side" [class.left-side-desktop]="adaptiveService.desktop">

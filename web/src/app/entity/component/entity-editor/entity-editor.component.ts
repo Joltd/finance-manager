@@ -54,7 +54,6 @@ export class EntityEditorComponent implements OnInit {
 
   save() {
     if (!this.form?.valid) {
-      console.log('invalid')
       return
     }
     this.entityService.update(this.form?.getRawValue())
