@@ -35,8 +35,8 @@ export class EntityService {
   async load(page: number | null, size: number | null) {
     this.page = await lastValueFrom(this.list(
       this.entity.name,
-      page || this.page.page,
-      size || this.page.size
+      page != null ? page : this.page.page,
+      size != null ? size : this.page.size
     ))
   }
 

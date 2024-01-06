@@ -50,15 +50,25 @@ class EntityService(
         val query = cb.createQuery()
         val root = query.from(type)
 
-        filter.sort
+        val sort = filter.sort
             .map {
                 when (it.direction) {
                     SortDirection.ASC -> cb.asc(root.get<Any>(it.field))
                     SortDirection.DESC -> cb.desc(root.get<Any>(it.field))
                 }
             }
-            .takeIf { it.isNotEmpty() }
-            ?.let { query.orderBy(it) }
+
+        if (sort.isNotEmpty()) {
+            query.orderBy(sort)
+        }
+
+        val countQuery = cb.createQuery(Long::class.java)
+        countQuery.select(cb.count(countQuery.from(type)))
+//        countQuery.where()
+        if (sort.isNotEmpty()) {
+            query.orderBy(sort)
+        }
+        val count = entityManager.createQuery(countQuery).singleResult
 
         val result = entityManager.createQuery(query)
             .setFirstResult(filter.page * filter.size)
@@ -67,7 +77,7 @@ class EntityService(
             .map { toRecord(type, entity, it) }
 
         return EntityPage(
-            total = 10000L,
+            total = count,
             page = filter.page,
             size = filter.size,
             values = result
