@@ -1,22 +1,85 @@
 <div matDialogContent>
-  @for (entry of filters(); track entry.id) {
+  @for (condition of conditions; track condition.id) {
     <div class="entry">
-      <mat-select [(value)]="entry.field" placeholder="Field">
-        @for (field of entity().fields; track field.name) {
-          <mat-option [value]="field.name">{{field.name}}</mat-option>
-        }
-      </mat-select>
-      <mat-select [(value)]="entry.operator" placeholder="Operator">
-        @for (operator of operators(); track operator.name) {
-          <mat-option [value]="operator.name">{{operator.label}}</mat-option>
-        }
-      </mat-select>
-      <entity-filter-input [(value)]="entry.value"></entity-filter-input>
+
+      <mat-form-field>
+        <mat-label>Field</mat-label>
+        <mat-select [(ngModel)]="condition.field">
+          @for (field of fields; track field.name) {
+            <mat-option [value]="field">{{field.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (condition.field) {
+        <mat-form-field>
+          <mat-label>Operator</mat-label>
+          <mat-select [(ngModel)]="condition.operator">
+            @for (operator of getOperators(condition.field.type); track operator.operator) {
+              <mat-option [value]="operator.operator">{{operator.label}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      @if (isValueInputVisible(condition)) {
+
+        <mat-form-field>
+          <mat-label>Value</mat-label>
+
+          @if (isMultiselectInput(condition)) {
+
+            <mat-select [(ngModel)]="condition.value" multiple>
+              @if (condition.field.nullable) {
+                <mat-option [value]="null">Empty</mat-option>
+              }
+
+              @switch (condition.field.type) {
+                @case ('REFERENCE') {
+                  @for (reference of getReferences(condition.field.referenceName!!) | async; track reference.id) {
+                    <mat-option [value]="reference.id">{{reference.name}}</mat-option>
+                  }
+                }
+                @case ('ENUM') {
+                  @for (enumValue of condition.field.enumConstants; track enumValue) {
+                    <mat-option [value]="enumValue">{{enumValue}}</mat-option>
+                  }
+                }
+                @case ('BOOLEAN') {
+                  <mat-option [value]="true">True</mat-option>
+                  <mat-option [value]="false">False</mat-option>
+                }
+              }
+            </mat-select>
+
+          } @else if(isDateInput(condition)) {
+
+            <input matInput [(ngModel)]="condition.value" [matDatepicker]="picker" readonly (click)="picker.open()">
+            <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+
+          } @else if (isNumberInput(condition)) {
+
+            <input matInput [(ngModel)]="condition.value" type="number">
+
+          } @else {
+
+            <input matInput [(ngModel)]="condition.value">
+
+          }
+
+        </mat-form-field>
+
+      }
+
+      <button mat-icon-button (click)="remove(condition)">
+        <mat-icon>trash</mat-icon>
+      </button>
+
     </div>
   }
 </div>
 <div matDialogActions>
   <button mat-button (click)="add()">Add</button>
-  <button mat-button (click)="apply()">Apply</button>
-  <button mat-button (click)="close()">Close</button>
+  <button mat-button [mat-dialog-close]="result()">Apply</button>
+  <button mat-button mat-dialog-close>Close</button>
 </div>

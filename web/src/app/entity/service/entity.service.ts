@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Entity, EntityFilterEntry, EntityPage, EntitySortEntry } from "../model/entity";
 import { lastValueFrom, Observable } from "rxjs";
+import { Reference } from "../../common/model/reference";
 
 @Injectable({
   providedIn: 'root'
@@ -47,6 +48,10 @@ export class EntityService {
       sort: this.sort,
     }
     return this.http.post<EntityPage>('/entity/' + this.entity.name + '/list', request)
+  }
+
+  referenceList(name: string): Observable<Reference[]> {
+    return this.http.get<Reference[]>('/entity/' + name + '/reference')
   }
 
   byId(id: string): Observable<any> {

@@ -4,7 +4,16 @@ export interface Entity {
   fields: EntityField[]
 }
 
-type EntityFieldType = 'ID' | 'STRING' | 'NUMBER' | 'BOOLEAN' | 'DATE' | 'AMOUNT' | 'ENUM' | 'REFERENCE' | 'JSON'
+export type EntityFieldType =
+  'ID' |
+  'STRING' |
+  'NUMBER' |
+  'BOOLEAN' |
+  'DATE' |
+  'AMOUNT' |
+  'ENUM' |
+  'REFERENCE' |
+  'JSON'
 
 export interface EntityField {
   name: string
@@ -26,6 +35,28 @@ export interface EntitySortEntry {
   direction: 'ASC' | 'DESC'
 }
 
+export type EntityFilterOperator =
+  'EQUALS' |
+  'NOT_EQUALS' |
+  'GREATER' |
+  'GREATER_EQUALS' |
+  'LESS' |
+  'LESS_EQUALS' |
+  'LIKE' |
+  'NOT_LIKE' |
+  'IN_LIST' |
+  'NOT_IN_LIST' |
+  'IS_NULL' |
+  'IS_NOT_NULL' |
+  'CURRENCY_IN_LIST' |
+  'CURRENCY_NOT_IN_LIST' |
+  'AMOUNT_EQUALS' |
+  'AMOUNT_NOT_EQUALS' |
+  'AMOUNT_GREATER' |
+  'AMOUNT_GREATER_EQUALS' |
+  'AMOUNT_LESS' |
+  'AMOUNT_LESS_EQUALS'
+
 export interface EntityFilterEntry {
   id: string
   field: string
@@ -37,12 +68,12 @@ export interface EntityFilterCondition {
   id: number,
   negate: boolean,
   field: string,
-  operator: string,
+  operator: EntityFilterOperator,
   empty: boolean,
   value: any
 }
 
-export interface EntityFilterOperator {
-  name: string
-  label: string
+export interface EntityFilterDialogData {
+  fields: EntityField[]
+  conditions: EntityFilterCondition[]
 }

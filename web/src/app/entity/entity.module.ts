@@ -5,13 +5,13 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatListModule } from "@angular/material/list";
 import { EntityListComponent } from "./component/entity-list/entity-list.component";
-import { NgForOf, NgIf } from "@angular/common";
+import { AsyncPipe, NgForOf, NgIf } from "@angular/common";
 import { EntityLabelComponent } from "./component/entity-label/entity-label.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { EntityFilterComponent } from "./component/entity-filter/entity-filter.component";
 import { EntitySortComponent } from "./component/entity-sort/entity-sort.component";
-import { MatDialogActions, MatDialogContent } from "@angular/material/dialog";
+import { MatDialogActions, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { MatSelectModule } from "@angular/material/select";
 import { EntityFilterInputComponent } from "./component/entity-filter-input/entity-filter-input.component";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
@@ -36,28 +36,30 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
     EntitySortComponent,
     EntityEditorComponent
   ],
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatListModule,
-    NgForOf,
-    NgIf,
-    MatTableModule,
-    MatPaginatorModule,
-    MatDialogContent,
-    MatDialogActions,
-    MatSelectModule,
-    MatSlideToggleModule,
-    FormsModule,
-    MatInputModule,
-    MatTooltipModule,
-    RouterLink,
-    MatSortModule,
-    MatRippleModule,
-    MatDatepickerModule,
-    ReactiveFormsModule
-  ],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        MatListModule,
+        NgForOf,
+        NgIf,
+        MatTableModule,
+        MatPaginatorModule,
+        MatDialogContent,
+        MatDialogActions,
+        MatSelectModule,
+        MatSlideToggleModule,
+        FormsModule,
+        MatInputModule,
+        MatTooltipModule,
+        RouterLink,
+        MatSortModule,
+        MatRippleModule,
+        MatDatepickerModule,
+        ReactiveFormsModule,
+        MatDialogClose,
+        AsyncPipe
+    ],
   providers: [],
   exports: [
     EntityListComponent,
