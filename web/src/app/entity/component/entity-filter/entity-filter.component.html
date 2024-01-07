@@ -1,4 +1,4 @@
-<div matDialogContent>
+<div matDialogContent class="content">
   @for (condition of conditions; track condition.id) {
     <div class="entry">
 
@@ -20,6 +20,8 @@
             }
           </mat-select>
         </mat-form-field>
+      } @else {
+        <div></div>
       }
 
       @if (isValueInputVisible(condition)) {
@@ -49,6 +51,11 @@
                   <mat-option [value]="true">True</mat-option>
                   <mat-option [value]="false">False</mat-option>
                 }
+                @case ('AMOUNT') {
+                  @for (currency of getCurrencies(); track currency.name) {
+                    <mat-option [value]="currency.name">{{currency.name}}</mat-option>
+                  }
+                }
               }
             </mat-select>
 
@@ -69,10 +76,12 @@
 
         </mat-form-field>
 
+      } @else {
+        <div></div>
       }
 
-      <button mat-icon-button (click)="remove(condition)">
-        <mat-icon>trash</mat-icon>
+      <button class="icon" mat-icon-button (click)="remove(condition)">
+        <mat-icon>delete</mat-icon>
       </button>
 
     </div>
@@ -80,6 +89,7 @@
 </div>
 <div matDialogActions>
   <button mat-button (click)="add()">Add</button>
-  <button mat-button [mat-dialog-close]="result()">Apply</button>
+  <div class="button-filler"></div>
+  <button mat-raised-button color="primary" [mat-dialog-close]="result()">Apply</button>
   <button mat-button mat-dialog-close>Close</button>
 </div>

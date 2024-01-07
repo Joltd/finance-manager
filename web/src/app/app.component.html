@@ -3,7 +3,7 @@
   <a class="app-title" href="/">{{toolbarService.title}}</a>
   <span class="spacer"></span>
   @for (command of toolbarService.commands; track command.name) {
-    <button mat-icon-button (click)="command.action()" [disabled]="command.disabled">
+    <button mat-icon-button (click)="command.action()">
       <mat-icon>{{command.icon}}</mat-icon>
     </button>
   }

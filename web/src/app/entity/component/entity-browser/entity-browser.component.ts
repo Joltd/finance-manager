@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, HostBinding, OnInit } from "@angular/core";
 import { EntityService } from "../../service/entity.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { PageEvent } from "@angular/material/paginator";
@@ -8,6 +8,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { EntityFilterComponent } from "../entity-filter/entity-filter.component";
 import { EntitySortComponent } from "../entity-sort/entity-sort.component";
 import { Entity } from "../../model/entity";
+import { AdaptiveService } from "../../../common/service/adaptive.service";
 
 @Component({
   selector: 'entity-browser',
@@ -26,11 +27,15 @@ export class EntityBrowserComponent implements OnInit {
   hasData: boolean = false
   currentValue: any = null
 
+  @HostBinding('style.height')
+  height!: number
+
   constructor(
     private activatedRoute: ActivatedRoute,
     private entityService: EntityService,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    public adaptiveService: AdaptiveService
   ) {}
 
   ngOnInit(): void {
@@ -79,9 +84,28 @@ export class EntityBrowserComponent implements OnInit {
   }
 
   openFilter() {
-    this.dialog.open(EntityFilterComponent)
+    let config = {
+      width: '700px',
+      height: '500px',
+      data: {
+        fields: this.entityService.entity.fields,
+        conditions: this.entityService.filter,
+      }
+    } as any
+    if (!this.adaptiveService.desktop) {
+      config.width = '90vw'
+      config.height = '85vh'
+      config.maxWidth = '90vw'
+      config.maxHeight = '85vh'
+    }
+    this.dialog.open(EntityFilterComponent, config)
       .afterClosed()
-      .subscribe(() => this.load())
+      .subscribe((result) => {
+        if (result) {
+          this.entityService.filter = result
+          this.load().then()
+        }
+      })
   }
 
   openSort() {

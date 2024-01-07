@@ -8,6 +8,8 @@ import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { Reference } from "../../../common/model/reference";
 import { EntityService } from "../../service/entity.service";
 import { lastValueFrom } from "rxjs";
+import { CurrencyService } from "../../../reference/service/currency.service";
+import { Currency } from "../../../reference/model/currency";
 
 @Component({
   selector: 'entity-filter',
@@ -17,7 +19,7 @@ import { lastValueFrom } from "rxjs";
 export class EntityFilterComponent {
 
   private config: { [key in EntityFieldType]: EntityFilterOperator[] } = {
-    'ID': ['EQUALS', 'NOT_EQUALS', 'LIKE', 'NOT_LIKE', 'IS_NULL', 'IS_NOT_NULL',],
+    'ID': ['EQUALS', 'NOT_EQUALS', 'IS_NULL', 'IS_NOT_NULL',],
     'STRING': ['EQUALS', 'NOT_EQUALS', 'LIKE', 'NOT_LIKE', 'IS_NULL', 'IS_NOT_NULL',],
     'NUMBER': ['EQUALS', 'NOT_EQUALS', 'GREATER', 'GREATER_EQUALS', 'LESS', 'LESS_EQUALS', 'IS_NULL', 'IS_NOT_NULL',],
     'BOOLEAN': ['IN_LIST', 'NOT_IN_LIST',],
@@ -56,17 +58,16 @@ export class EntityFilterComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) data: EntityFilterDialogData,
-    private entityService: EntityService
+    private entityService: EntityService,
+    private currencyService: CurrencyService
   ) {
     this.fields = data.fields
     this.conditions = data.conditions
       .map(condition => {
         return {
           id: condition.id,
-          negate: condition.negate,
           field: this.fields.find(field => field.name === condition.field)!,
           operator: condition.operator,
-          empty: condition.empty,
           value: condition.value
         }
       })
@@ -74,16 +75,16 @@ export class EntityFilterComponent {
   }
 
   result(): EntityFilterCondition[] {
-    return this.conditions.map(condition => {
-      return {
-        id: condition.id,
-        negate: condition.negate,
-        field: condition.field.name,
-        operator: condition.operator,
-        empty: condition.empty,
-        value: condition.value
-      }
-    })
+    return this.conditions
+      .filter(condition => condition.field != null)
+      .map(condition => {
+        return {
+          id: condition.id,
+          field: condition.field.name,
+          operator: condition.operator,
+          value: condition.value
+        }
+      })
   }
 
   getOperators(fieldType: EntityFieldType): InternalEntityFilterOperator[] {
@@ -102,6 +103,10 @@ export class EntityFilterComponent {
           return result
         })
     }
+  }
+
+  getCurrencies(): Currency[] {
+    return this.currencyService.currencies
   }
 
   isValueInputVisible(condition: InternalEntityFilterCondition): boolean {
@@ -181,9 +186,7 @@ interface InternalEntityFilterOperator {
 
 interface InternalEntityFilterCondition {
   id: number,
-  negate: boolean,
   field: EntityField,
   operator: EntityFilterOperator,
-  empty: boolean,
   value: any
 }

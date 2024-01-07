@@ -57,19 +57,10 @@ export type EntityFilterOperator =
   'AMOUNT_LESS' |
   'AMOUNT_LESS_EQUALS'
 
-export interface EntityFilterEntry {
-  id: string
-  field: string
-  operator: string
-  value: any
-}
-
 export interface EntityFilterCondition {
   id: number,
-  negate: boolean,
   field: string,
   operator: EntityFilterOperator,
-  empty: boolean,
   value: any
 }
 

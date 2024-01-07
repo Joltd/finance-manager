@@ -5,7 +5,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatListModule } from "@angular/material/list";
 import { EntityListComponent } from "./component/entity-list/entity-list.component";
-import { AsyncPipe, NgForOf, NgIf } from "@angular/common";
+import { AsyncPipe, NgClass, NgForOf, NgIf } from "@angular/common";
 import { EntityLabelComponent } from "./component/entity-label/entity-label.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatPaginatorModule } from "@angular/material/paginator";
@@ -36,30 +36,31 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
     EntitySortComponent,
     EntityEditorComponent
   ],
-    imports: [
-        CommonModule,
-        MatIconModule,
-        MatButtonModule,
-        MatListModule,
-        NgForOf,
-        NgIf,
-        MatTableModule,
-        MatPaginatorModule,
-        MatDialogContent,
-        MatDialogActions,
-        MatSelectModule,
-        MatSlideToggleModule,
-        FormsModule,
-        MatInputModule,
-        MatTooltipModule,
-        RouterLink,
-        MatSortModule,
-        MatRippleModule,
-        MatDatepickerModule,
-        ReactiveFormsModule,
-        MatDialogClose,
-        AsyncPipe
-    ],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatListModule,
+    NgForOf,
+    NgIf,
+    MatTableModule,
+    MatPaginatorModule,
+    MatDialogContent,
+    MatDialogActions,
+    MatSelectModule,
+    MatSlideToggleModule,
+    FormsModule,
+    MatInputModule,
+    MatTooltipModule,
+    RouterLink,
+    MatSortModule,
+    MatRippleModule,
+    MatDatepickerModule,
+    ReactiveFormsModule,
+    MatDialogClose,
+    AsyncPipe,
+    NgClass
+  ],
   providers: [],
   exports: [
     EntityListComponent,

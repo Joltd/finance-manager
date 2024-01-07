@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Entity, EntityFilterEntry, EntityPage, EntitySortEntry } from "../model/entity";
+import { Entity, EntityFilterCondition, EntityPage, EntitySortEntry } from "../model/entity";
 import { lastValueFrom, Observable } from "rxjs";
 import { Reference } from "../../common/model/reference";
 
@@ -11,7 +11,7 @@ export class EntityService {
 
   entities: Entity[] = []
   entity!: Entity
-  filter: EntityFilterEntry[] = []
+  filter: EntityFilterCondition[] = []
   sort: EntitySortEntry[] = []
   page: EntityPage = {
     total: 0,
@@ -46,6 +46,7 @@ export class EntityService {
       page: this.page.page,
       size: this.page.size,
       sort: this.sort,
+      filter: this.filter
     }
     return this.http.post<EntityPage>('/entity/' + this.entity.name + '/list', request)
   }

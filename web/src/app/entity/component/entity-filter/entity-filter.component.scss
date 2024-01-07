@@ -1,3 +1,22 @@
+.content {
+  max-height: 100vh;
+}
+
+.content-desktop {
+
+}
+
 .entry {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr min-content;
+  grid-gap: 10px;
+  align-items: center;
+
+  .icon {
+    margin-bottom: 20px;
+  }
+}
+
+.button-filler {
+  flex-grow: 1;
 }
