@@ -1,30 +1,28 @@
-<mat-card>
-  <mat-card-content>
-    <form [formGroup]="form">
+<common-layout>
+  <form [formGroup]="form">
 
-      <mat-form-field>
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name">
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Type</mat-label>
-        <mat-select formControlName="type">
-          <mat-option [value]="'ACCOUNT'">Account</mat-option>
-          <mat-option [value]="'EXPENSE'">Expense</mat-option>
-          <mat-option [value]="'INCOME'">Income</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="'ACCOUNT'">Account</mat-option>
+        <mat-option [value]="'EXPENSE'">Expense</mat-option>
+        <mat-option [value]="'INCOME'">Income</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-      <mat-slide-toggle formControlName="deleted">Deleted</mat-slide-toggle>
+    <mat-slide-toggle formControlName="deleted">Deleted</mat-slide-toggle>
 
-      <mat-form-field>
-        <mat-label>Revised</mat-label>
-        <input formControlName="reviseDate" matInput [matDatepicker]="reviseDate" readonly (click)="reviseDate.open()">
-        <mat-datepicker touchUi #reviseDate></mat-datepicker>
-        <button mat-icon-button matSuffix (click)="form.patchValue({reviseDate: null})"><mat-icon>close</mat-icon></button>
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Revised</mat-label>
+      <input formControlName="reviseDate" matInput [matDatepicker]="reviseDate" readonly (click)="reviseDate.open()">
+      <mat-datepicker [touchUi]="true" #reviseDate></mat-datepicker>
+      <button mat-icon-button matSuffix (click)="form.patchValue({reviseDate: null})"><mat-icon>close</mat-icon></button>
+    </mat-form-field>
 
-    </form>
-  </mat-card-content>
-</mat-card>
+  </form>
+</common-layout>
