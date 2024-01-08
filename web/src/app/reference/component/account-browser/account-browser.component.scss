@@ -1,5 +1,19 @@
 @use "../../../../variables";
 
+:host {
+  display: grid;
+  overflow: hidden;
+}
+
+mat-tab-group {
+  height: 100%;
+  overflow: hidden;
+}
+
+::ng-deep .mat-mdc-tab-body-wrapper {
+  height: 100%;
+}
+
 .expense {
   color: variables.$expense-color!important;
 }

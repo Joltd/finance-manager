@@ -1,5 +1,5 @@
-<mat-card>
-  <mat-action-list *ngIf="currencyService.currencies. length > 0; else noData">
+<common-layout>
+  <mat-action-list *ifHasData="currencyService.currencies. length > 0">
     <button mat-list-item
             [matMenuTriggerFor]="menu"
             *ngFor="let currency of currencyService.currencies">
@@ -13,9 +13,7 @@
       </mat-menu>
     </button>
   </mat-action-list>
-</mat-card>
-<button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>
-
-<ng-template #noData>
-  <no-data></no-data>
-</ng-template>
+  <fab-group>
+    <button mat-fab (click)="add()"><mat-icon>add</mat-icon></button>
+  </fab-group>
+</common-layout>

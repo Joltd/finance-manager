@@ -1,22 +1,20 @@
-<mat-card>
-  <mat-card-content>
-    <form [formGroup]="form">
+<common-layout>
+  <form [formGroup]="form">
 
-      <mat-form-field>
-        <mat-label>Operation default currency</mat-label>
-        <currency-input formControlName="operationDefaultCurrency"></currency-input>
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Operation default currency</mat-label>
+      <currency-input formControlName="operationDefaultCurrency"></currency-input>
+    </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Operation default account</mat-label>
-        <account-input [types]="['ACCOUNT']" formControlName="operationDefaultAccount"></account-input>
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Operation default account</mat-label>
+      <account-input [types]="['ACCOUNT']" formControlName="operationDefaultAccount"></account-input>
+    </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Operation cash account</mat-label>
-        <account-input [types]="['ACCOUNT']" formControlName="operationCashAccount"></account-input>
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Operation cash account</mat-label>
+      <account-input [types]="['ACCOUNT']" formControlName="operationCashAccount"></account-input>
+    </mat-form-field>
 
-    </form>
-  </mat-card-content>
-</mat-card>
+  </form>
+</common-layout>

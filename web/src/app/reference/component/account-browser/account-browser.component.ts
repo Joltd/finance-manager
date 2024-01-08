@@ -2,6 +2,7 @@ import {Component, OnInit} from "@angular/core";
 import {AccountService} from "../../service/account.service";
 import {Router} from "@angular/router";
 import {Account, AccountType} from "../../model/account";
+import { CommonLayoutComponent } from "../../../common/component/common-layout/common-layout.component";
 
 @Component({
   selector: 'account-browser',

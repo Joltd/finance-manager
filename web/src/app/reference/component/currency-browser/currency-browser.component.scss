@@ -1,3 +1,12 @@
+:host {
+  display: grid;
+  overflow: hidden;
+}
+
+mat-action-list {
+  overflow-y: auto;
+}
+
 .currency-list-item {
   display: grid;
   grid-template-columns: 1fr min-content;

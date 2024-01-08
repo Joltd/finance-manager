@@ -1,0 +1,11 @@
+:host {
+  display: grid;
+  justify-self: center;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+:host.desktop {
+  width: 600px;
+}

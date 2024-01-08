@@ -1,11 +1,12 @@
-<mat-card>
+<common-layout>
+
   <mat-tab-group>
 
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon>account_balance_wallet</mat-icon>
       </ng-template>
-      <mat-action-list *ngIf="accounts.length > 0; else noData">
+      <mat-action-list *ifHasData="accounts.length > 0">
         <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let account of accounts">
           {{account.name}}
           <mat-menu #menu>
@@ -20,7 +21,7 @@
       <ng-template mat-tab-label>
         <mat-icon class="expense">money_off</mat-icon>
       </ng-template>
-      <mat-action-list *ngIf="expenses.length > 0; else noData">
+      <mat-action-list *ifHasData="expenses.length > 0">
         <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let expense of expenses">
           {{expense.name}}
           <mat-menu #menu>
@@ -35,7 +36,7 @@
       <ng-template mat-tab-label>
         <mat-icon class="income">attach_money</mat-icon>
       </ng-template>
-      <mat-action-list *ngIf="incomes.length > 0; else noData">
+      <mat-action-list *ifHasData="incomes.length > 0">
         <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let income of incomes">
           {{income.name}}
           <mat-menu #menu>
@@ -47,9 +48,9 @@
     </mat-tab>
 
   </mat-tab-group>
-</mat-card>
-<button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>
 
-<ng-template #noData>
-  <no-data></no-data>
-</ng-template>
+  <fab-group>
+    <button mat-fab (click)="add()"><mat-icon>add</mat-icon></button>
+  </fab-group>
+
+</common-layout>
