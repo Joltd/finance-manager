@@ -7,43 +7,28 @@ import {MatExpansionPanel} from "@angular/material/expansion";
 import {Amount} from "../../../common/model/amount";
 import { EntityFilterComponent } from "../../../entity/component/entity-filter/entity-filter.component";
 import { MatDialog } from "@angular/material/dialog";
+import { EntityService } from "../../../entity/service/entity.service";
 
 @Component({
   selector: 'operation-browser',
   templateUrl: './operation-browser.component.html',
   styleUrls: ['./operation-browser.component.scss']
 })
-export class OperationBrowserComponent implements OnInit,AfterViewInit,OnDestroy {
+export class OperationBrowserComponent implements AfterViewInit {
 
   @ViewChild(MatExpansionPanel)
   filter!: MatExpansionPanel
 
   constructor(
     private router: Router,
+    private entityService: EntityService,
     public operationService: OperationService,
     private toolbarService: ToolbarService,
     private dialog: MatDialog
   ) {}
 
-  ngOnInit(): void {
-    this.toolbarService.setup('Operation', [
-      {
-        name: 'load',
-        icon: 'done',
-        action: () => {
-          this.filter.close()
-          this.load()
-        }
-      }
-    ])
-  }
-
   ngAfterViewInit(): void {
     this.load()
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
   }
 
   onPage(event: PageEvent) {
@@ -56,28 +41,20 @@ export class OperationBrowserComponent implements OnInit,AfterViewInit,OnDestroy
   }
 
   openFilter() {
-    // let config = {
-    //   width: '700px',
-    //   height: '500px',
-    //   data: {
-    //     fields: this.entityService.entity.fields,
-    //     conditions: this.entityService.filter,
-    //   }
-    // } as any
-    // if (!this.adaptiveService.desktop) {
-    //   config.width = '90vw'
-    //   config.height = '85vh'
-    //   config.maxWidth = '90vw'
-    //   config.maxHeight = '85vh'
-    // }
-    // this.dialog.open(EntityFilterComponent, config)
-    //   .afterClosed()
-    //   .subscribe((result) => {
-    //     if (result) {
-    //       // this.entityService.filter = result
-    //       // this.load().then()
-    //     }
-    //   })
+    let config = {
+      data: {
+        fields: this.entityService.getEntity('Operation').fields,
+        conditions: this.operationService.filter,
+      }
+    }
+    this.dialog.open(EntityFilterComponent, config)
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          this.operationService.filter = result
+          this.load()
+        }
+      })
   }
 
   add() {
@@ -85,7 +62,6 @@ export class OperationBrowserComponent implements OnInit,AfterViewInit,OnDestroy
   }
 
   edit(id: string) {
-    console.log(id)
     this.router.navigate(['operation', id]).then()
   }
 

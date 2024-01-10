@@ -1,55 +1,18 @@
-<toolbar-content>
+<toolbar-content title="Operation">
   <toolbar-button name="Filter" icon="filter_alt" (click)="openFilter()"></toolbar-button>
 </toolbar-content>
 
-<mat-expansion-panel>
-  <mat-expansion-panel-header>
-    <mat-panel-title>Filter</mat-panel-title>
-  </mat-expansion-panel-header>
-
-  <form [formGroup]="operationService.filter">
-
-    <mat-form-field>
-      <mat-label>From</mat-label>
-      <input formControlName="dateFrom" matInput [matDatepicker]="from" readonly (click)="from.open()">
-      <mat-datepicker touchUi #from></mat-datepicker>
-      <button mat-icon-button matSuffix (click)="operationService.filter.patchValue({dateFrom: null})"><mat-icon>close</mat-icon></button>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>To</mat-label>
-      <input formControlName="dateTo" matInput [matDatepicker]="to" readonly (click)="to.open()">
-      <mat-datepicker touchUi #to></mat-datepicker>
-      <button mat-icon-button matSuffix (click)="operationService.filter.patchValue({dateTo: null})"><mat-icon>close</mat-icon></button>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Type</mat-label>
-      <mat-select formControlName="type">
-        <mat-option [value]="null">Nothing</mat-option>
-        <mat-option [value]="'EXPENSE'">Expense</mat-option>
-        <mat-option [value]="'TRANSFER'">Transfer</mat-option>
-        <mat-option [value]="'INCOME'">Income</mat-option>
-        <mat-option [value]="'EXCHANGE'">Exchange</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Account</mat-label>
-      <account-input [types]="['ACCOUNT']" formControlName="account"></account-input>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Category</mat-label>
-      <account-input [types]="['EXPENSE','INCOME']" formControlName="category"></account-input>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Currency</mat-label>
-      <currency-input formControlName="currency"></currency-input>
-    </mat-form-field>
-
-  </form>
+<common-layout class="common-layout">
+  <mat-action-list *ifHasData="operationService.operationPage.values.length > 0">
+    @for (operation of operationService.operationPage.values; track operation.id) {
+      <button mat-list-item (click)="action.show(operation.id)">
+      <span class="row">
+        <mat-checkbox (click)="$event.stopPropagation()"></mat-checkbox>
+        <operation-label [operation]="operation"></operation-label>
+      </span>
+      </button>
+    }
+  </mat-action-list>
 
   <mat-paginator [hidePageSize]="true"
                  [showFirstLastButtons]="true"
@@ -57,25 +20,7 @@
                  [pageIndex]="operationService.operationPage.page"
                  [length]="operationService.operationPage.total"
                  (page)="onPage($event)"></mat-paginator>
-</mat-expansion-panel>
-
-<mat-action-list *ifHasData="operationService.operationPage.operations.length > 0">
-  @for (operation of operationService.operationPage.operations; track operation.id) {
-    <button mat-list-item (click)="action.show(operation.id)">
-      <span class="row">
-        <mat-checkbox (click)="$event.stopPropagation()"></mat-checkbox>
-        <operation-label [operation]="operation"></operation-label>
-      </span>
-    </button>
-  }
-</mat-action-list>
-
-<mat-paginator [hidePageSize]="true"
-               [showFirstLastButtons]="true"
-               [pageSize]="operationService.operationPage.size"
-               [pageIndex]="operationService.operationPage.page"
-               [length]="operationService.operationPage.total"
-               (page)="onPage($event)"></mat-paginator>
+</common-layout>
 
 <entry-select #action>
   <entry-item (select)="copy($event); action.close()">Copy</entry-item>

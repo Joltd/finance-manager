@@ -10,6 +10,8 @@ import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.entity.record.EntityFilterConditionRecord
+import com.evgenltd.financemanager.entity.service.ConditionBuilderService
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
@@ -19,6 +21,7 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -28,7 +31,8 @@ import java.util.*
 class OperationService(
     private val operationRepository: OperationRepository,
     private val operationConverter: OperationConverter,
-    private val transactionService: TransactionService
+    private val transactionService: TransactionService,
+    private val conditionBuilderService: ConditionBuilderService
 ) {
 
     fun list(filter: OperationFilter): OperationPage = pagedList(filter, Sort.by(Sort.Direction.DESC, Operation::date.name))
@@ -42,6 +46,11 @@ class OperationService(
                     .map { operationConverter.toRecord(it) }
             )
         }
+
+//    fun pageListNew(filter: List<EntityFilterConditionRecord>) {
+//        val specification = conditionBuilderService.build<Operation>(filter)
+//        operationRepository.findAll(specification, PageRequest.of(page, size, sort))
+//    }
 
     fun pagedList(filter: OperationFilter, sort: Sort = Sort.unsorted()): Page<Operation> =
         operationRepository.findAllByCondition(filter.page, filter.size, sort) {

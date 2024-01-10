@@ -1,11 +1,9 @@
 :host {
   display: grid;
-  grid-gap: 1em;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
+.common-layout {
+  grid-template-rows: 1fr min-content;
 }
 
 .row {

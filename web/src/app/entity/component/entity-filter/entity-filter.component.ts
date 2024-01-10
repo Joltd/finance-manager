@@ -1,22 +1,23 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, OnInit } from "@angular/core";
 import {
   EntityField, EntityFieldType,
   EntityFilterCondition,
   EntityFilterDialogData, EntityFilterOperator,
 } from "../../model/entity";
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { Reference } from "../../../common/model/reference";
 import { EntityService } from "../../service/entity.service";
 import { lastValueFrom } from "rxjs";
 import { CurrencyService } from "../../../reference/service/currency.service";
 import { Currency } from "../../../reference/model/currency";
+import { AdaptiveService } from "../../../common/service/adaptive.service";
 
 @Component({
   selector: 'entity-filter',
   templateUrl: 'entity-filter.component.html',
   styleUrls: ['entity-filter.component.scss']
 })
-export class EntityFilterComponent {
+export class EntityFilterComponent implements OnInit {
 
   private config: { [key in EntityFieldType]: EntityFilterOperator[] } = {
     'ID': ['EQUALS', 'NOT_EQUALS', 'IS_NULL', 'IS_NOT_NULL',],
@@ -57,9 +58,11 @@ export class EntityFilterComponent {
   conditions: InternalEntityFilterCondition[] = []
 
   constructor(
+    private dialogRef: MatDialogRef<any>,
     @Inject(MAT_DIALOG_DATA) data: EntityFilterDialogData,
     private entityService: EntityService,
-    private currencyService: CurrencyService
+    private currencyService: CurrencyService,
+    private adaptiveService: AdaptiveService
   ) {
     this.fields = data.fields
     this.conditions = data.conditions
@@ -72,6 +75,14 @@ export class EntityFilterComponent {
         }
       })
       .filter(condition => condition.field.type != 'JSON')
+  }
+
+  ngOnInit(): void {
+    if (this.adaptiveService.desktop) {
+      this.dialogRef.updateSize('700px', '500px')
+    } else {
+      this.dialogRef.updateSize('90vw', '85vh')
+    }
   }
 
   result(): EntityFilterCondition[] {

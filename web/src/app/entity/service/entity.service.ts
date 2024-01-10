@@ -20,7 +20,9 @@ export class EntityService {
     values: []
   }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.entityLoad().then()
+  }
 
   async entityLoad() {
     if (this.entities.length == 0) {
@@ -49,6 +51,10 @@ export class EntityService {
       filter: this.filter
     }
     return this.http.post<EntityPage>('/entity/' + this.entity.name + '/list', request)
+  }
+
+  getEntity(name: string): Entity {
+    return this.entities.find(entity => entity.name == name)!
   }
 
   referenceList(name: string): Observable<Reference[]> {

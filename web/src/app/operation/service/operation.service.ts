@@ -5,25 +5,19 @@ import {Operation, OperationPage} from "../model/operation";
 import {Observable} from "rxjs";
 import {Router} from "@angular/router";
 import * as moment from "moment";
+import { EntityFilterCondition, EntityPage } from "../../entity/model/entity";
 
 @Injectable({
   providedIn: 'root'
 })
 export class OperationService {
 
-  filter: FormGroup = new FormGroup({
-    dateFrom: new FormControl(moment().subtract(3, 'month').format('yyyy-MM-DD')),
-    dateTo: new FormControl(moment().format('yyyy-MM-DD')),
-    type: new FormControl(null),
-    category: new FormControl(null),
-    account: new FormControl(null),
-    currency: new FormControl(null),
-  })
-  operationPage: OperationPage = {
+  filter: EntityFilterCondition[] = []
+  operationPage: EntityPage = {
     total: 0,
     page: 0,
     size: 20,
-    operations: []
+    values: []
   }
 
   constructor(
@@ -32,17 +26,17 @@ export class OperationService {
   ) {}
 
   viewOperations(filter: any) {
-    this.filter.setValue({
-      ...{
-        dateFrom: null,
-        dateTo: null,
-        type: null,
-        category: null,
-        account: null,
-        currency: null,
-      },
-      ...filter
-    })
+    // this.filter.setValue({
+    //   ...{
+    //     dateFrom: null,
+    //     dateTo: null,
+    //     type: null,
+    //     category: null,
+    //     account: null,
+    //     currency: null,
+    //   },
+    //   ...filter
+    // })
     this.operationPage.page = 0
     this.router.navigate(['operation']).then()
   }
@@ -51,9 +45,10 @@ export class OperationService {
     let filter = {
       page: this.operationPage.page,
       size: this.operationPage.size,
-      ...this.filter.value
+      filter: this.filter,
+      sort: [{field: 'date', direction: 'DESC'}]
     }
-    this.http.post<OperationPage>('/operation/filter', filter)
+    this.http.post<EntityPage>('/entity/Operation/list', filter)
       .subscribe(result => this.operationPage = result)
   }
 
