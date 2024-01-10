@@ -118,12 +118,12 @@ export class EntityBrowserComponent implements OnInit {
     this.router.navigate(['entity', this.entity().name, 'new']).then()
   }
 
-  edit() {
-    this.router.navigate(['entity', this.entity().name, this.currentValue.id]).then()
+  edit(id: string) {
+    this.router.navigate(['entity', this.entity().name, id]).then()
   }
 
-  delete() {
-    this.entityService.delete(this.currentValue.id)
+  delete(id: string) {
+    this.entityService.delete(id)
       .subscribe(() => this.load().then())
   }
 

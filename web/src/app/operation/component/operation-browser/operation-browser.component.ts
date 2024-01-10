@@ -5,6 +5,8 @@ import {PageEvent} from "@angular/material/paginator";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {MatExpansionPanel} from "@angular/material/expansion";
 import {Amount} from "../../../common/model/amount";
+import { EntityFilterComponent } from "../../../entity/component/entity-filter/entity-filter.component";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
   selector: 'operation-browser',
@@ -19,7 +21,8 @@ export class OperationBrowserComponent implements OnInit,AfterViewInit,OnDestroy
   constructor(
     private router: Router,
     public operationService: OperationService,
-    private toolbarService: ToolbarService
+    private toolbarService: ToolbarService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -52,11 +55,37 @@ export class OperationBrowserComponent implements OnInit,AfterViewInit,OnDestroy
     this.operationService.list()
   }
 
+  openFilter() {
+    // let config = {
+    //   width: '700px',
+    //   height: '500px',
+    //   data: {
+    //     fields: this.entityService.entity.fields,
+    //     conditions: this.entityService.filter,
+    //   }
+    // } as any
+    // if (!this.adaptiveService.desktop) {
+    //   config.width = '90vw'
+    //   config.height = '85vh'
+    //   config.maxWidth = '90vw'
+    //   config.maxHeight = '85vh'
+    // }
+    // this.dialog.open(EntityFilterComponent, config)
+    //   .afterClosed()
+    //   .subscribe((result) => {
+    //     if (result) {
+    //       // this.entityService.filter = result
+    //       // this.load().then()
+    //     }
+    //   })
+  }
+
   add() {
     this.router.navigate(['operation', 'new']).then()
   }
 
   edit(id: string) {
+    console.log(id)
     this.router.navigate(['operation', id]).then()
   }
 

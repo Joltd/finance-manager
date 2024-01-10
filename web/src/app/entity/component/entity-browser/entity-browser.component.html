@@ -36,7 +36,7 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="fieldNames; sticky: true"></tr>
-    <tr mat-row (click)="currentValue = value; entityAction.show()" *matRowDef="let value; columns: fieldNames"></tr>
+    <tr mat-row (click)="currentValue = value; action.show(value.id)" *matRowDef="let value; columns: fieldNames"></tr>
 
   </table>
 </div>
@@ -48,9 +48,9 @@
                [length]="page.total"
                (page)="onPage($event)"></mat-paginator>
 
-<entry-select #entityAction>
-  <entry-item (select)="edit(); entityAction.close()">Edit</entry-item>
-  <entry-item (select)="delete(); entityAction.close()">Delete</entry-item>
+<entry-select #action>
+  <entry-item (select)="edit($event); action.close()">Edit</entry-item>
+  <entry-item (select)="delete($event); action.close()">Delete</entry-item>
 </entry-select>
 
 <fab-group>

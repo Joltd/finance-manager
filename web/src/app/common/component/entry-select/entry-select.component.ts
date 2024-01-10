@@ -18,13 +18,7 @@ import {CdkPortal} from "@angular/cdk/portal";
   templateUrl: 'entry-select.component.html',
   styleUrls: ['entry-select.component.scss']
 })
-export class EntrySelectComponent implements AfterViewInit {
-
-  @Input()
-  nullable: boolean = false
-
-  @Output()
-  select: EventEmitter<any> = new EventEmitter<any>()
+export class EntrySelectComponent {
 
   @ContentChildren(EntryItemComponent)
   items!: QueryList<EntryItemComponent>
@@ -35,19 +29,8 @@ export class EntrySelectComponent implements AfterViewInit {
 
   constructor(private overlay: Overlay) {}
 
-  ngAfterViewInit(): void {
-    this.items.changes
-      .pipe(startWith(this.items))
-      .subscribe((items: QueryList<EntryItemComponent>) => {
-        for (let item of items) {
-          item.select.subscribe(value => {
-            this.select.emit(value)
-          })
-        }
-      })
-  }
-
-  show() {
+  show(data: any = null) {
+    this.items.forEach(item => item.value = data)
     let config = new OverlayConfig({
       hasBackdrop: true,
       positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically()

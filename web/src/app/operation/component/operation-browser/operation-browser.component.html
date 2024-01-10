@@ -1,3 +1,7 @@
+<toolbar-content>
+  <toolbar-button name="Filter" icon="filter_alt" (click)="openFilter()"></toolbar-button>
+</toolbar-content>
+
 <mat-expansion-panel>
   <mat-expansion-panel-header>
     <mat-panel-title>Filter</mat-panel-title>
@@ -55,26 +59,30 @@
                  (page)="onPage($event)"></mat-paginator>
 </mat-expansion-panel>
 
-<mat-card>
-  <mat-action-list *ngIf="operationService.operationPage.operations.length > 0; else noData">
-    <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let operation of operationService.operationPage.operations">
+<mat-action-list *ifHasData="operationService.operationPage.operations.length > 0">
+  @for (operation of operationService.operationPage.operations; track operation.id) {
+    <button mat-list-item (click)="action.show(operation.id)">
       <span class="row">
         <mat-checkbox (click)="$event.stopPropagation()"></mat-checkbox>
         <operation-label [operation]="operation"></operation-label>
       </span>
-      <mat-menu #menu>
-        <button mat-menu-item (click)="copy(operation.id!)">Copy</button>
-        <button mat-menu-item (click)="edit(operation.id!)">Edit</button>
-        <button mat-menu-item (click)="delete(operation.id!)">Delete</button>
-      </mat-menu>
     </button>
-  </mat-action-list>
-</mat-card>
+  }
+</mat-action-list>
 
-<button class="fab" mat-fab (click)="add()">
-  <mat-icon>add</mat-icon>
-</button>
+<mat-paginator [hidePageSize]="true"
+               [showFirstLastButtons]="true"
+               [pageSize]="operationService.operationPage.size"
+               [pageIndex]="operationService.operationPage.page"
+               [length]="operationService.operationPage.total"
+               (page)="onPage($event)"></mat-paginator>
 
-<ng-template #noData>
-  <no-data></no-data>
-</ng-template>
+<entry-select #action>
+  <entry-item (select)="copy($event); action.close()">Copy</entry-item>
+  <entry-item (select)="edit($event); action.close()">Edit</entry-item>
+  <entry-item (select)="delete($event); action.close()">Delete</entry-item>
+</entry-select>
+
+<fab-group>
+  <button mat-fab (click)="add()"><mat-icon>add</mat-icon></button>
+</fab-group>
