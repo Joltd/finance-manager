@@ -1,22 +1,23 @@
-<mat-card>
-  <mat-card-content>
-    <form [formGroup]="form">
+<form [formGroup]="form">
 
-      <mat-form-field>
-        <mat-label>Parser</mat-label>
-        <reference-input api="/parser/reference" formControlName="parser"></reference-input>
-      </mat-form-field>
+  <mat-form-field>
+    <mat-label>Parser</mat-label>
+    <reference-input api="/parser/reference" formControlName="parser"></reference-input>
+  </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Account</mat-label>
-        <account-input [types]="['ACCOUNT']" formControlName="account"></account-input>
-      </mat-form-field>
+  <mat-form-field>
+    <mat-label>Account</mat-label>
+    <account-input [types]="['ACCOUNT']" formControlName="account"></account-input>
+  </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>File</mat-label>
-        <file-input formControlName="file"></file-input>
-      </mat-form-field>
+  <mat-form-field>
+    <mat-label>File</mat-label>
+    <file-input formControlName="file"></file-input>
+  </mat-form-field>
 
-    </form>
-  </mat-card-content>
-</mat-card>
+</form>
+
+<toolbar-content title="Import">
+  <toolbar-button name="Save" icon="done" (click)="start()"></toolbar-button>
+  <toolbar-button name="Close" icon="close" (click)="close()"></toolbar-button>
+</toolbar-content>

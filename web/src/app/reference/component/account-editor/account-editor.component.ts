@@ -9,7 +9,7 @@ import {ToolbarService} from "../../../common/service/toolbar.service";
   templateUrl: 'account-editor.component.html',
   styleUrls: ['account-editor.component.scss']
 })
-export class AccountEditorComponent implements OnInit,OnDestroy {
+export class AccountEditorComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
@@ -21,7 +21,6 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
 
   constructor(
     private accountService: AccountService,
-    private toolbarService: ToolbarService,
     private activatedRoute: ActivatedRoute,
     private router: Router
   ) {
@@ -34,18 +33,6 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
     })
   }
 
-  ngOnInit(): void {
-    this.toolbarService.setupSaveClose(
-      "Account",
-      () => this.save(),
-      () => this.close()
-    )
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
-  }
-
   private load() {
     this.accountService.byId(this.form.value.id)
       .subscribe(result => {
@@ -53,7 +40,7 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
       })
   }
 
-  private save() {
+  save() {
     if (this.form.invalid) {
       return
     }
@@ -61,7 +48,7 @@ export class AccountEditorComponent implements OnInit,OnDestroy {
       .subscribe(() => this.close())
   }
 
-  private close() {
+  close() {
     this.router.navigate(['account']).then()
   }
 

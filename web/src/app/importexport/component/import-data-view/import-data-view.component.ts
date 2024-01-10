@@ -24,7 +24,7 @@ import {OperationService} from "../../../operation/service/operation.service";
   templateUrl: "./import-data-view.component.html",
   styleUrls: ["./import-data-view.component.scss"]
 })
-export class ImportDataViewComponent implements OnInit, OnDestroy {
+export class ImportDataViewComponent implements OnDestroy {
 
   id!: string
   importData!: ImportData
@@ -46,7 +46,6 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
   private subscription!: Subscription
 
   constructor(
-    private settingsService: SettingsService,
     private toolbarService: ToolbarService,
     private activatedRoute: ActivatedRoute,
     private importDataService: ImportDataService,
@@ -57,25 +56,14 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private operationService: OperationService
   ) {
-    this.settingsService.wideScreenToggle = false
     this.activatedRoute.params.subscribe(params => {
       this.id = params['id']
       this.load()
     })
   }
 
-  ngOnInit(): void {
-    this.toolbarService.setup('Import', [
-      { name: 'repeatPreparation', icon: 'carpenter', action: () => this.repeatPreparation() },
-      { name: 'startImport', icon: 'publish', action: () => this.startImport() },
-      { name: 'close', icon: 'close', action: () => this.close() }
-    ])
-  }
-
   ngOnDestroy(): void {
     this.subscription?.unsubscribe()
-    this.toolbarService.reset()
-    this.settingsService.wideScreenToggle = true
   }
 
   private load() {
@@ -242,7 +230,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
     this.categoryMappingService.delete(id!!).subscribe()
   }
 
-  private repeatPreparation() {
+  repeatPreparation() {
     if (this.isInProgress()) {
       this.shortMessageService.show('Already in progress')
       return
@@ -255,7 +243,7 @@ export class ImportDataViewComponent implements OnInit, OnDestroy {
       })
   }
 
-  private startImport() {
+  startImport() {
     if (this.isInProgress()) {
       this.shortMessageService.show('Already in progress')
       return

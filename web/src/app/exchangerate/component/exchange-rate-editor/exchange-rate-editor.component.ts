@@ -2,7 +2,6 @@ import {Component} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ExchangeRateService} from "../../service/exchange-rate.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {SettingsService} from "../../../settings/service/settings.service";
 
 @Component({
   selector: 'exchange-rate-editor',
@@ -22,8 +21,7 @@ export class ExchangeRateEditorComponent {
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private exchangeRateService: ExchangeRateService,
-    public settingsService: SettingsService
+    private exchangeRateService: ExchangeRateService
   ) {
     this.activatedRoute.params.subscribe(params => {
       let id = params['id']

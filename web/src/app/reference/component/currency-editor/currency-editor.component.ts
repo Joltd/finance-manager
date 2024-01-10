@@ -9,7 +9,7 @@ import {ActivatedRoute, Router} from "@angular/router";
   templateUrl: 'currency-editor.component.html',
   styleUrls: ['currency-editor.component.scss']
 })
-export class CurrencyEditorComponent implements OnInit,OnDestroy {
+export class CurrencyEditorComponent {
 
   form: FormGroup = new FormGroup({
     id: new FormControl(null),
@@ -33,14 +33,6 @@ export class CurrencyEditorComponent implements OnInit,OnDestroy {
     })
   }
 
-  ngOnInit(): void {
-    this.toolbarService.setupSaveClose('Currency', () => this.save(), () => this.close())
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
-  }
-
   private load() {
     this.currencyService.byId(this.form.value.id)
       .subscribe(result => {
@@ -48,12 +40,12 @@ export class CurrencyEditorComponent implements OnInit,OnDestroy {
       })
   }
 
-  private save() {
+  save() {
     this.currencyService.update(this.form.value)
       .subscribe(() => this.close())
   }
 
-  private close() {
+  close() {
     this.router.navigate(['currency']).then()
   }
 

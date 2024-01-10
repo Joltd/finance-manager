@@ -15,7 +15,7 @@ import {OperationViewComponent} from "../operation-view/operation-view.component
   templateUrl: './operation-editor.component.html',
   styleUrls: ['./operation-editor.component.scss']
 })
-export class OperationEditorComponent implements OnInit, OnDestroy {
+export class OperationEditorComponent implements OnInit {
 
   operation!: Operation
 
@@ -31,7 +31,6 @@ export class OperationEditorComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.toolbarService.setupSaveClose('Operation', () => this.save(), () => this.close())
     combineLatest([this.activatedRoute.params, this.activatedRoute.queryParams])
       .subscribe(([params, queryParams]) => {
         let id = params['id']
@@ -52,10 +51,6 @@ export class OperationEditorComponent implements OnInit, OnDestroy {
           return
         }
       })
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
   }
 
   save() {

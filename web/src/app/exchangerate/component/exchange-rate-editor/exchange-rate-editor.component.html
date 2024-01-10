@@ -1,30 +1,31 @@
-<editor title="Exchange rate" (onSave)="save()" (onClose)="close()" [saveDisabled]="!form.valid">
-  <mat-card>
-    <mat-card-content>
-      <form [formGroup]="form">
+<common-layout>
+  <form [formGroup]="form">
 
-        <mat-form-field>
-          <mat-label>Date</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="date" (click)="picker.open()" readonly>
-          <mat-datepicker touchUi #picker></mat-datepicker>
-        </mat-form-field>
+    <mat-form-field>
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="date" (click)="picker.open()" readonly>
+      <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+    </mat-form-field>
 
-        <mat-form-field>
-          <mat-label>From</mat-label>
-          <currency-input formControlName="from"></currency-input>
-        </mat-form-field>
+    <mat-form-field>
+      <mat-label>From</mat-label>
+      <currency-input formControlName="from"></currency-input>
+    </mat-form-field>
 
-        <mat-form-field>
-          <mat-label>To</mat-label>
-          <currency-input formControlName="to"></currency-input>
-        </mat-form-field>
+    <mat-form-field>
+      <mat-label>To</mat-label>
+      <currency-input formControlName="to"></currency-input>
+    </mat-form-field>
 
-        <mat-form-field>
-          <mat-label>Value</mat-label>
-          <input matInput formControlName="value" type="number">
-        </mat-form-field>
+    <mat-form-field>
+      <mat-label>Value</mat-label>
+      <input matInput formControlName="value" type="number">
+    </mat-form-field>
 
-      </form>
-    </mat-card-content>
-  </mat-card>
-</editor>
+  </form>
+
+  <toolbar-content>
+    <toolbar-button name="Save" icon="done" (click)="save()"></toolbar-button>
+    <toolbar-button name="Close" icon="close" (click)="close()"></toolbar-button>
+  </toolbar-content>
+</common-layout>

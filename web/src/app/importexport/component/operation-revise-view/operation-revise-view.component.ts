@@ -21,7 +21,7 @@ import {
   templateUrl: './operation-revise-view.component.html',
   styleUrls: ['./operation-revise-view.component.scss']
 })
-export class OperationReviseViewComponent implements OnInit,OnDestroy {
+export class OperationReviseViewComponent implements OnInit {
 
   @ViewChild(MatExpansionPanel)
   settingsPanel!: MatExpansionPanel
@@ -43,7 +43,6 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
   entries: OperationReviseEntry[] = []
 
   constructor(
-    private settingsService: SettingsService,
     private toolbarService: ToolbarService,
     private operationReviseService: OperationReviseService,
     private operationService: OperationService,
@@ -57,27 +56,9 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
       let id = params['id']
       if (id != 'new') {
         this.id = id
-        setTimeout(() => this.settingsService.wideScreenToggle = false)
         this.load()
       }
-
-      if (this.id) {
-        this.toolbarService.setup('Operation Revise', [
-          { name: 'revise', icon: 'difference', action: () => this.repeatRevise() },
-          { name: 'close', icon: 'close', action: () => this.close() }
-        ])
-      } else {
-        this.toolbarService.setupSaveClose(
-          'Operation Revise',
-          () => this.save(),
-          () => this.close())
-      }
     })
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
-    this.settingsService.wideScreenToggle = true
   }
 
   private load() {
@@ -97,7 +78,7 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
       .subscribe(result => this.entries = result)
   }
 
-  private save() {
+  save() {
     let record = {
       id: null,
       dateFrom: this.form.value.dateFrom,
@@ -111,7 +92,7 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
       .subscribe(() => this.close())
   }
 
-  private close() {
+  close() {
     this.router.navigate(['operation-revise']).then()
   }
 
@@ -176,7 +157,7 @@ export class OperationReviseViewComponent implements OnInit,OnDestroy {
     }
   }
 
-  private repeatRevise() {
+  repeatRevise() {
     this.operationReviseService.repeatRevise(this.id)
       .subscribe(() => {
         this.load()

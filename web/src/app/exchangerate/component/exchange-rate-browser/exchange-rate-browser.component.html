@@ -1,8 +1,5 @@
-<mat-card>
-  <ng-template #noData>
-    <no-data></no-data>
-  </ng-template>
-  <mat-list *ngIf="exchangeRates.length > 0; else noData">
+<common-layout>
+  <mat-list *ifHasData="exchangeRates.length > 0">
     <mat-list-item *ngFor="let exchangeRate of exchangeRates">
       <div matLine class="mat-line-with-menu">
         <date-label [date]="exchangeRate.date"></date-label>
@@ -16,5 +13,9 @@
       </div>
     </mat-list-item>
   </mat-list>
-</mat-card>
-<button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>
+
+  <fab-group>
+    <button mat-fab (click)="add()"><mat-icon>add</mat-icon></button>
+  </fab-group>
+
+</common-layout>

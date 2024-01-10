@@ -1,16 +1,13 @@
-<mat-card>
-  <ng-template #noData>
-    <no-data></no-data>
-  </ng-template>
-  <mat-action-list *ngIf="operationReviseList.length > 0; else noData">
-    <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let operationRevise of operationReviseList">
-      <span matListItemTitle>{{operationRevise.parser.name}} ({{operationRevise.account.name}})</span>
-      <mat-menu #menu>
-        <button mat-menu-item (click)="edit(operationRevise.id!)">Edit</button>
-        <button mat-menu-item (click)="delete(operationRevise.id!)">Delete</button>
-      </mat-menu>
-    </button>
-  </mat-action-list>
-</mat-card>
+<mat-action-list *ifHasData="operationReviseList.length > 0">
+  <button mat-list-item [matMenuTriggerFor]="menu" *ngFor="let operationRevise of operationReviseList">
+    <span matListItemTitle>{{operationRevise.parser.name}} ({{operationRevise.account.name}})</span>
+    <mat-menu #menu>
+      <button mat-menu-item (click)="edit(operationRevise.id!)">Edit</button>
+      <button mat-menu-item (click)="delete(operationRevise.id!)">Delete</button>
+    </mat-menu>
+  </button>
+</mat-action-list>
 
-<button mat-fab class="fab" (click)="add()"><mat-icon>add</mat-icon></button>
+<fab-group>
+  <button (click)="add()"><mat-icon>add</mat-icon></button>
+</fab-group>

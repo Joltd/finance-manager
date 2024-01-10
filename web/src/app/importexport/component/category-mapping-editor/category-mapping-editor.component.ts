@@ -11,7 +11,7 @@ import {CategoryMappingViewComponent} from "../category-mapping-view/category-ma
   templateUrl: './category-mapping-editor.component.html',
   styleUrls: ['./category-mapping-editor.component.scss']
 })
-export class CategoryMappingEditorComponent implements OnInit, OnDestroy {
+export class CategoryMappingEditorComponent {
 
   categoryMapping!: CategoryMapping
 
@@ -22,7 +22,6 @@ export class CategoryMappingEditorComponent implements OnInit, OnDestroy {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private categoryMappingService: CategoryMappingService,
-    private toolbarService: ToolbarService,
   ) {
     this.activatedRoute.params.subscribe(params => {
       let id = params['id']
@@ -31,18 +30,6 @@ export class CategoryMappingEditorComponent implements OnInit, OnDestroy {
           .subscribe(result => this.categoryMapping = result)
       }
     })
-  }
-
-  ngOnInit(): void {
-    this.toolbarService.setupSaveClose(
-      'Category Mapping',
-      () => this.save(),
-      () => this.close()
-    )
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
   }
 
   save() {

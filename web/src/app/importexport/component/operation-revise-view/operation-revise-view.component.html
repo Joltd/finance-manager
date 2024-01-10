@@ -1,3 +1,13 @@
+<toolbar-content title="Operation Revise">
+  @if (id) {
+    <toolbar-button name="Revise" icon="difference" (click)="repeatRevise()"></toolbar-button>
+    <toolbar-button name="Close" icon="close" (click)="close()"></toolbar-button>
+  } @else {
+    <toolbar-button name="Save" icon="done" (click)="save()"></toolbar-button>
+    <toolbar-button name="Close" icon="close" (click)="close()"></toolbar-button>
+  }
+</toolbar-content>
+
 <mat-card *ngIf="operationRevise?.id == null">
   <mat-card-content>
     <form [formGroup]="form">

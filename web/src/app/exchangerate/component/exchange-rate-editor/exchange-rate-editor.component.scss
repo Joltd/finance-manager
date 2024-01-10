@@ -1,19 +1,9 @@
 :host {
   display: grid;
-  grid-gap: 1em;
-}
-
-.toolbar {
-  display: grid;
-  grid-template-columns: 1fr min-content min-content;
-  align-items: center;
-
-  .title {
-    font-size: 1.5em;
-  }
 }
 
 form {
-  display: grid;
-  grid-auto-flow: row;
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
 }

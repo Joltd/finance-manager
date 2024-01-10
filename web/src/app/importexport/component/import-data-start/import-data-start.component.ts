@@ -9,7 +9,7 @@ import {ToolbarService} from "../../../common/service/toolbar.service";
   templateUrl: "./import-data-start.component.html",
   styleUrls: ["./import-data-start.component.scss"]
 })
-export class ImportDataStartComponent implements OnInit, OnDestroy {
+export class ImportDataStartComponent {
 
   form: FormGroup = new FormGroup({
     parser: new FormControl(null, Validators.required),
@@ -22,14 +22,6 @@ export class ImportDataStartComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private router: Router
   ) {}
-
-  ngOnInit(): void {
-    this.toolbarService.setupSaveClose('Import', () => this.start(), () => this.close())
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
-  }
 
   start() {
     if (this.form.invalid) {

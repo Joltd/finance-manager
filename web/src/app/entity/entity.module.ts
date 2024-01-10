@@ -13,7 +13,6 @@ import { EntityFilterComponent } from "./component/entity-filter/entity-filter.c
 import { EntitySortComponent } from "./component/entity-sort/entity-sort.component";
 import { MatDialogActions, MatDialogClose, MatDialogContent } from "@angular/material/dialog";
 import { MatSelectModule } from "@angular/material/select";
-import { EntityFilterInputComponent } from "./component/entity-filter-input/entity-filter-input.component";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatInputModule } from "@angular/material/input";
@@ -32,7 +31,6 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
     EntityLabelComponent,
     EntityFilterComponent,
     EntityFilterConditionComponent,
-    EntityFilterInputComponent,
     EntitySortComponent,
     EntityEditorComponent
   ],
@@ -68,7 +66,6 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
     EntityLabelComponent,
     EntityFilterComponent,
     EntityFilterConditionComponent,
-    EntityFilterInputComponent,
     EntitySortComponent,
     EntityEditorComponent
   ]

@@ -9,24 +9,6 @@ export class ToolbarService {
   title: string = 'Finance Manager'
   commands: Command[] = []
 
-  setupSaveClose(title: string, onSave: () => void, onClose: () => void) {
-    this.setup(
-      title,
-      [
-        {
-          name: 'save',
-          icon: 'done',
-          action: onSave
-        },
-        {
-          name: 'close',
-          icon: 'close',
-          action: onClose
-        }
-      ]
-    )
-  }
-
   setupTitle(title: string) {
     setTimeout(() => this.title = title, 100)
   }
