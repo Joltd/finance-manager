@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import {
   EntityField, EntityFieldType,
-  EntityFilterCondition,
+  EntityFilterExpression,
   EntityFilterDialogData, EntityFilterOperator,
 } from "../../model/entity";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
@@ -85,7 +85,7 @@ export class EntityFilterComponent implements OnInit {
     }
   }
 
-  result(): EntityFilterCondition[] {
+  result(): EntityFilterExpression[] {
     return this.conditions
       .filter(condition => condition.field != null)
       .map(condition => {

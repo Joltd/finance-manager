@@ -5,14 +5,14 @@ import {Operation, OperationPage} from "../model/operation";
 import {Observable} from "rxjs";
 import {Router} from "@angular/router";
 import * as moment from "moment";
-import { EntityFilterCondition, EntityPage } from "../../entity/model/entity";
+import { EntityFilterExpression, EntityPage } from "../../entity/model/entity";
 
 @Injectable({
   providedIn: 'root'
 })
 export class OperationService {
 
-  filter: EntityFilterCondition[] = []
+  filter: EntityFilterExpression[] = []
   operationPage: EntityPage = {
     total: 0,
     page: 0,

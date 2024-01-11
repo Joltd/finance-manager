@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Entity, EntityFilterCondition, EntityPage, EntitySortEntry } from "../model/entity";
+import { Entity, EntityFilterExpression, EntityPage, EntitySortEntry } from "../model/entity";
 import { lastValueFrom, Observable } from "rxjs";
 import { Reference } from "../../common/model/reference";
 
@@ -11,7 +11,7 @@ export class EntityService {
 
   entities: Entity[] = []
   entity!: Entity
-  filter: EntityFilterCondition[] = []
+  filter: EntityFilterExpression[] = []
   sort: EntitySortEntry[] = []
   page: EntityPage = {
     total: 0,

@@ -1,0 +1,15 @@
+.content {
+  max-height: 100vh;
+  height: 100%;
+}
+
+.filter-node {
+  display: grid;
+  grid-template-columns: min-content 1fr min-content min-content;
+  align-items: center;
+}
+
+.button-filler {
+  flex-grow: 1;
+}
+

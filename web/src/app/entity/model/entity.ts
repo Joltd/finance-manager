@@ -57,7 +57,7 @@ export type EntityFilterOperator =
   'AMOUNT_LESS' |
   'AMOUNT_LESS_EQUALS'
 
-export interface EntityFilterCondition {
+export interface EntityFilterExpression {
   id: number,
   field: string,
   operator: EntityFilterOperator,
@@ -66,5 +66,22 @@ export interface EntityFilterCondition {
 
 export interface EntityFilterDialogData {
   fields: EntityField[]
-  conditions: EntityFilterCondition[]
+  conditions: EntityFilterExpression[]
+  newCondition: EntityFilterNode
 }
+
+export interface EntityFilterExpressionDialogData {
+  fields: EntityField[]
+  expression: EntityFilterExpression
+}
+
+export interface EntityFilterNode {
+  negate: boolean
+  expression: EntityFilterExpression | null
+  condition: EntityFilterCondition | null
+  children: EntityFilterNode[]
+}
+
+export type EntityFilterCondition =
+  'AND' |
+  'OR'

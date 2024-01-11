@@ -1,0 +1,82 @@
+<div matDialogContent class="content">
+
+  <mat-form-field>
+    <mat-label>Field</mat-label>
+    <mat-select [(ngModel)]="expression.field">
+      @for (field of fields; track field.name) {
+        <mat-option [value]="field">{{field.name}}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (expression.field) {
+    <mat-form-field>
+      <mat-label>Operator</mat-label>
+      <mat-select [(ngModel)]="expression.operator">
+        @for (operator of getOperators(expression.field.type); track operator.operator) {
+          <mat-option [value]="operator.operator">{{operator.label}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+
+  @if (isValueInputVisible()) {
+
+    <mat-form-field>
+      <mat-label>Value</mat-label>
+
+      @if (isMultiselectInput()) {
+
+      <mat-select [(ngModel)]="expression.value" multiple>
+        @if (expression.field.nullable) {
+          <mat-option [value]="null">Empty</mat-option>
+        }
+
+        @switch (expression.field.type) {
+          @case ('REFERENCE') {
+            @for (reference of getReferences() | async; track reference.id) {
+              <mat-option [value]="reference.id">{{reference.name}}</mat-option>
+            }
+          }
+          @case ('ENUM') {
+            @for (enumValue of expression.field.enumConstants; track enumValue) {
+              <mat-option [value]="enumValue">{{enumValue}}</mat-option>
+            }
+          }
+          @case ('BOOLEAN') {
+            <mat-option [value]="true">True</mat-option>
+            <mat-option [value]="false">False</mat-option>
+          }
+          @case ('AMOUNT') {
+            @for (currency of getCurrencies(); track currency.name) {
+              <mat-option [value]="currency.name">{{currency.name}}</mat-option>
+            }
+          }
+        }
+      </mat-select>
+
+      } @else if(isDateInput()) {
+
+        <input matInput [(ngModel)]="expression.value" [matDatepicker]="picker" readonly (click)="picker.open()">
+        <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+
+      } @else if (isNumberInput()) {
+
+        <input matInput [(ngModel)]="expression.value" type="number">
+
+      } @else {
+
+        <input matInput [(ngModel)]="expression.value">
+
+      }
+
+    </mat-form-field>
+
+  }
+
+</div>
+
+<div matDialogActions>
+  <button mat-raised-button color="primary" (click)="save()">Save</button>
+  <button mat-button (click)="close()">Cancel</button>
+</div>

@@ -9,6 +9,7 @@ import { EntityFilterComponent } from "../entity-filter/entity-filter.component"
 import { EntitySortComponent } from "../entity-sort/entity-sort.component";
 import { Entity } from "../../model/entity";
 import { AdaptiveService } from "../../../common/service/adaptive.service";
+import { EntityFilterNewComponent } from "../entity-filter-new/entity-filter-new.component";
 
 @Component({
   selector: 'entity-browser',
@@ -85,20 +86,12 @@ export class EntityBrowserComponent implements OnInit {
 
   openFilter() {
     let config = {
-      width: '700px',
-      height: '500px',
       data: {
         fields: this.entityService.entity.fields,
         conditions: this.entityService.filter,
       }
-    } as any
-    if (!this.adaptiveService.desktop) {
-      config.width = '90vw'
-      config.height = '85vh'
-      config.maxWidth = '90vw'
-      config.maxHeight = '85vh'
     }
-    this.dialog.open(EntityFilterComponent, config)
+    this.dialog.open(EntityFilterNewComponent, config)
       .afterClosed()
       .subscribe((result) => {
         if (result) {

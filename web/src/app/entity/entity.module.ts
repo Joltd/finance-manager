@@ -16,13 +16,18 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatInputModule } from "@angular/material/input";
-import { EntityFilterConditionComponent } from "./component/entity-filter-condition/entity-filter-condition.component";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { RouterLink } from "@angular/router";
 import { MatSortModule } from "@angular/material/sort";
 import { MatRippleModule } from "@angular/material/core";
 import { EntityEditorComponent } from "./component/entity-editor/entity-editor.component";
 import { MatDatepickerModule } from "@angular/material/datepicker";
+import { EntityFilterNewComponent } from "./component/entity-filter-new/entity-filter-new.component";
+import { MatTreeModule } from "@angular/material/tree";
+import {
+  EntityFilterExpressionComponent
+} from "./component/entity-filter-expression/entity-filter-expression.component";
+import { MatMenuModule } from "@angular/material/menu";
 
 @NgModule({
   declarations: [
@@ -30,9 +35,10 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
     EntityBrowserComponent,
     EntityLabelComponent,
     EntityFilterComponent,
-    EntityFilterConditionComponent,
+    EntityFilterExpressionComponent,
     EntitySortComponent,
-    EntityEditorComponent
+    EntityEditorComponent,
+    EntityFilterNewComponent
   ],
   imports: [
     CommonModule,
@@ -57,7 +63,9 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
     ReactiveFormsModule,
     MatDialogClose,
     AsyncPipe,
-    NgClass
+    NgClass,
+    MatTreeModule,
+    MatMenuModule
   ],
   providers: [],
   exports: [
@@ -65,9 +73,10 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
     EntityBrowserComponent,
     EntityLabelComponent,
     EntityFilterComponent,
-    EntityFilterConditionComponent,
+    EntityFilterExpressionComponent,
     EntitySortComponent,
-    EntityEditorComponent
+    EntityEditorComponent,
+    EntityFilterNewComponent
   ]
 })
 export class EntityModule {}
