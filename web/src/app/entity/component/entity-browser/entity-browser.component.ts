@@ -5,11 +5,10 @@ import { PageEvent } from "@angular/material/paginator";
 import { firstValueFrom } from "rxjs";
 import { ArrayDataSource } from "@angular/cdk/collections";
 import { MatDialog } from "@angular/material/dialog";
-import { EntityFilterComponent } from "../entity-filter/entity-filter.component";
 import { EntitySortComponent } from "../entity-sort/entity-sort.component";
 import { Entity } from "../../model/entity";
 import { AdaptiveService } from "../../../common/service/adaptive.service";
-import { EntityFilterNewComponent } from "../entity-filter-new/entity-filter-new.component";
+import { EntityFilterComponent } from "../entity-filter/entity-filter.component";
 
 @Component({
   selector: 'entity-browser',
@@ -88,10 +87,10 @@ export class EntityBrowserComponent implements OnInit {
     let config = {
       data: {
         fields: this.entityService.entity.fields,
-        conditions: this.entityService.filter,
+        filter: this.entityService.filter,
       }
     }
-    this.dialog.open(EntityFilterNewComponent, config)
+    this.dialog.open(EntityFilterComponent, config)
       .afterClosed()
       .subscribe((result) => {
         if (result) {

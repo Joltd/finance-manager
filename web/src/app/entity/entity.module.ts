@@ -22,23 +22,23 @@ import { MatSortModule } from "@angular/material/sort";
 import { MatRippleModule } from "@angular/material/core";
 import { EntityEditorComponent } from "./component/entity-editor/entity-editor.component";
 import { MatDatepickerModule } from "@angular/material/datepicker";
-import { EntityFilterNewComponent } from "./component/entity-filter-new/entity-filter-new.component";
 import { MatTreeModule } from "@angular/material/tree";
 import {
   EntityFilterExpressionComponent
 } from "./component/entity-filter-expression/entity-filter-expression.component";
 import { MatMenuModule } from "@angular/material/menu";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { MatCheckboxModule } from "@angular/material/checkbox";
 
 @NgModule({
   declarations: [
     EntityListComponent,
     EntityBrowserComponent,
     EntityLabelComponent,
-    EntityFilterComponent,
     EntityFilterExpressionComponent,
     EntitySortComponent,
     EntityEditorComponent,
-    EntityFilterNewComponent
+    EntityFilterComponent
   ],
   imports: [
     CommonModule,
@@ -65,18 +65,19 @@ import { MatMenuModule } from "@angular/material/menu";
     AsyncPipe,
     NgClass,
     MatTreeModule,
-    MatMenuModule
+    MatMenuModule,
+    MatButtonToggleModule,
+    MatCheckboxModule
   ],
   providers: [],
   exports: [
     EntityListComponent,
     EntityBrowserComponent,
     EntityLabelComponent,
-    EntityFilterComponent,
     EntityFilterExpressionComponent,
     EntitySortComponent,
     EntityEditorComponent,
-    EntityFilterNewComponent
+    EntityFilterComponent
   ]
 })
 export class EntityModule {}

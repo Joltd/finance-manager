@@ -64,9 +64,11 @@ class EntityService(
         //
         val countQuery = cb.createQuery(Long::class.java)
         val countRoot = countQuery.from(entity.type)
-        val countPredicate = conditionBuilderService.build(request.filter, entity.fields, countRoot, cb)
+        request.filter
+            ?.let { conditionBuilderService.build(request.filter, entity.fields, countRoot, cb) }
+            ?.let { countQuery.where(it) }
         countQuery.select(cb.count(countRoot))
-        countQuery.where(countPredicate)
+
         val count = entityManager.createQuery(countQuery)
             .singleResult
 
@@ -74,8 +76,9 @@ class EntityService(
 
         val query = cb.createQuery()
         val root = query.from(entity.type)
-        val predicate = conditionBuilderService.build(request.filter, entity.fields, root, cb)
-        query.where(predicate)
+        request.filter
+            ?.let { conditionBuilderService.build(request.filter, entity.fields, root, cb) }
+            ?.let { query.where(it) }
         query.orderBy(request.sort.map {
             when (it.direction) {
                 SortDirection.ASC -> cb.asc(root.get<Any>(it.field))

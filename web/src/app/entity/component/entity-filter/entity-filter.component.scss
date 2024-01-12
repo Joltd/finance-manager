@@ -1,22 +1,26 @@
 .content {
   max-height: 100vh;
+  height: 100%;
 }
 
-.content-desktop {
-
-}
-
-.entry {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr min-content;
-  grid-gap: 10px;
+.filter-node {
+  display: flex;
   align-items: center;
-
-  .icon {
-    margin-bottom: 20px;
-  }
+  margin-bottom: 10px;
 }
 
-.button-filler {
+.filler {
   flex-grow: 1;
+}
+
+.filter-tree .mat-nested-tree-node div[role=group] {
+  padding-left: 40px;
+}
+
+.filter-tree div[role=group] > .filter-node {
+  padding-left: 40px;
+}
+
+.negate {
+  margin-right: 10px;
 }

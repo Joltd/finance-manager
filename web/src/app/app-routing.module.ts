@@ -36,8 +36,6 @@ import {
 } from "./importexport/component/operation-revise-browser/operation-revise-browser.component";
 import { EntityBrowserComponent } from "./entity/component/entity-browser/entity-browser.component";
 import { EntityListComponent } from "./entity/component/entity-list/entity-list.component";
-import { EntitySortComponent } from "./entity/component/entity-sort/entity-sort.component";
-import { EntityFilterComponent } from "./entity/component/entity-filter/entity-filter.component";
 import { EntityEditorComponent } from "./entity/component/entity-editor/entity-editor.component";
 
 const routes: Routes = [

@@ -1,10 +1,7 @@
 package com.evgenltd.financemanager.entity.service
 
 import com.evgenltd.financemanager.common.util.toAmountValue
-import com.evgenltd.financemanager.entity.record.EntityFieldRecord
-import com.evgenltd.financemanager.entity.record.EntityFieldType
-import com.evgenltd.financemanager.entity.record.EntityFilterConditionRecord
-import com.evgenltd.financemanager.entity.record.EntityFilterOperator
+import com.evgenltd.financemanager.entity.record.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Path
@@ -20,28 +17,36 @@ class ConditionBuilderService(
 ) {
 
     fun <T> build(
-        filter: List<EntityFilterConditionRecord>,
+        filter: EntityFilterNodeRecord,
         fields: List<EntityFieldRecord>,
         root: Root<T>,
         cb: CriteriaBuilder,
     ): Predicate {
-        val fieldIndex = fields.associateBy { it.name }
-        return filter.map { it.toPredicate(root, cb, fieldIndex) }
-            .let { cb.and(*it.toTypedArray()) }
-    }
 
-    fun <T> build(
-        filter: List<EntityFilterConditionRecord>,
-        fields: List<EntityFieldRecord>,
-    ): Specification<T> {
-        val fieldIndex = fields.associateBy { it.name }
-        return Specification { root, _, cb ->
-            filter.map { it.toPredicate(root, cb, fieldIndex) }
-                .let { cb.and(*it.toTypedArray()) }
+        val predicate = if (filter.condition != null) {
+            filter.children
+                .map { build(it, fields, root, cb) }
+                .let {
+                    when (filter.condition) {
+                        EntityFilterCondition.AND -> cb.and(*it.toTypedArray())
+                        EntityFilterCondition.OR -> cb.or(*it.toTypedArray())
+                    }
+                }
+        } else if (filter.expression != null) {
+            filter.expression.toPredicate(root, cb, fields.associateBy { it.name })
+        } else {
+            cb.conjunction()
         }
+
+        return if (filter.negate) {
+            cb.not(predicate)
+        } else {
+            predicate
+        }
+
     }
 
-    private fun <T> EntityFilterConditionRecord.toPredicate(root: Root<T>, cb: CriteriaBuilder, fields: Map<String, EntityFieldRecord>): Predicate {
+    private fun <T> EntityFilterExpressionRecord.toPredicate(root: Root<T>, cb: CriteriaBuilder, fields: Map<String, EntityFieldRecord>): Predicate {
         val field = fields[field]!!
 
         val fieldPath = field.fieldPath(root, operator)

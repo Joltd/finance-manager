@@ -3,7 +3,7 @@ import {
   EntityField,
   EntityFieldType,
   EntityFilterExpression, EntityFilterExpressionDialogData,
-  EntityFilterOperator
+  EntityFilterOperator, OPERATOR_LABELS
 } from "../../model/entity";
 import { Reference } from "../../../common/model/reference";
 import { lastValueFrom } from "rxjs";
@@ -30,28 +30,6 @@ export class EntityFilterExpressionComponent {
     'REFERENCE': ['IN_LIST', 'NOT_IN_LIST',],
     'JSON': [],
   }
-  private operators: InternalEntityFilterOperator[] = [
-    { operator: 'EQUALS', label: 'equals...' },
-    { operator: 'NOT_EQUALS', label: 'not equals...' },
-    { operator: 'GREATER', label: 'greater....' },
-    { operator: 'GREATER_EQUALS', label: 'greater or equals...' },
-    { operator: 'LESS', label: 'less than...' },
-    { operator: 'LESS_EQUALS', label: 'less or equals...' },
-    { operator: 'LIKE', label: 'like...' },
-    { operator: 'NOT_LIKE', label: 'not like...' },
-    { operator: 'IN_LIST', label: 'in list...' },
-    { operator: 'NOT_IN_LIST', label: 'not in list...' },
-    { operator: 'IS_NULL', label: 'is null' },
-    { operator: 'IS_NOT_NULL', label: 'is not null' },
-    { operator: 'CURRENCY_IN_LIST', label: 'currency in list...' },
-    { operator: 'CURRENCY_NOT_IN_LIST', label: 'currency not in list...' },
-    { operator: 'AMOUNT_EQUALS', label: 'amount equals...' },
-    { operator: 'AMOUNT_NOT_EQUALS', label: 'amount not equals...' },
-    { operator: 'AMOUNT_GREATER', label: 'amount greater...' },
-    { operator: 'AMOUNT_GREATER_EQUALS', label: 'amount greater equals...' },
-    { operator: 'AMOUNT_LESS', label: 'amount less...' },
-    { operator: 'AMOUNT_LESS_EQUALS', label: 'amount less or equals...' },
-  ]
   private references: { [key: string]: Reference[] } = {}
 
   fields: EntityField[] = []
@@ -86,8 +64,10 @@ export class EntityFilterExpressionComponent {
     this.dialogRef.close()
   }
 
-  getOperators(fieldType: EntityFieldType): InternalEntityFilterOperator[] {
-    return this.operators.filter(operator => this.config[fieldType].includes(operator.operator))
+  getOperators(fieldType: EntityFieldType): EntityFilterOperator[] {
+    return Object.keys(OPERATOR_LABELS)
+      .map(key => key as EntityFilterOperator)
+      .filter(operator => this.config[fieldType].includes(operator))
   }
 
   async getReferences(): Promise<Reference[]> {
@@ -161,6 +141,7 @@ export class EntityFilterExpressionComponent {
     )
   }
 
+  protected readonly OPERATOR_LABELS = OPERATOR_LABELS;
 }
 
 interface InternalEntityFilterOperator {

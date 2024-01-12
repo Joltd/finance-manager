@@ -1,9 +1,3 @@
-export interface Entity {
-  name: string
-  label: string
-  fields: EntityField[]
-}
-
 export type EntityFieldType =
   'ID' |
   'STRING' |
@@ -14,26 +8,6 @@ export type EntityFieldType =
   'ENUM' |
   'REFERENCE' |
   'JSON'
-
-export interface EntityField {
-  name: string
-  type: EntityFieldType
-  nullable: boolean
-  referenceName: string | null
-  enumConstants: string[]
-}
-
-export interface EntityPage {
-  total: number
-  page: number
-  size: number
-  values: any[]
-}
-
-export interface EntitySortEntry {
-  field: string
-  direction: 'ASC' | 'DESC'
-}
 
 export type EntityFilterOperator =
   'EQUALS' |
@@ -57,6 +31,68 @@ export type EntityFilterOperator =
   'AMOUNT_LESS' |
   'AMOUNT_LESS_EQUALS'
 
+
+export type EntityFilterCondition =
+  'AND' |
+  'OR'
+
+export const OPERATOR_LABELS: { [key in EntityFilterOperator]: string } = {
+  'EQUALS': 'equals...',
+  'NOT_EQUALS': 'not equals...',
+  'GREATER': 'greater....',
+  'GREATER_EQUALS': 'greater or equals...',
+  'LESS': 'less than...',
+  'LESS_EQUALS': 'less or equals...',
+  'LIKE': 'like...',
+  'NOT_LIKE': 'not like...',
+  'IN_LIST': 'in list...',
+  'NOT_IN_LIST': 'not in list...',
+  'IS_NULL': 'is null',
+  'IS_NOT_NULL': 'is not null',
+  'CURRENCY_IN_LIST': 'currency in list...',
+  'CURRENCY_NOT_IN_LIST': 'currency not in list...',
+  'AMOUNT_EQUALS': 'amount equals...',
+  'AMOUNT_NOT_EQUALS': 'amount not equals...',
+  'AMOUNT_GREATER': 'amount greater...',
+  'AMOUNT_GREATER_EQUALS': 'amount greater equals...',
+  'AMOUNT_LESS': 'amount less...',
+  'AMOUNT_LESS_EQUALS': 'amount less or equals...',
+}
+
+export interface Entity {
+  name: string
+  label: string
+  fields: EntityField[]
+}
+
+export interface EntityField {
+  name: string
+  type: EntityFieldType
+  nullable: boolean
+  referenceName: string | null
+  enumConstants: string[]
+}
+
+export interface EntityPage {
+  total: number
+  page: number
+  size: number
+  values: any[]
+}
+
+export interface EntityFilterNode {
+  id: number
+  negate: boolean
+  expression: EntityFilterExpression | null
+  condition: EntityFilterCondition | null
+  children: EntityFilterNode[]
+}
+
+export interface EntitySortEntry {
+  field: string
+  direction: 'ASC' | 'DESC'
+}
+
 export interface EntityFilterExpression {
   id: number,
   field: string,
@@ -66,8 +102,7 @@ export interface EntityFilterExpression {
 
 export interface EntityFilterDialogData {
   fields: EntityField[]
-  conditions: EntityFilterExpression[]
-  newCondition: EntityFilterNode
+  filter: EntityFilterNode
 }
 
 export interface EntityFilterExpressionDialogData {
@@ -75,13 +110,3 @@ export interface EntityFilterExpressionDialogData {
   expression: EntityFilterExpression
 }
 
-export interface EntityFilterNode {
-  negate: boolean
-  expression: EntityFilterExpression | null
-  condition: EntityFilterCondition | null
-  children: EntityFilterNode[]
-}
-
-export type EntityFilterCondition =
-  'AND' |
-  'OR'

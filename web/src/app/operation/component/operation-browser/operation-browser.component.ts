@@ -1,10 +1,9 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, ViewChild} from "@angular/core";
 import {Router} from "@angular/router";
 import {OperationService} from "../../service/operation.service";
 import {PageEvent} from "@angular/material/paginator";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {MatExpansionPanel} from "@angular/material/expansion";
-import {Amount} from "../../../common/model/amount";
 import { EntityFilterComponent } from "../../../entity/component/entity-filter/entity-filter.component";
 import { MatDialog } from "@angular/material/dialog";
 import { EntityService } from "../../../entity/service/entity.service";

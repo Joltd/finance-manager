@@ -57,6 +57,19 @@ enum class EntityFilterOperator {
     AMOUNT_LESS_EQUALS,
 }
 
+data class EntityFilterExpressionRecord(
+    val field: String,
+    val operator: EntityFilterOperator,
+    val value: Any?,
+)
+
+data class EntityFilterNodeRecord(
+    val negate: Boolean,
+    val expression: EntityFilterExpressionRecord?,
+    val condition: EntityFilterCondition?,
+    val children: List<EntityFilterNodeRecord>,
+)
+
 data class EntityFilterConditionRecord(
     val field: String,
     val operator: EntityFilterOperator,
@@ -73,7 +86,7 @@ enum class SortDirection {
 data class EntityListRequest(
     val page: Int = 0,
     val size: Int = 50,
-    val filter: List<EntityFilterConditionRecord> = emptyList(),
+    val filter: EntityFilterNodeRecord?,
     val sort: List<EntitySortEntryRecord> = emptyList(),
 )
 
@@ -89,3 +102,8 @@ data class SelectQuery(
     val countQuery: String,
     val parameters: Map<String,Any?>,
 )
+
+enum class EntityFilterCondition {
+    AND,
+    OR,
+}

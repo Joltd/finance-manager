@@ -1,95 +1,45 @@
 <div matDialogContent class="content">
-  @for (condition of conditions; track condition.id) {
-    <div class="entry">
+  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="filter-tree">
 
-      <mat-form-field>
-        <mat-label>Field</mat-label>
-        <mat-select [(ngModel)]="condition.field">
-          @for (field of fields; track field.name) {
-            <mat-option [value]="field">{{field.name}}</mat-option>
+    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="filter-node">
+      <mat-checkbox class="negate" [(ngModel)]="node.negate">Not</mat-checkbox>
+      {{node.expression?.field}} {{operatorLabel(node.expression?.operator)}} {{node.expression?.value}}
+      <div class="filler"></div>
+      <button mat-icon-button [matMenuTriggerFor]="expressionMenu"><mat-icon>more_vert</mat-icon></button>
+      <mat-menu #expressionMenu>
+        <button mat-menu-item (click)="edit(node)">Edit</button>
+        <button mat-menu-item (click)="delete(node)">Delete</button>
+      </mat-menu>
+    </mat-tree-node>
+
+    <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+      <div class="filter-node">
+        <button mat-icon-button matTreeNodeToggle [disabled]="node.children.length == 0">
+          <mat-icon>{{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}</mat-icon>
+        </button>
+        <mat-checkbox class="negate" [(ngModel)]="node.negate">Not</mat-checkbox>
+        <mat-button-toggle-group [(ngModel)]="node.condition">
+          <mat-button-toggle [value]="'AND'">And</mat-button-toggle>
+          <mat-button-toggle [value]="'OR'">Or</mat-button-toggle>
+        </mat-button-toggle-group>
+        <div class="filler"></div>
+        <button mat-icon-button [matMenuTriggerFor]="conditionMenu"><mat-icon>more_vert</mat-icon></button>
+        <mat-menu #conditionMenu>
+          <button mat-menu-item (click)="addCondition(node)">Add condition</button>
+          <button mat-menu-item (click)="addExpression(node)">Add expression</button>
+          @if (!isRoot(node)) {
+            <button mat-menu-item (click)="delete(node)">Delete</button>
           }
-        </mat-select>
-      </mat-form-field>
+        </mat-menu>
+      </div>
+      <div [hidden]="!treeControl.isExpanded(node)" role="group">
+        <ng-container matTreeNodeOutlet></ng-container>
+      </div>
+    </mat-nested-tree-node>
 
-      @if (condition.field) {
-        <mat-form-field>
-          <mat-label>Operator</mat-label>
-          <mat-select [(ngModel)]="condition.operator">
-            @for (operator of getOperators(condition.field.type); track operator.operator) {
-              <mat-option [value]="operator.operator">{{operator.label}}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      } @else {
-        <div></div>
-      }
-
-      @if (isValueInputVisible(condition)) {
-
-        <mat-form-field>
-          <mat-label>Value</mat-label>
-
-          @if (isMultiselectInput(condition)) {
-
-            <mat-select [(ngModel)]="condition.value" multiple>
-              @if (condition.field.nullable) {
-                <mat-option [value]="null">Empty</mat-option>
-              }
-
-              @switch (condition.field.type) {
-                @case ('REFERENCE') {
-                  @for (reference of getReferences(condition.field.referenceName!!) | async; track reference.id) {
-                    <mat-option [value]="reference.id">{{reference.name}}</mat-option>
-                  }
-                }
-                @case ('ENUM') {
-                  @for (enumValue of condition.field.enumConstants; track enumValue) {
-                    <mat-option [value]="enumValue">{{enumValue}}</mat-option>
-                  }
-                }
-                @case ('BOOLEAN') {
-                  <mat-option [value]="true">True</mat-option>
-                  <mat-option [value]="false">False</mat-option>
-                }
-                @case ('AMOUNT') {
-                  @for (currency of getCurrencies(); track currency.name) {
-                    <mat-option [value]="currency.name">{{currency.name}}</mat-option>
-                  }
-                }
-              }
-            </mat-select>
-
-          } @else if(isDateInput(condition)) {
-
-            <input matInput [(ngModel)]="condition.value" [matDatepicker]="picker" readonly (click)="picker.open()">
-            <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
-
-          } @else if (isNumberInput(condition)) {
-
-            <input matInput [(ngModel)]="condition.value" type="number">
-
-          } @else {
-
-            <input matInput [(ngModel)]="condition.value">
-
-          }
-
-        </mat-form-field>
-
-      } @else {
-        <div></div>
-      }
-
-      <button class="icon" mat-icon-button (click)="remove(condition)">
-        <mat-icon>delete</mat-icon>
-      </button>
-
-    </div>
-  }
+  </mat-tree>
 </div>
 <div matDialogActions>
-  <button mat-button (click)="add()">Add</button>
-  <div class="button-filler"></div>
-  <button mat-raised-button color="primary" [mat-dialog-close]="result()">Apply</button>
-  <button mat-button mat-dialog-close>Close</button>
+  <button mat-raised-button color="primary" (click)="apply()">Apply</button>
+  <button mat-button (click)="close()">Close</button>
 </div>
