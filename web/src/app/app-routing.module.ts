@@ -64,7 +64,7 @@ const routes: Routes = [
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: 'candy', component: CandyDashboardComponent },
   { path: 'settings', component: SettingsEditorComponent },
-  { path: '', redirectTo: '/entity', pathMatch: 'full' }
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];
 
 @NgModule({
