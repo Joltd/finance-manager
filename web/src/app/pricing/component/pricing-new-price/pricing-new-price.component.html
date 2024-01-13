@@ -1,0 +1,82 @@
+<common-layout>
+  <toolbar-content>
+    <toolbar-button name="Save" icon="done" (click)="save()"></toolbar-button>
+  </toolbar-content>
+
+  <form [formGroup]="form">
+    <mat-stepper orientation="vertical">
+
+      <mat-step label="Select item">
+        <mat-form-field>
+          <mat-label>Item</mat-label>
+          <input matInput formControlName="item" (input)="searchItem()">
+        </mat-form-field>
+        <mat-action-list>
+          @for (item of items; track item.id) {
+            <button mat-list-item (click)="selectItem(item)">{{ item.name }} ({{item.defaultQuantity}} {{item.unit}})</button>
+          }
+        </mat-action-list>
+        <div>
+          <button mat-button matStepperNext type="button">New Item</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Create item">
+        <mat-form-field>
+          <mat-label>Item</mat-label>
+          <input matInput formControlName="item" [value]="form.getRawValue().item">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Category</mat-label>
+          <input matInput formControlName="category">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Unit</mat-label>
+          <input matInput formControlName="unit">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Default unit value</mat-label>
+          <input matInput formControlName="defaultQuantity" type="number">
+        </mat-form-field>
+        <div>
+          <button mat-raised-button matStepperNext type="button">To Price</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Fill price">
+        <mat-form-field>
+          <mat-label>Price</mat-label>
+          <amount-input formControlName="price"></amount-input>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Unit value</mat-label>
+          <input matInput formControlName="quantity" type="number">
+        </mat-form-field>
+        <div>
+          <button mat-button matStepperNext type="button">Other info</button>
+        </div>
+      </mat-step>
+
+      <mat-step label="Other info">
+        <mat-form-field>
+          <mat-label>Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" (click)="picker.open()" readonly>
+          <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Country</mat-label>
+          <input matInput formControlName="country">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Store</mat-label>
+          <input matInput formControlName="store">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Comment</mat-label>
+          <input matInput formControlName="comment">
+        </mat-form-field>
+      </mat-step>
+
+    </mat-stepper>
+  </form>
+</common-layout>

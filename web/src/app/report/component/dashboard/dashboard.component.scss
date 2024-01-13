@@ -1,14 +1,15 @@
 @use "../../../../variables";
 
-:host {
+common-layout {
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 20px;
   justify-items: center;
   align-items: center;
 }
 
 .cash {
+  justify-self: center;
   width: 10em;
 }
 

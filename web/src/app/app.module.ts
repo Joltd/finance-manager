@@ -31,6 +31,7 @@ import {OperationModule} from "./operation/operation.modules";
 import {ImportExportModule} from "./importexport/import-export.module";
 import { EntityModule } from "./entity/entity.module";
 import { CandyModule } from "./candy/candy.module";
+import { PricingModule } from "./pricing/pricing.module";
 
 @NgModule({
   declarations: [
@@ -67,6 +68,7 @@ import { CandyModule } from "./candy/candy.module";
     ImportExportModule,
     EntityModule,
     CandyModule,
+    PricingModule,
   ],
   providers: [
     restInterceptorProvider,

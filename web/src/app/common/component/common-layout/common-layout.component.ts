@@ -6,7 +6,7 @@ import { AdaptiveService } from "../../service/adaptive.service";
   templateUrl: 'common-layout.component.html',
   styleUrls: ['common-layout.component.scss']
 })
-export class CommonLayoutComponent implements OnInit, AfterViewInit {
+export class CommonLayoutComponent implements AfterViewInit {
 
   @Input()
   background: 'white' | 'gray' = 'white'
@@ -20,18 +20,10 @@ export class CommonLayoutComponent implements OnInit, AfterViewInit {
     private el: ElementRef
   ) {}
 
-  ngOnInit(): void {
-    // this.el.nativeElement.style.display = 'grid'
-    // this.el.nativeElement.style.overflow = 'hidden'
-    // if (this.adaptiveService.desktop) {
-    //   this.el.nativeElement.style.width = '600px'
-    // }
-  }
-
   ngAfterViewInit(): void {
     this.el.nativeElement.parentElement.style.display = 'grid'
     if (this.background == 'gray') {
-      this.el.nativeElement.parentElement.style.backgroundColor = '#f5f5f5'
+      this.el.nativeElement.parentElement.style.backgroundColor = '#BDBDBD'
     }
   }
 
