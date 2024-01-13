@@ -1,0 +1,35 @@
+:host {
+  display: grid;
+  background-color: gray;
+}
+
+common-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 20px;
+}
+
+.balance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.expense {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  .amount {
+    display: flex;
+    width: 20vw;
+    flex-direction: column;
+  }
+
+  .comment {
+    flex-grow: 1;
+    text-align: end;
+  }
+}

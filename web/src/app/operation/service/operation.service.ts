@@ -5,14 +5,14 @@ import {Operation, OperationPage} from "../model/operation";
 import {Observable} from "rxjs";
 import {Router} from "@angular/router";
 import * as moment from "moment";
-import { EntityFilterExpression, EntityPage } from "../../entity/model/entity";
+import { EntityFilterExpression, EntityFilterNode, EntityPage } from "../../entity/model/entity";
 
 @Injectable({
   providedIn: 'root'
 })
 export class OperationService {
 
-  filter: EntityFilterExpression[] = []
+  filter!: EntityFilterNode
   operationPage: EntityPage = {
     total: 0,
     page: 0,
@@ -25,18 +25,8 @@ export class OperationService {
     private router: Router
   ) {}
 
-  viewOperations(filter: any) {
-    // this.filter.setValue({
-    //   ...{
-    //     dateFrom: null,
-    //     dateTo: null,
-    //     type: null,
-    //     category: null,
-    //     account: null,
-    //     currency: null,
-    //   },
-    //   ...filter
-    // })
+  viewOperations(filter: EntityFilterNode) {
+    this.filter = filter
     this.operationPage.page = 0
     this.router.navigate(['operation']).then()
   }

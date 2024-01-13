@@ -61,10 +61,20 @@ class ExchangeRateService(
 
     fun delete(id: String) = exchangeRateRepository.deleteById(id)
 
-    fun rate(rateDate: LocalDate, fromCurrency: String, toCurrency: String): BigDecimal {
-        val date = rateDate.with(DayOfWeek.MONDAY)
+    fun actualRate(fromCurrency: String, toCurrency: String): BigDecimal =
+        rate(LocalDate.now().minusDays(1), fromCurrency, toCurrency)
+
+    fun rateStartOfWeek(date: LocalDate, fromCurrency: String, toCurrency: String): BigDecimal =
+        rate(date.with(DayOfWeek.MONDAY), fromCurrency, toCurrency)
+
+    fun rate(date: LocalDate, fromCurrency: String, toCurrency: String): BigDecimal {
+
         val from = mapCurrency(fromCurrency)
         val to = mapCurrency(toCurrency)
+
+        if (from == to) {
+            return BigDecimal.ONE
+        }
 
         val rates = exchangeRateRepository.findByDate(date)
         val directRate = rates.rate(from, to)

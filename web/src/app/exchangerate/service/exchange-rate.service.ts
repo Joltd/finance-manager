@@ -26,4 +26,11 @@ export class ExchangeRateService {
     return this.http.delete<void>('/exchange-rate/' + id)
   }
 
+  rate(from: string, to: string): Observable<number> {
+    let config = {
+      params: { from, to }
+    }
+    return this.http.get<number>('/exchange-rate/rate', config)
+  }
+
 }

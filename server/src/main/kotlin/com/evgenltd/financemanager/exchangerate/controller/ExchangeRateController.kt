@@ -7,7 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
+import java.time.LocalDate
 
 @RestController
 class ExchangeRateController(
@@ -25,5 +28,11 @@ class ExchangeRateController(
 
     @DeleteMapping("/exchange-rate/{id}")
     fun delete(@PathVariable("id") id: String) = exchangeRateService.delete(id)
+
+    @GetMapping("/exchange-rate/rate")
+    fun rate(
+        @RequestParam from: String,
+        @RequestParam to: String,
+    ): BigDecimal = exchangeRateService.actualRate(from, to)
 
 }

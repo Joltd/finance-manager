@@ -32,7 +32,6 @@ class OperationService(
     private val operationRepository: OperationRepository,
     private val operationConverter: OperationConverter,
     private val transactionService: TransactionService,
-    private val conditionBuilderService: ConditionBuilderService
 ) {
 
     fun list(filter: OperationFilter): OperationPage = pagedList(filter, Sort.by(Sort.Direction.DESC, Operation::date.name))
@@ -46,11 +45,6 @@ class OperationService(
                     .map { operationConverter.toRecord(it) }
             )
         }
-
-//    fun pageListNew(filter: List<EntityFilterConditionRecord>) {
-//        val specification = conditionBuilderService.build<Operation>(filter)
-//        operationRepository.findAll(specification, PageRequest.of(page, size, sort))
-//    }
 
     fun pagedList(filter: OperationFilter, sort: Sort = Sort.unsorted()): Page<Operation> =
         operationRepository.findAllByCondition(filter.page, filter.size, sort) {

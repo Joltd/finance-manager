@@ -37,6 +37,7 @@ import {
 import { EntityBrowserComponent } from "./entity/component/entity-browser/entity-browser.component";
 import { EntityListComponent } from "./entity/component/entity-list/entity-list.component";
 import { EntityEditorComponent } from "./entity/component/entity-editor/entity-editor.component";
+import { CandyDashboardComponent } from "./candy/component/candy-dashboard/candy-dashboard.component";
 
 const routes: Routes = [
   { path: 'entity', component: EntityListComponent },
@@ -61,6 +62,7 @@ const routes: Routes = [
   { path: 'cumulative-funds-chart', component: CumulativeFundsChartComponent },
   { path: 'exchange-rate', component: ExchangeRateBrowserComponent },
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
+  { path: 'candy', component: CandyDashboardComponent },
   { path: 'settings', component: SettingsEditorComponent },
   { path: '', redirectTo: '/entity', pathMatch: 'full' }
 ];

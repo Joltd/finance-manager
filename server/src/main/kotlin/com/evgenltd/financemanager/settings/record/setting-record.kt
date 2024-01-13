@@ -1,16 +1,24 @@
 package com.evgenltd.financemanager.settings.record
 
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.reference.record.Reference
+import java.time.temporal.ChronoUnit
 
 data class ApplicationSettings(
     val version: String,
     val operationDefaultCurrency: String?,
     val operationDefaultAccount: Reference?,
-    val operationCashAccount: Reference?
+    val operationCashAccount: Reference?,
+    val candyIncomeAmount: Amount?,
+    val candyIncomeFrequencyValue: Long?,
+    val candyIncomeFrequencyUnit: ChronoUnit?,
 )
 
 data class UpdateApplicationSettings(
     val operationDefaultCurrency: String?,
     val operationDefaultAccount: Reference?,
-    val operationCashAccount: Reference?
+    val operationCashAccount: Reference?,
+    val candyIncomeAmount: Amount?,
+    val candyIncomeFrequencyValue: Long?,
+    val candyIncomeFrequencyUnit: ChronoUnit?,
 )

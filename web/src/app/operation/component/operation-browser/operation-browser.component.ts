@@ -22,7 +22,6 @@ export class OperationBrowserComponent implements AfterViewInit {
     private router: Router,
     private entityService: EntityService,
     public operationService: OperationService,
-    private toolbarService: ToolbarService,
     private dialog: MatDialog
   ) {}
 
@@ -43,7 +42,7 @@ export class OperationBrowserComponent implements AfterViewInit {
     let config = {
       data: {
         fields: this.entityService.getEntity('Operation').fields,
-        conditions: this.operationService.filter,
+        filter: this.operationService.filter,
       }
     }
     this.dialog.open(EntityFilterComponent, config)

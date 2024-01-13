@@ -11,6 +11,7 @@ import {MatExpansionPanel} from "@angular/material/expansion";
 import {Router} from "@angular/router";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {OperationService} from "../../../operation/service/operation.service";
+import { and, expression, or } from "../../../entity/model/entity";
 
 @Component({
   selector: 'flow-chart',
@@ -77,14 +78,14 @@ export class FlowChartComponent implements OnInit, AfterViewInit, OnDestroy {
       return
     }
 
-    this.operationService.viewOperations({
-      dateFrom: moment(params.name).format('yyyy-MM-DD'),
-      dateTo: moment(params.name).add(1, 'month').format('yyyy-MM-DD'),
-      category: {
-        id: params.seriesId,
-        name: params.seriesName
-      }
-    })
+    this.operationService.viewOperations(and([
+      expression('date', 'GREATER_EQUALS', moment(params.name).format('yyyy-MM-DD')),
+      expression('date', 'LESS', moment(params.name).add(1, 'month').format('yyyy-MM-DD')),
+      or([
+        expression('accountFrom', 'EQUALS', params.seriesId),
+        expression('accountTo', 'EQUALS', params.seriesId),
+      ]),
+    ]))
   }
 
   apply() {

@@ -56,7 +56,7 @@ class CurrentFundsChartService(
         if (currency == "TRX") {
             return emptyAmount(target)
         }
-        val rate = exchangeRateService.rate(date, currency, target)
+        val rate = exchangeRateService.rateStartOfWeek(date, currency, target)
         return (toBigDecimal() * rate).fromFractional(target)
     }
 

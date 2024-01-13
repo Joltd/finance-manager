@@ -10,23 +10,25 @@ import {MatSelectModule} from "@angular/material/select";
 import {NgForOf} from "@angular/common";
 import {MatChipsModule} from "@angular/material/chips";
 import {ReferenceModule} from "../reference/reference.module";
+import { MatInputModule } from "@angular/material/input";
 
 @NgModule({
   declarations: [
     SettingsEditorComponent
   ],
-  imports: [
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    CommonModule,
-    ReactiveFormsModule,
-    MatSelectModule,
-    NgForOf,
-    MatChipsModule,
-    ReferenceModule
-  ],
+    imports: [
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        CommonModule,
+        ReactiveFormsModule,
+        MatSelectModule,
+        NgForOf,
+        MatChipsModule,
+        ReferenceModule,
+        MatInputModule
+    ],
   exports: [
     SettingsEditorComponent
   ]

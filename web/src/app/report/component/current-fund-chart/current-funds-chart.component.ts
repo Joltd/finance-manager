@@ -7,6 +7,7 @@ import {ToolbarService} from "../../../common/service/toolbar.service";
 import {Amount} from "../../../common/model/amount";
 import {OperationService} from "../../../operation/service/operation.service";
 import * as moment from "moment";
+import { and, expression, or } from "../../../entity/model/entity";
 
 @Component({
   selector: 'current-funds-chart',
@@ -63,10 +64,16 @@ export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
   }
 
   drillDown(entry: CurrentFundsChartEntry, amountEntry: CurrentFundsChartEntryAmount) {
-    this.operationService.viewOperations({
-      account: entry.account,
-      currency: amountEntry.amount.currency
-    })
+    this.operationService.viewOperations(and([
+      or([
+        expression('accountFrom', 'EQUALS', entry.account.id),
+        expression('accountTo', 'EQUALS', entry.account.id)
+      ]),
+      or([
+        expression('amountFrom', 'CURRENCY_IN_LIST', amountEntry.amount.currency),
+        expression('amountTo', 'CURRENCY_IN_LIST', amountEntry.amount.currency)
+      ])
+    ]))
   }
 
   reviseDateAgo(date: string): number {

@@ -110,3 +110,37 @@ export interface EntityFilterExpressionDialogData {
   expression: EntityFilterExpression
 }
 
+export function and(expressions: EntityFilterNode[]): EntityFilterNode {
+  return {
+    id: 0,
+    negate: false,
+    expression: null,
+    condition: 'AND',
+    children: []
+  }
+}
+
+export function or(expressions: EntityFilterNode[]): EntityFilterNode {
+  return {
+    id: 0,
+    negate: false,
+    expression: null,
+    condition: 'OR',
+    children: []
+  }
+}
+
+export function expression(field: string, operator: EntityFilterOperator, value: any): EntityFilterNode {
+  return {
+    id: 0,
+    negate: false,
+    expression: {
+      id: 0,
+      field: field,
+      operator: operator,
+      value: value
+    },
+    condition: null,
+    children: []
+  }
+}

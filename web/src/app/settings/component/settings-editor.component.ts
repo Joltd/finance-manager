@@ -11,30 +11,24 @@ import { CommonLayoutComponent } from "../../common/component/common-layout/comm
   templateUrl: 'settings-editor.component.html',
   styleUrls: ['settings-editor.component.scss']
 })
-export class SettingsEditorComponent implements OnInit,OnDestroy {
+export class SettingsEditorComponent implements OnInit {
 
   form: FormGroup = new FormGroup({
     operationDefaultCurrency: new FormControl(null),
     operationDefaultAccount: new FormControl(null),
-    operationCashAccount: new FormControl(null)
+    operationCashAccount: new FormControl(null),
+    candyIncomeAmount: new FormControl(null),
+    candyIncomeFrequencyValue: new FormControl(null),
+    candyIncomeFrequencyUnit: new FormControl(null),
   })
 
   constructor(
     public settingsService: SettingsService,
     private shortMessageService: ShortMessageService,
-    private toolbarService: ToolbarService
   ) {}
 
   ngOnInit(): void {
-    this.toolbarService.setup(
-      'Settings',
-      [{ name: 'save', icon: 'done', action: () => this.save() }]
-    )
     this.load()
-  }
-
-  ngOnDestroy(): void {
-    this.toolbarService.reset()
   }
 
   private load() {
@@ -42,8 +36,12 @@ export class SettingsEditorComponent implements OnInit,OnDestroy {
       .subscribe(settings => this.form.patchValue(settings))
   }
 
+  isInvalid(): boolean {
+    return this.form.invalid
+  }
+
   save() {
-    if (this.form.invalid) {
+    if (this.isInvalid()) {
       return
     }
     this.settingsService.update(this.form.value)

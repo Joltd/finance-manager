@@ -1,0 +1,36 @@
+<common-layout>
+
+  @if (dashboard) {
+    <mat-card>
+      <mat-card-content class="balance">
+        <amount-label [amount]="dashboard.balanceUsd"></amount-label>
+        <amount-label [amount]="dashboard.balance"></amount-label>
+      </mat-card-content>
+    </mat-card>
+
+    @if (dashboard.lastExpenses.length > 0) {
+      <mat-card>
+        <mat-card-content>
+          <mat-list>
+            @for (expense of dashboard.lastExpenses; track expense.id) {
+              <mat-list-item>
+                <div class="expense">
+                  <date-label [date]="expense.date"></date-label>
+                  <div class="amount">
+                    <amount-label [amount]="expense.amount"></amount-label>
+                    <amount-label [amount]="expense.amountUsd"></amount-label>
+                  </div>
+                  <div class="comment">{{expense.comment}}</div>
+                </div>
+              </mat-list-item>
+            }
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+
+  <fab-group>
+    <button mat-fab (click)="add()"><mat-icon>add</mat-icon></button>
+  </fab-group>
+</common-layout>

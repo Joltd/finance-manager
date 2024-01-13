@@ -30,6 +30,7 @@ import {SettingsModule} from "./settings/settings.module";
 import {OperationModule} from "./operation/operation.modules";
 import {ImportExportModule} from "./importexport/import-export.module";
 import { EntityModule } from "./entity/entity.module";
+import { CandyModule } from "./candy/candy.module";
 
 @NgModule({
   declarations: [
@@ -64,7 +65,8 @@ import { EntityModule } from "./entity/entity.module";
     SettingsModule,
     OperationModule,
     ImportExportModule,
-    EntityModule
+    EntityModule,
+    CandyModule,
   ],
   providers: [
     restInterceptorProvider,

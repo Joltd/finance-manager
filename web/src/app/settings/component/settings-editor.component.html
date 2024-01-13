@@ -1,20 +1,49 @@
 <common-layout>
   <form [formGroup]="form">
 
+    <h1>Operation</h1>
+
     <mat-form-field>
-      <mat-label>Operation default currency</mat-label>
+      <mat-label>Default currency</mat-label>
       <currency-input formControlName="operationDefaultCurrency"></currency-input>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Operation default account</mat-label>
+      <mat-label>Default account</mat-label>
       <account-input [types]="['ACCOUNT']" formControlName="operationDefaultAccount"></account-input>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Operation cash account</mat-label>
+      <mat-label>Cash account</mat-label>
       <account-input [types]="['ACCOUNT']" formControlName="operationCashAccount"></account-input>
     </mat-form-field>
 
+    <h1>Candy</h1>
+
+    <mat-form-field>
+      <mat-label>Amount</mat-label>
+      <amount-input formControlName="candyIncomeAmount"></amount-input>
+    </mat-form-field>
+
+    <div class="row">
+      <mat-form-field>
+        <mat-label>Frequency</mat-label>
+        <input matInput type="number" formControlName="candyIncomeFrequencyValue">
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Unit</mat-label>
+        <mat-select formControlName="candyIncomeFrequencyUnit">
+          <mat-option [value]="'DAYS'">Day</mat-option>
+          <mat-option [value]="'WEEKS'">Week</mat-option>
+          <mat-option [value]="'MONTHS'">Month</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
   </form>
+
+  <toolbar-content title="Settings">
+    <toolbar-button (click)="save()" icon="done" name="Save"></toolbar-button>
+  </toolbar-content>
 </common-layout>
