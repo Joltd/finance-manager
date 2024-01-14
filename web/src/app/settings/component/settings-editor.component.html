@@ -41,6 +41,14 @@
       </mat-form-field>
     </div>
 
+    <h1>Turnover</h1>
+
+    <mat-form-field>
+      <mat-label>Last update</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="turnoverLastUpdate" (click)="picker.open()" readonly>
+      <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+    </mat-form-field>
+
   </form>
 
   <toolbar-content title="Settings">

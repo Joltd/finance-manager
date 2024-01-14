@@ -20,6 +20,7 @@ export class SettingsEditorComponent implements OnInit {
     candyIncomeAmount: new FormControl(null),
     candyIncomeFrequencyValue: new FormControl(null),
     candyIncomeFrequencyUnit: new FormControl(null),
+    turnoverLastUpdate: new FormControl(null),
   })
 
   constructor(

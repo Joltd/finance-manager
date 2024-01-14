@@ -11,6 +11,7 @@ import {NgForOf} from "@angular/common";
 import {MatChipsModule} from "@angular/material/chips";
 import {ReferenceModule} from "../reference/reference.module";
 import { MatInputModule } from "@angular/material/input";
+import { MatDatepickerModule } from "@angular/material/datepicker";
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { MatInputModule } from "@angular/material/input";
         NgForOf,
         MatChipsModule,
         ReferenceModule,
-        MatInputModule
+        MatInputModule,
+        MatDatepickerModule
     ],
   exports: [
     SettingsEditorComponent

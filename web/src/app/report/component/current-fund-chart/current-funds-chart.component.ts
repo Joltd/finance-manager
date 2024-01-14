@@ -16,13 +16,7 @@ import { and, expression, or } from "../../../entity/model/entity";
 })
 export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
 
-  @ViewChild(MatExpansionPanel)
-  filter!: MatExpansionPanel
-
-  settings: FormGroup = new FormGroup({
-    currency: new FormControl('USD')
-  })
-  currentFund!: CurrentFundsChart
+  currentFund: CurrentFundsChart | null = null
   minCommonAmount: number = 0
   maxCommonAmount: number = 0
 
@@ -43,8 +37,7 @@ export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
   }
 
   apply() {
-    this.filter.close()
-    this.currentFundsChartService.load(this.settings.value)
+    this.currentFundsChartService.load()
       .subscribe(result => {
         this.currentFund = result
         let commonValues = this.currentFund.entries

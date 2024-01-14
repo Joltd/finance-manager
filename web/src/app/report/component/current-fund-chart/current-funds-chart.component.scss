@@ -1,21 +1,13 @@
 @use '../../../../variables';
 
 :host {
-  display: grid;
-  grid-template-rows: min-content 1fr;
-  gap: 1em;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
+  margin: 20px;
 }
 
 .funds {
   display: grid;
   grid-template-columns: min-content min-content 1fr;
-  grid-gap: .4em;
-  padding: 2em;
+  grid-gap: .5px;
 }
 
 .account {

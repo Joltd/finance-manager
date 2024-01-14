@@ -4,7 +4,7 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.reference.record.AccountRecord
 
 data class CurrentFundsChartSettingsRecord(
-    val currency: String
+    val currency: String?
 )
 
 data class CurrentFundsChartRecord(
