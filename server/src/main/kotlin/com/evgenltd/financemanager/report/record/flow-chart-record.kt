@@ -1,14 +1,12 @@
 package com.evgenltd.financemanager.report.record
 
+import com.evgenltd.financemanager.entity.record.EntityFilterNodeRecord
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
 class FlowChartSettingsRecord(
-    val dateFrom: LocalDate,
-    val dateTo: LocalDate,
-    val categories: List<UUID>,
-    val currency: String,
+    val filter: EntityFilterNodeRecord,
     val total: Boolean,
     val showAverage: Boolean
 )

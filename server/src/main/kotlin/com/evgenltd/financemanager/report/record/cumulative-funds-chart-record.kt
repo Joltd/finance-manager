@@ -5,7 +5,6 @@ import java.time.LocalDate
 
 data class CumulativeFundsChartSettingsRecord(
     val dateFrom: LocalDate,
-    val currency: String
 )
 
 data class CumulativeFundsChartRecord(

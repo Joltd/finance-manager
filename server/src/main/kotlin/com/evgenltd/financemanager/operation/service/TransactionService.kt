@@ -50,12 +50,6 @@ class TransactionService(
         return transactionRepository.findByAccount(cashAccount)
     }
 
-    fun findTransactions(from: LocalDate, to: LocalDate, categories: List<UUID>): List<Transaction> = if (categories.isEmpty()) {
-        transactionRepository.findByDateGreaterThanEqualAndDateLessThanAndAccountTypeIn(from, to, listOf(AccountType.EXPENSE, AccountType.INCOME))
-    } else {
-        transactionRepository.findByDateGreaterThanEqualAndDateLessThanAndAccountIdIn(from, to, categories)
-    }
-
     fun findTransactions(accountType: AccountType): List<Transaction> = transactionRepository.findByAccountType(accountType)
 
 }

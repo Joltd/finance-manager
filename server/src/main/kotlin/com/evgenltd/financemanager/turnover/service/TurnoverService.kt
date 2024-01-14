@@ -4,12 +4,16 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
+import com.evgenltd.financemanager.entity.record.EntityFilterNodeRecord
+import com.evgenltd.financemanager.entity.service.ConditionBuilderService
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.settings.service.SettingService
 import com.evgenltd.financemanager.turnover.entity.Turnover
+import com.evgenltd.financemanager.turnover.record.TurnoverKey
 import com.evgenltd.financemanager.turnover.repository.TurnoverRepository
 import jakarta.annotation.PostConstruct
 import org.springframework.scheduling.annotation.Scheduled
@@ -26,12 +30,22 @@ class TurnoverService(
     private val transactionRepository: TransactionRepository,
     private val exchangeRateService: ExchangeRateService,
     private val settingService: SettingService,
+    private val conditionBuilderService: ConditionBuilderService,
 ) : Loggable() {
 
     @PostConstruct
     fun postConstruct() {
         log.info("Initialized")
     }
+
+    fun listByAccountType(): List<Turnover> = turnoverRepository.findByAccountType(AccountType.ACCOUNT)
+
+    fun listByAccount(account: Account): List<Turnover> {
+        return turnoverRepository.findByAccount(account)
+    }
+
+    fun list(filter: EntityFilterNodeRecord): List<Turnover> =
+        turnoverRepository.findAll { root, _, cb -> conditionBuilderService.build(filter, Turnover::class.java, root, cb) }
 
     @Transactional
     fun rebuild(rebuildDate: LocalDate) {
@@ -40,15 +54,8 @@ class TurnoverService(
 
         turnoverRepository.deleteByDateGreaterThanEqual(date)
 
-        val turnoverTotals = turnoverRepository.findAll()
-            .groupingBy { it.toKey() } // key for all dimensions except date
-            .aggregate { key, accumulator: Turnover?, turnover, first ->
-                if (accumulator == null || turnover.date.isAfter(accumulator.date)) {
-                    turnover
-                } else {
-                    accumulator
-                }
-            }
+        val turnoverTotals = turnoverRepository.findByDateLessThan(date)
+            .sliceLast()
             .toMutableMap()
 
         val rateCache = mutableMapOf<RateKey,BigDecimal>()
@@ -110,13 +117,9 @@ class TurnoverService(
 
     private fun Transaction.toKey(): TransactionKey = TransactionKey(date.withDayOfMonth(1), account.id!!, amount.currency)
 
-    private fun Turnover.toKey(): TurnoverKey = TurnoverKey(account.id!!, amount.currency)
-
     private fun TransactionKey.toKey(): TurnoverKey = TurnoverKey(accountId, currency)
 
     private data class RateKey(val date: LocalDate, val from: String, val to: String)
-
-    private data class TurnoverKey(val accountId: UUID, val currency: String)
 
     private data class TransactionKey(val date: LocalDate, val accountId: UUID, val currency: String)
 

@@ -3,30 +3,33 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
+import com.evgenltd.financemanager.entity.service.EntityService
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.service.TransactionService
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSeriesRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
+import com.evgenltd.financemanager.turnover.service.TurnoverService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
 class FlowChartService(
-    private val transactionService: TransactionService,
-    private val exchangeRateService: ExchangeRateService
+    private val turnoverService: TurnoverService,
 ) {
 
     fun load(settings: FlowChartSettingsRecord): FlowChartRecord {
 
-        val start = settings.dateFrom.withDayOfMonth(1)
+        val turnovers = turnoverService.list(settings.filter)
+
+        val start = turnovers.minOf { it.date }
+        val end = turnovers.maxOf { it.date }
         val dates = generateSequence(start) {
-            it.plusMonths(1).takeIf { date -> !date.isAfter(settings.dateTo) }
+            it.plusMonths(1).takeIf { date -> !date.isAfter(end) }
         }.toList()
+        val emptyAmount = emptyAmount("USD")
 
-        val emptyAmount = emptyAmount(settings.currency)
-
-        val series = transactionService.findTransactions(settings.dateFrom, settings.dateTo, settings.categories)
+        val series = turnovers
             .groupingBy {
                 if (settings.total) {
                     Key(it.account.type.name, it.account.type.name)
@@ -34,11 +37,11 @@ class FlowChartService(
                     Key(it.account.id.toString(), it.account.name)
                 }
             }
-            .aggregate { _, accumulator: MutableMap<LocalDate,Amount>?, transaction, _ ->
-                val date = transaction.date.withDayOfMonth(1)
+            .aggregate { _, accumulator: MutableMap<LocalDate,Amount>?, turnover, _ ->
+                val date = turnover.date.withDayOfMonth(1)
                 val entries = accumulator ?: dates.associateWith { emptyAmount }.toMutableMap()
                 entries.compute(date) { _, accumulatedAmount ->
-                    (accumulatedAmount ?: emptyAmount) + transaction.amount.convertTo(transaction.date, settings.currency)
+                    (accumulatedAmount ?: emptyAmount) + turnover.amountUsd
                 }
                 entries
             }
@@ -60,14 +63,6 @@ class FlowChartService(
             series = series
         )
 
-    }
-
-    private fun Amount.convertTo(date: LocalDate, target: String): Amount {
-        if (currency == "TRX") {
-            return emptyAmount(target)
-        }
-        val rate = exchangeRateService.rateStartOfWeek(date, currency, target)
-        return (toBigDecimal() * rate).fromFractional(target)
     }
 
     private data class Key(val id: String, val name: String)

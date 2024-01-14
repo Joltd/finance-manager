@@ -28,7 +28,6 @@ class EntityService(
     private val entityManager: EntityManager,
     private val entityConverter: EntityConverter,
     private val mapper: ObjectMapper,
-    private val queryBuilderService: QueryBuilderService,
     private val conditionBuilderService: ConditionBuilderService,
 ) {
 
@@ -41,6 +40,8 @@ class EntityService(
             .map { entityConverter.toEntity(it) }
             .toList()
     }
+
+    fun fields(javaType: Class<*>): List<EntityFieldRecord> = entities.first { it.type.javaType == javaType }.fields
 
     fun entityList(): List<EntityRecord> = entities.sortedBy { it.name }
 

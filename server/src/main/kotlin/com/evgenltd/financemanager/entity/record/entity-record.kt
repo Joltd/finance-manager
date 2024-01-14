@@ -70,12 +70,6 @@ data class EntityFilterNodeRecord(
     val children: List<EntityFilterNodeRecord>,
 )
 
-data class EntityFilterConditionRecord(
-    val field: String,
-    val operator: EntityFilterOperator,
-    val value: Any?
-)
-
 data class EntitySortEntryRecord(val field: String, val direction: SortDirection)
 
 enum class SortDirection {
@@ -95,12 +89,6 @@ data class EntityListPage(
     val page: Int,
     val size: Int,
     val values: List<Map<String,Any?>>
-)
-
-data class SelectQuery(
-    val query: String,
-    val countQuery: String,
-    val parameters: Map<String,Any?>,
 )
 
 enum class EntityFilterCondition {

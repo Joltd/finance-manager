@@ -5,22 +5,24 @@ import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.operation.service.TransactionService
 import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.settings.service.SettingService
+import com.evgenltd.financemanager.turnover.service.TurnoverService
+import com.evgenltd.financemanager.turnover.service.sliceLast
 import org.springframework.stereotype.Service
 
 @Service
 class DashboardService(
-    private val transactionService: TransactionService,
-    private val settingService: SettingService
+    private val settingService: SettingService,
+    private val turnoverService: TurnoverService,
 ) {
 
     fun load(): DashboardRecord {
-
-        val cashFunds = transactionService.findCashTransactions()
-            .groupingBy { it.amount.currency }
-            .aggregate { currency, accumulator: Amount?, transaction, _ ->
-                (accumulator ?: Amount(0, currency)) + transaction.signedAmount()
-            }
-            .toMutableMap()
+        val cashFunds = settingService.operationCashAccount()
+            ?.let { turnoverService.listByAccount(it) }
+            ?.sliceLast()
+            ?.map { it.key.currency to it.value.cumulativeAmount }
+            ?.associate { it }
+            ?.toMutableMap()
+            ?: mutableMapOf()
 
         val defaultCurrency = settingService.operationDefaultCurrency() ?: MAIN_CURRENCY
         val defaultCurrencyAmount = cashFunds.remove(defaultCurrency) ?: emptyAmount(defaultCurrency)

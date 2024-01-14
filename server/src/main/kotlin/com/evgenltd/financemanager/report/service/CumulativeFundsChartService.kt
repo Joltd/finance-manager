@@ -3,19 +3,23 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
+import com.evgenltd.financemanager.entity.record.EntityFilterNodeRecord
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.service.TransactionService
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartRecord
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartSettingsRecord
+import com.evgenltd.financemanager.turnover.entity.Turnover
+import com.evgenltd.financemanager.turnover.service.TurnoverService
+import com.evgenltd.financemanager.turnover.service.sliceLast
 import org.springframework.stereotype.Service
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.util.*
 
 @Service
 class CumulativeFundsChartService(
-    private val transactionService: TransactionService,
-    private val exchangeRateService: ExchangeRateService
+    private val turnoverService: TurnoverService,
 ) {
 
     fun load(settings: CumulativeFundsChartSettingsRecord): CumulativeFundsChartRecord {
@@ -24,25 +28,27 @@ class CumulativeFundsChartService(
         val dates = generateSequence(dateFrom) {
             it.plusMonths(1).takeIf { date -> date < dateTo }
         }
+        val emptyAmount = emptyAmount("USD")
 
-        val transactions = transactionService.findTransactions(AccountType.ACCOUNT)
-        var cumulativeAmount = transactions.filter { it.date < dateFrom }
-            .map { it.signedAmount().convertTo(it.date, settings.currency) }
-            .fold(emptyAmount(settings.currency)) { acc, amount -> acc + amount }
+        val turnovers = turnoverService.listByAccountType()
 
-        val amounts = dates.associateWith { emptyAmount(settings.currency) }.toMutableMap()
+        var cumulativeAmount = turnovers
+            .filter { it.date < dateFrom }
+            .sliceLast()
+            .map { it.value.cumulativeAmountUsd }
+            .fold(emptyAmount) { acc, amount -> acc + amount }
 
-        transactions.filter { it.date >= dateFrom }
-            .onEach {
-                val date = it.date.withDayOfMonth(1)
-                val amount = it.signedAmount().convertTo(it.date, settings.currency)
-                amounts.compute(date) { _, acc -> (acc ?: emptyAmount(settings.currency)) + amount }
+        val amounts = turnovers.filter { it.date >= dateFrom }
+            .groupingBy { it.date }
+            .aggregate { _, accumulator: Amount?, turnover, _ ->
+                accumulator?.plus(turnover.amountUsd) ?: turnover.amountUsd
             }
 
-        val values = amounts.entries
-            .sortedBy { it.key }
+        val values = dates
             .map { entry ->
-                cumulativeAmount.also { cumulativeAmount =+ entry.value + cumulativeAmount }
+                val amount = (amounts[entry] ?: emptyAmount)
+                cumulativeAmount = amount + cumulativeAmount
+                cumulativeAmount
             }
             .map { it.toBigDecimal().setScale(0, RoundingMode.HALF_UP) }
             .toList()
@@ -51,14 +57,6 @@ class CumulativeFundsChartService(
             dates = dates.toList(),
             values = values,
         )
-    }
-
-    private fun Amount.convertTo(date: LocalDate, target: String): Amount {
-        if (currency == "TRX") {
-            return emptyAmount(target)
-        }
-        val rate = exchangeRateService.rateStartOfWeek(date, currency, target)
-        return (toBigDecimal() * rate).fromFractional(target)
     }
 
 }
