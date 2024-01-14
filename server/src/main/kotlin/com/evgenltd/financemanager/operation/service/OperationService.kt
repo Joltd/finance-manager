@@ -10,8 +10,6 @@ import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.entity.record.EntityFilterConditionRecord
-import com.evgenltd.financemanager.entity.service.ConditionBuilderService
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
@@ -21,7 +19,6 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.time.LocalDate

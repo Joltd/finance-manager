@@ -14,15 +14,7 @@ import java.math.BigDecimal
 @Service
 class ConditionBuilderService(
     private val mapper: ObjectMapper,
-    private val entityService: EntityService,
 ) {
-
-    fun <T> build(
-        filter: EntityFilterNodeRecord,
-        javaType: Class<T>,
-        root: Root<T>,
-        cb: CriteriaBuilder,
-    ): Predicate = build(filter, entityService.fields(javaType), root, cb)
 
     fun <T> build(
         filter: EntityFilterNodeRecord,

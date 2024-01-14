@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.entity.record.EntityFilterNodeRecord
 import com.evgenltd.financemanager.entity.service.ConditionBuilderService
+import com.evgenltd.financemanager.entity.service.EntityService
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
@@ -31,6 +32,7 @@ class TurnoverService(
     private val exchangeRateService: ExchangeRateService,
     private val settingService: SettingService,
     private val conditionBuilderService: ConditionBuilderService,
+    private val entityService: EntityService,
 ) : Loggable() {
 
     @PostConstruct
@@ -44,8 +46,12 @@ class TurnoverService(
         return turnoverRepository.findByAccount(account)
     }
 
-    fun list(filter: EntityFilterNodeRecord): List<Turnover> =
-        turnoverRepository.findAll { root, _, cb -> conditionBuilderService.build(filter, Turnover::class.java, root, cb) }
+    fun list(filter: EntityFilterNodeRecord): List<Turnover> {
+        val javaType = entityService.fields(Turnover::class.java)
+        return turnoverRepository.findAll { root, _, cb ->
+            conditionBuilderService.build(filter, javaType, root, cb)
+        }
+    }
 
     @Transactional
     fun rebuild(rebuildDate: LocalDate) {

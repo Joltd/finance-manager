@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.entity.service
 
-import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.entity.converter.EntityConverter
 import com.evgenltd.financemanager.entity.record.*
 import com.evgenltd.financemanager.reference.record.Reference
@@ -8,20 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import jakarta.annotation.PostConstruct
 import jakarta.persistence.EntityManager
-import jakarta.persistence.metamodel.Attribute
-import jakarta.persistence.metamodel.EntityType
-import jakarta.persistence.metamodel.SingularAttribute
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.lang.reflect.Field
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.UUID
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.memberProperties
 
 @Service
 class EntityService(

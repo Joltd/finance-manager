@@ -14,7 +14,6 @@ import java.util.*
 @Service
 class TransactionService(
     private val transactionRepository: TransactionRepository,
-    private val settingService: SettingService
 ) {
 
     @Transactional
@@ -44,12 +43,4 @@ class TransactionService(
         }
         transactionRepository.deleteByOperationId(operationId)
     }
-
-    fun findCashTransactions(): List<Transaction> {
-        val cashAccount = settingService.operationCashAccount() ?: return emptyList()
-        return transactionRepository.findByAccount(cashAccount)
-    }
-
-    fun findTransactions(accountType: AccountType): List<Transaction> = transactionRepository.findByAccountType(accountType)
-
 }

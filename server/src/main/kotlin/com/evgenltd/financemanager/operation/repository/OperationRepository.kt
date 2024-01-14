@@ -13,6 +13,4 @@ interface OperationRepository : JpaRepository<Operation,UUID>, JpaSpecificationE
 
     fun findByDate(date: LocalDate): List<Operation>
 
-    fun findByAccountFromOrAccountTo(accountFrom: Account, accountTo: Account): List<Operation>
-
 }

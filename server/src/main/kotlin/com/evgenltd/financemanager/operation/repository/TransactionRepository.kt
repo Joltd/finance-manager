@@ -13,11 +13,7 @@ interface TransactionRepository : JpaRepository<Transaction, UUID> {
 
     fun deleteByOperationId(id: UUID)
 
-    fun findByAccount(account: Account): List<Transaction>
-
     fun findByDateGreaterThanEqual(date: LocalDate): List<Transaction>
-
-    fun findByAccountType(type: AccountType): List<Transaction>
 
     fun findFirstByOrderByUpdatedAtDesc(): Transaction?
 
