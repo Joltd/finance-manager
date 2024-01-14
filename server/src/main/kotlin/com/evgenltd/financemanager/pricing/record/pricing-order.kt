@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class PricingOrderDefaults(
+    val currency: String?,
     val country: String,
     val store: String,
 )

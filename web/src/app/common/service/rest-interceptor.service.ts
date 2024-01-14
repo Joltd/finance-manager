@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {
-  HTTP_INTERCEPTORS,
+  HTTP_INTERCEPTORS, HttpContextToken,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
@@ -36,7 +36,11 @@ export class RestInterceptorService implements HttpInterceptor {
       return next.handle(req);
     }
 
-    this.loadingService.startLoading()
+    let skipLoading = req.context.get(SKIP_LOADING) || false
+
+    if (!skipLoading) {
+      this.loadingService.startLoading()
+    }
 
     return next.handle(req)
       .pipe(
@@ -46,7 +50,9 @@ export class RestInterceptorService implements HttpInterceptor {
             return event
           }
 
-          this.loadingService.endLoading()
+          if (!skipLoading) {
+            this.loadingService.endLoading()
+          }
 
           let responseBody = event.body as ResponseBody
           if (!responseBody.body && !responseBody.error) {
@@ -63,7 +69,9 @@ export class RestInterceptorService implements HttpInterceptor {
 
         }),
         catchError(error => {
-          this.loadingService.endLoading()
+          if (!skipLoading) {
+            this.loadingService.endLoading()
+          }
           let message: string
           if (error.statusText) {
             message = error.statusText
@@ -89,3 +97,5 @@ class ResponseBody {
   body!: object
   error!: string
 }
+
+export const SKIP_LOADING = new HttpContextToken<boolean>(() => false)

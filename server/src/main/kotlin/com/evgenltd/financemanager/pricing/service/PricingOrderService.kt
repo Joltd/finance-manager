@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.pricing.entity.PricingOrder
 import com.evgenltd.financemanager.pricing.record.PricingOrderDefaults
 import com.evgenltd.financemanager.pricing.record.PricingOrderRecord
 import com.evgenltd.financemanager.pricing.repository.PricingOrderRepository
+import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,11 +18,18 @@ class PricingOrderService(
     private val pricingOrderRepository: PricingOrderRepository,
     private val pricingItemService: PricingItemService,
     private val exchangeRateService: ExchangeRateService,
+    private val settingService: SettingService,
 ) {
 
-    fun loadDefaults(): PricingOrderDefaults = pricingOrderRepository.findByOrderByDateDesc()
-        ?.let { PricingOrderDefaults(it.country, it.store) }
-        ?: PricingOrderDefaults("", "")
+    fun loadDefaults(): PricingOrderDefaults {
+        val defaultCurrency = settingService.operationDefaultCurrency()
+        val lastOrder = pricingOrderRepository.findByOrderByDateDesc()
+        return PricingOrderDefaults(
+            currency = defaultCurrency,
+            country = lastOrder?.country ?: "",
+            store = lastOrder?.store ?: "",
+        )
+    }
 
     @Transactional
     fun createOrder(record: PricingOrderRecord) {

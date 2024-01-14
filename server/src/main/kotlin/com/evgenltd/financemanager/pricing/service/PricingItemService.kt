@@ -13,7 +13,7 @@ class PricingItemService(
 ) {
 
     fun searchTop(query: String): List<PricingItemRecord> =
-        pricingItemRepository.findTop5ByNameLikeIgnoreCaseOrderByName(query)
+        pricingItemRepository.findTop5ByNameLikeIgnoreCaseOrderByName("%${query}%")
             .map { pricingItemConverter.toRecord(it) }
 
     fun save(record: PricingItemRecord): PricingItem {

@@ -41,6 +41,10 @@ export class PricingNewPriceComponent implements OnInit {
     this.pricingService.orderDefaults()
       .subscribe(defaults => {
         this.form.patchValue({
+          price: {
+            value: null,
+            currency: defaults.currency,
+          },
           country: defaults.country,
           store: defaults.store,
         } as any)
@@ -62,6 +66,7 @@ export class PricingNewPriceComponent implements OnInit {
       category: item.category,
       unit: item.unit,
       defaultQuantity: item.defaultQuantity,
+      quantity: item.defaultQuantity,
     } as any)
     this.stepper.selectedIndex = 2
   }
