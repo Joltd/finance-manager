@@ -15,10 +15,14 @@ interface TransactionRepository : JpaRepository<Transaction, UUID> {
 
     fun findByAccount(account: Account): List<Transaction>
 
+    fun findByDateGreaterThanEqual(date: LocalDate): List<Transaction>
+
     fun findByDateGreaterThanEqualAndDateLessThanAndAccountTypeIn(from: LocalDate, to: LocalDate, types: List<AccountType>): List<Transaction>
 
     fun findByDateGreaterThanEqualAndDateLessThanAndAccountIdIn(from: LocalDate, to: LocalDate, accountIds: List<UUID>): List<Transaction>
 
     fun findByAccountType(type: AccountType): List<Transaction>
+
+    fun findFirstByOrderByUpdatedAtDesc(): Transaction?
 
 }

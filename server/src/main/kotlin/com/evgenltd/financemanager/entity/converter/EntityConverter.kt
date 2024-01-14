@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import java.lang.reflect.Field
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
@@ -126,7 +127,7 @@ class EntityConverter {
             EntityFieldType.NUMBER
         } else if (attributeType == Boolean::class.java) {
             EntityFieldType.BOOLEAN
-        } else if (attributeType == LocalDate::class.java) {
+        } else if (attributeType in listOf(LocalDate::class.java, LocalDateTime::class.java)) {
             EntityFieldType.DATE
         } else if (attributeField?.getDeclaredAnnotation(JdbcTypeCode::class.java)?.value == SqlTypes.JSON) {
             EntityFieldType.JSON

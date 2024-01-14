@@ -12,6 +12,7 @@ import com.evgenltd.financemanager.settings.repository.SettingRepository
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -39,6 +40,12 @@ class SettingService(
 
     fun candyIncomeFrequencyUnit(): ChronoUnit? = getSetting(CANDY_INCOME_FREQUENCY_UNIT)?.let { ChronoUnit.valueOf(it) }
 
+    fun turnoverLastUpdate(): LocalDateTime? = getSetting(TURNOVER_LAST_UPDATE)?.let {  LocalDateTime.parse(it) }
+
+    fun setTurnoverLastUpdate(value: LocalDateTime) {
+        updateSetting(TURNOVER_LAST_UPDATE, value.toString())
+    }
+
     fun load(): ApplicationSettings = ApplicationSettings(
         version = version,
         operationDefaultCurrency = operationDefaultCurrency(),
@@ -47,6 +54,7 @@ class SettingService(
         candyIncomeAmount = candyIncomeAmount(),
         candyIncomeFrequencyValue = candyIncomeFrequencyValue(),
         candyIncomeFrequencyUnit = candyIncomeFrequencyUnit(),
+        turnoverLastUpdate = turnoverLastUpdate(),
     )
 
     @Transactional
@@ -57,6 +65,7 @@ class SettingService(
         updateSetting(CANDY_INCOME_AMOUNT, request.candyIncomeAmount?.value?.toString())
         updateSetting(CANDY_INCOME_FREQUENCY_VALUE, request.candyIncomeFrequencyValue?.toString())
         updateSetting(CANDY_INCOME_FREQUENCY_UNIT, request.candyIncomeFrequencyUnit?.name)
+        updateSetting(TURNOVER_LAST_UPDATE, request.turnoverLastUpdate?.toString())
     }
 
     private fun getSetting(name: String): String? = settingRepository.findByName(name)?.value
@@ -75,6 +84,7 @@ class SettingService(
         const val CANDY_INCOME_AMOUNT = "candy.income.amount"
         const val CANDY_INCOME_FREQUENCY_VALUE = "candy.income.frequency.value"
         const val CANDY_INCOME_FREQUENCY_UNIT = "candy.income.frequency.unit"
+        const val TURNOVER_LAST_UPDATE = "turnover.last.update"
     }
 
 }

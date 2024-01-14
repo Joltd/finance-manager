@@ -1,6 +1,10 @@
 package com.evgenltd.financemanager.exchangerate.service
 
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.exchangerate.converter.ExchangeRateConverter
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
@@ -20,7 +24,7 @@ class ExchangeRateService(
     private val exchangeRateRepository: ExchangeRateRepository,
     private val exchangeRateConverter: ExchangeRateConverter,
     private val exchangeRateProviders: List<ExchangeRateProvider>
-) {
+) : Loggable() {
 
     @PostConstruct
     fun postConstruct() {

@@ -1,0 +1,1 @@
+alter table transactions add column updated_at timestamp not null default now();
