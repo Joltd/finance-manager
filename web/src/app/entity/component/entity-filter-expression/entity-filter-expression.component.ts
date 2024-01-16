@@ -30,7 +30,7 @@ export class EntityFilterExpressionComponent {
     'REFERENCE': ['IN_LIST', 'NOT_IN_LIST',],
     'JSON': [],
   }
-  private references: { [key: string]: Reference[] } = {}
+  references: { [key: string]: Reference[] } = {}
 
   fields: EntityField[] = []
   expression!: InternalEntityFilterExpression
@@ -70,19 +70,23 @@ export class EntityFilterExpressionComponent {
       .filter(operator => this.config[fieldType].includes(operator))
   }
 
-  async getReferences(): Promise<Reference[]> {
-    let entity = this.expression.field.referenceName!
-    if (this.references[entity]) {
-      return new Promise<Reference[]>(() => {
-        return this.references[entity]
-      })
-    } else {
-      return lastValueFrom(this.entityService.referenceList(entity))
-        .then((result) => {
-          this.references[entity] = result
-          return result
-        })
+  loadReferences() {
+    let skip = !(this.expression.operator == 'IN_LIST'
+    || this.expression.operator == 'NOT_IN_LIST'
+    || this.expression.operator == 'CURRENCY_IN_LIST'
+    || this.expression.operator == 'CURRENCY_NOT_IN_LIST')
+    if (skip) {
+      return
     }
+
+    if (this.references[this.expression.field.referenceName!]) {
+      return;
+    }
+
+    this.entityService.referenceList(this.expression.field.referenceName!)
+      .subscribe(result => {
+        this.references[this.expression.field.referenceName!] = result
+      })
   }
 
   getCurrencies(): Currency[] {

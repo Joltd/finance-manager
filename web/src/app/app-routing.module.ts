@@ -66,7 +66,7 @@ const routes: Routes = [
   { path: 'candy', component: CandyDashboardComponent },
   { path: 'pricing', component: PricingNewPriceComponent },
   { path: 'settings', component: SettingsEditorComponent },
-  { path: '', redirectTo: '/pricing', pathMatch: 'full' }
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];
 
 @NgModule({

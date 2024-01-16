@@ -7,17 +7,21 @@ import java.util.*
 
 class FlowChartSettingsRecord(
     val filter: EntityFilterNodeRecord,
-    val total: Boolean,
+    val category: Boolean,
     val showAverage: Boolean
 )
 
 data class FlowChartRecord(
-    val dates: List<String>,
-    val series: List<FlowChartSeriesRecord>
+    val groups: List<FlowChartGroupRecord>,
 )
 
-data class FlowChartSeriesRecord(
+data class FlowChartGroupRecord(
+    val date: LocalDate,
+    val entries: List<FlowChartEntryRecord>,
+)
+
+data class FlowChartEntryRecord(
     val id: String,
     val name: String,
-    val values: List<BigDecimal>
+    val value: BigDecimal,
 )

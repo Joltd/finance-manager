@@ -12,7 +12,7 @@
   @if (expression.field) {
     <mat-form-field>
       <mat-label>Operator</mat-label>
-      <mat-select [(ngModel)]="expression.operator">
+      <mat-select [(ngModel)]="expression.operator" (selectionChange)="loadReferences()">
         @for (operator of getOperators(expression.field.type); track operator) {
           <mat-option [value]="operator">{{OPERATOR_LABELS[operator]}}</mat-option>
         }
@@ -36,7 +36,7 @@
 
         @switch (expression.field.type) {
           @case ('REFERENCE') {
-            @for (reference of getReferences() | async; track reference.id) {
+            @for (reference of references[expression.field.referenceName!]; track reference.id) {
               <mat-option [value]="reference.id">{{reference.name}}</mat-option>
             }
           }

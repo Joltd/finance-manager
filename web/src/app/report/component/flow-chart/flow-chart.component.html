@@ -1,46 +1,31 @@
-<mat-expansion-panel>
-  <mat-expansion-panel-header>Settings</mat-expansion-panel-header>
+<common-layout>
+  <toolbar-content title="Flow Chart">
+    <toolbar-button name="Filter" icon="filter_alt" (click)="openFilter()"></toolbar-button>
+  </toolbar-content>
 
-  <form [formGroup]="flowChartService.settings">
+  <div>
+    <mat-button-toggle-group [ngModel]="groupBy" (ngModelChange)="changeGroupBy($event)">
+      <mat-button-toggle [value]="'TYPE'">Type</mat-button-toggle>
+      <mat-button-toggle [value]="'CATEGORY'">Category</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
 
-    <mat-form-field>
-      <mat-label>From</mat-label>
-      <input formControlName="dateFrom" matInput [matDatepicker]="from" readonly (click)="from.open()">
-      <mat-datepicker touchUi #from></mat-datepicker>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>To</mat-label>
-      <input formControlName="dateTo" matInput [matDatepicker]="to" readonly (click)="to.open()">
-      <mat-datepicker touchUi #to></mat-datepicker>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Categories</mat-label>
-      <mat-select formControlName="categories" multiple>
-        <mat-optgroup label="Expenses">
-          <mat-option *ngFor="let expenseCategory of expenseCategories" [value]="expenseCategory.id">{{expenseCategory.name}}</mat-option>
-        </mat-optgroup>
-        <mat-optgroup label="Incomes">
-          <mat-option *ngFor="let incomeCategory of incomeCategories" [value]="incomeCategory.id">{{incomeCategory.name}}</mat-option>
-        </mat-optgroup>
-      </mat-select>
-      <button matSuffix mat-icon-button (click)="clearCategories()"><mat-icon>close</mat-icon></button>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Currency</mat-label>
-      <currency-input formControlName="currency"></currency-input>
-    </mat-form-field>
-
-    <mat-slide-toggle formControlName="total">Total</mat-slide-toggle>
-
-    <mat-slide-toggle formControlName="showAverage">Show average</mat-slide-toggle>
-
-  </form>
-</mat-expansion-panel>
-
-<mat-card>
-  <no-data *ngIf="!flow"></no-data>
-  <div #chart [style.height]="chartHeight + 'em'" [class.omit]="!flow"></div>
-</mat-card>
+  <div *ifHasData="flow != null" class="chart">
+    @for (group of flow?.groups; track group.date) {
+      <div class="date">{{group.date | date: 'MMM yyyy'}}</div>
+      <div class="group">
+      @for (entry of group.entries; track entry.id) {
+        <div class="entry">
+          <div class="name">{{entry.name}}</div>
+          <div class="bar"
+               [style.background-color]="color(entry.id)"
+               [style.width]="axis.calcWidth(entry.value) + '%'"
+               [style.margin-left]="axis.calcOffset(entry.value) + '%'"
+          ></div>
+          <div class="value" [style.left]="calcValueOffset(entry.value) + '%'">{{entry.value | number: '1.0-2'}}</div>
+        </div>
+      }
+      </div>
+    }
+  </div>
+</common-layout>

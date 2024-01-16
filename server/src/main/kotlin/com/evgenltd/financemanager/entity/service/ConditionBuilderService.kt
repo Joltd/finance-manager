@@ -74,6 +74,7 @@ class ConditionBuilderService(
         root.get(name)
     }
 
+    // todo operator in_list, not_in_list -> parse as list of values
     private fun EntityFieldRecord.actualValue(operator: EntityFilterOperator, value: Any): Any =
         if (type in listOf(EntityFieldType.ID, EntityFieldType.DATE) && operator !in listOf(EntityFilterOperator.IS_NULL, EntityFilterOperator.IS_NOT_NULL)) {
             mapper.readValue("\"$value\"", attribute.javaType)

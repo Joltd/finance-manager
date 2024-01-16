@@ -1,29 +1,57 @@
 @use "../../../../variables";
 
 :host {
-  display: grid;
+  overflow: hidden;
+  margin: 20px;
+}
+
+common-layout {
   grid-template-rows: min-content 1fr;
-  gap: 1em;
+  grid-gap: 20px;
+  overflow: hidden;
 }
 
-.chart-header {
-  padding: 16px;
+.chart {
   display: grid;
-  grid-template-columns: 1fr min-content min-content;
+  //grid-template-columns: min-content 1fr;
   align-items: center;
-}
+  //grid-gap: 20px 10px;
+  overflow: auto;
 
-form {
-  display: flex;
-  flex-direction: column;
+  .date {
+    white-space: nowrap;
+  }
+  .date:not(:first-child) {
+    margin-top: 20px;
+  }
 
-  mat-slide-toggle {
-    margin-bottom: 1em;
+  .group {
+    display: grid;
+    grid-gap: 2px;
   }
 }
 
-.hidden {
-  display: none;
+.entry {
+  position: relative;
+  width: 100%;
+
+  .bar {
+    height: 20px;
+    border-radius: 5px;
+  }
+
+  .name {
+    white-space: nowrap;
+    line-height: 13px;
+    font-size: 10px;
+    color: gray;
+  }
+
+  .value {
+    position: absolute;
+    bottom: 0;
+    padding: 0 5px;
+  }
 }
 
 .expense {

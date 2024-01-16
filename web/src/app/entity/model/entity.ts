@@ -116,7 +116,7 @@ export function and(expressions: EntityFilterNode[]): EntityFilterNode {
     negate: false,
     expression: null,
     condition: 'AND',
-    children: []
+    children: expressions
   }
 }
 
@@ -126,7 +126,7 @@ export function or(expressions: EntityFilterNode[]): EntityFilterNode {
     negate: false,
     expression: null,
     condition: 'OR',
-    children: []
+    children: expressions
   }
 }
 

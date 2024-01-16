@@ -2,16 +2,14 @@ package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.common.util.fromFractional
-import com.evgenltd.financemanager.entity.service.EntityService
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.operation.service.TransactionService
+import com.evgenltd.financemanager.reference.entity.AccountType
+import com.evgenltd.financemanager.report.record.FlowChartEntryRecord
+import com.evgenltd.financemanager.report.record.FlowChartGroupRecord
 import com.evgenltd.financemanager.report.record.FlowChartRecord
-import com.evgenltd.financemanager.report.record.FlowChartSeriesRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
+import com.evgenltd.financemanager.turnover.entity.Turnover
 import com.evgenltd.financemanager.turnover.service.TurnoverService
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class FlowChartService(
@@ -29,42 +27,57 @@ class FlowChartService(
         }.toList()
         val emptyAmount = emptyAmount("USD")
 
-        val series = turnovers
-            .groupingBy {
-                if (settings.total) {
-                    Key(it.account.type.name, it.account.type.name)
+        val groups = turnovers.filter { it.account.type != AccountType.ACCOUNT }
+            .groupBy { it.date }
+            .map { entry ->
+                val entries = entry.value
+                    .groupingBy {
+                        if (settings.category) {
+                            GroupKey(it.account.id.toString(), it.account.name)
+                        } else {
+                            GroupKey(it.account.type.name, it.account.type.name)
+                        }
+                    }
+                    .aggregate { _, accumulator: Amount?, turnover, _ ->
+                        (accumulator ?: emptyAmount) + turnover.amountUsd
+                    }
+                    .map { (key, value) ->
+                        val actualValue = if (!settings.category && key.id == AccountType.INCOME.name) {
+                            value.toBigDecimal().negate()
+                        } else {
+                            value.toBigDecimal()
+                        }
+                        FlowChartEntryRecord(
+                            id = key.id,
+                            name = key.name,
+                            value = actualValue
+                        )
+                    }
+                entry.key to entries
+            }
+            .associate { it }
+
+        return dates
+            .map {  date ->
+                val entries = groups[date] ?: emptyList()
+                val sorted = if (settings.category) {
+                    entries.sortedByDescending { it.value }.take(5)
                 } else {
-                    Key(it.account.id.toString(), it.account.name)
+                    entries.sortedBy { it.name }
                 }
-            }
-            .aggregate { _, accumulator: MutableMap<LocalDate,Amount>?, turnover, _ ->
-                val date = turnover.date.withDayOfMonth(1)
-                val entries = accumulator ?: dates.associateWith { emptyAmount }.toMutableMap()
-                entries.compute(date) { _, accumulatedAmount ->
-                    (accumulatedAmount ?: emptyAmount) + turnover.amountUsd
-                }
-                entries
-            }
-            .map {
-                val values = it.value.entries
-                    .sortedBy { entry -> entry.key }
-                    .map { entry -> entry.value.toBigDecimal() }
-                val average = values.sumOf { value -> value } / values.size.toBigDecimal()
-                FlowChartSeriesRecord(
-                    id = it.key.id,
-                    name = it.key.name,
-                    values = values + if (settings.showAverage) listOf(average) else emptyList()
+                FlowChartGroupRecord(
+                    date = date,
+                    entries = sorted
                 )
             }
-            .sortedBy { it.name }
-
-        return FlowChartRecord(
-            dates = dates.map { it.toString() } + if (settings.showAverage) listOf("Average") else emptyList(),
-            series = series
-        )
+            .sortedByDescending { it.date }
+            .let { FlowChartRecord(it) }
 
     }
 
-    private data class Key(val id: String, val name: String)
+    private data class GroupKey(
+        val id: String,
+        val name: String,
+    )
 
 }

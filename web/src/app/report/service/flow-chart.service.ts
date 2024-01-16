@@ -10,25 +10,19 @@ import * as moment from "moment/moment";
 })
 export class FlowChartService {
 
-  settings: FormGroup = new FormGroup({
-    dateFrom: new FormControl(moment().subtract(3, 'month').format('yyyy-MM-DD')),
-    dateTo: new FormControl(moment().format('yyyy-MM-DD')),
-    categories: new FormControl([]),
-    currency: new FormControl('USD'),
-    total: new FormControl(true),
-    showAverage: new FormControl(false),
-  })
+  // settings: FormGroup = new FormGroup({
+  //   dateFrom: new FormControl(moment().subtract(3, 'month').format('yyyy-MM-DD')),
+  //   dateTo: new FormControl(moment().format('yyyy-MM-DD')),
+  //   categories: new FormControl([]),
+  //   currency: new FormControl('USD'),
+  //   total: new FormControl(true),
+  //   showAverage: new FormControl(false),
+  // })
 
   constructor(private http: HttpClient) {}
 
-  load(): Observable<FlowChart> {
-    return this.http.post<FlowChart>('/flow-chart', this.settings.value)
-  }
-
-  clearCategories() {
-    this.settings.patchValue({
-      categories: []
-    })
+  load(filter: any, category: boolean): Observable<FlowChart> {
+    return this.http.post<FlowChart>('/flow-chart', { filter, category })
   }
 
 }

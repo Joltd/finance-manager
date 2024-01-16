@@ -1,11 +1,15 @@
-
 export interface FlowChart {
-  dates: string[]
-  series: FlowChartSeries[]
+  groups: FlowChartGroup[]
 }
 
-export interface FlowChartSeries {
-  id: string,
-  name: string,
-  values: number[]
+export interface FlowChartGroup {
+  date: string
+  entries: FlowChartEntry[]
+}
+
+export interface FlowChartEntry {
+  id: string
+  name: string
+  value: number
+  color: string
 }
