@@ -5,8 +5,8 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatListModule } from "@angular/material/list";
 import { EntityListComponent } from "./component/entity-list/entity-list.component";
-import { AsyncPipe, NgClass, NgForOf, NgIf } from "@angular/common";
-import { EntityLabelComponent } from "./component/entity-label/entity-label.component";
+import { AsyncPipe, DatePipe, NgClass, NgForOf, NgIf } from "@angular/common";
+import { EntityFieldLabelComponent } from "./component/entity-field-label/entity-field-label.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { EntityFilterComponent } from "./component/entity-filter/entity-filter.component";
@@ -29,12 +29,13 @@ import {
 import { MatMenuModule } from "@angular/material/menu";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatAutocompleteModule } from "@angular/material/autocomplete";
 
 @NgModule({
   declarations: [
     EntityListComponent,
     EntityBrowserComponent,
-    EntityLabelComponent,
+    EntityFieldLabelComponent,
     EntityFilterExpressionComponent,
     EntitySortComponent,
     EntityEditorComponent,
@@ -67,13 +68,15 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
     MatTreeModule,
     MatMenuModule,
     MatButtonToggleModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    DatePipe,
+    MatAutocompleteModule
   ],
   providers: [],
   exports: [
     EntityListComponent,
     EntityBrowserComponent,
-    EntityLabelComponent,
+    EntityFieldLabelComponent,
     EntityFilterExpressionComponent,
     EntitySortComponent,
     EntityEditorComponent,

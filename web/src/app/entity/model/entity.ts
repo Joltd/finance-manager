@@ -11,19 +11,14 @@ export type EntityFieldType =
 
 export type EntityFilterOperator =
   'EQUALS' |
-  'NOT_EQUALS' |
   'GREATER' |
   'GREATER_EQUALS' |
   'LESS' |
   'LESS_EQUALS' |
   'LIKE' |
-  'NOT_LIKE' |
   'IN_LIST' |
-  'NOT_IN_LIST' |
   'IS_NULL' |
-  'IS_NOT_NULL' |
   'CURRENCY_IN_LIST' |
-  'CURRENCY_NOT_IN_LIST' |
   'AMOUNT_EQUALS' |
   'AMOUNT_NOT_EQUALS' |
   'AMOUNT_GREATER' |
@@ -38,19 +33,14 @@ export type EntityFilterCondition =
 
 export const OPERATOR_LABELS: { [key in EntityFilterOperator]: string } = {
   'EQUALS': 'equals...',
-  'NOT_EQUALS': 'not equals...',
   'GREATER': 'greater....',
   'GREATER_EQUALS': 'greater or equals...',
   'LESS': 'less than...',
   'LESS_EQUALS': 'less or equals...',
   'LIKE': 'like...',
-  'NOT_LIKE': 'not like...',
   'IN_LIST': 'in list...',
-  'NOT_IN_LIST': 'not in list...',
   'IS_NULL': 'is null',
-  'IS_NOT_NULL': 'is not null',
   'CURRENCY_IN_LIST': 'currency in list...',
-  'CURRENCY_NOT_IN_LIST': 'currency not in list...',
   'AMOUNT_EQUALS': 'amount equals...',
   'AMOUNT_NOT_EQUALS': 'amount not equals...',
   'AMOUNT_GREATER': 'amount greater...',

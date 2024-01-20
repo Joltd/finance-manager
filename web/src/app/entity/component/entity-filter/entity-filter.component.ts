@@ -1,11 +1,12 @@
 import { Component, Inject } from "@angular/core";
-import { NestedTreeControl } from "@angular/cdk/tree";
-import { MatTreeNestedDataSource } from "@angular/material/tree";
 import {
   EntityField,
+  EntityFieldType,
   EntityFilterDialogData,
   EntityFilterExpression,
-  EntityFilterNode, EntityFilterOperator, OPERATOR_LABELS
+  EntityFilterNode,
+  EntityFilterOperator,
+  OPERATOR_LABELS
 } from "../../model/entity";
 import { AdaptiveService } from "../../../common/service/adaptive.service";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from "@angular/material/dialog";
@@ -15,15 +16,13 @@ import { Observable } from "rxjs";
 @Component({
   selector: 'entity-filter',
   templateUrl: 'entity-filter.component.html',
-  styleUrls: ['entity-filter.component.scss']
+  styleUrls: ['entity-filter.component.scss'],
 })
 export class EntityFilterComponent {
 
   fields: EntityField[] = []
-  expression: EntityFilterExpression | null = null
-
-  treeControl = new NestedTreeControl<EntityFilterNode>(node => node.children)
-  dataSource = new MatTreeNestedDataSource<EntityFilterNode>()
+  filter!: EntityFilterNode
+  node!: EntityFilterNode
   private parentIndex: Map<number,EntityFilterNode> = new Map<number,EntityFilterNode>()
 
   constructor(
@@ -34,32 +33,42 @@ export class EntityFilterComponent {
   ) {
     this.fields = data.fields
     if (data.filter) {
-      this.dataSource.data = [data.filter]
+      this.filter = data.filter
     } else {
-      this.dataSource.data = [{
+      this.filter = {
         id: this.random(),
         negate: false,
         expression: null,
         condition: 'AND',
         children: []
-      }]
+      }
     }
-    this.index(null, this.dataSource.data)
-    this.treeControl.expandDescendants(this.dataSource.data[0])
+    this.node = this.filter
+    this.index(null, [this.filter])
   }
 
   ngOnInit(): void {
     if (this.adaptiveService.desktop) {
       this.dialogRef.updateSize('700px', '500px')
     } else {
-      this.dialogRef.updateSize('90vw', '85vh')
+      this.dialogRef.updateSize('95vw', '85vh')
     }
   }
 
-  hasChild = (_: number, node: EntityFilterNode) => node.condition != null
+  isRoot(): boolean {
+    return this.parentIndex.get(this.node.id) == null
+  }
 
-  isRoot(node: EntityFilterNode): boolean {
-    return this.parentIndex.get(node.id) == null
+  fieldType(field: string): EntityFieldType {
+    return this.fields.find(it => it.name == field)?.type || 'STRING'
+  }
+
+  isValueArray(value: any): boolean {
+    return Array.isArray(value)
+  }
+
+  asValueArray(value: any): any[] {
+    return value as any[]
   }
 
   operatorLabel(operator: any): string {
@@ -67,7 +76,7 @@ export class EntityFilterComponent {
   }
 
   apply() {
-    this.dialogRef.close(this.dataSource.data[0])
+    this.dialogRef.close(this.filter)
   }
 
   close() {
@@ -82,6 +91,7 @@ export class EntityFilterComponent {
       children: []
     } as any
     this.doAdd(node, parentNode)
+    this.edit(node)
   }
 
   addExpression(parentNode: EntityFilterNode) {
@@ -97,6 +107,7 @@ export class EntityFilterComponent {
       children: []
     } as any
 
+    this.edit(node)
     this.doEdit(node.expression)
       .subscribe(result => {
         if (result) {
@@ -107,15 +118,16 @@ export class EntityFilterComponent {
   }
 
   edit(node: EntityFilterNode) {
-    if (node.expression == null) {
-      return
+    if (node.condition != null) {
+      this.node = node
+    } else if (node.expression != null) {
+      this.doEdit(node.expression)
+        .subscribe(result => {
+          if (result) {
+            node.expression = result
+          }
+        })
     }
-    this.doEdit(node.expression)
-      .subscribe(result => {
-        if (result) {
-          node.expression = result
-        }
-      })
   }
 
   delete(node: EntityFilterNode) {
@@ -126,17 +138,19 @@ export class EntityFilterComponent {
 
     parentNode.children = parentNode.children.filter(child => child.id != node.id)
     this.parentIndex.delete(node.id)
-    this.treeControl.getDescendants(node)
-      .forEach(child => this.parentIndex.delete(child.id))
-    this.refresh()
+  }
+
+  back() {
+    let parent = this.parentIndex.get(this.node.id)
+    if (parent) {
+      this.node = parent
+    }
   }
 
   private doAdd(node: EntityFilterNode, parent: EntityFilterNode) {
     node.id = this.random()
     parent.children.push(node)
     this.parentIndex.set(node.id, parent)
-    this.refresh()
-    this.treeControl.expand(parent)
   }
 
   private doEdit(expression: EntityFilterExpression): Observable<any> {
@@ -148,12 +162,6 @@ export class EntityFilterComponent {
     }
     return this.dialog.open(EntityFilterExpressionComponent, config)
       .afterClosed()
-  }
-
-  private refresh() {
-    let data = this.dataSource.data
-    this.dataSource.data = []
-    this.dataSource.data = data
   }
 
   private index(parent: EntityFilterNode | null, nodes: EntityFilterNode[]) {
@@ -170,4 +178,5 @@ export class EntityFilterComponent {
     return Math.ceil(Math.random() * 1000000)
   }
 
+  protected readonly event = event;
 }

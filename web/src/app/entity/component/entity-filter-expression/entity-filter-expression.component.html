@@ -29,35 +29,42 @@
 
       @if (isMultiselectInput()) {
 
-      <mat-select [(ngModel)]="expression.value" multiple>
-        @if (expression.field.nullable) {
-          <mat-option [value]="null">Empty</mat-option>
-        }
+        <mat-select [(ngModel)]="expression.value" multiple>
+          @if (expression.field.nullable) {
+            <mat-option [value]="null">Empty</mat-option>
+          }
 
-        @switch (expression.field.type) {
-          @case ('REFERENCE') {
-            @for (reference of references[expression.field.referenceName!]; track reference.id) {
-              <mat-option [value]="reference.id">{{reference.name}}</mat-option>
+          @switch (expression.field.type) {
+            @case ('ENUM') {
+              @for (enumValue of expression.field.enumConstants; track enumValue) {
+                <mat-option [value]="enumValue">{{enumValue}}</mat-option>
+              }
+            }
+            @case ('BOOLEAN') {
+              <mat-option [value]="true">True</mat-option>
+              <mat-option [value]="false">False</mat-option>
+            }
+            @case ('AMOUNT') {
+              @for (currency of getCurrencies(); track currency.name) {
+                <mat-option [value]="currency.name">{{currency.name}}</mat-option>
+              }
             }
           }
-          @case ('ENUM') {
-            @for (enumValue of expression.field.enumConstants; track enumValue) {
-              <mat-option [value]="enumValue">{{enumValue}}</mat-option>
-            }
-          }
-          @case ('BOOLEAN') {
-            <mat-option [value]="true">True</mat-option>
-            <mat-option [value]="false">False</mat-option>
-          }
-          @case ('AMOUNT') {
-            @for (currency of getCurrencies(); track currency.name) {
-              <mat-option [value]="currency.name">{{currency.name}}</mat-option>
-            }
-          }
-        }
-      </mat-select>
+        </mat-select>
 
-      } @else if(isDateInput()) {
+      } @else if (isReferenceInput()) {
+
+        <input matInput [matAutocomplete]="reference">
+        <mat-autocomplete #reference multiple>
+          @if (expression.field.nullable) {
+            <mat-option [value]="null">Empty</mat-option>
+          }
+          @for (reference of references[expression.field.referenceName!]; track reference) {
+            <mat-option [value]="reference">{{reference.name}}</mat-option>
+          }
+        </mat-autocomplete>
+
+      } @else if (isDateInput()) {
 
         <input matInput [(ngModel)]="expression.value" [matDatepicker]="picker" readonly (click)="picker.open()">
         <mat-datepicker [touchUi]="true" #picker></mat-datepicker>

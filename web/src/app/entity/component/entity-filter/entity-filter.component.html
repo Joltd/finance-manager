@@ -1,45 +1,52 @@
 <div matDialogContent class="content">
-  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="filter-tree">
-
-    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="filter-node">
-      <mat-checkbox class="negate" [(ngModel)]="node.negate">Not</mat-checkbox>
-      {{node.expression?.field}} {{operatorLabel(node.expression?.operator)}} {{node.expression?.value}}
-      <div class="filler"></div>
-      <button mat-icon-button [matMenuTriggerFor]="expressionMenu"><mat-icon>more_vert</mat-icon></button>
-      <mat-menu #expressionMenu>
-        <button mat-menu-item (click)="edit(node)">Edit</button>
-        <button mat-menu-item (click)="delete(node)">Delete</button>
-      </mat-menu>
-    </mat-tree-node>
-
-    <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
-      <div class="filter-node">
-        <button mat-icon-button matTreeNodeToggle [disabled]="node.children.length == 0">
-          <mat-icon>{{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}</mat-icon>
-        </button>
-        <mat-checkbox class="negate" [(ngModel)]="node.negate">Not</mat-checkbox>
-        <mat-button-toggle-group [(ngModel)]="node.condition">
-          <mat-button-toggle [value]="'AND'">And</mat-button-toggle>
-          <mat-button-toggle [value]="'OR'">Or</mat-button-toggle>
-        </mat-button-toggle-group>
-        <div class="filler"></div>
-        <button mat-icon-button [matMenuTriggerFor]="conditionMenu"><mat-icon>more_vert</mat-icon></button>
-        <mat-menu #conditionMenu>
-          <button mat-menu-item (click)="addCondition(node)">Add condition</button>
-          <button mat-menu-item (click)="addExpression(node)">Add expression</button>
-          @if (!isRoot(node)) {
-            <button mat-menu-item (click)="delete(node)">Delete</button>
+  <div class="header">
+    @if (!isRoot()) {
+      <button mat-icon-button (click)="back()"><mat-icon>arrow_back</mat-icon></button>
+    }
+    <mat-button-toggle-group [(ngModel)]="node.condition">
+      <mat-button-toggle [value]="'AND'">And</mat-button-toggle>
+      <mat-button-toggle [value]="'OR'">Or</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+  <mat-action-list>
+    @for (child of node.children; track child.id) {
+      <button mat-list-item class="item" (click)="editMenu.show(child)">
+        <div class="line">
+          <mat-slide-toggle class="negate" (click)="$event.stopPropagation()" [(ngModel)]="child.negate"></mat-slide-toggle>
+          @if (child.expression) {
+            <span>{{child.expression.field}}</span>
+            <span>{{operatorLabel(child.expression.operator)}}</span>
+            @if (isValueArray(child.expression.value)) {
+              @for (entry of asValueArray(child.expression.value); track entry) {
+                <entity-field-label [type]="fieldType(child.expression.field)" [value]="entry"></entity-field-label>
+              }
+            } @else {
+              <entity-field-label [type]="fieldType(child.expression.field)" [value]="child.expression.value"></entity-field-label>
+            }
+          } @else if (child.condition) {
+            @if (child.condition == 'AND') {
+              <span>And</span>
+            } @else if (child.condition == 'OR') {
+              <span>Or</span>
+            }
+            <span>({{child.children.length}} conditions)</span>
           }
-        </mat-menu>
-      </div>
-      <div [hidden]="!treeControl.isExpanded(node)" role="group">
-        <ng-container matTreeNodeOutlet></ng-container>
-      </div>
-    </mat-nested-tree-node>
-
-  </mat-tree>
+        </div>
+      </button>
+    }
+  </mat-action-list>
+  <entry-select #addMenu>
+    <entry-item (select)="addMenu.close(); addCondition(node)">Add condition</entry-item>
+    <entry-item (select)="addMenu.close(); addExpression(node)">Add expression</entry-item>
+  </entry-select>
+  <entry-select #editMenu>
+    <entry-item (select)="editMenu.close(); edit($event)">Edit</entry-item>
+    <entry-item (select)="editMenu.close(); delete($event)">Delete</entry-item>
+  </entry-select>
 </div>
 <div matDialogActions>
   <button mat-raised-button color="primary" (click)="apply()">Apply</button>
   <button mat-button (click)="close()">Close</button>
+  <div class="filler"></div>
+  <button mat-raised-button color="primary" (click)="addMenu.show()">Add</button>
 </div>

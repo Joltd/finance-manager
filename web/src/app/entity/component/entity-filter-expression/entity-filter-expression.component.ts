@@ -1,33 +1,33 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, OnInit } from "@angular/core";
 import {
   EntityField,
   EntityFieldType,
-  EntityFilterExpression, EntityFilterExpressionDialogData,
+  EntityFilterExpressionDialogData,
   EntityFilterOperator, OPERATOR_LABELS
 } from "../../model/entity";
 import { Reference } from "../../../common/model/reference";
-import { lastValueFrom } from "rxjs";
 import { Currency } from "../../../reference/model/currency";
 import { CurrencyService } from "../../../reference/service/currency.service";
 import { EntityService } from "../../service/entity.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { AdaptiveService } from "../../../common/service/adaptive.service";
 
 @Component({
   selector: 'entity-filter-expression',
   templateUrl: './entity-filter-expression.component.html',
   styleUrls: ['./entity-filter-expression.component.scss']
 })
-export class EntityFilterExpressionComponent {
+export class EntityFilterExpressionComponent implements OnInit {
 
   private config: { [key in EntityFieldType]: EntityFilterOperator[] } = {
-    'ID': ['EQUALS', 'NOT_EQUALS', 'IS_NULL', 'IS_NOT_NULL',],
-    'STRING': ['EQUALS', 'NOT_EQUALS', 'LIKE', 'NOT_LIKE', 'IS_NULL', 'IS_NOT_NULL',],
-    'NUMBER': ['EQUALS', 'NOT_EQUALS', 'GREATER', 'GREATER_EQUALS', 'LESS', 'LESS_EQUALS', 'IS_NULL', 'IS_NOT_NULL',],
-    'BOOLEAN': ['IN_LIST', 'NOT_IN_LIST',],
-    'DATE': ['EQUALS', 'NOT_EQUALS', 'GREATER', 'GREATER_EQUALS', 'LESS', 'LESS_EQUALS', 'IS_NULL', 'IS_NOT_NULL',],
-    'AMOUNT': ['CURRENCY_IN_LIST', 'CURRENCY_NOT_IN_LIST', 'AMOUNT_EQUALS', 'AMOUNT_NOT_EQUALS', 'AMOUNT_GREATER', 'AMOUNT_GREATER_EQUALS', 'AMOUNT_LESS', 'AMOUNT_LESS_EQUALS',],
-    'ENUM': ['IN_LIST', 'NOT_IN_LIST',],
-    'REFERENCE': ['IN_LIST', 'NOT_IN_LIST',],
+    'ID': ['EQUALS', 'IS_NULL',],
+    'STRING': ['EQUALS', 'LIKE', 'IS_NULL',],
+    'NUMBER': ['EQUALS', 'GREATER', 'GREATER_EQUALS', 'LESS', 'LESS_EQUALS', 'IS_NULL',],
+    'BOOLEAN': ['IN_LIST',],
+    'DATE': ['EQUALS', 'GREATER', 'GREATER_EQUALS', 'LESS', 'LESS_EQUALS', 'IS_NULL',],
+    'AMOUNT': ['CURRENCY_IN_LIST', 'AMOUNT_EQUALS', 'AMOUNT_NOT_EQUALS', 'AMOUNT_GREATER', 'AMOUNT_GREATER_EQUALS', 'AMOUNT_LESS', 'AMOUNT_LESS_EQUALS',],
+    'ENUM': ['IN_LIST',],
+    'REFERENCE': ['IN_LIST',],
     'JSON': [],
   }
   references: { [key: string]: Reference[] } = {}
@@ -40,6 +40,7 @@ export class EntityFilterExpressionComponent {
     @Inject(MAT_DIALOG_DATA) data: EntityFilterExpressionDialogData,
     private entityService: EntityService,
     private currencyService: CurrencyService,
+    private adaptiveService: AdaptiveService
   ) {
     this.fields = data.fields
     this.expression = {
@@ -47,6 +48,16 @@ export class EntityFilterExpressionComponent {
       field: this.fields.find(field => field.name == data.expression.field)!,
       operator: data.expression.operator,
       value: data.expression.value,
+    }
+    console.log(this.expression.value)
+  }
+
+  ngOnInit(): void {
+    this.loadReferences()
+    if (this.adaptiveService.desktop) {
+      this.dialogRef.updateSize('300px')
+    } else {
+      this.dialogRef.updateSize('90vw')
     }
   }
 
@@ -71,10 +82,7 @@ export class EntityFilterExpressionComponent {
   }
 
   loadReferences() {
-    let skip = !(this.expression.operator == 'IN_LIST'
-    || this.expression.operator == 'NOT_IN_LIST'
-    || this.expression.operator == 'CURRENCY_IN_LIST'
-    || this.expression.operator == 'CURRENCY_NOT_IN_LIST')
+    let skip = !(this.expression.operator == 'IN_LIST' || this.expression.operator == 'CURRENCY_IN_LIST')
     if (skip) {
       return
     }
@@ -100,22 +108,22 @@ export class EntityFilterExpressionComponent {
     return this.expression.field.type == 'REFERENCE'
       || this.expression.field.type == 'ENUM'
       || this.expression.field.type == 'BOOLEAN'
-      || (this.expression.operator != 'IS_NULL' && this.expression.operator != 'IS_NOT_NULL')
+      || this.expression.operator != 'IS_NULL'
   }
 
   isMultiselectInput(): boolean {
-    return this.expression.field.type == 'REFERENCE'
-      || this.expression.field.type == 'ENUM'
+    return this.expression.field.type == 'ENUM'
       || this.expression.field.type == 'BOOLEAN'
-      || (this.expression.field.type == 'AMOUNT'
-        && (this.expression.operator == 'CURRENCY_IN_LIST' || this.expression.operator == 'CURRENCY_NOT_IN_LIST')
-      )
+      || (this.expression.field.type == 'AMOUNT' && this.expression.operator == 'CURRENCY_IN_LIST')
+  }
+
+  isReferenceInput(): boolean {
+    return this.expression.field.type == 'REFERENCE'
   }
 
   isDateInput(): boolean {
     return this.expression.field.type == 'DATE' && (
       this.expression.operator == 'EQUALS'
-      || this.expression.operator == 'NOT_EQUALS'
       || this.expression.operator == 'GREATER'
       || this.expression.operator == 'GREATER_EQUALS'
       || this.expression.operator == 'LESS'
@@ -127,7 +135,6 @@ export class EntityFilterExpressionComponent {
     return (
       this.expression.field.type == 'NUMBER' && (
         this.expression.operator == 'EQUALS'
-        || this.expression.operator == 'NOT_EQUALS'
         || this.expression.operator == 'GREATER'
         || this.expression.operator == 'GREATER_EQUALS'
         || this.expression.operator == 'LESS'
@@ -136,7 +143,6 @@ export class EntityFilterExpressionComponent {
     ) || (
       this.expression.field.type == 'AMOUNT' && (
         this.expression.operator == 'EQUALS'
-        || this.expression.operator == 'NOT_EQUALS'
         || this.expression.operator == 'GREATER'
         || this.expression.operator == 'GREATER_EQUALS'
         || this.expression.operator == 'LESS'
@@ -146,11 +152,6 @@ export class EntityFilterExpressionComponent {
   }
 
   protected readonly OPERATOR_LABELS = OPERATOR_LABELS;
-}
-
-interface InternalEntityFilterOperator {
-  operator: EntityFilterOperator,
-  label: string
 }
 
 export interface InternalEntityFilterExpression {
