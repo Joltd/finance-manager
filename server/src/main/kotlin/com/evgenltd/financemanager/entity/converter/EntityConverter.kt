@@ -5,8 +5,11 @@ import com.evgenltd.financemanager.entity.record.EntityFieldRecord
 import com.evgenltd.financemanager.entity.record.EntityFieldType
 import com.evgenltd.financemanager.entity.record.EntityRecord
 import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.reference.repository.CurrencyRepository
 import jakarta.persistence.metamodel.Attribute
+import jakarta.persistence.metamodel.EmbeddableType
 import jakarta.persistence.metamodel.EntityType
+import jakarta.persistence.metamodel.ManagedType
 import jakarta.persistence.metamodel.SingularAttribute
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
@@ -21,15 +24,18 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberProperties
 
 @Service
-class EntityConverter {
+class EntityConverter(
+    private val currencyRepository: CurrencyRepository,
+) {
 
     fun toRecord(entity: EntityRecord, value: Any): Map<String,Any?> = entity.fields
+        .filter { it.attributes.size == 1 }
         .associate { it.name to it.toValue(value) }
 
     private fun EntityFieldRecord.toValue(value: Any): Any? = if (type == EntityFieldType.REFERENCE) {
-        (attribute.javaMember as Field).get(value).let { toReferenceValue(it) }
+        (attributes.last().javaMember as Field).get(value).let { toReferenceValue(it) }
     } else {
-        (attribute.javaMember as Field).get(value)
+        (attributes.last().javaMember as Field).get(value)
     }
 
     fun toReferenceValue(value: Any): Reference {
@@ -50,64 +56,89 @@ class EntityConverter {
             type,
             type.name,
             type.name,
-            type.attributes
-                .mapNotNull { it as? SingularAttribute }
-                .map { toField(it, fields[it.name]!!) }
+            type.singularAttributes
+                .flatMap { toField(it, fields[it.name]!!) }
         )
     }
 
-    private fun toField(attribute: SingularAttribute<*, *>, field: KProperty1<out Any, *>): EntityFieldRecord {
+    private fun toField(attribute: SingularAttribute<*, *>, field: KProperty1<out Any, *>): List<EntityFieldRecord> {
         if (attribute.isId) {
-            return EntityFieldRecord(
-                attribute = attribute,
+            return listOf(EntityFieldRecord(
+                attributes = listOf(attribute),
                 name = attribute.name,
                 type = EntityFieldType.ID,
                 nullable = false,
-            )
+            ))
         }
 
         if (attribute.persistentAttributeType == Attribute.PersistentAttributeType.BASIC) {
 
             if (attribute.javaType.isEnum) {
-                return EntityFieldRecord(
-                    attribute = attribute,
+                return listOf(EntityFieldRecord(
+                    attributes = listOf(attribute),
                     name = attribute.name,
                     type = EntityFieldType.ENUM,
                     nullable = field.returnType.isMarkedNullable,
                     enumConstants = attribute.javaType.enumConstants.toList()
-                )
+                ))
             }
 
-            return EntityFieldRecord(
-                attribute = attribute,
+            return listOf(EntityFieldRecord(
+                attributes = listOf(attribute),
                 name = attribute.name,
                 type = determineFieldType(attribute),
                 nullable = field.returnType.isMarkedNullable,
-            )
+            ))
         }
 
         if (attribute.persistentAttributeType == Attribute.PersistentAttributeType.MANY_TO_ONE) {
-            return EntityFieldRecord(
-                attribute = attribute,
-                name = attribute.name,
-                type = EntityFieldType.REFERENCE,
-                nullable = field.returnType.isMarkedNullable,
-                referenceName = (attribute.type as? EntityType)?.name,
-            )
+            val type = attribute.type as EntityType
+            return toManagedField(attribute, field, type, EntityFieldType.REFERENCE, type.name)
         }
 
         if (attribute.persistentAttributeType == Attribute.PersistentAttributeType.EMBEDDED) {
-            if (attribute.javaType == Amount::class.java) {
-                return EntityFieldRecord(
-                    attribute = attribute,
-                    name = attribute.name,
-                    type = EntityFieldType.AMOUNT,
-                    nullable = field.returnType.isMarkedNullable,
-                )
+            val type = attribute.type
+            if (type is EmbeddableType) {
+                if (type.javaType == Amount::class.java) {
+                    return toManagedField(attribute, field, type, EntityFieldType.AMOUNT)
+                        .map { managedField ->
+                            managedField.takeIf { it.attributes.last().name == "currency" }
+                                ?.copy(
+                                    type = EntityFieldType.ENUM,
+                                    enumConstants = currencyRepository.findAll().map { it.name }
+                                )
+                                ?: managedField
+                        }
+                }
             }
         }
 
         throw IllegalStateException("Unknown attribute type ${attribute.persistentAttributeType}")
+    }
+
+    private fun toManagedField(
+        attribute: SingularAttribute<*, *>,
+        field: KProperty1<out Any, *>,
+        type: ManagedType<*>,
+        fieldType: EntityFieldType,
+        referenceName: String? = null,
+    ): List<EntityFieldRecord> {
+        val fields = type.javaType.kotlin.declaredMemberProperties.associateBy { it.name }
+        val subFields = type.singularAttributes
+            .flatMap { toField(it, fields[it.name]!!) }
+            .map {
+                it.copy(
+                    attributes = listOf(attribute) + it.attributes,
+                    name = "${attribute.name}.${it.name}",
+                )
+            }
+        return listOf(EntityFieldRecord(
+            attributes = listOf(attribute),
+            name = attribute.name,
+            type = fieldType,
+            nullable = field.returnType.isMarkedNullable,
+            referenceName = referenceName,
+        )) + subFields
     }
 
     private fun determineFieldType(attribute: SingularAttribute<*, *>): EntityFieldType {

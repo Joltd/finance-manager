@@ -17,15 +17,7 @@ export type EntityFilterOperator =
   'LESS_EQUALS' |
   'LIKE' |
   'IN_LIST' |
-  'IS_NULL' |
-  'CURRENCY_IN_LIST' |
-  'AMOUNT_EQUALS' |
-  'AMOUNT_NOT_EQUALS' |
-  'AMOUNT_GREATER' |
-  'AMOUNT_GREATER_EQUALS' |
-  'AMOUNT_LESS' |
-  'AMOUNT_LESS_EQUALS'
-
+  'IS_NULL'
 
 export type EntityFilterCondition =
   'AND' |
@@ -40,13 +32,6 @@ export const OPERATOR_LABELS: { [key in EntityFilterOperator]: string } = {
   'LIKE': 'like...',
   'IN_LIST': 'in list...',
   'IS_NULL': 'is null',
-  'CURRENCY_IN_LIST': 'currency in list...',
-  'AMOUNT_EQUALS': 'amount equals...',
-  'AMOUNT_NOT_EQUALS': 'amount not equals...',
-  'AMOUNT_GREATER': 'amount greater...',
-  'AMOUNT_GREATER_EQUALS': 'amount greater equals...',
-  'AMOUNT_LESS': 'amount less...',
-  'AMOUNT_LESS_EQUALS': 'amount less or equals...',
 }
 
 export interface Entity {

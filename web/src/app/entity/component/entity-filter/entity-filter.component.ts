@@ -107,7 +107,6 @@ export class EntityFilterComponent {
       children: []
     } as any
 
-    this.edit(node)
     this.doEdit(node.expression)
       .subscribe(result => {
         if (result) {
@@ -178,5 +177,4 @@ export class EntityFilterComponent {
     return Math.ceil(Math.random() * 1000000)
   }
 
-  protected readonly event = event;
 }

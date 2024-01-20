@@ -25,9 +25,9 @@ export class EntityFilterExpressionComponent implements OnInit {
     'NUMBER': ['EQUALS', 'GREATER', 'GREATER_EQUALS', 'LESS', 'LESS_EQUALS', 'IS_NULL',],
     'BOOLEAN': ['IN_LIST',],
     'DATE': ['EQUALS', 'GREATER', 'GREATER_EQUALS', 'LESS', 'LESS_EQUALS', 'IS_NULL',],
-    'AMOUNT': ['CURRENCY_IN_LIST', 'AMOUNT_EQUALS', 'AMOUNT_NOT_EQUALS', 'AMOUNT_GREATER', 'AMOUNT_GREATER_EQUALS', 'AMOUNT_LESS', 'AMOUNT_LESS_EQUALS',],
     'ENUM': ['IN_LIST',],
     'REFERENCE': ['IN_LIST',],
+    'AMOUNT': [],
     'JSON': [],
   }
   references: { [key: string]: Reference[] } = {}
@@ -49,11 +49,9 @@ export class EntityFilterExpressionComponent implements OnInit {
       operator: data.expression.operator,
       value: data.expression.value,
     }
-    console.log(this.expression.value)
   }
 
   ngOnInit(): void {
-    this.loadReferences()
     if (this.adaptiveService.desktop) {
       this.dialogRef.updateSize('300px')
     } else {
@@ -81,8 +79,15 @@ export class EntityFilterExpressionComponent implements OnInit {
       .filter(operator => this.config[fieldType].includes(operator))
   }
 
+  fieldChanged() {
+    let operators = this.config[this.expression.field.type]
+    if (operators.length == 1) {
+      this.expression.operator = operators[0]
+    }
+  }
+
   loadReferences() {
-    let skip = !(this.expression.operator == 'IN_LIST' || this.expression.operator == 'CURRENCY_IN_LIST')
+    let skip = this.expression.field.type != 'REFERENCE'
     if (skip) {
       return
     }
@@ -114,7 +119,6 @@ export class EntityFilterExpressionComponent implements OnInit {
   isMultiselectInput(): boolean {
     return this.expression.field.type == 'ENUM'
       || this.expression.field.type == 'BOOLEAN'
-      || (this.expression.field.type == 'AMOUNT' && this.expression.operator == 'CURRENCY_IN_LIST')
   }
 
   isReferenceInput(): boolean {

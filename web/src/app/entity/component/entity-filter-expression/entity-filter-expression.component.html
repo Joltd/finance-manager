@@ -2,7 +2,7 @@
 
   <mat-form-field>
     <mat-label>Field</mat-label>
-    <mat-select [(ngModel)]="expression.field">
+    <mat-select [(ngModel)]="expression.field" (selectionChange)="fieldChanged()">
       @for (field of fields; track field.name) {
         <mat-option [value]="field">{{field.name}}</mat-option>
       }

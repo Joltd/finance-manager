@@ -63,8 +63,8 @@ export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
         expression('accountTo', 'EQUALS', entry.account.id)
       ]),
       or([
-        expression('amountFrom', 'CURRENCY_IN_LIST', amountEntry.amount.currency),
-        expression('amountTo', 'CURRENCY_IN_LIST', amountEntry.amount.currency)
+        expression('amountFrom.currency', 'IN_LIST', amountEntry.amount.currency),
+        expression('amountTo.currency', 'IN_LIST', amountEntry.amount.currency)
       ])
     ]))
   }

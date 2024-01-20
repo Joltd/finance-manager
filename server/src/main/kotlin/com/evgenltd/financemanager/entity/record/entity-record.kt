@@ -26,7 +26,7 @@ enum class EntityFieldType {
 
 data class EntityFieldRecord(
     @JsonIgnore
-    val attribute: SingularAttribute<*,*>,
+    val attributes: List<SingularAttribute<*,*>>,
     val name: String,
     val type: EntityFieldType,
     val nullable: Boolean = false,
@@ -43,7 +43,6 @@ enum class EntityFilterOperator {
     LIKE,
     IN_LIST,
     IS_NULL,
-    CURRENCY_IN_LIST,
     AMOUNT_EQUALS,
     AMOUNT_NOT_EQUALS,
     AMOUNT_GREATER,
