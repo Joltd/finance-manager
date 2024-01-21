@@ -54,15 +54,7 @@
 
       } @else if (isReferenceInput()) {
 
-        <input matInput [matAutocomplete]="reference">
-        <mat-autocomplete #reference multiple>
-          @if (expression.field.nullable) {
-            <mat-option [value]="null">Empty</mat-option>
-          }
-          @for (reference of references[expression.field.referenceName!]; track reference) {
-            <mat-option [value]="reference">{{reference.name}}</mat-option>
-          }
-        </mat-autocomplete>
+        <multi-reference-input [(ngModel)]="expression.value" [references]="references[expression.field.referenceName!]"></multi-reference-input>
 
       } @else if (isDateInput()) {
 

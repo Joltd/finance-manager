@@ -30,6 +30,7 @@ import { MatMenuModule } from "@angular/material/menu";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
+import { MatChipsModule } from "@angular/material/chips";
 
 @NgModule({
   declarations: [
@@ -41,37 +42,38 @@ import { MatAutocompleteModule } from "@angular/material/autocomplete";
     EntityEditorComponent,
     EntityFilterComponent
   ],
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatListModule,
-    NgForOf,
-    NgIf,
-    MatTableModule,
-    MatPaginatorModule,
-    MatDialogContent,
-    MatDialogActions,
-    MatSelectModule,
-    MatSlideToggleModule,
-    FormsModule,
-    MatInputModule,
-    MatTooltipModule,
-    RouterLink,
-    MatSortModule,
-    MatRippleModule,
-    MatDatepickerModule,
-    ReactiveFormsModule,
-    MatDialogClose,
-    AsyncPipe,
-    NgClass,
-    MatTreeModule,
-    MatMenuModule,
-    MatButtonToggleModule,
-    MatCheckboxModule,
-    DatePipe,
-    MatAutocompleteModule
-  ],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        MatListModule,
+        NgForOf,
+        NgIf,
+        MatTableModule,
+        MatPaginatorModule,
+        MatDialogContent,
+        MatDialogActions,
+        MatSelectModule,
+        MatSlideToggleModule,
+        FormsModule,
+        MatInputModule,
+        MatTooltipModule,
+        RouterLink,
+        MatSortModule,
+        MatRippleModule,
+        MatDatepickerModule,
+        ReactiveFormsModule,
+        MatDialogClose,
+        AsyncPipe,
+        NgClass,
+        MatTreeModule,
+        MatMenuModule,
+        MatButtonToggleModule,
+        MatCheckboxModule,
+        DatePipe,
+        MatAutocompleteModule,
+        MatChipsModule
+    ],
   providers: [],
   exports: [
     EntityListComponent,

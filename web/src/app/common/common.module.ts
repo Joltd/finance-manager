@@ -30,11 +30,14 @@ import { ToolbarButtonComponent } from "./component/toolbar-button/toolbar-butto
 import { FabGroupComponent } from "./component/fab-group/fab-group.component";
 import { IfHasDataDirective } from "./component/if-has-data/if-has-data.directive";
 import { CommonLayoutComponent } from "./component/common-layout/common-layout.component";
+import { MultiReferenceInputComponent } from "./component/multi-reference-input/multi-reference-input.component";
+import { MatChipsModule } from "@angular/material/chips";
 
 @NgModule({
   declarations: [
     AmountInputComponent,
     ReferenceInputComponent,
+    MultiReferenceInputComponent,
     FileInputComponent,
     AmountPipe,
     AmountLabelComponent,
@@ -67,11 +70,13 @@ import { CommonLayoutComponent } from "./component/common-layout/common-layout.c
     NgClass,
     MatTooltipModule,
     OverlayModule,
-    PortalModule
+    PortalModule,
+    MatChipsModule
   ],
   exports: [
     AmountInputComponent,
     ReferenceInputComponent,
+    MultiReferenceInputComponent,
     FileInputComponent,
     AmountPipe,
     AmountLabelComponent,

@@ -25,7 +25,7 @@ import { AxisModel } from "../../../common/model/axis-model";
 export class FlowChartComponent implements AfterViewInit, OnDestroy {
 
   filter: EntityFilterNode = and([
-    expression('date', 'GREATER_EQUALS', moment().subtract(1, 'year').format('yyyy-MM-DD'))
+    expression('date', 'GREATER_EQUALS', moment().subtract(1, 'year').format('yyyy-MM-DD')),
   ])
   groupBy: 'TYPE' | 'CATEGORY' = 'TYPE'
   flow: FlowChart | null = null

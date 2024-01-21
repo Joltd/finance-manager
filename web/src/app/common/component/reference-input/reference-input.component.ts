@@ -23,7 +23,7 @@ import {EntrySelectComponent} from "../entry-select/entry-select.component";
 })
 export class ReferenceInputComponent implements MatFormFieldControl<Reference>, ControlValueAccessor, OnDestroy {
 
-  private static nextId = 0
+  private static nextId: number = 0
 
   @ViewChild(EntrySelectComponent)
   entrySelect!: EntrySelectComponent
@@ -35,7 +35,7 @@ export class ReferenceInputComponent implements MatFormFieldControl<Reference>, 
 
   stateChanges = new Subject<void>()
   private _placeholder!: string
-  id = `reference-input-${ReferenceInputComponent.nextId++}`
+  id: string = `reference-input-${ReferenceInputComponent.nextId++}`
   focused: boolean = false
   touched: boolean = false
   private _required: boolean = false

@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.entity.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.entity.record.*
+import com.evgenltd.financemanager.reference.record.Reference
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Path
@@ -75,7 +76,8 @@ class ConditionBuilderService(
         val parentAttribute = attributes.takeIf { attributes.size > 1 }?.let { it[it.size - 2] }
         return if (operator == EntityFilterOperator.IN_LIST) {
             if (type == EntityFieldType.REFERENCE) {
-                (value as List<String>).map { mapper.readValue("\"$it\"", UUID::class.java) }
+                (value as List<Map<String,Any>>)
+                    .map { UUID.fromString(it["id"] as String) }
             } else {
                 (value as List<String>).map { mapper.readValue("\"$it\"", attribute.javaType) }
             }

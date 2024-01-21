@@ -11,6 +11,9 @@ import { CurrencyService } from "../../../reference/service/currency.service";
 import { EntityService } from "../../service/entity.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { AdaptiveService } from "../../../common/service/adaptive.service";
+import { MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
+import { MatChipInputEvent } from "@angular/material/chips";
+import { COMMA, ENTER } from "@angular/cdk/keycodes";
 
 @Component({
   selector: 'entity-filter-expression',
@@ -30,6 +33,7 @@ export class EntityFilterExpressionComponent implements OnInit {
     'AMOUNT': [],
     'JSON': [],
   }
+  separatorKeysCodes: number[] = [ENTER, COMMA]
   references: { [key: string]: Reference[] } = {}
 
   fields: EntityField[] = []
@@ -49,6 +53,7 @@ export class EntityFilterExpressionComponent implements OnInit {
       operator: data.expression.operator,
       value: data.expression.value,
     }
+    this.loadReferences()
   }
 
   ngOnInit(): void {
@@ -83,6 +88,7 @@ export class EntityFilterExpressionComponent implements OnInit {
     let operators = this.config[this.expression.field.type]
     if (operators.length == 1) {
       this.expression.operator = operators[0]
+      this.loadReferences()
     }
   }
 
@@ -104,6 +110,22 @@ export class EntityFilterExpressionComponent implements OnInit {
 
   getCurrencies(): Currency[] {
     return this.currencyService.currencies
+  }
+
+  asValueArray(): Reference[] {
+    return this.expression.value as Reference[]
+  }
+
+  referenceSelected(event: MatAutocompleteSelectedEvent) {
+    this.asValueArray().push(event.option.value)
+  }
+
+  referenceAdd(event: MatChipInputEvent) {
+    console.log(event)
+  }
+
+  referenceRemove(reference: Reference) {
+    this.expression.value = this.asValueArray().filter(it => it.id != reference.id)
   }
 
   isValueInputVisible(): boolean {

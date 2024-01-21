@@ -30,7 +30,9 @@ export class EntrySelectComponent {
   constructor(private overlay: Overlay) {}
 
   show(data: any = null) {
-    this.items.forEach(item => item.value = data)
+    if (data) {
+      this.items.forEach(item => item.value = data)
+    }
     let config = new OverlayConfig({
       hasBackdrop: true,
       positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically()
@@ -48,6 +50,10 @@ export class EntrySelectComponent {
 
   visible(): boolean {
     return this.ref?.hasAttached()
+  }
+
+  search(event: any) {
+    console.log(event)
   }
 
 }

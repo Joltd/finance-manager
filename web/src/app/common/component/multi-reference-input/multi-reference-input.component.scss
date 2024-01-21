@@ -1,0 +1,26 @@
+.selection {
+  width: 80vw;
+  height: 90vh;
+
+  .search {
+    margin: 10px 10px 0 10px;
+  }
+
+  .list {
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  .buttons {
+    display: flex;
+    flex-flow: row-reverse;
+    margin: 10px;
+  }
+}
+
+.selection-desktop {
+  min-width: 300px;
+  max-width: 500px;
+  min-height: 50vh;
+  max-height: 80vh;
+}
