@@ -93,7 +93,7 @@ export class EntityFilterExpressionComponent implements OnInit {
   }
 
   loadReferences() {
-    let skip = this.expression.field.type != 'REFERENCE'
+    let skip = this.expression?.field?.type != 'REFERENCE'
     if (skip) {
       return
     }

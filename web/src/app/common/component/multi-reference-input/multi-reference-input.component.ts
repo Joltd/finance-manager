@@ -35,8 +35,8 @@ export class MultiReferenceInputComponent implements MatFormFieldControl<Referen
   @ViewChild(MatSelectionList)
   selection!: MatSelectionList
 
-  private _references: Reference[] = []
-  filteredReferences: Reference[] = []
+  @Input()
+  references: Reference[] = []
   private _value: Reference[] = []
 
   stateChanges = new Subject<void>()
@@ -77,26 +77,11 @@ export class MultiReferenceInputComponent implements MatFormFieldControl<Referen
   }
 
   @Input()
-  set references(references: Reference[]) {
-    this._references = references
-    this.filteredReferences = references
-    this.stateChanges.next()
-  }
-  get references(): Reference[] {
-    return this._references
-  }
-
-  @Input()
   get value(): Reference[] {
     return this._value
   }
-  set value(value: Reference[]) {
-    this._value = value
-    if (!value) {
-      this.stateChanges.next()
-      return
-    }
-
+  set value(value: Reference[] | null) {
+    this._value = value ?? []
     this.stateChanges.next()
   }
 
@@ -168,16 +153,6 @@ export class MultiReferenceInputComponent implements MatFormFieldControl<Referen
     this.value = value
   }
 
-  // handle entry selection
-
-  // private setupName() {
-  //   if (this.value != null) {
-  //     this.name = this.value.name
-  //   } else {
-  //     this.name = `Nothing`
-  //   }
-  // }
-
   isSelected(reference: Reference): boolean {
     return this.value.findIndex(it => it.id == reference.id) >= 0
   }
@@ -202,6 +177,5 @@ export class MultiReferenceInputComponent implements MatFormFieldControl<Referen
 
   onSearch(event: Event) {
     let query = (event.target as HTMLInputElement).value
-    this.filteredReferences = this.references.filter(it => it.name.toLowerCase().includes(query.toLowerCase()))
   }
 }

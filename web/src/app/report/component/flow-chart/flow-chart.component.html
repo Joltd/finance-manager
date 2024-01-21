@@ -19,10 +19,13 @@
           <div class="name">{{entry.name}}</div>
           <div class="bar"
                [style.background-color]="color(entry.id)"
-               [style.width]="axis.calcWidth(entry.value) + '%'"
-               [style.margin-left]="axis.calcOffset(entry.value) + '%'"
+               [style.width]="calcWidth(entry.value) + '%'"
+               [style.margin-left]="calcOffset(entry.value) + '%'"
           ></div>
-          <div class="value" [style.left]="calcValueOffset(entry.value) + '%'">{{entry.value | number: '1.0-2'}}</div>
+          <div class="value"
+               [class.expense]="entry.value < 0"
+               [style.left]="calcValueOffset(entry.value) + '%'"
+          >{{entry.value | number: '1.0-2'}}</div>
         </div>
       }
       </div>

@@ -43,7 +43,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   ]
   private colorIndex: number = 0
   private colors: { [key: string]: string } = {}
-  axis: AxisModel = new AxisModel()
+  private axis: AxisModel = new AxisModel()
 
   constructor(
     private dialog: MatDialog,
@@ -115,7 +115,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     this.flow = flow
     let values = this.flow.groups
       .flatMap(group => group.entries)
-      .map(entry => entry.value)
+      .map(entry => Math.abs(entry.value))
     this.axis.define(values)
   }
 
@@ -127,8 +127,16 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
     return color
   }
 
+  calcWidth(value: number): number {
+    return this.axis.calcWidth(Math.abs(value))
+  }
+
+  calcOffset(value: number): number {
+    return this.axis.calcOffset(Math.abs(value))
+  }
+
   calcValueOffset(value: number): number {
-    return this.axis.calcValueOffset(value)
+    return this.axis.calcValueOffset(Math.abs(value))
   }
 
   private nextColor(): string {

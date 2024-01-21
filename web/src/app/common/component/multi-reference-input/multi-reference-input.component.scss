@@ -9,12 +9,19 @@
   .list {
     overflow-y: auto;
     flex-grow: 1;
+
+    .hidden {
+      display: none;
+    }
   }
 
   .buttons {
     display: flex;
-    flex-flow: row-reverse;
     margin: 10px;
+
+    .filler {
+      flex-grow: 1;
+    }
   }
 }
 
