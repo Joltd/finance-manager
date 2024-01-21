@@ -39,6 +39,7 @@ import { EntityListComponent } from "./entity/component/entity-list/entity-list.
 import { EntityEditorComponent } from "./entity/component/entity-editor/entity-editor.component";
 import { CandyDashboardComponent } from "./candy/component/candy-dashboard/candy-dashboard.component";
 import { PricingNewPriceComponent } from "./pricing/component/pricing-new-price/pricing-new-price.component";
+import { NewTaxComponent } from "./taxes/component/new-tax/new-tax.component";
 
 const routes: Routes = [
   { path: 'entity', component: EntityListComponent },
@@ -65,6 +66,7 @@ const routes: Routes = [
   { path: 'exchange-rate/:id', component: ExchangeRateEditorComponent },
   { path: 'candy', component: CandyDashboardComponent },
   { path: 'pricing', component: PricingNewPriceComponent },
+  { path: 'tax', component: NewTaxComponent },
   { path: 'settings', component: SettingsEditorComponent },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 ];

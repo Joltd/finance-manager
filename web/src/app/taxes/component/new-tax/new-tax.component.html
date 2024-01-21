@@ -1,0 +1,31 @@
+<common-layout>
+  <form [formGroup]="form">
+
+    <mat-form-field>
+      <mat-label>Date</mat-label>
+      <input matInput formControlName="date" [matDatepicker]="picker" readonly (click)="picker.open()">
+      <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Currency</mat-label>
+      <currency-input></currency-input>
+    </mat-form-field>
+
+  </form>
+
+  <mat-selection-list>
+    @for (income of incomes; track income.operation.id) {
+      <mat-list-option [togglePosition]="'before'" (selectedChange)="incomeSelected(income, $event)">
+        <operation-label [operation]="income.operation"></operation-label>
+        <amount-label [amount]="income.amount"></amount-label>
+      </mat-list-option>
+    }
+  </mat-selection-list>
+
+  <div>Month tax</div>
+  <amount-label [amount]="currentTax"></amount-label>
+  <div>Year tax (incl. month)</div>
+  <amount-label [amount]="totalTax()"></amount-label>
+
+</common-layout>
