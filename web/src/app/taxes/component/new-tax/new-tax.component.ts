@@ -1,11 +1,15 @@
-import { Component, OnInit } from "@angular/core";
-import { TaxesService } from "../../service/taxes.service";
+import { Component, OnInit, ViewChild } from "@angular/core";
+import { TaxService } from "../../service/tax.service";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import * as moment from "moment";
 import { Income } from "../../model/taxes";
 import { ExchangeRateService } from "../../../exchangerate/service/exchange-rate.service";
-import { Amount, emptyAmount, plus } from "../../../common/model/amount";
+import { Amount, emptyAmount, fromFractional, plus, toFractional } from "../../../common/model/amount";
 import { lastValueFrom } from "rxjs";
+import { Operation } from "../../../operation/model/operation";
+import { SelectionModel } from "@angular/cdk/collections";
+import { MatListOption, MatSelectionList } from "@angular/material/list";
+import { StepperSelectionEvent } from "@angular/cdk/stepper";
 
 @Component({
   selector: "new-tax",
@@ -15,96 +19,84 @@ import { lastValueFrom } from "rxjs";
 export class NewTaxComponent implements OnInit {
 
   form = new FormGroup({
-    date: new FormControl(moment().startOf('month').format('yyyy-MM-DD'), Validators.required),
-    currency: new FormControl(null, Validators.required),
+    date: new FormControl(moment().startOf('month').subtract(3, 'month').format('yyyy-MM-DD'), Validators.required),
+    currency: new FormControl('GEL', Validators.required),
+    amount: new FormControl(null, Validators.required),
   })
 
+  @ViewChild(MatSelectionList)
+  selection!: MatSelectionList
+
+  operations: Operation[] = []
   incomes: Income[] = []
-  currentTax!: Amount
-  yearTax!: Amount
+
+  monthTax: Amount = emptyAmount('USD')
+  yearTax: Amount = emptyAmount('USD')
 
   constructor(
-    private taxesService: TaxesService,
+    private taxesService: TaxService,
     private exchangeRateService: ExchangeRateService,
   ) {}
 
-  ngOnInit(): void {
-    this.form.valueChanges.subscribe((v) => {
-      console.log(v)
-      // date -> this.loadYearTax() this.loadIncomes()
-      // currency -> this.loadYearTax() this.calculateAllTaxes()
-    })
-    this.loadIncomes().then()
-    this.loadYearTax()
-  }
+  ngOnInit(): void {}
 
-  incomeSelected(income: Income, event: any) {
-    console.log(event)
-    // income.selected = ???
-    let currency = this.form.value.currency as string | null
-    if (!currency) {
-      income.amount = null
-      return
-    }
-    if (event == 'true') {
-      this.calculateTax(income, currency).then()
-    } else {
-      income.amount = null
+  nextStep(event: StepperSelectionEvent) {
+    let prev = event.previouslySelectedIndex
+    let next = event.selectedIndex
+    if (prev == 0 && next == 1) {
+      this.loadIncomes()
+    } else if (prev == 1 && next == 2) {
+      this.calcTaxes()
     }
   }
 
-  totalTax(): Amount {
-    return plus(this.currentTax, this.yearTax)
+  private loadIncomes() {
+    let date = moment(this.form.value.date!!).startOf('month').format('yyyy-MM-DD')
+    let currency = this.form.value.currency!!;
+    this.taxesService.listIncomes(date)
+      .subscribe(result => this.operations = result)
+    this.taxesService.yearTax(date, currency)
+      .subscribe(result => {
+        this.monthTax = emptyAmount(currency)
+        this.yearTax = result
+      })
   }
 
-  private async loadIncomes() {
-    let date = this.form.value.date ?? moment().format('yyyy-MM-DD')
-    let incomes = await lastValueFrom(this.taxesService.listIncomes(date))
-    this.incomes = incomes.map(income => {
-      return {
-        selected: false,
-        operation: income,
-        amount: null,
-      }
-    })
-    await this.calculateTaxes()
+  calcTaxes() {
+    this.incomes = this.selection.selectedOptions
+      .selected
+      .map(option => {
+        return {
+          operation: option.value as Operation,
+          amount: {
+            currency: this.form.value.currency!!,
+            value: 0,
+          }
+        } as Income
+      })
+    this.calcIncomeInSelectedCurrency().then()
   }
 
-  private async loadYearTax() {
-    let date = this.form.value.date
-    let currency = this.form.value.currency
-    if (!date || !currency) {
-      return
-    }
-    this.yearTax = await lastValueFrom(this.taxesService.yearTax(date, currency))
-  }
-
-  private async calculateTaxes() {
-    let currency = this.form.value.currency
-    if (!currency) {
-      return
-    }
-
+  private async calcIncomeInSelectedCurrency() {
     for (let income of this.incomes) {
-      if (!income.selected || !currency) {
-        income.amount = null
-      } else {
-        await this.calculateTax(income, currency)
-      }
+      let date = income.operation.date
+      let amount = income.operation.amountTo
+      let from = amount.currency
+      let to = this.form.value.currency!!
+      let rate = await lastValueFrom(this.exchangeRateService.rate(date, from, to))
+      income.amount.value = fromFractional(toFractional(amount) * rate)
     }
-
-    this.currentTax = this.incomes.filter(income => income.amount != null)
-      .map(income => income.amount!!)
-      .reduce((acc, amount) => plus(acc, amount), emptyAmount(currency))
+    this.monthTax = this.incomes.map(income => income.amount)
+      .reduce((acc, amount) => plus(acc, amount), emptyAmount(this.form.value.currency!!))
+    this.form.patchValue({amount: this.monthTax as any})
   }
 
-  private async calculateTax(income: Income, currency: string) {
-    let rate = await lastValueFrom(this.exchangeRateService.rate(income.operation.amountTo.currency, currency))
+  totalTaxes(): Amount {
+    return plus(this.monthTax, this.yearTax)
+  }
 
-    income.amount = {
-      currency: currency,
-      value: income.operation.amountTo.value * rate,
-    }
+  save() {
+
   }
 
 }

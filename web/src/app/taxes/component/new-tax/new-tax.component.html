@@ -1,31 +1,74 @@
 <common-layout>
-  <form [formGroup]="form">
 
-    <mat-form-field>
-      <mat-label>Date</mat-label>
-      <input matInput formControlName="date" [matDatepicker]="picker" readonly (click)="picker.open()">
-      <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
-    </mat-form-field>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <mat-stepper orientation="vertical" [linear]="true" (selectionChange)="nextStep($event)">
 
-    <mat-form-field>
-      <mat-label>Currency</mat-label>
-      <currency-input></currency-input>
-    </mat-form-field>
+      <mat-step label="Date and currency">
+        <div class="step">
+          <mat-form-field>
+            <mat-label>Date</mat-label>
+            <input matInput formControlName="date" [matDatepicker]="picker" readonly (click)="picker.open()">
+            <mat-datepicker [touchUi]="true" #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Currency</mat-label>
+            <currency-input formControlName="currency"></currency-input>
+          </mat-form-field>
+
+          <div class="buttons">
+            <button mat-raised-button matStepperNext type="button">Next</button>
+          </div>
+        </div>
+      </mat-step>
+
+      <mat-step label="Operations">
+        <div class="step">
+          <mat-selection-list class="step-gap">
+            @for (operation of operations; track operation.id) {
+              <mat-list-option [value]="operation" [togglePosition]="'before'">
+                <operation-label [operation]="operation"></operation-label>
+              </mat-list-option>
+            }
+          </mat-selection-list>
+
+          <div class="buttons">
+            <button mat-raised-button matStepperPrevious type="button">Back</button>
+            <button mat-raised-button matStepperNext type="button">Next</button>
+          </div>
+        </div>
+      </mat-step>
+
+      <mat-step label="Result">
+        <div class="step">
+          <mat-form-field>
+            <mat-label>Month tax</mat-label>
+            <amount-input formControlName="amount"></amount-input>
+          </mat-form-field>
+
+          <div class="totals">
+            <div>Month tax</div>
+            <amount-label [amount]="monthTax"></amount-label>
+            <div>Year tax (incl. month)</div>
+            <amount-label [amount]="totalTaxes()"></amount-label>
+          </div>
+
+          <div class="incomes">
+            @for (income of incomes; track income.operation.id) {
+              <amount-label [amount]="income.amount"></amount-label>
+              <operation-label [operation]="income.operation" [hideAccount]="true"></operation-label>
+            }
+          </div>
+
+          <div class="buttons">
+            <button mat-raised-button matStepperPrevious type="button">Back</button>
+            <button mat-raised-button color="primary" type="submit">Save</button>
+          </div>
+        </div>
+      </mat-step>
+
+    </mat-stepper>
 
   </form>
-
-  <mat-selection-list>
-    @for (income of incomes; track income.operation.id) {
-      <mat-list-option [togglePosition]="'before'" (selectedChange)="incomeSelected(income, $event)">
-        <operation-label [operation]="income.operation"></operation-label>
-        <amount-label [amount]="income.amount"></amount-label>
-      </mat-list-option>
-    }
-  </mat-selection-list>
-
-  <div>Month tax</div>
-  <amount-label [amount]="currentTax"></amount-label>
-  <div>Year tax (incl. month)</div>
-  <amount-label [amount]="totalTax()"></amount-label>
 
 </common-layout>

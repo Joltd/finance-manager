@@ -31,8 +31,9 @@ class ExchangeRateController(
 
     @GetMapping("/exchange-rate/rate")
     fun rate(
+        @RequestParam date: LocalDate,
         @RequestParam from: String,
         @RequestParam to: String,
-    ): BigDecimal = exchangeRateService.actualRate(from, to)
+    ): BigDecimal = exchangeRateService.rate(date, from, to)
 
 }

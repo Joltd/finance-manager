@@ -36,7 +36,7 @@ export class CandyExpenseComponent {
   amountChanged() {
     let amount = this.form.value.amount
     if (amount) {
-      this.exchangeRateService.rate(amount.currency, 'USD')
+      this.exchangeRateService.rate(moment().subtract(1, 'day').format('yyyy-MM-DD'), amount.currency, 'USD')
         .subscribe(result => {
           this.amountUsd = {
             value: amount.value * result,

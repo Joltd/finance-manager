@@ -6,6 +6,8 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatListModule } from "@angular/material/list";
 import { OperationModule } from "../operation/operation.modules";
+import { MatStepperModule } from "@angular/material/stepper";
+import { MatButtonModule } from "@angular/material/button";
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { OperationModule } from "../operation/operation.modules";
     MatDatepickerModule,
     ReactiveFormsModule,
     MatListModule,
-    OperationModule
+    OperationModule,
+    MatStepperModule,
+    MatButtonModule
   ],
   exports: [
     NewTaxComponent,

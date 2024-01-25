@@ -18,6 +18,9 @@ export class OperationLabelComponent {
   @Input()
   hideDate: boolean = false
 
+  @Input()
+  hideAccount: boolean = false
+
   sameAmount(): boolean {
     return this.operation.amountFrom.currency == this.operation.amountTo.currency
       && this.operation.amountFrom.value == this.operation.amountTo.value

@@ -1,21 +1,25 @@
-<date-label *ngIf="!hideDate" [date]="operation.date" [disabled]="disabled"></date-label>
+@if (!hideDate) {
+  <date-label [date]="operation.date" [disabled]="disabled"></date-label>
+}
 <div class="amount">
   <amount-label class="amount-from" [amount]="operation.amountFrom"></amount-label>
   <amount-label class="amount-to" *ngIf="!sameAmount()" [amount]="operation.amountTo"></amount-label>
 </div>
-<div class="account">
-  <div class="name">
-    <div class="marker"
-         [class.expense]="operation.accountFrom.type == 'EXPENSE'"
-         [class.income]="operation.accountFrom.type == 'INCOME'"
-         [class.exchange]="operation.accountFrom.type == 'ACCOUNT'"></div>
-    {{operation.accountFrom.name}}
+@if (!hideAccount) {
+  <div class="account">
+    <div class="name">
+      <div class="marker"
+           [class.expense]="operation.accountFrom.type == 'EXPENSE'"
+           [class.income]="operation.accountFrom.type == 'INCOME'"
+           [class.exchange]="operation.accountFrom.type == 'ACCOUNT'"></div>
+      {{operation.accountFrom.name}}
+    </div>
+    <div class="name" *ngIf="operation.accountFrom.id != operation.accountTo.id">
+      <div class="marker"
+           [class.expense]="operation.accountTo.type == 'EXPENSE'"
+           [class.income]="operation.accountTo.type == 'INCOME'"
+           [class.exchange]="operation.accountTo.type == 'ACCOUNT'"></div>
+      {{operation.accountTo.name}}
+    </div>
   </div>
-  <div class="name" *ngIf="operation.accountFrom.id != operation.accountTo.id">
-    <div class="marker"
-         [class.expense]="operation.accountTo.type == 'EXPENSE'"
-         [class.income]="operation.accountTo.type == 'INCOME'"
-         [class.exchange]="operation.accountTo.type == 'ACCOUNT'"></div>
-    {{operation.accountTo.name}}
-  </div>
-</div>
+}

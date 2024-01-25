@@ -68,7 +68,7 @@ const routes: Routes = [
   { path: 'pricing', component: PricingNewPriceComponent },
   { path: 'tax', component: NewTaxComponent },
   { path: 'settings', component: SettingsEditorComponent },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
+  { path: '', redirectTo: '/tax', pathMatch: 'full' }
 ];
 
 @NgModule({
