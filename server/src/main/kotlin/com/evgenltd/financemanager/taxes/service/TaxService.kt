@@ -6,6 +6,8 @@ import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationService
+import com.evgenltd.financemanager.taxes.entity.Tax
+import com.evgenltd.financemanager.taxes.record.NewTax
 import com.evgenltd.financemanager.taxes.repository.TaxRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -16,14 +18,14 @@ class TaxService(
     private val operationService: OperationService,
 ) {
 
-    fun getTotalYearTax(date: LocalDate, currency: String): Amount {
+    fun getYearBase(date: LocalDate, currency: String): Amount {
         val from = date.withDayOfYear(1)
         val to = date.withDayOfMonth(1)
         return taxRepository.findByDateGreaterThanEqualAndDateLessThanAndAmountCurrency(
             from = from,
             to = to,
             currency = currency,
-        ).map { it.amount }
+        ).map { it.base }
             .reduceOrNull { acc, amount -> acc + amount }
             ?: emptyAmount(currency)
     }
@@ -37,6 +39,17 @@ class TaxService(
             type = OperationType.INCOME,
         )
         return operationService.list(filter).operations
+    }
+
+    fun saveNewTax(newTax: NewTax) {
+        val tax = Tax(
+            id = null,
+            date = newTax.date.withDayOfMonth(1),
+            base = newTax.base,
+            rate = newTax.rate,
+            amount = newTax.amount,
+        )
+        taxRepository.save(tax)
     }
 
 }

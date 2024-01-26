@@ -16,6 +16,11 @@
             <currency-input formControlName="currency"></currency-input>
           </mat-form-field>
 
+          <mat-form-field>
+            <mat-label>Interest rate, %</mat-label>
+            <input matInput formControlName="interestRate" type="number">
+          </mat-form-field>
+
           <div class="buttons">
             <button mat-raised-button matStepperNext type="button">Next</button>
           </div>
@@ -42,15 +47,19 @@
       <mat-step label="Result">
         <div class="step">
           <mat-form-field>
+            <mat-label>Month total</mat-label>
+            <amount-input formControlName="base"></amount-input>
+            <mat-hint>{{monthTotal | format}}</mat-hint>
+          </mat-form-field>
+          <mat-form-field>
             <mat-label>Month tax</mat-label>
             <amount-input formControlName="amount"></amount-input>
+            <mat-hint>{{taxAmount | format}}</mat-hint>
           </mat-form-field>
 
           <div class="totals">
-            <div>Month tax</div>
-            <amount-label [amount]="monthTax"></amount-label>
-            <div>Year tax (incl. month)</div>
-            <amount-label [amount]="totalTaxes()"></amount-label>
+            <div>Year total (incl. month)</div>
+            <amount-label [amount]="totalAmount()"></amount-label>
           </div>
 
           <div class="incomes">

@@ -11,12 +11,16 @@ export class TaxService {
 
   constructor(private http: HttpClient) {}
 
-  yearTax(date: string, currency: string): Observable<Amount> {
+  yearTotal(date: string, currency: string): Observable<Amount> {
     return this.http.get<Amount>(`/tax/year?date=${date}&currency=${currency}`)
   }
 
   listIncomes(date: string): Observable<Operation[]> {
     return this.http.get<Operation[]>(`/tax/income?date=${date}`)
+  }
+
+  save(tax: any): Observable<any> {
+    return this.http.post<any>("/tax", tax);
   }
 
 }
