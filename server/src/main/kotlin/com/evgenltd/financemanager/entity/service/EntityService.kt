@@ -2,7 +2,6 @@ package com.evgenltd.financemanager.entity.service
 
 import com.evgenltd.financemanager.entity.converter.EntityConverter
 import com.evgenltd.financemanager.entity.record.*
-import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.Reference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
@@ -32,13 +31,7 @@ class EntityService(
 
     fun fields(javaType: Class<*>): List<EntityFieldRecord> = entities.first { it.type.javaType == javaType }.fields
 
-    fun entityList(): List<EntityRecord> = entities
-        .map {  entity ->
-            entity.copy(
-                fields = entity.fields.filter { it.type != EntityFieldType.AMOUNT }
-            )
-        }
-        .sortedBy { it.name }
+    fun entityList(): List<EntityRecord> = entities.sortedBy { it.name }
 
     fun referenceList(name: String, mask: String?, id: UUID?): List<Reference> {
         val entity = entities.first { it.name == name }
@@ -141,7 +134,9 @@ class EntityService(
             declaredField.set(entityValue, mapper.treeToValue(fieldValueNode, field.attributes.last().javaType))
         }
 
-        val isNew = entity.type.javaType.getDeclaredField("id").get(entityValue) == null
+        val idField = entity.type.javaType.getDeclaredField("id")
+        idField.trySetAccessible()
+        val isNew = idField.get(entityValue) == null
         if (isNew) {
             entityManager.persist(entityValue)
         } else {

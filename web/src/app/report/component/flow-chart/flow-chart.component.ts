@@ -85,7 +85,7 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   openFilter() {
     let config = {
       data: {
-        fields: this.entityService.getEntity('Turnover').fields,
+        fields: this.entityService.getFields('Turnover'),
         filter: this.filter,
       }
     }

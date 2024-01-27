@@ -41,7 +41,7 @@ export class OperationBrowserComponent implements AfterViewInit {
   openFilter() {
     let config = {
       data: {
-        fields: this.entityService.getEntity('Operation').fields,
+        fields: this.entityService.getFields('Operation'),
         filter: this.operationService.filter,
       }
     }

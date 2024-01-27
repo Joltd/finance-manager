@@ -6,33 +6,39 @@
 <div class="table-container">
   <table mat-table matSort (matSortChange)="onSort($event)" [dataSource]="dataSource" *ifHasData="hasData">
 
-    <ng-container [matColumnDef]="field.name" *ngFor="let field of entity().fields">
+    <ng-container [matColumnDef]="field.name" *ngFor="let field of entityFields()">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{field.name}}</th>
-      <td mat-cell *matCellDef="let value" nowrap="true">
+      @if (field.type == 'STRING') {
+        <td mat-cell *matCellDef="let value">
+          {{value[field.name]}}
+        </td>
+      } @else {
+        <td mat-cell *matCellDef="let value" nowrap="true">
 
-        @if (value[field.name] == null) {
-          <badge>Empty</badge>
-        } @else {
-          @switch (field.type) {
-            @case ('ID') {
-              <badge [matTooltip]="value[field.name]">ID</badge>
-            }
-            @case ('JSON') {
-              <badge [matTooltip]="value[field.name]">JSON</badge>
-            }
-            @case ('AMOUNT') {
-              <amount-label [amount]="value[field.name]"></amount-label>
-            }
-            @case ('REFERENCE') {
-              <badge [matTooltip]="value[field.name].id + ' - ' + value[field.name].name">{{value[field.name].name}}</badge>
-            }
-            @default {
-              {{value[field.name]}}
+          @if (value[field.name] == null) {
+            <badge>Empty</badge>
+          } @else {
+            @switch (field.type) {
+              @case ('ID') {
+                <badge [matTooltip]="value[field.name]">ID</badge>
+              }
+              @case ('JSON') {
+                <badge [matTooltip]="value[field.name]">JSON</badge>
+              }
+              @case ('AMOUNT') {
+                <amount-label [amount]="value[field.name]"></amount-label>
+              }
+              @case ('REFERENCE') {
+                <badge [matTooltip]="value[field.name].id + ' - ' + value[field.name].name">{{value[field.name].name}}</badge>
+              }
+              @default {
+                {{value[field.name]}}
+              }
             }
           }
-        }
 
-      </td>
+        </td>
+      }
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="fieldNames; sticky: true"></tr>

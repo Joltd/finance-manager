@@ -44,6 +44,7 @@ export interface EntityField {
   name: string
   type: EntityFieldType
   nullable: boolean
+  subField: boolean
   referenceName: string | null
   enumConstants: string[]
 }

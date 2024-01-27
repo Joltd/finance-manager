@@ -30,6 +30,7 @@ data class EntityFieldRecord(
     val name: String,
     val type: EntityFieldType,
     val nullable: Boolean = false,
+    val subField: Boolean = false,
     val referenceName: String? = null,
     val enumConstants: List<Any> = emptyList(),
 )

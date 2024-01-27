@@ -6,7 +6,7 @@ import { firstValueFrom } from "rxjs";
 import { ArrayDataSource } from "@angular/cdk/collections";
 import { MatDialog } from "@angular/material/dialog";
 import { EntitySortComponent } from "../entity-sort/entity-sort.component";
-import { Entity } from "../../model/entity";
+import { Entity, EntityField } from "../../model/entity";
 import { AdaptiveService } from "../../../common/service/adaptive.service";
 import { EntityFilterComponent } from "../entity-filter/entity-filter.component";
 
@@ -45,12 +45,12 @@ export class EntityBrowserComponent implements OnInit {
   private async onInit() {
     let params = await firstValueFrom(this.activatedRoute.params)
     await this.entityService.setEntity(params['name'])
-    this.fieldNames = this.entityService.entity.fields.map(field => field.name)
+    this.fieldNames = this.entityFields().map(field => field.name)
     await this.load()
   }
 
-  entity(): Entity {
-    return this.entityService.entity
+  entityFields(): EntityField[] {
+    return this.entityService.entity.fields.filter(field => !field.subField)
   }
 
   onPage(event: PageEvent) {
@@ -86,7 +86,7 @@ export class EntityBrowserComponent implements OnInit {
   openFilter() {
     let config = {
       data: {
-        fields: this.entityService.entity.fields,
+        fields: this.entityService.entity.fields.filter(field => field.type != 'AMOUNT'),
         filter: this.entityService.filter,
       }
     }
@@ -107,11 +107,11 @@ export class EntityBrowserComponent implements OnInit {
   }
 
   add() {
-    this.router.navigate(['entity', this.entity().name, 'new']).then()
+    this.router.navigate(['entity', this.entityService.entity.name, 'new']).then()
   }
 
   edit(id: string) {
-    this.router.navigate(['entity', this.entity().name, id]).then()
+    this.router.navigate(['entity', this.entityService.entity.name, id]).then()
   }
 
   delete(id: string) {

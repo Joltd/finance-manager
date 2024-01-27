@@ -67,7 +67,6 @@ class EntityConverter(
                 attributes = listOf(attribute),
                 name = attribute.name,
                 type = EntityFieldType.ID,
-                nullable = false,
             ))
         }
 
@@ -130,6 +129,7 @@ class EntityConverter(
                 it.copy(
                     attributes = listOf(attribute) + it.attributes,
                     name = "${attribute.name}.${it.name}",
+                    subField = true,
                 )
             }
         return listOf(EntityFieldRecord(

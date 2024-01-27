@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { EntityService } from "../../service/entity.service";
-import { Entity } from "../../model/entity";
+import { Entity, EntityField } from "../../model/entity";
 import { ActivatedRoute, Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
@@ -30,7 +30,7 @@ export class EntityEditorComponent implements OnInit {
     await this.entityService.setEntity(params['name'])
 
     let formGroup: Record<string, FormControl> = {}
-    for (let field of this.entityService.entity.fields) {
+    for (let field of this.entityFields()) {
       formGroup[field.name] = field.nullable
         ? new FormControl(null)
         : new FormControl(null, Validators.required)
@@ -48,8 +48,8 @@ export class EntityEditorComponent implements OnInit {
     }
   }
 
-  entity(): Entity {
-    return this.entityService.entity
+  entityFields(): EntityField[] {
+    return this.entityService.entity.fields.filter(field => !field.subField)
   }
 
   save() {
@@ -61,7 +61,7 @@ export class EntityEditorComponent implements OnInit {
   }
 
   close() {
-    this.router.navigate(['entity', this.entity().name]).then()
+    this.router.navigate(['entity', this.entityService.entity.name]).then()
   }
 
 }

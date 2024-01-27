@@ -6,7 +6,7 @@
 
   @if (form) {
     <form [formGroup]="form">
-      @for (field of entity().fields; track field.name) {
+      @for (field of entityFields(); track field.name) {
 
         @switch (field.type) {
 

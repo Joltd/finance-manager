@@ -1,6 +1,12 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Entity, EntityFilterExpression, EntityFilterNode, EntityPage, EntitySortEntry } from "../model/entity";
+import {
+  Entity,
+  EntityField,
+  EntityFilterNode,
+  EntityPage,
+  EntitySortEntry
+} from "../model/entity";
 import { lastValueFrom, Observable } from "rxjs";
 import { Reference } from "../../common/model/reference";
 
@@ -53,8 +59,9 @@ export class EntityService {
     return this.http.post<EntityPage>('/entity/' + this.entity.name + '/list', request)
   }
 
-  getEntity(name: string): Entity {
-    return this.entities.find(entity => entity.name == name)!
+  getFields(entityName: string): EntityField[] {
+    return this.entities.find(entity => entity.name == entityName)!
+      .fields.filter(field => field.type != 'AMOUNT')
   }
 
   referenceList(name: string): Observable<Reference[]> {
