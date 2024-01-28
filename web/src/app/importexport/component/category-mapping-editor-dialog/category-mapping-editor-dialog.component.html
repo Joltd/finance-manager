@@ -1,7 +1,24 @@
-<div `matDialogContent`>
-  <category-mapping-view #categoryMappingView [categoryMapping]="categoryMapping"></category-mapping-view>
+<div matDialogContent>
+  <form [formGroup]="form">
+
+    <mat-form-field>
+      <mat-label>Parser</mat-label>
+      <reference-input api="/parser/reference" formControlName="parser"></reference-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Pattern</mat-label>
+      <input matInput formControlName="pattern">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Category</mat-label>
+      <account-input [types]="['EXPENSE','INCOME']" formControlName="category"></account-input>
+    </mat-form-field>
+
+  </form>
 </div>
 <div matDialogActions>
   <button mat-button mat-dialog-close>Close</button>
-  <button mat-button [mat-dialog-close]="categoryMappingView.categoryMapping" [disabled]="!categoryMappingView.valid">Save</button>
+  <button mat-button [mat-dialog-close]="categoryMapping" [disabled]="!valid()">Save</button>
 </div>

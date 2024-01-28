@@ -2,7 +2,6 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef, ViewChild}
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {ImportData, ImportDataEntry, ImportDataEntryPage, ImportOption} from "../../model/import-data";
 import {FormControl, FormGroup} from "@angular/forms";
-import {SettingsService} from "../../../settings/service/settings.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ImportDataService} from "../../service/import-data.service";
 import {PageEvent} from "@angular/material/paginator";

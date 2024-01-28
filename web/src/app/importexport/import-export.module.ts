@@ -1,6 +1,4 @@
 import {NgModule} from "@angular/core";
-import {CategoryMappingBrowserComponent} from "./component/category-mapping-browser/category-mapping-browser.component";
-import {CategoryMappingEditorComponent} from "./component/category-mapping-editor/category-mapping-editor.component";
 import {CategoryMappingLabelComponent} from "./component/category-mapping-label/category-mapping-label.component";
 import {MatExpansionModule} from "@angular/material/expansion";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -20,7 +18,6 @@ import {ImportDataViewComponent} from "./component/import-data-view/import-data-
 import {ImportDataStartComponent} from "./component/import-data-start/import-data-start.component";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {PortalModule} from "@angular/cdk/portal";
-import {CategoryMappingViewComponent} from "./component/category-mapping-view/category-mapping-view.component";
 import {
   CategoryMappingEditorDialogComponent
 } from "./component/category-mapping-editor-dialog/category-mapping-editor-dialog.component";
@@ -43,9 +40,6 @@ import {MatProgressBarModule} from "@angular/material/progress-bar";
 
 @NgModule({
   declarations: [
-    CategoryMappingBrowserComponent,
-    CategoryMappingViewComponent,
-    CategoryMappingEditorComponent,
     CategoryMappingEditorDialogComponent,
     CategoryMappingLabelComponent,
     ImportDataBrowserComponent,
@@ -89,9 +83,6 @@ import {MatProgressBarModule} from "@angular/material/progress-bar";
     ],
   providers: [],
   exports: [
-    CategoryMappingBrowserComponent,
-    CategoryMappingViewComponent,
-    CategoryMappingEditorComponent,
     CategoryMappingEditorDialogComponent,
     CategoryMappingLabelComponent,
     ImportDataBrowserComponent,

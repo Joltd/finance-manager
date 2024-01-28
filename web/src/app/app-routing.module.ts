@@ -19,12 +19,6 @@ import {
 } from "./report/component/cumulative-funds-chart/cumulative-funds-chart.component";
 import {CurrencyBrowserComponent} from "./reference/component/currency-browser/currency-browser.component";
 import {CurrencyEditorComponent} from "./reference/component/currency-editor/currency-editor.component";
-import {
-  CategoryMappingBrowserComponent
-} from "./importexport/component/category-mapping-browser/category-mapping-browser.component";
-import {
-  CategoryMappingEditorComponent
-} from "./importexport/component/category-mapping-editor/category-mapping-editor.component";
 import {ImportDataBrowserComponent} from "./importexport/component/import-data-browser/import-data-browser.component";
 import {ImportDataViewComponent} from "./importexport/component/import-data-view/import-data-view.component";
 import {ImportDataStartComponent} from "./importexport/component/import-data-start/import-data-start.component";
@@ -53,8 +47,6 @@ const routes: Routes = [
   { path: 'operation/:id', component: OperationEditorComponent },
   { path: 'operation-revise', component: OperationReviseBrowserComponent },
   { path: 'operation-revise/:id', component: OperationReviseViewComponent },
-  { path: 'category-mapping', component: CategoryMappingBrowserComponent },
-  { path: 'category-mapping/:id', component: CategoryMappingEditorComponent },
   { path: 'import-data', component: ImportDataBrowserComponent },
   { path: 'import-data-start', component: ImportDataStartComponent },
   { path: 'import-data/:id', component: ImportDataViewComponent },

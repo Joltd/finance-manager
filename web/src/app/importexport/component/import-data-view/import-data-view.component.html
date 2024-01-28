@@ -88,92 +88,110 @@
   </mat-tab-group>
 </mat-card>
 
-<div *ngIf="!importDataEntry"></div>
-<div *ngIf="importDataEntry" class="entry">
-  <div class="in-progress" *ngIf="isInProgress()"></div>
+@if (importDataEntry) {
+  <div class="entry">
+    @if (isInProgress()) {
+      <div class="in-progress"></div>
+    }
 
-  <mat-card *ngIf="!importDataEntry.preparationResult && importDataEntry.preparationError" class="preparation-error">
-    <mat-card-content class="error-content">
-      <mat-icon>warning</mat-icon>
-      {{importDataEntry.preparationError}}
-    </mat-card-content>
-  </mat-card>
+    @if (!importDataEntry.preparationResult && importDataEntry.preparationError) {
+      <mat-card class="preparation-error">
+        <mat-card-content class="error-content">
+          <mat-icon>warning</mat-icon>
+          {{importDataEntry.preparationError}}
+        </mat-card-content>
+      </mat-card>
+    }
 
-  <mat-card *ngIf="importDataEntry.importResult == 'FAILED' && importDataEntry.importError" class="import-error">
-    <mat-card-content class="error-content">
-      <mat-icon>warning</mat-icon>
-      {{importDataEntry.importError}}
-    </mat-card-content>
-  </mat-card>
+    @if (importDataEntry.importResult == 'FAILED' && importDataEntry.importError) {
+      <mat-card class="import-error">
+        <mat-card-content class="error-content">
+          <mat-icon>warning</mat-icon>
+          {{importDataEntry.importError}}
+        </mat-card-content>
+      </mat-card>
+    }
 
-  <mat-card class="suggested-operation">
-    <mat-card-content>
-      <button mat-button
-              *ngIf="!importDataEntry.suggestedOperation"
-              (click)="viewOperation()">Suggest operation</button>
-      <operation-label *ngIf="importDataEntry.suggestedOperation"
-                       [operation]="suggestedOperation()"
-                       (click)="viewOperation()"></operation-label>
-      <div class="spacer"></div>
-      <mat-slide-toggle [ngModel]="importDataEntry.preparationResult"
-                        [disabled]="importDataEntry.importResult == 'DONE'"
-                        (ngModelChange)="updatePreparationResult($event)">
-        <span *ngIf="importDataEntry.preparationResult">Prepared</span>
-        <span *ngIf="!importDataEntry.preparationResult">Not prepared</span>
-      </mat-slide-toggle>
-      <mat-button-toggle-group *ngIf="importDataEntry.preparationResult && importDataEntry.suggestedOperation"
-                               [ngModel]="importDataEntry.option"
-                               [disabled]="importDataEntry.importResult == 'DONE'"
-                               (ngModelChange)="updateOption($event)">
-        <mat-button-toggle value="NONE">None</mat-button-toggle>
-        <mat-button-toggle value="SKIP">Skip</mat-button-toggle>
-        <mat-button-toggle value="CREATE_NEW">Add</mat-button-toggle>
-        <mat-button-toggle value="REPLACE">Replace</mat-button-toggle>
-      </mat-button-toggle-group>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-expansion-panel class="parsed-entry">
-    <mat-expansion-panel-header>Parsed entry</mat-expansion-panel-header>
-    <import-data-parsed-entry [parsedEntry]="importDataEntry.parsedEntry"></import-data-parsed-entry>
-  </mat-expansion-panel>
-
-  <div class="additional-info">
-    <mat-card class="similar-operations">
-      <mat-card-header>
-        <mat-card-subtitle>
-          Similar operations
-          <button mat-button class="small-icon-button" *ngIf="importDataEntry.importResult != 'DONE'" (click)="searchSimilar()"><mat-icon>refresh</mat-icon></button>
-        </mat-card-subtitle>
-      </mat-card-header>
+    <mat-card class="suggested-operation">
       <mat-card-content>
-        <operation-label [operation]="similarOperation"
-                         [matMenuTriggerFor]="menu"
-                         *ngFor="let similarOperation of importDataEntry.similarOperations">
-          <mat-menu #menu>
-            <button mat-menu-item (click)="editSimilarOperation(similarOperation)">Edit</button>
-            <button mat-menu-item (click)="deleteSimilarOperation(similarOperation)">Delete</button>
-          </mat-menu>
-        </operation-label>
+        @if (importDataEntry.suggestedOperation) {
+          <operation-label [operation]="suggestedOperation()" (click)="viewOperation()"></operation-label>
+        } @else {
+          <button mat-button (click)="viewOperation()">Suggest operation</button>
+        }
+        <div class="spacer"></div>
+        <mat-slide-toggle [ngModel]="importDataEntry.preparationResult"
+                          [disabled]="importDataEntry.importResult == 'DONE'"
+                          (ngModelChange)="updatePreparationResult($event)">
+          @if (importDataEntry.preparationResult) {
+            <span>Prepared</span>
+          } @else {
+            <span>Not prepared</span>
+          }
+        </mat-slide-toggle>
+        @if (importDataEntry.preparationResult && importDataEntry.suggestedOperation) {
+          <mat-button-toggle-group [ngModel]="importDataEntry.option"
+                                   [disabled]="importDataEntry.importResult == 'DONE'"
+                                   (ngModelChange)="updateOption($event)">
+            <mat-button-toggle value="NONE">None</mat-button-toggle>
+            <mat-button-toggle value="SKIP">Skip</mat-button-toggle>
+            <mat-button-toggle value="CREATE_NEW">Add</mat-button-toggle>
+            <mat-button-toggle value="REPLACE">Replace</mat-button-toggle>
+          </mat-button-toggle-group>
+        }
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="category-mappings">
-      <mat-card-header>
-        <mat-card-subtitle>
-          Category mappings
-          <button mat-button class="small-icon-button" *ngIf="importDataEntry.importResult != 'DONE'" (click)="addCategoryMapping()"><mat-icon>add</mat-icon></button>
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="row" *ngFor="let categoryMapping of importDataEntry.matchedCategoryMappings">
-          <category-mapping-label [categoryMapping]="categoryMapping"></category-mapping-label>
-          <button mat-button class="small-icon-button" (click)="deleteCategoryMapping(categoryMapping.id)"><mat-icon>delete</mat-icon></button>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <mat-expansion-panel class="parsed-entry">
+      <mat-expansion-panel-header>Parsed entry</mat-expansion-panel-header>
+      <import-data-parsed-entry [parsedEntry]="importDataEntry.parsedEntry"></import-data-parsed-entry>
+    </mat-expansion-panel>
+
+    <div class="additional-info">
+      <mat-card class="similar-operations">
+        <mat-card-header>
+          <mat-card-subtitle>
+            Similar operations
+            @if (importDataEntry.importResult != 'DONE') {
+              <button mat-button class="small-icon-button" (click)="searchSimilar()"><mat-icon>refresh</mat-icon></button>
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @for (similarOperation of importDataEntry.similarOperations; track similarOperation.id) {
+            <operation-label [operation]="similarOperation" [matMenuTriggerFor]="menu">
+              <mat-menu #menu>
+                <button mat-menu-item (click)="editSimilarOperation(similarOperation)">Edit</button>
+                <button mat-menu-item (click)="deleteSimilarOperation(similarOperation)">Delete</button>
+              </mat-menu>
+            </operation-label>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="category-mappings">
+        <mat-card-header>
+          <mat-card-subtitle>
+            Category mappings
+            @if (importDataEntry.importResult != 'DONE') {
+              <button mat-button class="small-icon-button" (click)="addCategoryMapping()"><mat-icon>add</mat-icon></button>
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @for (categoryMapping of importDataEntry.matchedCategoryMappings; track categoryMapping.id) {
+            <div class="row">
+              <category-mapping-label [categoryMapping]="categoryMapping"></category-mapping-label>
+              <button mat-button class="small-icon-button" (click)="deleteCategoryMapping(categoryMapping.id)"><mat-icon>delete</mat-icon></button>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
   </div>
-
-</div>
+} @else {
+  <div></div>
+}
 
 <mat-progress-bar [value]="progress()"></mat-progress-bar>

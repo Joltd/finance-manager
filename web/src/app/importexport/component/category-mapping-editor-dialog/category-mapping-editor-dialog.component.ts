@@ -1,6 +1,7 @@
 import {Component, Inject} from "@angular/core";
 import {CategoryMapping} from "../../model/category-mapping";
 import {MAT_DIALOG_DATA} from "@angular/material/dialog";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: 'category-mapping-editor-dialog',
@@ -9,10 +10,27 @@ import {MAT_DIALOG_DATA} from "@angular/material/dialog";
 })
 export class CategoryMappingEditorDialogComponent {
 
-  categoryMapping!: CategoryMapping
+  form: FormGroup = new FormGroup({
+    id: new FormControl(null),
+    parser: new FormControl(null, Validators.required),
+    pattern: new FormControl(null, Validators.required),
+    category: new FormControl(null, Validators.required)
+  })
 
   constructor(@Inject(MAT_DIALOG_DATA) data: CategoryMapping) {
-    this.categoryMapping = data
+    this.form.patchValue(data)
+  }
+
+  get categoryMapping(): CategoryMapping | null {
+    if (this.form.value) {
+      return this.form.value
+    } else {
+      return null
+    }
+  }
+
+  valid(): boolean {
+    return this.form.valid
   }
 
 }
