@@ -24,8 +24,13 @@ data class Amount(val value: Long, val currency: String) {
     }
 
     operator fun times(other: BigDecimal): Amount = Amount(
-            toBigDecimal().multiply(other).toAmountValue(),
-            currency
+        toBigDecimal().multiply(other).toAmountValue(),
+        currency
+    )
+
+    fun convert(rate: BigDecimal, currency: String): Amount = Amount(
+        toBigDecimal().multiply(rate).toAmountValue(),
+        currency
     )
 
     fun abs(): Amount = Amount(value.absoluteValue, currency)

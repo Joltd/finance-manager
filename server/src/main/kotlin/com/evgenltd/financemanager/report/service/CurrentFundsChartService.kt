@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.report.record.CurrentFundsChartAmountEntryRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartEntryRecord
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 class CurrentFundsChartService(
     private val accountConverter: AccountConverter,
     private val turnoverService: TurnoverService,
+    private val exchangeRateService: ExchangeRateService,
 ) {
 
     fun load(settings: CurrentFundsChartSettingsRecord): CurrentFundsChartRecord = turnoverService.listByAccountType()
@@ -21,17 +23,20 @@ class CurrentFundsChartService(
         .values
         .groupBy { it.account.id!! }
         .map {
+            val amounts = it.value
+                .map { value ->
+                    val rate = exchangeRateService.actualRate(value.cumulativeAmount.currency, "USD")
+                    CurrentFundsChartAmountEntryRecord(
+                        amount = value.cumulativeAmount,
+                        commonAmount = value.cumulativeAmount.convert(rate, "USD")
+                    )
+                }
+                .filter { entry -> entry.amount.isNotZero() }
+                .sortedByDescending { entry -> entry.amount.value }
             CurrentFundsChartEntryRecord(
                 account = accountConverter.toRecord(it.value.first().account),
-                commonAmount = it.value.fold(emptyAmount("USD")) { acc, entry -> acc + entry.cumulativeAmountUsd },
-                amounts = it.value
-                    .map { value ->
-                        CurrentFundsChartAmountEntryRecord(
-                            amount = value.cumulativeAmount,
-                            commonAmount = value.cumulativeAmountUsd
-                        )
-                    }
-                    .sortedByDescending { entry -> entry.amount.value }
+                commonAmount = amounts.fold(emptyAmount("USD")) { acc, entry -> acc + entry.commonAmount },
+                amounts = amounts
             )
         }
         .filter { it.commonAmount.isNotZero() }

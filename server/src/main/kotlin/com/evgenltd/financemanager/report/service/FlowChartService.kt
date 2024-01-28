@@ -2,18 +2,19 @@ package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.report.record.FlowChartEntryRecord
 import com.evgenltd.financemanager.report.record.FlowChartGroupRecord
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
-import com.evgenltd.financemanager.turnover.entity.Turnover
 import com.evgenltd.financemanager.turnover.service.TurnoverService
 import org.springframework.stereotype.Service
 
 @Service
 class FlowChartService(
     private val turnoverService: TurnoverService,
+    private val exchangeRateService: ExchangeRateService,
 ) {
 
     fun load(settings: FlowChartSettingsRecord): FlowChartRecord {
@@ -39,7 +40,8 @@ class FlowChartService(
                         }
                     }
                     .aggregate { _, accumulator: Amount?, turnover, _ ->
-                        (accumulator ?: emptyAmount) + turnover.amountUsd
+                        val rate = exchangeRateService.rate(entry.key, turnover.amount.currency, "USD")
+                        (accumulator ?: emptyAmount) + turnover.amount.convert(rate, "USD")
                     }
                     .map { (key, value) ->
                         val actualValue = if (!settings.category && key.id == AccountType.INCOME.name) {

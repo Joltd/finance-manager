@@ -73,8 +73,8 @@ class ExchangeRateService(
 
     fun rate(date: LocalDate, fromCurrency: String, toCurrency: String): BigDecimal {
 
-        val from = mapCurrency(fromCurrency)
-        val to = mapCurrency(toCurrency)
+        val from = mapCurrency(fromCurrency) ?: return BigDecimal.ZERO
+        val to = mapCurrency(toCurrency) ?: return BigDecimal.ZERO
 
         if (from == to) {
             return BigDecimal.ONE
@@ -99,6 +99,7 @@ class ExchangeRateService(
 
         for (exchangeRateProvider in exchangeRateProviders) {
             val providerRate = exchangeRateProvider.rate(date, from, to) ?: continue
+            log.info("Exchange rate for $from/$to on $date is $providerRate by ${exchangeRateProvider::class.simpleName}")
 
             if (exchangeRateProvider !is StubProvider) {
                 exchangeRateRepository.save(ExchangeRate(null, date, from, to, providerRate))
@@ -112,9 +113,9 @@ class ExchangeRateService(
 
     private fun List<ExchangeRate>.rate(from: String, to: String): BigDecimal? = firstOrNull { it.from == from && it.to == to }?.value
 
-    private fun mapCurrency(currency: String): String = when (currency) {
+    private fun mapCurrency(currency: String): String? = when (currency) {
         "USDT" -> "USD"
-        "TRX" -> throw IllegalAccessException("TRX is not supported")
+        "TRX" -> null
         else -> currency
     }
 

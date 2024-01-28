@@ -35,11 +35,6 @@ class TurnoverService(
     private val entityService: EntityService,
 ) : Loggable() {
 
-    @PostConstruct
-    fun postConstruct() {
-        log.info("Initialized")
-    }
-
     fun listByAccountType(): List<Turnover> = turnoverRepository.findByAccountType(AccountType.ACCOUNT)
 
     fun listByAccount(account: Account): List<Turnover> {
@@ -70,10 +65,8 @@ class TurnoverService(
             .groupingBy { it.toKey() }
             .aggregate { key, accumulator: TransactionValue?, transaction, _ ->
                 val amount = transaction.signedAmount()
-                val amountUsd = rateCache.toUsd(transaction)
                 val accumulatedAmount = accumulator?.amount?.plus(amount) ?: amount
-                val accumulatedAmountUsd = accumulator?.amountUsd?.plus(amountUsd) ?: amountUsd
-                TransactionValue(key.date, transaction.account, accumulatedAmount, accumulatedAmountUsd)
+                TransactionValue(key.date, transaction.account, accumulatedAmount)
             }
             .map { it }
             .sortedBy { it.key.date }
@@ -85,9 +78,7 @@ class TurnoverService(
                     date = key.date,
                     account = value.account,
                     amount = value.amount,
-                    amountUsd = value.amountUsd,
                     cumulativeAmount = lastTurnover?.cumulativeAmount?.plus(value.amount) ?: value.amount,
-                    cumulativeAmountUsd = lastTurnover?.cumulativeAmountUsd?.plus(value.amountUsd) ?: value.amountUsd,
                 ).let { turnoverRepository.save(it) }
                     .let { turnoverTotals[turnoverKey] = it }
             }
@@ -101,21 +92,23 @@ class TurnoverService(
         val transactionLastUpdate = transactionRepository.findFirstByOrderByUpdatedAtDesc()?.updatedAt ?: return
 
         val rebuild = transactionLastUpdate.isAfter(turnoverLastUpdate)
-        if (rebuild) {
+        if (!rebuild) return
+
+        try {
             rebuild(turnoverLastUpdate.toLocalDate())
             settingService.setTurnoverLastUpdate(transactionLastUpdate)
+        } catch (e: Exception) {
+            log.error("Failed to rebuild turnovers", e)
         }
     }
 
-    private fun MutableMap<RateKey, BigDecimal>.toUsd(transaction: Transaction): Amount {
-        val amount = transaction.signedAmount()
+    private fun MutableMap<RateKey, BigDecimal>.toUsd(date: LocalDate, amount: Amount): Amount {
         if (amount.currency == "USD") {
             return amount
         }
         if (amount.currency == "TRX") {
             return emptyAmount("USD")
         }
-        val date = transaction.date.withDayOfMonth(1)
         val key = RateKey(date, amount.currency, "USD")
         val rate = computeIfAbsent(key) { exchangeRateService.rate(date, amount.currency, "USD") }
         return (amount.toBigDecimal() * rate).fromFractional("USD")
@@ -129,6 +122,6 @@ class TurnoverService(
 
     private data class TransactionKey(val date: LocalDate, val accountId: UUID, val currency: String)
 
-    private data class TransactionValue(val date: LocalDate, val account: Account, val amount: Amount, val amountUsd: Amount)
+    private data class TransactionValue(val date: LocalDate, val account: Account, val amount: Amount)
 
 }
