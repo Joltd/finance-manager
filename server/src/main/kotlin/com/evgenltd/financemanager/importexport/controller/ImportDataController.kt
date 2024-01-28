@@ -67,9 +67,10 @@ class ImportDataController(
     fun preparationStart(
         @RequestParam("parser") parser: UUID,
         @RequestParam("account") account: UUID,
+        @RequestParam("currency") currency: String?,
         @RequestParam("file") file: MultipartFile
     ) {
-        importDataService.preparationStart(parser, account, file)
+        importDataService.preparationStart(parser, account, currency, file)
     }
 
     @PutMapping("/import-data/{id}/preparation")

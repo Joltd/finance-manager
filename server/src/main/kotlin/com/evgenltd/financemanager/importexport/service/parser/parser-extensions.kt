@@ -31,11 +31,33 @@ fun InputStream.readCsv(skip: Int = 0, delimiter: String = ","): List<CsvRow> {
 
     return lines.drop(1)
         .map {
-            val values = it.split(delimiter)
+            val values = it.readValues(delimiter)
             val cells = values.mapIndexed { index, cell -> fields[index] to cell }
                 .associate { it }
             CsvRow(values, cells)
         }
+}
+
+private fun String.readValues(delimiter: String): List<String> {
+    val values = split(delimiter)
+    val result = mutableListOf<String>()
+    var quoted: StringBuilder? = null
+    for (value in values) {
+        if (quoted != null) {
+            if (value.endsWith("\"")) {
+                quoted.append(value.replace("\"", ""))
+                result.add(quoted.toString())
+                quoted = null
+            } else {
+                quoted.append(value)
+            }
+        } else if (value.startsWith("\"")) {
+            quoted = StringBuilder(value.replace("\"", ""))
+        } else {
+            result.add(value)
+        }
+    }
+    return result
 }
 
 class CsvRow(

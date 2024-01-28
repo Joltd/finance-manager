@@ -3,9 +3,7 @@ package com.evgenltd.financemanager.importexport.service
 import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.importexport.converter.OperationReviseConverter
 import com.evgenltd.financemanager.importexport.converter.OperationReviseEntryConverter
-import com.evgenltd.financemanager.importexport.entity.OperationRevise
-import com.evgenltd.financemanager.importexport.entity.OperationReviseDate
-import com.evgenltd.financemanager.importexport.entity.OperationReviseEntry
+import com.evgenltd.financemanager.importexport.entity.*
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryFilter
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryRecord
 import com.evgenltd.financemanager.importexport.record.OperationReviseRecord
@@ -34,8 +32,6 @@ class OperationReviseService(
     private val operationService: OperationService,
     private val importParserService: ImportParserService,
     private val accountConverter: AccountConverter,
-    private val operationConverter: OperationConverter,
-    private val operationRepository: OperationRepository
 ) {
 
     fun list(): List<OperationReviseRecord> = operationReviseRepository.findAll()
@@ -84,7 +80,14 @@ class OperationReviseService(
 
     private fun prepareRevise(operationRevise: OperationRevise, file: InputStream): List<OperationReviseEntry> {
         val parser = importParserService.resolve(operationRevise.parser) ?: throw IllegalArgumentException("Parser not found")
-        return parser.parse(null, file)
+        val importData = ImportData(
+            parser = parser.id,
+            currency = operationRevise.currency,
+            account = operationRevise.account,
+            status = ImportDataStatus.NEW,
+            progress = .0,
+        )
+        return parser.parse(importData, file)
             .map {
                 OperationReviseEntry(
                     operationRevise = operationRevise,

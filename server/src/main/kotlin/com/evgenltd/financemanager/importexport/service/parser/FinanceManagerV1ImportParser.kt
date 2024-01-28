@@ -43,7 +43,7 @@ class FinanceManagerV1ImportParser(
         importRule("tinkoff-rub", tinkoffImportParser.id)
     }
 
-    override fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
 
         val accountIndex = accountService.list()
             .associateBy { it.name }

@@ -16,6 +16,7 @@ class ImportDataConverter(
         id = entity.id!!,
         parser = importParserConverter.toReference(entity.parser),
         account = accountConverter.toRecord(entity.account),
+        currency = entity.currency,
         status = entity.status,
         message = entity.message,
         progress = entity.progress

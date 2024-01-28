@@ -1,0 +1,1 @@
+alter table import_data add column currency varchar(255);

@@ -26,6 +26,8 @@ class ImportData(
     @JoinColumn(name = "account_id")
     var account: Account,
 
+    var currency: String? = null,
+
     @Enumerated(EnumType.STRING)
     var status: ImportDataStatus,
 

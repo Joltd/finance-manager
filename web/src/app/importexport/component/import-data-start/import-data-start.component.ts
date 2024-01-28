@@ -14,12 +14,12 @@ export class ImportDataStartComponent {
   form: FormGroup = new FormGroup({
     parser: new FormControl(null, Validators.required),
     account: new FormControl(null, Validators.required),
+    currency: new FormControl(null),
     file: new FormControl(null, Validators.required)
   })
 
   constructor(
     private importDataService: ImportDataService,
-    private toolbarService: ToolbarService,
     private router: Router
   ) {}
 
@@ -30,6 +30,7 @@ export class ImportDataStartComponent {
     let request = {
       parser: this.form.value.parser.id,
       account: this.form.value.account.id,
+      currency: this.form.value.currency,
       file: this.form.value.file
     }
     this.importDataService.preparationStart(request)

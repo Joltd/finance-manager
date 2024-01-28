@@ -12,18 +12,41 @@ import java.util.*
 
 @Service
 class TbcImportParser(
-    private val accountConverter: AccountConverter
+    private val accountConverter: AccountConverter,
 ) : ImportParser {
 
     override val id: UUID = UUID.fromString("4cedb5cf-d946-4702-8c78-1b0c47c225a0")
     override val name: String = "TBC"
 
-    override fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> =
+        stream.readCsv(skip = 1)
+            .map {
+                val amountAndType = if (it[PAID_OUT].isNotEmpty()) {
+                    fromFractionalString(it[PAID_OUT], importData.currency!!) to OperationType.EXPENSE
+                } else if (it[PAID_IN].isNotEmpty()) {
+                    fromFractionalString(it[PAID_IN], importData.currency!!) to OperationType.INCOME
+                } else {
+                    throw IllegalStateException("Unable to parse amount from row $it")
+                }
+
+                ImportDataParsedEntry(
+                    rawEntries = listOf(it.toString()),
+                    date = it[DATE].date("dd/MM/yyyy"),
+                    type = amountAndType.second,
+                    accountFrom = null,
+                    amountFrom = amountAndType.first,
+                    accountTo = null,
+                    amountTo = amountAndType.first,
+                    description = it[DESCRIPTION].trim(),
+                )
+            }
+
+    private fun parseV1(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
         val lines = stream.readCsv(skip = 1)
         return lines.parseExchanges(importData) + lines.parseRegularOperations()
     }
 
-    private fun List<CsvRow>.parseExchanges(importData: ImportData?): List<ImportDataParsedEntry> {
+    private fun List<CsvRow>.parseExchanges(importData: ImportData): List<ImportDataParsedEntry> {
         val iterator = filter { it[TRANSACTION_TYPE] == EXCHANGE_OPERATION }.iterator()
         val result = mutableListOf<ImportDataParsedEntry>()
         while (iterator.hasNext()) {
@@ -47,9 +70,9 @@ class TbcImportParser(
                 rawEntries = listOf(first.toString(), second.toString()),
                 date = date,
                 type = OperationType.EXCHANGE,
-                accountFrom = importData?.account?.let { accountConverter.toRecord(it) },
+                accountFrom = importData.account.let { accountConverter.toRecord(it) },
                 amountFrom = from,
-                accountTo = importData?.account?.let { accountConverter.toRecord(it) },
+                accountTo = importData.account.let { accountConverter.toRecord(it) },
                 amountTo = to,
                 description = description,
             )
@@ -82,6 +105,8 @@ class TbcImportParser(
         const val TRANSACTION_TYPE = "Transaction Type"
         const val DATE = "Date"
         const val AMOUNT = "Amount"
+        const val PAID_OUT = "Paid Out"
+        const val PAID_IN = "Paid In"
         const val CURRENCY = "Currency"
         const val DESCRIPTION = "Description"
 

@@ -13,7 +13,7 @@ class TronScanImportParser : ImportParser {
     override val id: UUID = UUID.fromString("c453e28f-9cb6-4ace-bb7a-8ab809369e68")
     override val name: String = "TronScan"
 
-    override fun parse(importData: ImportData?, stream: InputStream): List<ImportDataParsedEntry> = stream
+    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> = stream
         .readCsv()
         .filter {
             it["Token Symbol"] == "USDT"

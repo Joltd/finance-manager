@@ -75,12 +75,14 @@ class ImportDataService(
     fun preparationStart(
         parser: UUID,
         account: UUID,
+        currency: String?,
         file: MultipartFile
     ) {
         val importData = ImportData(
             id = null,
             parser = parser,
             account = accountRepository.find(account),
+            currency = currency,
             status = ImportDataStatus.NEW,
             message = null,
             progress = 0.0

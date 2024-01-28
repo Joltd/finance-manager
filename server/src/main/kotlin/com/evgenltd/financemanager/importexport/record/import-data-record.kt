@@ -15,6 +15,7 @@ data class ImportDataRecord(
     val id: UUID,
     val parser: Reference,
     val account: AccountRecord,
+    val currency: String?,
     val status: ImportDataStatus,
     val message: String?,
     val progress: Double

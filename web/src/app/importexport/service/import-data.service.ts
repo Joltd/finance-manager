@@ -71,6 +71,7 @@ export class ImportDataService {
     let formData = new FormData()
     formData.append('parser', request.parser)
     formData.append('account', request.account)
+    formData.append('currency', request.currency)
     formData.append('file', request.file)
     return this.httpClient.post<void>('/import-data', formData)
   }
