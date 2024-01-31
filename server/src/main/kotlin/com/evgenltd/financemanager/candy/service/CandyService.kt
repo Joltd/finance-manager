@@ -26,8 +26,9 @@ class CandyService(
     fun dashboard(): CandyDashboardRecord {
         val candies = candyRepository.findAll()
 
-        val balanceUsd = candies.map { it.amountUsd }
-            .reduceOrNull { acc, amount -> acc + amount }
+        val balanceUsd = candies.map {
+            if (it.direction == Direction.IN) it.amountUsd else -it.amountUsd
+        }.reduceOrNull { acc, amount -> acc + amount }
             ?: emptyAmount("USD")
 
         val defaultCurrency = settingService.operationDefaultCurrency() ?: "USD"
