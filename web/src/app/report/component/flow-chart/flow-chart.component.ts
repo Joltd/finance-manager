@@ -6,7 +6,7 @@ import {ECharts} from "echarts";
 import {ReferenceService} from "../../../common/service/reference.service";
 import {Reference} from "../../../common/model/reference";
 import * as moment from "moment";
-import {FlowChart} from "../../model/flow-chart";
+import { FlowChart, FlowChartEntry, FlowChartGroup } from "../../model/flow-chart";
 import {MatExpansionPanel} from "@angular/material/expansion";
 import {Router} from "@angular/router";
 import {ToolbarService} from "../../../common/service/toolbar.service";
@@ -59,27 +59,34 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
   }
 
-  drillDown(params: any) {
-    // if (this.flowChartService.settings.value.total) {
-    //   this.flowChartService.settings.patchValue({
-    //     total: false
-    //   })
-    //   this.apply()
-    //   return
-    // }
-    //
-    // if (params.name == 'Average') {
-    //   return
-    // }
-    //
-    // this.operationService.viewOperations(and([
-    //   expression('date', 'GREATER_EQUALS', moment(params.name).format('yyyy-MM-DD')),
-    //   expression('date', 'LESS', moment(params.name).add(1, 'month').format('yyyy-MM-DD')),
-    //   or([
-    //     expression('accountFrom', 'EQUALS', params.seriesId),
-    //     expression('accountTo', 'EQUALS', params.seriesId),
-    //   ]),
-    // ]))
+  drillDown(group: FlowChartGroup, entry: FlowChartEntry) {
+    console.log(group)
+    console.log(entry)
+    let dateFrom = moment(group.date).format('yyyy-MM-DD')
+    let dateTo = moment(group.date).add(1, 'month').format('yyyy-MM-DD')
+    if (this.groupBy == 'TYPE') {
+      this.operationService.viewOperations(and([
+        expression('date', 'GREATER_EQUALS', dateFrom),
+        expression('date', 'LESS', dateTo),
+        or([
+          expression('accountFrom.type', 'IN_LIST', [entry.id]),
+          expression('accountTo.type', 'IN_LIST', [entry.id]),
+        ]),
+      ]))
+    } else if (this.groupBy == 'CATEGORY') {
+      let account = {
+        id: entry.id,
+        name: entry.name
+      }
+      this.operationService.viewOperations(and([
+        expression('date', 'GREATER_EQUALS', dateFrom),
+        expression('date', 'LESS', dateTo),
+        or([
+          expression('accountFrom', 'IN_LIST', [account]),
+          expression('accountTo', 'IN_LIST', [account]),
+        ]),
+      ]))
+    }
   }
 
   openFilter() {

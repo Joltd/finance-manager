@@ -1,8 +1,6 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, OnInit} from "@angular/core";
 import {CurrentFundsChartService} from "../../service/current-funds-chart.service";
 import {CurrentFundsChart, CurrentFundsChartEntry, CurrentFundsChartEntryAmount} from "../../model/current-funds-chart";
-import {MatExpansionPanel} from "@angular/material/expansion";
-import {FormControl, FormGroup} from "@angular/forms";
 import {ToolbarService} from "../../../common/service/toolbar.service";
 import {Amount} from "../../../common/model/amount";
 import {OperationService} from "../../../operation/service/operation.service";
@@ -16,6 +14,7 @@ import { and, expression, or } from "../../../entity/model/entity";
 })
 export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
 
+  usdAmount: boolean = false
   currentFund: CurrentFundsChart | null = null
   minCommonAmount: number = 0
   maxCommonAmount: number = 0

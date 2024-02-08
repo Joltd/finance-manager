@@ -15,7 +15,7 @@
       <div class="date">{{group.date | date: 'MMM yyyy'}}</div>
       <div class="group">
       @for (entry of group.entries; track entry.id) {
-        <div class="entry">
+        <div class="entry" (click)="drillDown(group, entry)">
           <div class="name">{{entry.name}}</div>
           <div class="bar"
                [style.background-color]="color(entry.id)"

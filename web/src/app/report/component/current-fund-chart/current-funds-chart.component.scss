@@ -1,39 +1,46 @@
 @use '../../../../variables';
 
 :host {
+  overflow: hidden;
   margin: 20px;
 }
 
-.funds {
+common-layout {
   display: grid;
-  grid-template-columns: min-content min-content 1fr;
-  grid-gap: .5px;
+  grid-template-rows: min-content 1fr;
+  overflow: hidden;
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  grid-gap: 0 20px;
+  overflow: auto;
+}
+
+.title {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: 1fr min-content;
+}
+
+.title:not(:first-child) {
+  margin-top: 20px;
 }
 
 .account {
-  grid-column: 1 / 3;
-  margin-bottom: .2em;
-}
-.account:not(:first-child) {
-  margin-top: .4em;
+  margin: 0;
 }
 
 .revised {
-  grid-column: 3 / 4;
-  justify-self: end;
-  align-self: center;
   font-size: 0.8em;
+  white-space: nowrap;
 
   .warn {
     background-color: #ffca28;
     padding: .4em;
     border-radius: .6em;
   }
-}
-
-.common-amount {
-  opacity: .4;
-  padding: 0 1em;
 }
 
 .bar {

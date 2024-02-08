@@ -6,6 +6,7 @@
 }
 
 common-layout {
+  display: grid;
   grid-template-rows: min-content 1fr;
   grid-gap: 20px;
   overflow: hidden;
@@ -13,9 +14,7 @@ common-layout {
 
 .chart {
   display: grid;
-  //grid-template-columns: min-content 1fr;
   align-items: center;
-  //grid-gap: 20px 10px;
   overflow: auto;
 
   .date {
@@ -34,6 +33,7 @@ common-layout {
 .entry {
   position: relative;
   width: 100%;
+  cursor: pointer;
 
   .bar {
     height: 20px;

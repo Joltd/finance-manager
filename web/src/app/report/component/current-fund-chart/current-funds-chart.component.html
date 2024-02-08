@@ -1,19 +1,34 @@
-<common-layout class="funds" *ifHasData="currentFund != null">
-  @for (entry of currentFund!.entries; track entry.account.id) {
-    <h4 class="account">{{entry.account.name}}</h4>
-    <div class="revised">
-        <span *ngIf="entry.account.reviseDate"
-              [matTooltip]="entry.account.reviseDate"
-              [class.warn]="reviseDateAgo(entry.account.reviseDate) > 14">{{reviseDateAgo(entry.account.reviseDate)}} days ago</span>
+<common-layout>
+  <div>
+    <mat-slide-toggle [(ngModel)]="usdAmount">USD</mat-slide-toggle>
+  </div>
+  @if (currentFund != null) {
+    <div class="chart">
+      @for (entry of currentFund!.entries; track entry.account.id) {
+        <div class="title">
+          <h3 class="account">{{entry.account.name}}</h3>
+          <div class="revised">
+            @if (entry.account.reviseDate != null) {
+              <span
+                [matTooltip]="entry.account.reviseDate"
+                [class.warn]="reviseDateAgo(entry.account.reviseDate) > 14">
+              {{reviseDateAgo(entry.account.reviseDate)}} days ago
+            </span>
+            }
+          </div>
+        </div>
+
+        @for (amountEntry of entry.amounts; track amountEntry.amount.currency) {
+          @if (usdAmount) {
+            <amount-label [amount]="amountEntry.commonAmount"></amount-label>
+          } @else {
+            <amount-label [amount]="amountEntry.amount"></amount-label>
+          }
+          <div class="bar" matRipple (click)="drillDown(entry, amountEntry)"
+               [style.width]="amountRelativeWidth(amountEntry.commonAmount) + '%'"
+               [style.margin-left]="amountRelativeOffset(amountEntry.commonAmount) + '%'"></div>
+        }
+      }
     </div>
-    @for (amountEntry of entry.amounts; track amountEntry.amount.currency) {
-      <amount-label [amount]="amountEntry.amount"></amount-label>
-      <amount-label [amount]="amountEntry.commonAmount" class="common-amount"
-                    *ngIf="amountEntry.commonAmount.currency != amountEntry.amount.currency"></amount-label>
-      <div *ngIf="amountEntry.commonAmount.currency == amountEntry.amount.currency"></div>
-      <div class="bar" matRipple (click)="drillDown(entry, amountEntry)"
-           [style.width]="amountRelativeWidth(amountEntry.commonAmount) + '%'"
-           [style.margin-left]="amountRelativeOffset(amountEntry.commonAmount) + '%'"></div>
-    }
   }
 </common-layout>
