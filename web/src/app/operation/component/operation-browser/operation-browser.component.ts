@@ -65,8 +65,8 @@ export class OperationBrowserComponent implements AfterViewInit {
 
   copy(id: string) {
     this.router.navigate(
-      ['operation', id],
-      {queryParams: {copy: true}}
+      ['operation', 'new'],
+      {queryParams: {copy: id}}
     ).then()
   }
 

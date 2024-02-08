@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.settings.record
 
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -8,8 +9,8 @@ import java.time.temporal.ChronoUnit
 data class ApplicationSettings(
     val version: String,
     val operationDefaultCurrency: String?,
-    val operationDefaultAccount: Reference?,
-    val operationCashAccount: Reference?,
+    val operationDefaultAccount: AccountRecord?,
+    val operationCashAccount: AccountRecord?,
     val candyIncomeAmount: Amount?,
     val candyIncomeFrequencyValue: Long?,
     val candyIncomeFrequencyUnit: ChronoUnit?,

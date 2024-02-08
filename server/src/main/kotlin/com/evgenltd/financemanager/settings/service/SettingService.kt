@@ -49,8 +49,8 @@ class SettingService(
     fun load(): ApplicationSettings = ApplicationSettings(
         version = version,
         operationDefaultCurrency = operationDefaultCurrency(),
-        operationDefaultAccount = operationDefaultAccount()?.let { accountConverter.toReference(it) },
-        operationCashAccount = operationCashAccount()?.let { accountConverter.toReference(it) },
+        operationDefaultAccount = operationDefaultAccount()?.let { accountConverter.toRecord(it) },
+        operationCashAccount = operationCashAccount()?.let { accountConverter.toRecord(it) },
         candyIncomeAmount = candyIncomeAmount(),
         candyIncomeFrequencyValue = candyIncomeFrequencyValue(),
         candyIncomeFrequencyUnit = candyIncomeFrequencyUnit(),

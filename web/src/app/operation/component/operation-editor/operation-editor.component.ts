@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {Component, OnInit, ViewChild} from "@angular/core";
 import {Operation, OperationType} from "../../model/operation";
 import {OperationService} from "../../service/operation.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -6,9 +6,8 @@ import {combineLatest} from "rxjs";
 import {SettingsService} from "../../../settings/service/settings.service";
 import * as moment from "moment";
 import {Amount} from "../../../common/model/amount";
-import {Reference} from "../../../common/model/reference";
-import {ToolbarService} from "../../../common/service/toolbar.service";
 import {OperationViewComponent} from "../operation-view/operation-view.component";
+import { Account } from "../../../reference/model/account";
 
 @Component({
   selector: 'operation-editor',
@@ -26,7 +25,6 @@ export class OperationEditorComponent implements OnInit {
     private settingsService: SettingsService,
     private operationService: OperationService,
     private activatedRoute: ActivatedRoute,
-    private toolbarService: ToolbarService,
     private router: Router
   ) {}
 
@@ -103,8 +101,8 @@ export class OperationEditorComponent implements OnInit {
   private operationTemplate(
     type: OperationType,
     amount: Amount | null,
-    accountFrom: Reference | null,
-    accountTo: Reference | null,
+    accountFrom: Account | null,
+    accountTo: Account | null,
   ): any {
     this.operation = {
       id: null,
