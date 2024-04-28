@@ -1,0 +1,1 @@
+alter table pricing_orders add created_at timestamp;

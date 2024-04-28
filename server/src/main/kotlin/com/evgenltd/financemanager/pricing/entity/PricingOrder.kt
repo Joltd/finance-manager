@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.common.util.Amount
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @Entity
@@ -43,5 +44,7 @@ class PricingOrder(
     var store: String,
 
     var comment: String?,
+
+    var createdAt: LocalDateTime,
 
 )

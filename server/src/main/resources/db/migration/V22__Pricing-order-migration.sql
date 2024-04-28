@@ -1,0 +1,1 @@
+update pricing_orders set created_at = "date" where created_at is null;

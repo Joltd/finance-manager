@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class PricingOrderService(
@@ -23,7 +24,7 @@ class PricingOrderService(
 
     fun loadDefaults(): PricingOrderDefaults {
         val defaultCurrency = settingService.operationDefaultCurrency()
-        val lastOrder = pricingOrderRepository.findFirstByOrderByDateDesc()
+        val lastOrder = pricingOrderRepository.findFirstByOrderByCreatedAtDesc()
         return PricingOrderDefaults(
             date = lastOrder?.date ?: LocalDate.now(),
             currency = defaultCurrency,
@@ -46,6 +47,7 @@ class PricingOrderService(
             country = record.country,
             store = record.store,
             comment = record.comment,
+            createdAt = LocalDateTime.now(),
         )
         pricingOrderRepository.save(pricingOrder)
     }
