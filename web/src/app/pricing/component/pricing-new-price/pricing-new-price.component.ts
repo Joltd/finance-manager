@@ -86,7 +86,9 @@ export class PricingNewPriceComponent implements OnInit {
 
   private reset() {
     this.form.reset()
-    this.stepper.selectedIndex = 0
+    if (this.stepper) {
+      this.stepper.selectedIndex = 0
+    }
     this.pricingService.orderDefaults()
       .subscribe(defaults => {
         this.form.patchValue({
