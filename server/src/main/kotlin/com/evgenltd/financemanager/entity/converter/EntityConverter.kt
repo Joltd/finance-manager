@@ -56,8 +56,9 @@ class EntityConverter(
             type,
             type.name,
             type.name,
-            type.singularAttributes
-                .flatMap { toField(it, fields[it.name]!!) }
+            type.attributes
+                .filter { it is SingularAttribute<*, *> }
+                .flatMap { toField(it as SingularAttribute<*, *>, fields[it.name]!!) }
         )
     }
 

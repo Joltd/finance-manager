@@ -3,6 +3,7 @@
     @if (!isRoot()) {
       <button mat-icon-button (click)="back()"><mat-icon>arrow_back</mat-icon></button>
     }
+    {{breadcrumbs()}}
     <mat-button-toggle-group [(ngModel)]="node.condition">
       <mat-button-toggle [value]="'AND'">And</mat-button-toggle>
       <mat-button-toggle [value]="'OR'">Or</mat-button-toggle>
@@ -41,6 +42,7 @@
   </entry-select>
   <entry-select #editMenu>
     <entry-item (select)="editMenu.close(); edit($event)">Edit</entry-item>
+    <entry-item (select)="editMenu.close(); copy($event)">Copy</entry-item>
     <entry-item (select)="editMenu.close(); delete($event)">Delete</entry-item>
   </entry-select>
 </div>
@@ -48,5 +50,7 @@
   <button mat-raised-button color="primary" (click)="apply()">Apply</button>
   <button mat-button (click)="close()">Close</button>
   <div class="filler"></div>
+  <button mat-raised-button (click)="clear()">Clear</button>
+  <button mat-raised-button (click)="wrap()">Wrap</button>
   <button mat-raised-button color="primary" (click)="addMenu.show()">Add</button>
 </div>

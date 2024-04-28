@@ -56,16 +56,10 @@ export class CurrentFundsChartComponent implements OnInit,AfterViewInit {
   }
 
   drillDown(entry: CurrentFundsChartEntry, amountEntry: CurrentFundsChartEntryAmount) {
-    this.operationService.viewOperations(and([
-      or([
-        expression('accountFrom', 'EQUALS', entry.account.id),
-        expression('accountTo', 'EQUALS', entry.account.id)
-      ]),
-      or([
-        expression('amountFrom.currency', 'IN_LIST', amountEntry.amount.currency),
-        expression('amountTo.currency', 'IN_LIST', amountEntry.amount.currency)
-      ])
-    ]))
+    this.operationService.viewOperations({
+      account: entry.account,
+      currency: amountEntry.amount.currency
+    })
   }
 
   reviseDateAgo(date: string): number {

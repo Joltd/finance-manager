@@ -22,8 +22,7 @@ import {ReferenceModule} from "../reference/reference.module";
 import {OperationEditorDialogComponent} from "./component/operation-editor-dialog/operation-editor-dialog.component";
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatCheckboxModule} from "@angular/material/checkbox";
-import {OperationReviseViewComponent} from "../importexport/component/operation-revise-view/operation-revise-view.component";
-import {ImportExportModule} from "../importexport/import-export.module";
+import { OperationFilterComponent } from "./component/operation-filter/operation-filter.component";
 
 @NgModule({
   declarations: [
@@ -31,7 +30,8 @@ import {ImportExportModule} from "../importexport/import-export.module";
     OperationEditorComponent,
     OperationViewComponent,
     OperationLabelComponent,
-    OperationEditorDialogComponent
+    OperationEditorDialogComponent,
+    OperationFilterComponent,
   ],
   imports: [
     CommonModule,
@@ -61,7 +61,8 @@ import {ImportExportModule} from "../importexport/import-export.module";
     OperationEditorComponent,
     OperationViewComponent,
     OperationLabelComponent,
-    OperationEditorDialogComponent
+    OperationEditorDialogComponent,
+    OperationFilterComponent,
   ]
 })
 export class OperationModule {}

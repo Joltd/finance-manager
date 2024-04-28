@@ -1,0 +1,43 @@
+<div matDialogContent class="content">
+  <form [formGroup]="form">
+
+    <mat-form-field>
+      <mat-label>From</mat-label>
+      <input formControlName="dateFrom" matInput [matDatepicker]="from" readonly (click)="from.open()">
+      <mat-datepicker [touchUi]="true" #from></mat-datepicker>
+      <button mat-icon-button matSuffix (click)="form.patchValue({dateFrom: null})"><mat-icon>close</mat-icon></button>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>To</mat-label>
+      <input formControlName="dateTo" matInput [matDatepicker]="to" readonly (click)="to.open()">
+      <mat-datepicker [touchUi]="true" #to></mat-datepicker>
+      <button mat-icon-button matSuffix (click)="form.patchValue({dateTo: null})"><mat-icon>close</mat-icon></button>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="null">Nothing</mat-option>
+        <mat-option [value]="'ACCOUNT'">Account</mat-option>
+        <mat-option [value]="'EXPENSE'">Expense</mat-option>
+        <mat-option [value]="'INCOME'">Income</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Account</mat-label>
+      <account-input [types]="['ACCOUNT','EXPENSE','INCOME']" formControlName="account"></account-input>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Currency</mat-label>
+      <currency-input formControlName="currency"></currency-input>
+    </mat-form-field>
+
+  </form>
+</div>
+<div matDialogActions>
+  <button mat-raised-button color="primary" (click)="apply()">Apply</button>
+  <button mat-button (click)="close()">Close</button>
+</div>

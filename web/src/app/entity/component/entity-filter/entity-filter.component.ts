@@ -59,6 +59,20 @@ export class EntityFilterComponent {
     return this.parentIndex.get(this.node.id) == null
   }
 
+  breadcrumbs(): string {
+    let result = ''
+    let node = this.node
+    while (true) {
+      let parent = this.parentIndex.get(node.id)
+      if (parent) {
+        result = parent.condition + '(' + result
+        node = parent
+      } else {
+        return result
+      }
+    }
+  }
+
   fieldType(field: string): EntityFieldType {
     return this.fields.find(it => it.name == field)?.type || 'STRING'
   }
@@ -81,6 +95,41 @@ export class EntityFilterComponent {
 
   close() {
     this.dialogRef.close()
+  }
+
+  clear() {
+    this.filter = {
+      id: this.random(),
+      negate: false,
+      expression: null,
+      condition: 'AND',
+      children: []
+    }
+    this.node = this.filter
+    this.index(null, [this.filter])
+  }
+
+  wrap() {
+    let newParent = {
+      id: this.random(),
+      negate: false,
+      expression: null,
+      condition: 'AND',
+      children: [this.node]
+    } as EntityFilterNode
+
+    let oldParent = this.parentIndex.get(this.node.id)
+    if (oldParent) {
+      this.parentIndex.set(newParent.id, oldParent);
+      let childIndex = oldParent.children.findIndex(child => child.id == this.node.id)
+      oldParent.children[childIndex] = newParent
+    } else {
+      this.filter = newParent
+    }
+
+    this.parentIndex.set(this.node.id, newParent);
+
+    this.node = newParent
   }
 
   addCondition(parentNode: EntityFilterNode) {
@@ -129,6 +178,41 @@ export class EntityFilterComponent {
     }
   }
 
+  copy(node: EntityFilterNode) {
+    let parentNode = this.parentIndex.get(node.id)
+    this.doCopy(node, parentNode)
+  }
+
+  private doCopy(node: EntityFilterNode, parentNode?: EntityFilterNode) {
+    if (node.expression && parentNode) {
+
+      let newNode = {
+        negate: node.negate,
+        expression: {
+          id: 0,
+          field: node.expression.field,
+          operator: node.expression.operator,
+          value: node.expression.value
+        },
+        condition: null,
+        children: []
+      } as any
+      this.doAdd(newNode, parentNode)
+
+    } else if (node.condition) {
+
+      let newNode = {
+        negate: node.negate,
+        expression: null,
+        condition: node.condition,
+        children: []
+      } as any
+      this.doAdd(newNode, parentNode)
+      newNode.condition = node.children.map(child => this.doCopy(child, newNode))
+
+    }
+  }
+
   delete(node: EntityFilterNode) {
     let parentNode = this.parentIndex.get(node.id)
     if (!parentNode) {
@@ -146,10 +230,15 @@ export class EntityFilterComponent {
     }
   }
 
-  private doAdd(node: EntityFilterNode, parent: EntityFilterNode) {
+  private doAdd(node: EntityFilterNode, parent?: EntityFilterNode) {
     node.id = this.random()
-    parent.children.push(node)
-    this.parentIndex.set(node.id, parent)
+    if (parent) {
+      parent.children.push(node)
+      this.parentIndex.set(node.id, parent)
+    } else {
+      this.filter = node
+    }
+
   }
 
   private doEdit(expression: EntityFilterExpression): Observable<any> {

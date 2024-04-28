@@ -60,32 +60,24 @@ export class FlowChartComponent implements AfterViewInit, OnDestroy {
   }
 
   drillDown(group: FlowChartGroup, entry: FlowChartEntry) {
-    console.log(group)
-    console.log(entry)
     let dateFrom = moment(group.date).format('yyyy-MM-DD')
     let dateTo = moment(group.date).add(1, 'month').format('yyyy-MM-DD')
     if (this.groupBy == 'TYPE') {
-      this.operationService.viewOperations(and([
-        expression('date', 'GREATER_EQUALS', dateFrom),
-        expression('date', 'LESS', dateTo),
-        or([
-          expression('accountFrom.type', 'IN_LIST', [entry.id]),
-          expression('accountTo.type', 'IN_LIST', [entry.id]),
-        ]),
-      ]))
+      this.operationService.viewOperations({
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        type: entry.id,
+      })
     } else if (this.groupBy == 'CATEGORY') {
       let account = {
         id: entry.id,
         name: entry.name
       }
-      this.operationService.viewOperations(and([
-        expression('date', 'GREATER_EQUALS', dateFrom),
-        expression('date', 'LESS', dateTo),
-        or([
-          expression('accountFrom', 'IN_LIST', [account]),
-          expression('accountTo', 'IN_LIST', [account]),
-        ]),
-      ]))
+      this.operationService.viewOperations({
+        dateFrom,
+        dateTo,
+        account,
+      })
     }
   }
 

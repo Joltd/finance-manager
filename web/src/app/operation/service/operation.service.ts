@@ -1,18 +1,23 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {FormControl, FormGroup} from "@angular/forms";
-import {Operation, OperationPage} from "../model/operation";
+import { Operation, OperationFilter } from "../model/operation";
 import {Observable} from "rxjs";
 import {Router} from "@angular/router";
 import * as moment from "moment";
-import { EntityFilterExpression, EntityFilterNode, EntityPage } from "../../entity/model/entity";
+import { and, EntityFilterNode, EntityPage, expression, or } from "../../entity/model/entity";
 
 @Injectable({
   providedIn: 'root'
 })
 export class OperationService {
 
-  filter!: EntityFilterNode
+  filter: OperationFilter = {
+    dateFrom: null,
+    dateTo: null,
+    type: null,
+    account: null,
+    currency: null,
+  }
   operationPage: EntityPage = {
     total: 0,
     page: 0,
@@ -25,7 +30,7 @@ export class OperationService {
     private router: Router
   ) {}
 
-  viewOperations(filter: EntityFilterNode) {
+  viewOperations(filter: any) {
     this.filter = filter
     this.operationPage.page = 0
     this.router.navigate(['operation']).then()
@@ -35,7 +40,7 @@ export class OperationService {
     let filter = {
       page: this.operationPage.page,
       size: this.operationPage.size,
-      filter: this.filter,
+      filter: this.convertToEntityFilter(this.filter),
       sort: [{field: 'date', direction: 'DESC'}]
     }
     this.http.post<EntityPage>('/entity/Operation/list', filter)
@@ -52,6 +57,35 @@ export class OperationService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>('/operation/' + id)
+  }
+
+  private convertToEntityFilter(filter: OperationFilter): EntityFilterNode {
+    let conditions: EntityFilterNode[] = []
+    if (filter.dateFrom) {
+      conditions.push(expression('date', 'GREATER_EQUALS', filter.dateFrom))
+    }
+    if (filter.dateTo) {
+      conditions.push(expression('date', 'LESS', filter.dateTo))
+    }
+    if (filter.type) {
+      conditions.push(or([
+        expression('accountFrom.type', 'IN_LIST', [filter.type]),
+        expression('accountTo.type', 'IN_LIST', [filter.type])
+      ]))
+    }
+    if (filter.account) {
+      conditions.push(or([
+        expression('accountFrom', 'IN_LIST', [filter.account]),
+        expression('accountTo', 'IN_LIST', [filter.account])
+      ]))
+    }
+    if (filter.currency) {
+      conditions.push(or([
+        expression('amountFrom.currency', 'IN_LIST', [filter.currency]),
+        expression('amountTo.currency', 'IN_LIST', [filter.currency])
+      ]))
+    }
+    return and(conditions)
   }
 
 }

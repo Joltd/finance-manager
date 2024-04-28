@@ -7,6 +7,7 @@ import {MatExpansionPanel} from "@angular/material/expansion";
 import { EntityFilterComponent } from "../../../entity/component/entity-filter/entity-filter.component";
 import { MatDialog } from "@angular/material/dialog";
 import { EntityService } from "../../../entity/service/entity.service";
+import { OperationFilterComponent } from "../operation-filter/operation-filter.component";
 
 @Component({
   selector: 'operation-browser',
@@ -40,12 +41,9 @@ export class OperationBrowserComponent implements AfterViewInit {
 
   openFilter() {
     let config = {
-      data: {
-        fields: this.entityService.getFields('Operation'),
-        filter: this.operationService.filter,
-      }
+      data: this.operationService.filter
     }
-    this.dialog.open(EntityFilterComponent, config)
+    this.dialog.open(OperationFilterComponent, config)
       .afterClosed()
       .subscribe((result) => {
         if (result) {

@@ -1,5 +1,5 @@
 import {Amount} from "../../common/model/amount";
-import {Account} from "../../reference/model/account";
+import { Account, AccountType } from "../../reference/model/account";
 import {ImportDataParsedEntry} from "../../importexport/model/import-data";
 
 export interface OperationPage {
@@ -21,3 +21,11 @@ export interface Operation {
 }
 
 export type OperationType = 'EXCHANGE' | 'TRANSFER' | 'EXPENSE' | 'INCOME'
+
+export interface OperationFilter {
+  dateFrom: Date | null
+  dateTo: Date | null
+  type: AccountType | null
+  account: string | null
+  currency: string | null
+}
