@@ -90,7 +90,7 @@ export class OperationEditorComponent implements OnInit {
     let defaultAccount = this.settingsService.settings?.operationDefaultAccount
 
     if (template === 'EXPENSE_CASH') {
-      this.operationTemplate('EXPENSE', amount, defaultAccount, null)
+      this.operationTemplate('EXPENSE', amount, cashAccount, null)
     } else if (template === 'EXCHANGE_TO_CASH') {
       this.operationTemplate('TRANSFER', amount, defaultAccount, cashAccount)
     } else if (template === 'EXCHANGE_FROM_CASH') {

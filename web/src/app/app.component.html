@@ -25,6 +25,7 @@
       <a mat-list-item [routerLink]="['import-data']" (click)="left.close()">Import</a>
       <a mat-list-item [routerLink]="['operation-revise']" (click)="left.close()">Revise</a>
       <mat-divider></mat-divider>
+      <a mat-list-item [routerLink]="['entity']" (click)="left.close()">Entity</a>
       <a mat-list-item [routerLink]="['settings']" (click)="left.close()">
         Settings
         <span class="version" *ngIf="settingsService.settings">({{settingsService.settings.version}})</span>
