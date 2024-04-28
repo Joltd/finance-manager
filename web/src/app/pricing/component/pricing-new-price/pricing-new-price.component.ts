@@ -38,17 +38,7 @@ export class PricingNewPriceComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.pricingService.orderDefaults()
-      .subscribe(defaults => {
-        this.form.patchValue({
-          price: {
-            value: null,
-            currency: defaults.currency,
-          },
-          country: defaults.country,
-          store: defaults.store,
-        } as any)
-      })
+    this.reset()
   }
 
   searchItem() {
@@ -90,8 +80,23 @@ export class PricingNewPriceComponent implements OnInit {
     this.pricingService.createOrder(order)
       .subscribe(() => {
         this.shortMessageService.show('Order created')
-        this.form.reset()
-        this.stepper.selectedIndex = 0
+        this.reset()
+      })
+  }
+
+  private reset() {
+    this.form.reset()
+    this.stepper.selectedIndex = 0
+    this.pricingService.orderDefaults()
+      .subscribe(defaults => {
+        this.form.patchValue({
+          price: {
+            value: null,
+            currency: defaults.currency,
+          },
+          country: defaults.country,
+          store: defaults.store,
+        } as any)
       })
   }
 
