@@ -90,6 +90,7 @@ export class PricingNewPriceComponent implements OnInit {
     this.pricingService.orderDefaults()
       .subscribe(defaults => {
         this.form.patchValue({
+          date: defaults.date,
           price: {
             value: null,
             currency: defaults.currency,

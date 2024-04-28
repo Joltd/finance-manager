@@ -3,7 +3,6 @@ package com.evgenltd.financemanager.pricing.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.pricing.converter.PricingOrderConverter
 import com.evgenltd.financemanager.pricing.entity.PricingOrder
 import com.evgenltd.financemanager.pricing.record.PricingOrderDefaults
 import com.evgenltd.financemanager.pricing.record.PricingOrderRecord
@@ -12,6 +11,7 @@ import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class PricingOrderService(
@@ -23,8 +23,9 @@ class PricingOrderService(
 
     fun loadDefaults(): PricingOrderDefaults {
         val defaultCurrency = settingService.operationDefaultCurrency()
-        val lastOrder = pricingOrderRepository.findByOrderByDateDesc()
+        val lastOrder = pricingOrderRepository.findFirstByOrderByDateDesc()
         return PricingOrderDefaults(
+            date = lastOrder?.date ?: LocalDate.now(),
             currency = defaultCurrency,
             country = lastOrder?.country ?: "",
             store = lastOrder?.store ?: "",

@@ -10,6 +10,6 @@ interface PricingOrderRepository : JpaRepository<PricingOrder, UUID> {
 
     fun findByRateIsNull(): List<PricingOrder>
 
-    fun findByOrderByDateDesc(): PricingOrder?
+    fun findFirstByOrderByDateDesc(): PricingOrder?
 
 }
