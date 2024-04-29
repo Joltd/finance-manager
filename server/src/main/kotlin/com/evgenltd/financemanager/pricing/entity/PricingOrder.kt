@@ -41,6 +41,8 @@ class PricingOrder(
 
     var country: String,
 
+    var city: String,
+
     var store: String,
 
     var comment: String?,

@@ -26,6 +26,7 @@ export class PricingNewPriceComponent implements OnInit {
     price: new FormControl(null, Validators.required),
     quantity: new FormControl(null, Validators.required),
     country: new FormControl(null, Validators.required),
+    city: new FormControl(null, Validators.required),
     store: new FormControl(null, Validators.required),
     comment: new FormControl(null),
   })
@@ -74,6 +75,7 @@ export class PricingNewPriceComponent implements OnInit {
       price: this.form.value.price,
       quantity: this.form.value.quantity,
       country: this.form.value.country,
+      city: this.form.value.city,
       store: this.form.value.store,
       comment: this.form.value.comment,
     }
@@ -89,6 +91,7 @@ export class PricingNewPriceComponent implements OnInit {
     if (this.stepper) {
       this.stepper.selectedIndex = 0
     }
+    this.items = []
     this.pricingService.orderDefaults()
       .subscribe(defaults => {
         this.form.patchValue({
@@ -98,6 +101,7 @@ export class PricingNewPriceComponent implements OnInit {
             currency: defaults.currency,
           },
           country: defaults.country,
+          city: defaults.city,
           store: defaults.store,
         } as any)
       })

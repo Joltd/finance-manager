@@ -29,6 +29,7 @@ class PricingOrderService(
             date = lastOrder?.date ?: LocalDate.now(),
             currency = defaultCurrency,
             country = lastOrder?.country ?: "",
+            city = lastOrder?.city ?: "",
             store = lastOrder?.store ?: "",
         )
     }
@@ -45,6 +46,7 @@ class PricingOrderService(
             rate = null,
             priceUsd = Amount(0, "USD"),
             country = record.country,
+            city = record.city,
             store = record.store,
             comment = record.comment,
             createdAt = LocalDateTime.now(),

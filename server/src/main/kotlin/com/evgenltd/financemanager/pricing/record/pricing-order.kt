@@ -9,6 +9,7 @@ data class PricingOrderDefaults(
     val date: LocalDate,
     val currency: String?,
     val country: String,
+    val city: String,
     val store: String,
 )
 
@@ -19,6 +20,7 @@ data class PricingOrderRecord(
     val price: Amount,
     val quantity: BigDecimal,
     val country: String,
+    val city: String,
     val store: String,
     val comment: String?,
 )
