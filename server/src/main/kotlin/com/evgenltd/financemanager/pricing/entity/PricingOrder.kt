@@ -49,4 +49,10 @@ class PricingOrder(
 
     var createdAt: LocalDateTime,
 
-)
+) {
+
+    fun asString(): String {
+        return "PricingOrder(date=$date, item=${item.name}, price=$price, quantity=$quantity, country='$country', city='$city', store='$store', comment=$comment)"
+    }
+
+}

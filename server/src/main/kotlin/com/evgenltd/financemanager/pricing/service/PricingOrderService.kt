@@ -64,10 +64,6 @@ class PricingOrderService(
     }
 
     private fun loadPricingOrders() {
-        if (pricingOrderRepository.count() > 300) {
-            return
-        }
-
         val pricingOrdersStream = {}.javaClass.getResourceAsStream("/data/pricing-orders.txt")
         if (pricingOrdersStream == null) {
             return
@@ -75,6 +71,10 @@ class PricingOrderService(
 
         val pricingItemIndex = pricingItemRepository.findAll()
             .associateBy { it.name }
+
+        val existedPricingOrders = pricingOrderRepository.findAll()
+            .map { it.asString() }
+            .toSet()
 
         pricingOrdersStream.bufferedReader()
             .use { it.readLines() }
@@ -115,9 +115,10 @@ class PricingOrderService(
                     city = fields[2],
                     store = fields[4],
                     comment = fields[3],
-                    createdAt = date.atStartOfDay(),
+                    createdAt = LocalDateTime.now(),
                 )
             }
+            .filter { it.asString() !in existedPricingOrders }
             .onEach { pricingOrderRepository.save(it) }
     }
 
