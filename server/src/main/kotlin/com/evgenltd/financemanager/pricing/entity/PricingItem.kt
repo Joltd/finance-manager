@@ -20,4 +20,4 @@ class PricingItem(
 
     var defaultQuantity: BigDecimal,
 
-    )
+)
