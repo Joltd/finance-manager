@@ -21,8 +21,8 @@ class FlowChartService(
 
         val turnovers = turnoverService.list(settings.filter)
 
-        val start = turnovers.minOfOrNull { it.date }
-        val end = turnovers.maxOfOrNull { it.date }
+        val start = turnovers.minOfOrNull { it.date }?.withDayOfMonth(1)
+        val end = turnovers.maxOfOrNull { it.date }?.withDayOfMonth(1)?.plusMonths(1)
         val dates = generateSequence(start) {
             it.plusMonths(1).takeIf { date -> !date.isAfter(end) }
         }.toList()
