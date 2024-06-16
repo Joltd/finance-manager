@@ -9,7 +9,7 @@ import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
 
-fun main() {
+fun main1() {
 
     val mapper = CsvMapper().findAndRegisterModules()
 
