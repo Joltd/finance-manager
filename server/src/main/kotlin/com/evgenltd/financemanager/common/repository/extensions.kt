@@ -10,7 +10,7 @@ import org.springframework.data.repository.findByIdOrNull
 
 typealias GetPath<T,E> = Root<E>.() -> Path<T>
 
-typealias Condition<E> = (Root<E>, CriteriaQuery<*>, CriteriaBuilder) -> Predicate?
+typealias Condition<E> = (Root<E>, CriteriaQuery<*>?, CriteriaBuilder) -> Predicate?
 
 fun <E> emptyCondition(): Condition<E> = { _, _, _ -> null }
 

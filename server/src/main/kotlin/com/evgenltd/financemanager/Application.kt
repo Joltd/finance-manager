@@ -37,5 +37,3 @@ class Application : SpringBootServletInitializer() {
 fun main(args: Array<String>) {
     runApplication<Application>(*args)
 }
-
-data class Test(val name: String)

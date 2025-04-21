@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM amazoncorretto:22
 
 COPY ./build/libs/*.jar app.jar
 
