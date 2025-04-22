@@ -1,4 +1,0 @@
-<div class="container" [formGroup]="amount" (focusin)="onFocusIn($event)" (focusout)="onFocusOut($event)">
-  <currency-select formControlName="currency" (click)="onOpenCurrencySelect()"></currency-select>
-  <input class="simple-input" formControlName="value" type="number" (input)="this.onInput()">
-</div>

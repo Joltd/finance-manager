@@ -1,7 +1,0 @@
-<div matDialogContent>
-    <operation-view #operationView [operation]="operation"></operation-view>
-</div>
-<div matDialogActions>
-    <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-button [mat-dialog-close]="operationView.operation" [disabled]="!operationView.valid">Ok</button>
-</div>
