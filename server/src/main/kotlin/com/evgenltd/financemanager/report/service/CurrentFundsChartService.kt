@@ -25,10 +25,10 @@ class CurrentFundsChartService(
         .map {
             val amounts = it.value
                 .map { value ->
-                    val rate = exchangeRateService.actualRate(value.cumulativeAmount.currency, "USD")
+//                    val rate = exchangeRateService.actualRate(value.cumulativeAmount.currency, "USD")
                     CurrentFundsChartAmountEntryRecord(
                         amount = value.cumulativeAmount,
-                        commonAmount = value.cumulativeAmount.convert(rate, "USD")
+                        commonAmount = value.cumulativeAmount,//.convert(rate, "USD")
                     )
                 }
                 .filter { entry -> entry.amount.isNotZero() }
