@@ -10,6 +10,7 @@ import com.evgenltd.financemanager.report.record.CurrentFundsChartSettingsRecord
 import com.evgenltd.financemanager.turnover.service.TurnoverService
 import com.evgenltd.financemanager.turnover.service.sliceLast
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class CurrentFundsChartService(
@@ -25,17 +26,17 @@ class CurrentFundsChartService(
         .map {
             val amounts = it.value
                 .map { value ->
-//                    val rate = exchangeRateService.actualRate(value.cumulativeAmount.currency, "USD")
+                    val rate = exchangeRateService.rate(LocalDate.now().minusDays(1L), value.cumulativeAmount.currency, ExchangeRateService.DEFAULT_TARGET_CURRENCY).rate
                     CurrentFundsChartAmountEntryRecord(
                         amount = value.cumulativeAmount,
-                        commonAmount = value.cumulativeAmount,//.convert(rate, "USD")
+                        commonAmount = value.cumulativeAmount.convert(rate, ExchangeRateService.DEFAULT_TARGET_CURRENCY)
                     )
                 }
                 .filter { entry -> entry.amount.isNotZero() }
                 .sortedByDescending { entry -> entry.amount.value }
             CurrentFundsChartEntryRecord(
                 account = accountConverter.toRecord(it.value.first().account),
-                commonAmount = amounts.fold(emptyAmount("USD")) { acc, entry -> acc + entry.commonAmount },
+                commonAmount = amounts.fold(emptyAmount(ExchangeRateService.DEFAULT_TARGET_CURRENCY)) { acc, entry -> acc + entry.commonAmount },
                 amounts = amounts
             )
         }

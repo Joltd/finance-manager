@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.settings.service
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.common.util.fromFractionalString
+import com.evgenltd.financemanager.exchangerate.service.provider.Provider
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.service.AccountService
@@ -41,6 +41,10 @@ class SettingService(
     fun candyIncomeFrequencyUnit(): ChronoUnit? = getSetting(CANDY_INCOME_FREQUENCY_UNIT)?.let { ChronoUnit.valueOf(it) }
 
     fun turnoverLastUpdate(): LocalDateTime? = getSetting(TURNOVER_LAST_UPDATE)?.let {  LocalDateTime.parse(it) }
+
+    fun fiatExchangeRateProvider(): Provider? = getSetting(FIAT_EXCHANGE_RATE_PROVIDER)?.let { Provider.valueOf(it) }
+
+    fun cryptoExchangeRateProvider(): Provider? = getSetting(CRYPTO_EXCHANGE_RATE_PROVIDER)?.let { Provider.valueOf(it) }
 
     fun setTurnoverLastUpdate(value: LocalDateTime) {
         updateSetting(TURNOVER_LAST_UPDATE, value.toString())
@@ -85,6 +89,8 @@ class SettingService(
         const val CANDY_INCOME_FREQUENCY_VALUE = "candy.income.frequency.value"
         const val CANDY_INCOME_FREQUENCY_UNIT = "candy.income.frequency.unit"
         const val TURNOVER_LAST_UPDATE = "turnover.last.update"
+        const val FIAT_EXCHANGE_RATE_PROVIDER = "fiat.exchange.rate.provider"
+        const val CRYPTO_EXCHANGE_RATE_PROVIDER = "crypto.exchange.rate.provider"
     }
 
 }

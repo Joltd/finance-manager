@@ -40,7 +40,7 @@ class FlowChartService(
                         }
                     }
                     .aggregate { _, accumulator: Amount?, turnover, _ ->
-                        val rate = exchangeRateService.rate(entry.key, turnover.amount.currency, "USD")
+                        val rate = exchangeRateService.rate(entry.key, turnover.amount.currency, "USD").rate
                         (accumulator ?: emptyAmount) + turnover.amount.convert(rate, "USD")
                     }
                     .map { (key, value) ->

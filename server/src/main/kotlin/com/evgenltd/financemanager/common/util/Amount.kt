@@ -60,25 +60,29 @@ data class Amount(val value: Long, val currency: String) {
     fun isNegative(): Boolean = value < 0L
 
     fun toBigDecimal(): BigDecimal = value.toBigDecimal()
-            .movePointLeft(4)
+            .movePointLeft(SCALE)
 
     override fun toString(): String = toBigDecimal()
             .stripTrailingZeros()
             .toPlainString() + " " + currency
 
+    companion object {
+        const val SCALE = 4
+    }
+
 }
 
 fun emptyAmount(currency: String): Amount = Amount(0, currency)
 
-fun BigDecimal.toAmountValue(): Long = movePointRight(4).toLong()
+fun BigDecimal.toAmountValue(): Long = movePointRight(Amount.SCALE).toLong()
 
 fun BigDecimal.fromFractional(currency: String): Amount = Amount(
-    movePointRight(4).toLong(),
+    movePointRight(Amount.SCALE).toLong(),
     currency
 )
 
 fun fromFractionalString(value: String, currency: String): Amount = Amount(
-    BigDecimal(value.replace(",",".")).movePointRight(4).toLong(),
+    BigDecimal(value.replace(",",".")).movePointRight(Amount.SCALE).toLong(),
     currency
 )
 

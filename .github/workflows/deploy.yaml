@@ -32,7 +32,7 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
 
       - name: Build Server
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v2.4.2
         with:
           arguments: bootJar
           build-root-directory: ./server

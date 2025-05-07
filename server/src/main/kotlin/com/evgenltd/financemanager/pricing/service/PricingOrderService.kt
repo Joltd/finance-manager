@@ -2,27 +2,21 @@ package com.evgenltd.financemanager.pricing.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.fromFractional
-import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.pricing.entity.PricingItem
 import com.evgenltd.financemanager.pricing.entity.PricingOrder
 import com.evgenltd.financemanager.pricing.record.PricingOrderDefaults
 import com.evgenltd.financemanager.pricing.record.PricingOrderRecord
-import com.evgenltd.financemanager.pricing.repository.PricingItemRepository
 import com.evgenltd.financemanager.pricing.repository.PricingOrderRepository
 import com.evgenltd.financemanager.settings.service.SettingService
-import jakarta.annotation.PostConstruct
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Service
 class PricingOrderService(
-    private val pricingItemRepository: PricingItemRepository,
     private val pricingOrderRepository: PricingOrderRepository,
     private val pricingItemService: PricingItemService,
     private val exchangeRateService: ExchangeRateService,
@@ -71,9 +65,12 @@ class PricingOrderService(
 
         for (order in orders) {
             val priceForDefaultUnit = order.item.defaultQuantity / order.quantity * order.price.toBigDecimal()
-            val rate = rateIndex[order.date.with(DayOfWeek.MONDAY) to order.price.currency]!!
-            order.rate = rate
-            order.priceUsd = (priceForDefaultUnit * rate).fromFractional("USD")
+            val rateResult = rateIndex[order.date.with(DayOfWeek.MONDAY) to order.price.currency] ?: continue
+            if (rateResult.worst) {
+                continue
+            }
+            order.rate = rateResult.rate
+            order.priceUsd = (priceForDefaultUnit * rateResult.rate).fromFractional("USD")
         }
 
         pricingOrderRepository.saveAll(orders)

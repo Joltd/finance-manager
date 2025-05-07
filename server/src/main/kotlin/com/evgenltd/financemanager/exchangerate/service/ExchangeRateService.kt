@@ -1,51 +1,50 @@
 package com.evgenltd.financemanager.exchangerate.service
 
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.common.util.Loggable
-import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.common.util.fromFractional
+import com.evgenltd.financemanager.common.util.*
 import com.evgenltd.financemanager.exchangerate.converter.ExchangeRateConverter
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
+import com.evgenltd.financemanager.exchangerate.record.ExchangeRateIndex
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
+import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRequestEvent
+import com.evgenltd.financemanager.exchangerate.record.ExchangeRateResult
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
-import com.evgenltd.financemanager.exchangerate.service.provider.StubProvider
-import com.evgenltd.financemanager.importexport.service.parser.dateTime
-import com.fasterxml.jackson.databind.ObjectMapper
-import jakarta.annotation.PostConstruct
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.math.RoundingMode
-import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Service
 class ExchangeRateService(
     private val exchangeRateRepository: ExchangeRateRepository,
     private val exchangeRateConverter: ExchangeRateConverter,
-    private val exchangeRateProviders: List<ExchangeRateProvider>
+    private val publisher: ApplicationEventPublisher,
 ) : Loggable() {
 
-    @PostConstruct
-    fun postConstruct() {
-        if (exchangeRateRepository.count() > 0) {
-            return
+    fun index(from: LocalDate, to: LocalDate): ExchangeRateIndex {
+        val rates = exchangeRateRepository.findByDateGreaterThanEqualAndDateLessThan(from.minusDays(DELTA_DAY), to.plusDays(DELTA_DAY))
+        return ExchangeRateIndex(rates, DEFAULT_TARGET_CURRENCY, DELTA_DAY)
+    }
+
+    fun rate(date: LocalDate, from: String, to: String): ExchangeRateResult {
+        if (from == to) {
+            return ExchangeRateResult(BigDecimal.ONE, false)
         }
 
-        val mapper = ObjectMapper()
-        val ratesFile = {}.javaClass.getResource("/rates.json")
-        val currencies = listOf("USD","EUR","RUB","KZT","TRY","RSD","GEL")
-        mapper.readTree(ratesFile)
-            .onEach {
-                val date = it.get("date").get("\$date").asText().dateTime("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                val from = it.get("from").asText()
-                val to = it.get("to").asText()
-                val value = it.get("value").asText().toBigDecimal()
-                if (from in currencies && to in currencies) {
-                    val rate = ExchangeRate(null, date, from, to, value)
-                    exchangeRateRepository.save(rate)
-                }
-            }
+        val rates = exchangeRateRepository.findByDate(date)
+
+        rates.rate(from, to)?.let {
+            return ExchangeRateResult(it, false)
+        }
+
+        val leftRate = rates.rate(from, DEFAULT_TARGET_CURRENCY)
+        val rightRate = rates.rate(DEFAULT_TARGET_CURRENCY, to)
+        if (leftRate != null && rightRate != null) {
+            return ExchangeRateResult(leftRate * rightRate, false)
+        }
+
+        publisher.publishEvent(ExchangeRateRequestEvent(date, listOf(from, to)))
+        return ExchangeRateResult(BigDecimal.ZERO, true)
     }
 
     fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll()
@@ -65,58 +64,12 @@ class ExchangeRateService(
 
     fun delete(id: String) = exchangeRateRepository.deleteById(id)
 
-    fun actualRate(fromCurrency: String, toCurrency: String): BigDecimal =
-        rate(LocalDate.now().minusDays(1), fromCurrency, toCurrency)
-
-    fun rateStartOfWeek(date: LocalDate, fromCurrency: String, toCurrency: String): BigDecimal =
-        rate(date.with(DayOfWeek.MONDAY), fromCurrency, toCurrency)
-
-    fun rate(date: LocalDate, fromCurrency: String, toCurrency: String): BigDecimal {
-
-        val from = mapCurrency(fromCurrency) ?: return BigDecimal.ZERO
-        val to = mapCurrency(toCurrency) ?: return BigDecimal.ZERO
-
-        if (from == to) {
-            return BigDecimal.ONE
-        }
-
-        val rates = exchangeRateRepository.findByDate(date)
-        val directRate = rates.rate(from, to)
-        if (directRate != null) {
-            return directRate
-        }
-
-        val reverseRate = rates.rate(to, from)?.let { BigDecimal.ONE.divide(it, 4, RoundingMode.HALF_UP) }
-        if (reverseRate != null) {
-            return reverseRate
-        }
-
-        val fromRate = rates.rate(from, "USD")
-        val toRate = rates.rate("USD", to)
-        if (fromRate != null && toRate != null) {
-            return fromRate * toRate
-        }
-
-        for (exchangeRateProvider in exchangeRateProviders) {
-            val providerRate = exchangeRateProvider.rate(date, from, to) ?: continue
-            log.info("Exchange rate for $from/$to on $date is $providerRate by ${exchangeRateProvider::class.simpleName}")
-
-            if (exchangeRateProvider !is StubProvider) {
-                exchangeRateRepository.save(ExchangeRate(null, date, from, to, providerRate))
-            }
-
-            return providerRate
-        }
-
-        throw IllegalStateException("Can't find exchange rate for $from/$to on $date")
-    }
-
     private fun List<ExchangeRate>.rate(from: String, to: String): BigDecimal? = firstOrNull { it.from == from && it.to == to }?.value
+            ?: firstOrNull { it.from == to && it.to == from }?.value?.oppositeRate()
 
-    private fun mapCurrency(currency: String): String? = when (currency) {
-        "USDT" -> "USD"
-        "TRX" -> null
-        else -> currency
+    companion object {
+        private const val DELTA_DAY = 2L
+        const val DEFAULT_TARGET_CURRENCY = "USD"
     }
 
 }
