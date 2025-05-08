@@ -34,6 +34,6 @@ class ExchangeRateController(
         @RequestParam date: LocalDate,
         @RequestParam from: String,
         @RequestParam to: String,
-    ): BigDecimal = exchangeRateService.rate(date, from, to)
+    ): BigDecimal = exchangeRateService.rate(date, from, to).rate
 
 }

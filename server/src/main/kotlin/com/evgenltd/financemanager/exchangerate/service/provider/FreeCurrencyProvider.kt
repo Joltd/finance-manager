@@ -13,25 +13,39 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
 
 @Service
-class ExchangeRateDataProvider(
-    @Value("\${exchange.exchange-rate.api-key}")
+class FreeCurrencyProvider(
+    @Value("\${exchange.free-currency.api-key}")
     private val apiKey: String,
     private val rest: IntegrationRestTemplate
 ) : ExchangeRateProvider, Loggable() {
 
-    override val name: Provider = Provider.EXCHANGE_RATE
+    override val name: Provider = Provider.FREE_CURRENCY
 
-    override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+    override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest")
+        ?.fields()
+        ?.asSequence()
+        ?.map { ExchangeRateToDefault(it.key, it.value.asText().toBigDecimal()) }
+        ?.toList()
+        ?: emptyList()
 
     override fun historical(date: LocalDate, currencyHints: List<String>): List<ExchangeRateToDefault> =
-        request("history", ExchangeRateService.DEFAULT_TARGET_CURRENCY, date.year.toString(), date.monthValue.toString(), date.dayOfMonth.toString())
+        request("historical") { it.queryParam("date", date) }
+            ?.get(date.toString())
+            ?.fields()
+            ?.asSequence()
+            ?.map { ExchangeRateToDefault(it.key, it.value.asText().toBigDecimal()) }
+            ?.toList()
+            ?: emptyList()
 
-    private fun request(vararg path: String): List<ExchangeRateToDefault> {
+    private fun request(path: String, block: (UriComponentsBuilder) -> Unit = {}): JsonNode? {
         val uri = UriComponentsBuilder
             .newInstance()
             .scheme("https")
-            .host("v6.exchangerate-api.com")
-            .pathSegment("v6", apiKey, *path)
+            .host("api.freecurrencyapi.com")
+            .pathSegment("v1", path)
+            .queryParam("apikey", apiKey)
+            .queryParam("base_currency", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+            .also(block)
             .build()
             .toUri()
 
@@ -39,20 +53,15 @@ class ExchangeRateDataProvider(
             uri,
             HttpMethod.GET,
             null,
-            JsonNode::class.java
+            JsonNode::class.java,
         )
 
         if (!response.statusCode.is2xxSuccessful) {
-            return emptyList()
+            return null
         }
 
         return response.body
-            ?.get("conversion_rates")
-            ?.fields()
-            ?.asSequence()
-            ?.map { ExchangeRateToDefault(it.key, it.value.asText().toBigDecimal()) }
-            ?.toList()
-            ?: emptyList()
+            ?.get("data")
     }
 
 }

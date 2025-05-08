@@ -2,12 +2,9 @@ package com.evgenltd.financemanager.turnover.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
-import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.entity.record.EntityFilterNodeRecord
 import com.evgenltd.financemanager.entity.service.ConditionBuilderService
 import com.evgenltd.financemanager.entity.service.EntityService
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.reference.entity.Account
@@ -16,7 +13,6 @@ import com.evgenltd.financemanager.settings.service.SettingService
 import com.evgenltd.financemanager.turnover.entity.Turnover
 import com.evgenltd.financemanager.turnover.record.TurnoverKey
 import com.evgenltd.financemanager.turnover.repository.TurnoverRepository
-import jakarta.annotation.PostConstruct
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +25,6 @@ import java.util.*
 class TurnoverService(
     private val turnoverRepository: TurnoverRepository,
     private val transactionRepository: TransactionRepository,
-    private val exchangeRateService: ExchangeRateService,
     private val settingService: SettingService,
     private val conditionBuilderService: ConditionBuilderService,
     private val entityService: EntityService,
@@ -100,18 +95,6 @@ class TurnoverService(
         } catch (e: Exception) {
             log.error("Failed to rebuild turnovers", e)
         }
-    }
-
-    private fun MutableMap<RateKey, BigDecimal>.toUsd(date: LocalDate, amount: Amount): Amount {
-        if (amount.currency == "USD") {
-            return amount
-        }
-        if (amount.currency == "TRX") {
-            return emptyAmount("USD")
-        }
-        val key = RateKey(date, amount.currency, "USD")
-        val rate = computeIfAbsent(key) { exchangeRateService.rate(date, amount.currency, "USD") }
-        return (amount.toBigDecimal() * rate).fromFractional("USD")
     }
 
     private fun Transaction.toKey(): TransactionKey = TransactionKey(date.withDayOfMonth(1), account.id!!, amount.currency)

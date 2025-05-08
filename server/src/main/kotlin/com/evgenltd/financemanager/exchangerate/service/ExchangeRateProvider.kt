@@ -1,10 +1,15 @@
 package com.evgenltd.financemanager.exchangerate.service
 
-import java.math.BigDecimal
+import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
+import com.evgenltd.financemanager.exchangerate.service.provider.Provider
 import java.time.LocalDate
 
 interface ExchangeRateProvider {
 
-    fun rate(date: LocalDate, from: String, to: String): BigDecimal?
+    val name: Provider
+
+    fun latest(currencyHints: List<String>): List<ExchangeRateToDefault>
+
+    fun historical(date: LocalDate, currencyHints: List<String>): List<ExchangeRateToDefault>
 
 }

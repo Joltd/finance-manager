@@ -11,7 +11,10 @@ services:
       DB_HOST: localhost:5432
       DB_USER: root_user
       DB_PASSWORD: root_password
-      EXCHANGE_API_KEY: exchange_api_key
+      FREE_CURRENCY_API_KEY: free_currency_api_key
+      OPEN_EXCHANGE_APP_ID: open_exchange_app_id
+      EXCHANGE_RATE_API_KEY: exchange_rate_api_key
+      COIN_GECKO_API_KEY: coin_gecko_api_key
 
   web:
     image: joltd/finance-manager:web-2.0.0-SNAPSHOT

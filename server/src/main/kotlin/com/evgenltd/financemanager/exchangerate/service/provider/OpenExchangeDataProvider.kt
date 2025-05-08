@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
-import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
@@ -13,25 +12,26 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
 
 @Service
-class ExchangeRateDataProvider(
-    @Value("\${exchange.exchange-rate.api-key}")
-    private val apiKey: String,
+class OpenExchangeDataProvider(
+    @Value("\${exchange.open-exchange.app-id}")
+    private val appId: String,
     private val rest: IntegrationRestTemplate
-) : ExchangeRateProvider, Loggable() {
+) : ExchangeRateProvider {
 
-    override val name: Provider = Provider.EXCHANGE_RATE
+    override val name: Provider = Provider.OPEN_EXCHANGE
 
-    override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+    override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest.json")
 
-    override fun historical(date: LocalDate, currencyHints: List<String>): List<ExchangeRateToDefault> =
-        request("history", ExchangeRateService.DEFAULT_TARGET_CURRENCY, date.year.toString(), date.monthValue.toString(), date.dayOfMonth.toString())
+    override fun historical(date: LocalDate, currencyHints: List<String>): List<ExchangeRateToDefault> = request("historical", "$date.json")
 
     private fun request(vararg path: String): List<ExchangeRateToDefault> {
         val uri = UriComponentsBuilder
             .newInstance()
             .scheme("https")
-            .host("v6.exchangerate-api.com")
-            .pathSegment("v6", apiKey, *path)
+            .host("openexchangerates.org")
+            .pathSegment("api", *path)
+            .queryParam("app_id", appId)
+            .queryParam("base", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
             .build()
             .toUri()
 
@@ -47,7 +47,7 @@ class ExchangeRateDataProvider(
         }
 
         return response.body
-            ?.get("conversion_rates")
+            ?.get("rates")
             ?.fields()
             ?.asSequence()
             ?.map { ExchangeRateToDefault(it.key, it.value.asText().toBigDecimal()) }

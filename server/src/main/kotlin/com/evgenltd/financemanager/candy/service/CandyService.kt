@@ -86,7 +86,7 @@ class CandyService(
     }
 
     private fun Amount.toCurrency(target: String): Amount {
-        val rate = exchangeRateService.actualRate(currency, target)
+        val rate = exchangeRateService.rate(LocalDate.now().minusDays(1L), currency, target).rate
         return (toBigDecimal() * rate).fromFractional(target)
     }
 

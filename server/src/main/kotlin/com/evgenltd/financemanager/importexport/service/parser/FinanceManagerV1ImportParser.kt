@@ -11,7 +11,6 @@ import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.service.AccountService
-import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.InputStream
@@ -31,17 +30,17 @@ class FinanceManagerV1ImportParser(
     override val id: UUID = UUID.fromString("f51b0bd4-8fbd-45c8-8709-12266a846b17")
     override val name: String = "Finance Manager v1.x"
 
-    @PostConstruct
-    fun postConstruct() {
-        if (categoryMappingRepository.count() > 0) {
-            return
-        }
-
-        importRule("bcc", bccImportParser.id)
-        importRule("sber", sberImportParser.id)
-        importRule("tbc", tbcImportParser.id)
-        importRule("tinkoff-rub", tinkoffImportParser.id)
-    }
+//    @PostConstruct
+//    fun postConstruct() {
+//        if (categoryMappingRepository.count() > 0) {
+//            return
+//        }
+//
+//        importRule("bcc", bccImportParser.id)
+//        importRule("sber", sberImportParser.id)
+//        importRule("tbc", tbcImportParser.id)
+//        importRule("tinkoff-rub", tinkoffImportParser.id)
+//    }
 
     override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
 
