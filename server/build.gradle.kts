@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.3.2"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version "1.9.24"
+    kotlin("plugin.allopen") version "2.1.21"
 }
 
 group = "com.evgenltd"
@@ -13,6 +14,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+allOpen {
+    annotation("jakarta.persistence.Entity")
 }
 
 repositories {
@@ -25,6 +30,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core:11.7.1")
     runtimeOnly("org.flywaydb:flyway-database-postgresql:11.7.1")
+    implementation("org.hibernate.orm:hibernate-vector:6.6.15.Final")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.17.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

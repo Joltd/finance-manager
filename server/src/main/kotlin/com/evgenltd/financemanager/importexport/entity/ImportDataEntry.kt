@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.entity
 
+import com.evgenltd.financemanager.common.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
@@ -31,15 +32,35 @@ class ImportDataEntry(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
-    @Column
-    var date: LocalDate,
-
     @ManyToOne
     @JoinColumn(name = "import_data_id")
     var importData: ImportData,
 
     @JdbcTypeCode(SqlTypes.JSON)
     var parsedEntry: ImportDataParsedEntry,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    var issues: List<String> = emptyList(),
+
+    var progress: Boolean = false,
+
+    var approved: Boolean = false,
+
+    @ManyToOne
+    @JoinColumn(name = "hint_id")
+    var hint: Embedding? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "full_id")
+    var full: Embedding? = null,
+
+
+
+
+    var suggestions: List<OperationRecord> = emptyList(),
+
+    @Column
+    var date: LocalDate = LocalDate.now(),
 
     @JdbcTypeCode(SqlTypes.JSON)
     var suggestedOperation: OperationRecord? = null,
@@ -85,7 +106,19 @@ data class ImportDataParsedEntry(
     val amountFrom: Amount,
     val accountTo: AccountRecord?,
     val amountTo: Amount,
-    val description: String
+    val description: String,
+    val hint: String? = null,
+)
+
+data class SuggestedOperation(
+    val date: LocalDate,
+    val type: OperationType,
+    val accountFrom: AccountRecord?,
+    val amountFrom: Amount,
+    val accountTo: AccountRecord?,
+    val amountTo: Amount,
+    val description: String,
+    val full: Embedding? = null,
 )
 
 enum class ImportOption {

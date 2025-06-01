@@ -25,7 +25,7 @@ import java.io.InputStream
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
-@Service
+
 class ImportDataProcessService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,

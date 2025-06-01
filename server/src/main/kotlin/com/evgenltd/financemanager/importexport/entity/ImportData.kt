@@ -20,7 +20,7 @@ class ImportData(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
-    var parser: UUID,
+    var parser: UUID = UUID.randomUUID(),
 
     @ManyToOne
     @JoinColumn(name = "account_id")
@@ -29,11 +29,11 @@ class ImportData(
     var currency: String? = null,
 
     @Enumerated(EnumType.STRING)
-    var status: ImportDataStatus,
+    var status: ImportDataStatus = ImportDataStatus.NEW,
 
     var message: String? = null,
 
-    var progress: Double
+    var progress: Double = 0.0,
 
 )
 

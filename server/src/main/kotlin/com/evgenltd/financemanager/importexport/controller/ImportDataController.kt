@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.util.UUID
 
-@RestController
 class ImportDataController(
     private val importDataService: ImportDataService
 ) {

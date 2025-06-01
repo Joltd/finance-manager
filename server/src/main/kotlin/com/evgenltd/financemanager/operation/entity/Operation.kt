@@ -1,11 +1,14 @@
 package com.evgenltd.financemanager.operation.entity
 
+import com.evgenltd.financemanager.common.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.persistence.*
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Root
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.LocalDate
 import java.util.*
 
@@ -45,6 +48,16 @@ class Operation(
     var accountTo: Account,
 
     var description: String?,
+
+    var raw: String? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "hint_id")
+    var hint: Embedding? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "full_id")
+    var full: Embedding? = null,
 ) {
 
     companion object {

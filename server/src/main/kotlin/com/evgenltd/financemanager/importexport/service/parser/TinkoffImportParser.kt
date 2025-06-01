@@ -16,20 +16,33 @@ class TinkoffImportParser : ImportParser {
     override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> = stream
         .readCsv(delimiter = ";")
         .filter { it[3].clean() == "OK" }
-        .map {
-            val amount = it[6].clean().amount("RUB")
+        .map { cells ->
+            val date = cells[0].clean().dateTime("dd.MM.yyyy HH:mm:ss")
+            val amount = cells[6].clean().amount("RUB")
+            val description = cells[11].clean()
+            val category = cells[9].clean()
+            val mcc = cells[10].clean().takeIf { it.isNotBlank() }?.let { " ($it)" }
+            val type = if (amount.value < 0) OperationType.EXPENSE else OperationType.INCOME
+            val hint = type.hint()?.let { typeHint -> "$typeHint $description - $category$mcc" }
             ImportDataParsedEntry(
-                rawEntries = listOf(it.toString()),
-                date = it[0].clean().dateTime("dd.MM.yyyy HH:mm:ss"),
-                type = if (amount.value < 0) OperationType.EXPENSE else OperationType.INCOME,
+                rawEntries = listOf(cells.toString()),
+                date = date,
+                type = type,
                 amountFrom = amount.abs(),
                 accountFrom = null,
                 amountTo = amount.abs(),
                 accountTo = null,
-                description = "${it[9].clean()}|${it[11].clean()}"
+                description = "${category}|${description}",
+                hint = hint,
             )
         }
 
     private fun String.clean(): String = replace("\"", "")
+
+    private fun OperationType.hint(): String? = when (this) {
+        OperationType.EXPENSE -> "Списание"
+        OperationType.INCOME -> "Поступление"
+        else -> null
+    }
 
 }

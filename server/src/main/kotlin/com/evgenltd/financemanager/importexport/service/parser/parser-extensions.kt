@@ -51,7 +51,7 @@ private fun String.readValues(delimiter: String): List<String> {
             } else {
                 quoted.append(value)
             }
-        } else if (value.startsWith("\"")) {
+        } else if (value.startsWith("\"") && !value.endsWith("\"")) {
             quoted = StringBuilder(value.replace("\"", ""))
         } else {
             result.add(value)

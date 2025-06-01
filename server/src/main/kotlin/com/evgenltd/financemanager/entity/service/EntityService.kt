@@ -21,7 +21,7 @@ class EntityService(
 
     private lateinit var entities: List<EntityRecord>
 
-    @PostConstruct
+//    @PostConstruct
     fun postConstruct() {
         entities = entityManager.metamodel
             .entities

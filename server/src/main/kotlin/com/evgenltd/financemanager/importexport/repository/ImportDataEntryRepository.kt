@@ -3,8 +3,11 @@ package com.evgenltd.financemanager.importexport.repository
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.entity.ImportResult
+import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -32,5 +35,13 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>,JpaSpe
         options: List<ImportOption> = listOf(ImportOption.REPLACE, ImportOption.CREATE_NEW),
         importResults: List<ImportResult> = listOf(ImportResult.NOT_IMPORTED, ImportResult.FAILED)
     ): List<UUID>
+
+    @Query("select ide from ImportDataEntry ide where ide.id = :id and ide.progress = :progress")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    fun findAndLock(id: UUID, progress: Boolean): ImportDataEntry?
+
+    @Modifying
+    @Query("update import_data_entries set process = true where import_data_id = :importDataId and process = false returning id", nativeQuery = true)
+    fun tryLockAll(importDataId: UUID): List<UUID>
 
 }

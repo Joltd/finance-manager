@@ -29,6 +29,8 @@ class Account(
 
     var reviseDate: LocalDate? = null,
 
+    var parser: String? = null,
+
 ) {
     companion object {
         fun name(root: Root<Account>): Path<String> = root.get(Account::name.name)

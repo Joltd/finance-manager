@@ -30,7 +30,8 @@ class IntegrationRestTemplate : RestTemplate() {
             ): ClientHttpResponse {
                 log.info("REQUEST ${request.method} ${request.uri} body ${String(body)}")
                 val response = execution.execute(request, body)
-                val responseBody = response.body.bufferedReader().use { it.readText() }
+//                val responseBody = response.body.bufferedReader().use { it.readText() }
+                val responseBody = response.body.readAllBytes()
                 log.info("RESPONSE ${response.statusCode} ${response.headers} body $responseBody")
                 return response
             }
