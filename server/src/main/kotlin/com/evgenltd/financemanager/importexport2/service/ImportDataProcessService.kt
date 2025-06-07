@@ -20,14 +20,8 @@ import java.util.concurrent.Executor
 class ImportDataProcessService(
     private val importDataService: ImportDataService,
     private val importDataActionService: ImportDataActionService,
-    private val importDataRepository: ImportDataRepository,
-    private val importDataParserResolver: ImportDataParserResolver,
-    private val importDataEntryRepository: ImportDataEntryRepository,
-    private val importDataStateService: ImportDataStateService,
-    private val aiProviderResolver: AiProviderResolver,
-    private val embeddingRepository: EmbeddingRepository,
-    @Qualifier(ExecutorConfig.BACKGROUND_CALCULATION_EXECUTOR)
-    private val executor: Executor,
+//    @Qualifier(ExecutorConfig.BACKGROUND_CALCULATION_EXECUTOR)
+//    private val executor: Executor,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
@@ -38,27 +32,20 @@ class ImportDataProcessService(
 
         importDataActionService.parseImportData(importData.id!!, inputStream)
 
-        val entryIds = importDataStateService.lockAllEntries()
-
-        entryIds.chunked(50)
-            .map {
-                CompletableFuture.allOf(
-                    CompletableFuture.supplyAsync({ importDataActionService.prepareHintEmbeddings(it) }, executor)
-                        .thenApplyAsync({ importDataActionService.interpretImportDataEntry() }, executor)
-                        .thenApplyAsync({ importDataActionService.prepareFullEmbeddingForSelectedSuggestion() }, executor),
-                    CompletableFuture.supplyAsync({ importDataActionService.prepareFullEmbeddings(it) }, executor)
-                ).exceptionally {  }
-            }
-            .let { CompletableFuture.allOf(*it.toTypedArray()) }
-
-
-        // lock
-
-        // get embeddings for hints
-
-        // get embeddings for full
-
-        //
+//        val entryIds = importDataStateService.lockAllEntries()
+//
+//        entryIds.chunked(50)
+//            .map {
+//                CompletableFuture.allOf(
+//                    CompletableFuture.supplyAsync({ importDataActionService.prepareHintEmbeddings() }, executor)
+//                        .thenApplyAsync({ importDataActionService.interpretImportDataEntry() }, executor)
+//                        .thenApplyAsync({ importDataActionService.prepareFullEmbeddings() }, executor)
+//                ).exceptionally {
+//                    log.error("", it)
+//                    return@exceptionally null
+//                }
+//            }
+//            .let { CompletableFuture.allOf(*it.toTypedArray()) }
     }
 
 

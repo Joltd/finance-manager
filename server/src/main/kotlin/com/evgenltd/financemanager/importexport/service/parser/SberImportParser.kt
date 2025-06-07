@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Service
@@ -39,7 +39,8 @@ class SberImportParser : ImportParser {
             val amount = lines[index][3]
             val secondLine = lines[index + 1]
             val description = if (secondLine.size > 2) secondLine[2] else secondLine[1]
-            result.add(ImportDataParsedEntry(
+            result.add(
+                ImportDataParsedEntry(
                 rawEntries = listOf(lines[index].toString(), lines[index + 1].toString()),
                 date = date.date("dd.MM.yyyy"),
                 type = if (amount.contains("+")) OperationType.INCOME else OperationType.EXPENSE,
@@ -48,7 +49,8 @@ class SberImportParser : ImportParser {
                 accountTo = null,
                 amountTo = amount.cleanAmount().amount("RUB"),
                 description = "$category|$description"
-            ))
+            )
+            )
             index += 2
         }
         return result

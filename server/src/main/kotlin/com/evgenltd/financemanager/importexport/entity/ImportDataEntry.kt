@@ -1,13 +1,10 @@
 package com.evgenltd.financemanager.importexport.entity
 
-import com.evgenltd.financemanager.common.entity.Embedding
-import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.reference.record.AccountRecord
 import jakarta.persistence.Column
-import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -37,27 +34,11 @@ class ImportDataEntry(
     var importData: ImportData,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    var parsedEntry: ImportDataParsedEntry,
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    var issues: List<String> = emptyList(),
+    var parsedEntry: ImportDataParsedEntry = ImportDataParsedEntry(),
 
     var progress: Boolean = false,
 
     var approved: Boolean = false,
-
-    @ManyToOne
-    @JoinColumn(name = "hint_id")
-    var hint: Embedding? = null,
-
-    @ManyToOne
-    @JoinColumn(name = "full_id")
-    var full: Embedding? = null,
-
-
-
-
-    var suggestions: List<OperationRecord> = emptyList(),
 
     @Column
     var date: LocalDate = LocalDate.now(),
@@ -83,6 +64,20 @@ class ImportDataEntry(
 
     var importError: String? = null
 ) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ImportDataEntry
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+
     companion object {
         fun importDataId(root: Root<ImportDataEntry>): Path<UUID> = root.get<ImportData>(ImportDataEntry::importData.name).get(ImportData::id.name)
 
@@ -97,29 +92,6 @@ class ImportDataEntry(
         fun importResult(root: Root<ImportDataEntry>): Path<ImportResult> = root.get(ImportDataEntry::importResult.name)
     }
 }
-
-data class ImportDataParsedEntry(
-    val rawEntries: List<String>,
-    val date: LocalDate,
-    val type: OperationType,
-    val accountFrom: AccountRecord?,
-    val amountFrom: Amount,
-    val accountTo: AccountRecord?,
-    val amountTo: Amount,
-    val description: String,
-    val hint: String? = null,
-)
-
-data class SuggestedOperation(
-    val date: LocalDate,
-    val type: OperationType,
-    val accountFrom: AccountRecord?,
-    val amountFrom: Amount,
-    val accountTo: AccountRecord?,
-    val amountTo: Amount,
-    val description: String,
-    val full: Embedding? = null,
-)
 
 enum class ImportOption {
     NONE,

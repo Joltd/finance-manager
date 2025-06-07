@@ -4,7 +4,7 @@ import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.parseAmount
 import com.evgenltd.financemanager.importexport.entity.CategoryMapping
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.repository.CategoryMappingRepository
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.reference.converter.AccountConverter

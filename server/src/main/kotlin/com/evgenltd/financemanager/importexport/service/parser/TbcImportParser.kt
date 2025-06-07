@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import org.springframework.stereotype.Service

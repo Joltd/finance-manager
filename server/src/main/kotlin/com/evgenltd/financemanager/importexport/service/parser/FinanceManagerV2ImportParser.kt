@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.entity.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.util.UUID
