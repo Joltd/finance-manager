@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import org.springframework.stereotype.Service
@@ -70,9 +70,9 @@ class TbcImportParser(
                 rawEntries = listOf(first.toString(), second.toString()),
                 date = date,
                 type = OperationType.EXCHANGE,
-                accountFrom = importData.account.let { accountConverter.toRecord(it) },
+                accountFrom = importData.account,
                 amountFrom = from,
-                accountTo = importData.account.let { accountConverter.toRecord(it) },
+                accountTo = importData.account,
                 amountTo = to,
                 description = description,
             )

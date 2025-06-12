@@ -6,7 +6,7 @@ export interface ValueLabelProps {
 }
 
 export function ValueLabel({ value, shorten }: ValueLabelProps) {
-  if (!shorten || value < 1000) {
+  if (!shorten || value < 100000) {
     return <div>{value}</div>
   }
   return (
@@ -15,7 +15,7 @@ export function ValueLabel({ value, shorten }: ValueLabelProps) {
         <div>{formatter.format(value)}</div>
       </TooltipTrigger>
       <TooltipContent>
-        <div>value</div>
+        <div>{value}</div>
       </TooltipContent>
     </Tooltip>
   )

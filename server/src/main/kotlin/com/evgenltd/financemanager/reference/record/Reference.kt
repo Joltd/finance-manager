@@ -5,5 +5,5 @@ import java.util.*
 data class Reference(
     val id: UUID,
     val name: String,
-    val deleted: Boolean
+    val deleted: Boolean = false,
 )

@@ -28,7 +28,7 @@ class PathBuilder {
     fun build(): Path = Path(pointers)
 }
 
-fun patchEvent(name: String, value: Any?, block: (PathBuilder) -> Unit): SseEvent {
+fun patchEvent(name: String, value: Any?, block: (PathBuilder) -> Unit = {}): SseEvent {
     val pathBuilder = PathBuilder().apply(block)
     val patch = Patch(pathBuilder.build(), value)
     return SseEvent(UUID.randomUUID(), name, patch)

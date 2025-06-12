@@ -10,14 +10,14 @@ export const useNotificationStore = create<NotificationStoreState>()((set, get) 
 
   const source = new EventSource(process.env.NEXT_PUBLIC_BACKEND_HOST + '/sse')
   const listeners: Record<string, any> = {}
-  //
+
   // const subscribeForPatch = (eventName: string, patchListener: (patch: Patch) => void) => {
   //   subscribe(eventName, (data) => patchListener())
   // }
 
   const subscribe = <T>(eventName: string, listener: (data: T) => void) => {
     unsubscribe(eventName)
-    const actualListener = (event: MessageEvent<T>) => listener(event.data)
+    const actualListener = (event: MessageEvent) => listener(JSON.parse(event.data))
     listeners[eventName] = actualListener
     source.addEventListener(eventName, actualListener)
   }

@@ -1,9 +1,9 @@
 package com.evgenltd.financemanager.importexport.entity
 
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -34,8 +34,8 @@ class ImportDataEntry(
     @JoinColumn(name = "import_data_id")
     var importData: ImportData,
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    var parsedEntry: ImportDataParsedEntry = ImportDataParsedEntry(),
+//    @JdbcTypeCode(SqlTypes.JSON)
+//    var parsedEntry: ImportDataParsedEntry = ImportDataParsedEntry(),
 
     var progress: Boolean = false,
 
@@ -45,7 +45,7 @@ class ImportDataEntry(
     @JoinColumn(name = "operation_id")
     var operation: Operation? = null,
 
-    @OneToMany(mappedBy = "importDataEntry")
+    @OneToMany(mappedBy = "importDataEntry", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var operations: MutableList<ImportDataOperation> = mutableListOf(),
 
     @Column

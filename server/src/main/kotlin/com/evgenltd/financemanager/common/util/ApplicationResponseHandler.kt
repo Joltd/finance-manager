@@ -27,18 +27,25 @@ class ApplicationResponseHandler : ResponseBodyAdvice<Any>, Loggable() {
         selectedConverterType: Class<out HttpMessageConverter<*>>,
         request: ServerHttpRequest,
         response: ServerHttpResponse
-    ): Any? = if (request.uri.toString().contains("/actuator") || body is Response || body is Resource) {
+    ): Any? = if (request.uri.toString() in EXCLUSIONS || body is Response || body is Resource) {
         body
     } else {
         Response(true, body, null)
     }
 
     @ExceptionHandler(Throwable::class)
-    fun handle(throwable: Throwable?): Response {
+    fun handle(throwable: Throwable?): Any? {
         log.error("", throwable)
         return Response(false, null, throwable?.message ?: "Server error")
     }
 
     data class Response(val success: Boolean, val body: Any?, val error: String?)
+
+    private companion object {
+        val EXCLUSIONS = listOf(
+            "/actuator",
+            "/sse"
+        )
+    }
 
 }

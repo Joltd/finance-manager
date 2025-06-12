@@ -1,14 +1,13 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.entity.ImportResult
+import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
-import java.time.LocalDate
 import java.util.UUID
 
 data class ImportDataRecord(
@@ -63,14 +62,3 @@ data class ImportDataState(
     val progress: Double,
 )
 
-data class ImportDataParsedEntry(
-    val rawEntries: List<String> = emptyList(),
-    val date: LocalDate = LocalDate.now(),
-    val type: OperationType = OperationType.EXCHANGE,
-    val accountFrom: AccountRecord? = null,
-    val amountFrom: Amount = Amount(0, "USD"),
-    val accountTo: AccountRecord? = null,
-    val amountTo: Amount = Amount(0, "USD"),
-    val description: String = "",
-    val hint: String? = null,
-)

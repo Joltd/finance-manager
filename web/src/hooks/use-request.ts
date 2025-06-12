@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "@/lib/axios";
+import { fillPathParams } from "@/lib/utils";
 
 export interface RequestOptions {
   method?: string
@@ -10,13 +11,14 @@ export const useRequest = (path: string, options?: RequestOptions) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const submit = async (data: Record<string, any>) => {
+  const submit = async (data: Record<string, any>, pathParams?: Record<string, any>) => {
     setLoading(true)
     setError('')
     try {
+      const preparedPath = fillPathParams(path, pathParams)
       const response = await api({
         method: options?.method || 'POST',
-        url: path,
+        url: preparedPath,
         data: data,
         headers: options?.multipart
           ? { 'Content-Type': 'multipart/form-data' }

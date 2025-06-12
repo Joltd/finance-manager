@@ -3,6 +3,7 @@ import api from "@/lib/axios";
 import { useMemo } from "react";
 import { patch, Path } from "@/lib/patch";
 import { produce } from "immer";
+import { fillPathParams } from "@/lib/utils";
 
 export const observable = <T, R>(
   store: StoreApi<T>,
@@ -68,7 +69,12 @@ const prepareFetchStoreCreator = <T>(path: string): StateCreator<FetchStoreState
     }
 
     const applyPatch = (path: Path, value?: any) => {
-      produce(get().data, (draft) => patch(draft, path, value))
+      if (!path.pointers.length) {
+        set({ data: value })
+      } else {
+        const result = produce(get().data, (draft) => patch(draft, path, value))
+        set({ data: result })
+      }
     }
 
     return {
@@ -85,20 +91,4 @@ const prepareFetchStoreCreator = <T>(path: string): StateCreator<FetchStoreState
       applyPatch,
     }
   };
-}
-
-const fillPathParams = (path: string, pathParams?: Record<string, any>): string => {
-  if (!pathParams) {
-    return path
-  }
-
-  Object.keys(pathParams)
-    .forEach((key) => {
-      const value = pathParams?.[key]
-      if (value) {
-        path = path.replaceAll(`:${key}`, value)
-      }
-    })
-
-  return path
 }

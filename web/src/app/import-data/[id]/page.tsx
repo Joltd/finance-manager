@@ -9,15 +9,19 @@ import { useImportDataStore } from "@/store/import-data";
 import { PatchListener } from "@/components/common/patch-listener";
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
+import { Patch } from "@/lib/patch";
 
 
 export default function Page() {
   const params = useParams()
+  const { subscribe, unsubscribe } = useNotificationStore()
   const { importData } = useImportDataStore()
 
   useEffect(() => {
     importData.updatePathParams({ id: params.id })
     importData.fetch()
+
+    subscribe<Patch>(`importData-${params.id}`, (patch) => importData.applyPatch(patch.path, patch.value))
   }, []);
 
   return (

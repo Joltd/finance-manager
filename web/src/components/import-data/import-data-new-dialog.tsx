@@ -27,7 +27,7 @@ const formSchema = z.object({
 })
 
 export function ImportDataNewDialog() {
-  const { accountList, newDialogOpened, setNewDialogOpened } = useImportDataStore()
+  const { importDataList, accountList, newDialogOpened, setNewDialogOpened } = useImportDataStore()
   const { loading, error, submit, reset } = useRequest(importDataUrls.begin, { multipart: true })
   const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,6 +51,7 @@ export function ImportDataNewDialog() {
       .then((result) => {
         setNewDialogOpened(false)
         router.push(`/import-data/${result}`)
+        importDataList.fetch()
       })
   }
 

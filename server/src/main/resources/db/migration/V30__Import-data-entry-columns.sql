@@ -1,0 +1,1 @@
+alter table import_data_entries drop column parsed_entry;

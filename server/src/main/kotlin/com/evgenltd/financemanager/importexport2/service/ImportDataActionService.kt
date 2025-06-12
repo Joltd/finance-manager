@@ -1,21 +1,20 @@
 package com.evgenltd.financemanager.importexport2.service
 
-import com.evgenltd.financemanager.ai.service.AiProviderResolver
 import com.evgenltd.financemanager.common.component.patchEvent
-import com.evgenltd.financemanager.common.entity.Embedding
-import com.evgenltd.financemanager.common.repository.EmbeddingRepository
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.operationEmbeddingInput
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataOperation
 import com.evgenltd.financemanager.importexport.entity.ImportDataOperationType
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataOperationRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.*
 
@@ -25,34 +24,36 @@ class ImportDataActionService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataOperationRepository: ImportDataOperationRepository,
+    private val importDataConverter: ImportDataConverter,
     private val publisher: ApplicationEventPublisher,
 ) {
 
     fun parseImportData(importDataId: UUID, stream: InputStream) {
         val importData = importDataRepository.find(importDataId)
-        importDataParserResolver.resolve(importData.account.parser)
-            .parse(importData, stream) // todo save warning if failed
-            .onEach { saveParsedEntry(it, importData) }
+        try {
+            importDataParserResolver.resolve(importData.account.parser)
+                .parse(importData, stream)
+                .map { saveParsedEntry(it, importData) }
+        } catch (e: Exception) {
+            TODO("Not yet implemented")
+        }
     }
 
     private fun saveParsedEntry(entry: ImportDataParsedEntry, importData: ImportData) {
         val importDataEntry = importDataEntryRepository.save(ImportDataEntry(importData = importData))
-        val importDataOperation = ImportDataOperation(
+        ImportDataOperation(
             importDataEntry = importDataEntry,
             importType = ImportDataOperationType.PARSED,
             date = entry.date,
             type = entry.type,
             amountFrom = entry.amountFrom,
-            accountFrom = null, //entry.accountFrom,
+            accountFrom = entry.accountFrom,
             amountTo = entry.amountTo,
-            accountTo = null, //entry.accountTo
+            accountTo = entry.accountTo,
             description = entry.description,
             raw = entry.rawEntries,
             hintInput = entry.hint,
         ).also { importDataOperationRepository.save(it) }
-
-//        patchEvent("", )
-//        publisher.publishEvent()
     }
 
     fun prepareHintEmbeddings() {
@@ -132,6 +133,16 @@ class ImportDataActionService(
 //            }
 //            .let { importDataOperationRepository.saveAll(it) }
     }
+
+    @Transactional
+    fun sendImportData(id: UUID) {
+        val importData = importDataRepository.find(id)
+        val record = importDataConverter.toRecord(importData)
+        val event = patchEvent(eventName(id), record)
+        publisher.publishEvent(event)
+    }
+
+    private fun eventName(id: UUID) = "importData-$id"
 
     private fun ImportDataOperation.fullInput(): String = operationEmbeddingInput(
         date = date,

@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,6 +31,9 @@ class ImportDataController(
 
     @GetMapping("/import-data/{id}")
     fun get(@PathVariable id: UUID): ImportDataRecord = importDataService.get(id)
+    
+    @DeleteMapping("/import-data/{id}")
+    fun delete(@PathVariable id: UUID) = importDataService.delete(id)
 
     @PostMapping("/import-data/begin")
     fun beginNewImport(@RequestPart("data") request: ImportDataCreateRequest, @RequestPart("file") file: MultipartFile): UUID {

@@ -5,7 +5,6 @@ import com.evgenltd.financemanager.common.config.ExecutorConfig
 import com.evgenltd.financemanager.common.repository.EmbeddingRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.importexport.service.ImportDataProcessService
 import com.evgenltd.financemanager.importexport2.record.ImportDataCreateRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,6 +30,7 @@ class ImportDataProcessService(
     fun beginNewImport(importDataId: UUID, inputStream: InputStream) {
 
         importDataActionService.parseImportData(importDataId, inputStream)
+        importDataActionService.sendImportData(importDataId)
 
 //        val entryIds = importDataStateService.lockAllEntries()
 //

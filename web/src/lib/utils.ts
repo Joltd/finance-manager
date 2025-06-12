@@ -11,3 +11,19 @@ export function jsonAsBlob(data: any): Blob {
     { type: "application/json" }
   )
 }
+
+export const fillPathParams = (path: string, pathParams?: Record<string, any>): string => {
+  if (!pathParams) {
+    return path
+  }
+
+  Object.keys(pathParams)
+    .forEach((key) => {
+      const value = pathParams?.[key]
+      if (value) {
+        path = path.replaceAll(`:${key}`, value)
+      }
+    })
+
+  return path
+}

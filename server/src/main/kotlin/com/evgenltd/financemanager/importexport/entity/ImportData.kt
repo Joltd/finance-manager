@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.importexport.entity
 
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -37,7 +38,7 @@ class ImportData(
 
     var progress: Double = 0.0,
 
-    @OneToMany(mappedBy = "importData")
+    @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var entries: MutableList<ImportDataEntry> = mutableListOf(),
 
 ) {

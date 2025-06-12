@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Service

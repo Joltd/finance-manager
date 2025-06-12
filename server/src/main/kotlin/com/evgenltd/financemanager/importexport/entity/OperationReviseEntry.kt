@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.importexport.entity
 
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.Operation
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode

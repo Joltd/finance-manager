@@ -30,3 +30,15 @@ data class ImportDataEntryRecord(
     val description: String?,
     val raw: List<String> = emptyList(),
 )
+
+data class ImportDataParsedEntry(
+    val rawEntries: List<String> = emptyList(),
+    val date: LocalDate,
+    val type: OperationType,
+    val accountFrom: Account? = null,
+    val amountFrom: Amount,
+    val accountTo: Account? = null,
+    val amountTo: Amount,
+    val description: String,
+    val hint: String? = null,
+)
