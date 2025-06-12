@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.reference.repository
 
 import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.reference.entity.AccountType
 import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
@@ -17,5 +18,7 @@ interface AccountRepository : JpaRepository<Account, UUID>,JpaSpecificationExecu
     fun findAndLock(id: UUID): Account?
 
     fun findByName(name: String): Account?
+
+    fun findByTypeAndParserIsNotNull(type: AccountType): List<Account>
 
 }

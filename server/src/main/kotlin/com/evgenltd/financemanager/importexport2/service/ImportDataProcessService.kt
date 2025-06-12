@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.io.InputStream
+import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 
@@ -27,10 +28,9 @@ class ImportDataProcessService(
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
 
     @Async
-    fun beginNewImport(data: ImportDataCreateRequest, inputStream: InputStream) {
-        val importData = importDataService.save(data)
+    fun beginNewImport(importDataId: UUID, inputStream: InputStream) {
 
-        importDataActionService.parseImportData(importData.id!!, inputStream)
+        importDataActionService.parseImportData(importDataId, inputStream)
 
 //        val entryIds = importDataStateService.lockAllEntries()
 //

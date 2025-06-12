@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.importexport2.service
 
 import com.evgenltd.financemanager.ai.service.AiProviderResolver
+import com.evgenltd.financemanager.common.component.patchEvent
 import com.evgenltd.financemanager.common.entity.Embedding
 import com.evgenltd.financemanager.common.repository.EmbeddingRepository
 import com.evgenltd.financemanager.common.repository.find
@@ -13,9 +14,7 @@ import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataOperationRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.importexport2.record.OperationSuggestion
-import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.operation.repository.OperationRepository
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.util.*
@@ -26,6 +25,7 @@ class ImportDataActionService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataOperationRepository: ImportDataOperationRepository,
+    private val publisher: ApplicationEventPublisher,
 ) {
 
     fun parseImportData(importDataId: UUID, stream: InputStream) {
@@ -49,8 +49,10 @@ class ImportDataActionService(
             description = entry.description,
             raw = entry.rawEntries,
             hintInput = entry.hint,
-        )
-        importDataOperationRepository.save(importDataOperation)
+        ).also { importDataOperationRepository.save(it) }
+
+//        patchEvent("", )
+//        publisher.publishEvent()
     }
 
     fun prepareHintEmbeddings() {

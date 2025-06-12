@@ -49,7 +49,8 @@ class Operation(
 
     var description: String?,
 
-    var raw: String? = null,
+    @JdbcTypeCode(SqlTypes.JSON)
+    var raw: List<String> = emptyList(),
 
     @ManyToOne
     @JoinColumn(name = "hint_id")

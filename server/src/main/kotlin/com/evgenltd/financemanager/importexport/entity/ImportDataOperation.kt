@@ -54,7 +54,7 @@ class ImportDataOperation(
     var description: String? = null,
 
     @JdbcTypeCode(SqlTypes.JSON)
-    var raw: List<String>,
+    var raw: List<String> = emptyList(),
 
     var hintInput: String? = null,
 

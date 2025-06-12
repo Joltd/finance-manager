@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.importexport.entity
 
 import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.util.*
 
@@ -34,6 +36,9 @@ class ImportData(
     var message: String? = null,
 
     var progress: Double = 0.0,
+
+    @OneToMany(mappedBy = "importData")
+    var entries: MutableList<ImportDataEntry> = mutableListOf(),
 
 ) {
     override fun equals(other: Any?): Boolean {

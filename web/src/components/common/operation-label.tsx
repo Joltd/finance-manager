@@ -7,11 +7,16 @@ import { MoveRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { Account } from "@/types/account";
+import { Amount } from "@/types/amount";
 
 export interface OperationLabelProps {
-  operation: Operation
-  account?: Account
-  showDate?: boolean
+  date?: string
+  type: OperationType
+  amountFrom: Amount
+  accountFrom: Account
+  amountTo: Amount
+  accountTo: Account
+  relatedAccount?: Account
   variant?: 'filled'
   className?: string
 }
@@ -27,25 +32,35 @@ const operationLabelVariants = cva(
   }
 )
 
-export function OperationLabel({ operation, account, showDate, variant, className }: OperationLabelProps) {
-  const withFrom = !account || account.id !== operation.accountFrom.id
-  const withTo = !account || account.id !== operation.accountTo.id
+export function OperationLabel({
+  date,
+  type,
+  amountFrom,
+  accountFrom,
+  amountTo,
+  accountTo,
+  relatedAccount,
+  variant,
+  className,
+}: OperationLabelProps) {
+  const withFrom = accountFrom?.id !== relatedAccount?.id
+  const withTo = accountTo?.id !== relatedAccount?.id
   return (
     <div className={cn(operationLabelVariants({ variant }), className)}>
-      <OperationTypeIcon type={operation.type} />
-      {showDate && <DateLabel date={operation.date} />}
+      <OperationTypeIcon type={type} />
+      {date && <DateLabel date={date} />}
       <span className="flex items-center text-nowrap gap-1 min-w-[210]">
-        <AmountLabel amount={operation.amountFrom} shorten />
-        {operation.type === OperationType.EXCHANGE && (
+        <AmountLabel amount={amountFrom} shorten />
+        {type === OperationType.EXCHANGE && (
           <>
             <MoveRight size="16" />
-            <AmountLabel amount={operation.amountTo} shorten />
+            <AmountLabel amount={amountTo} shorten />
           </>
         )}
       </span>
-      {withFrom && <AccountLabel account={operation.accountFrom} />}
+      {withFrom && <AccountLabel account={accountFrom} />}
       {withFrom && withTo && <MoveRight size="16" className="shrink-0" />}
-      {withTo && <AccountLabel account={operation.accountTo} />}
+      {withTo && <AccountLabel account={accountTo} />}
     </div>
   )
 }

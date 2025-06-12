@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Root
@@ -39,6 +40,13 @@ class ImportDataEntry(
     var progress: Boolean = false,
 
     var approved: Boolean = false,
+
+    @ManyToOne
+    @JoinColumn(name = "operation_id")
+    var operation: Operation? = null,
+
+    @OneToMany(mappedBy = "importDataEntry")
+    var operations: MutableList<ImportDataOperation> = mutableListOf(),
 
     @Column
     var date: LocalDate = LocalDate.now(),
