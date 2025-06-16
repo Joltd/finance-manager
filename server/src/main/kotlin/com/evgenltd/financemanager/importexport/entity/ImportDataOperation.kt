@@ -22,6 +22,7 @@ class ImportDataOperation(
     @JoinColumn(name = "import_data_entry_id")
     var importDataEntry: ImportDataEntry,
 
+    @Enumerated(EnumType.STRING)
     var importType: ImportDataOperationType,
 
     var date: LocalDate,

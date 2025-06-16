@@ -41,7 +41,11 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>,JpaSpe
     fun findAndLock(id: UUID, progress: Boolean): ImportDataEntry?
 
     @Modifying
-    @Query("update import_data_entries set process = true where import_data_id = :importDataId and process = false returning id", nativeQuery = true)
-    fun tryLockAll(importDataId: UUID): List<UUID>
+    @Query("update import_data_entries set progress = true where import_data_id = :importDataId and progress = false returning id", nativeQuery = true)
+    fun lockAll(importDataId: UUID): List<UUID>
+
+    @Modifying
+    @Query("update import_data_entries set progress = false where id in (:ids) and progress = true", nativeQuery = true)
+    fun unlock(ids: List<UUID>)
 
 }

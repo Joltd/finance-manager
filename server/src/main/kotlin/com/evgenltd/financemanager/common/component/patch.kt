@@ -28,8 +28,8 @@ class PathBuilder {
     fun build(): Path = Path(pointers)
 }
 
-fun patchEvent(name: String, value: Any?, block: (PathBuilder) -> Unit = {}): SseEvent {
-    val pathBuilder = PathBuilder().apply(block)
-    val patch = Patch(pathBuilder.build(), value)
-    return SseEvent(UUID.randomUUID(), name, patch)
-}
+fun patch(value: Any?, block: (PathBuilder) -> Unit = {}): Patch = PathBuilder().apply(block)
+    .build()
+    .let { Patch(it, value) }
+
+fun patchEvent(name: String, patches: List<Patch>): SseEvent = SseEvent(UUID.randomUUID(), name, patches)

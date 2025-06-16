@@ -1,9 +1,7 @@
 package com.evgenltd.financemanager.operation.repository
 
-import com.evgenltd.financemanager.importexport.tests.TestResult
 import com.evgenltd.financemanager.operation.entity.Operation
-import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.operation.record.SimilarOperation
+import com.evgenltd.financemanager.operation.record.AccountScore
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
@@ -37,18 +35,33 @@ interface OperationRepository : JpaRepository<Operation,UUID>, JpaSpecificationE
 //    fun findByEmbeddingExclude(embedding: String, id: UUID): List<TestResult>
 
     @Query("""
-        select o.*, (h.vector <-> e.vector) distance
-        from operations o
-        left join embeddings h on o.hint_id = h.id
-        left join embedding e on e.id = :embedding
-        where
-            (o.account_from_id = :account or o.account_to_id = :account)
-            and o.type = :type
-            and o.date >= current_date - interval '6 months'
+        select 
+            top_similar.account_id,
+            sum(1.0 / (top_similar.distance + 1e-5)) as score
+        from (
+            select
+                case
+                    when o.type = 'INCOME' then o.account_from_id
+                    when o.type = 'EXPENSE' then o.account_to_id
+                end as account_id,
+                (h.vector <-> e.vector) as distance
+            from operations o
+            join embeddings h on o.hint_id = h.id
+            join embeddings e on e.id = :embedding
+            where
+                (o.account_from_id = :account or o.account_to_id = :account)
+                and o.type = :type
+                and o.date >= current_date - interval '6 months'
+            order by
+                distance
+            limit 50
+        ) as top_similar
+        group by
+            top_similar.account_id
         order by
-            distance
-        limit 50
+            score desc
+        limit 5
     """, nativeQuery = true)
-    fun findSimilarByHint(account: UUID, type: OperationType, embedding: UUID): List<SimilarOperation>
+    fun findSimilarByHint(account: UUID, type: String, embedding: UUID): List<AccountScore>
 
 }

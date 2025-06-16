@@ -13,12 +13,12 @@ interface ImportDataOperationRepository : JpaRepository<ImportDataOperation, UUI
     @Query("""
         select ido from ImportDataOperation ido 
         where
-            ido.importDataEntry.id in :ids
+            ido.importDataEntry.id in :entryIds
             and ido.importType = :importType
             and ido.hintInput is not null
             and ido.hint is null
     """)
-    fun findForHintEmbedding(ids: List<UUID>, importType: ImportDataOperationType): List<ImportDataOperation>
+    fun findForHintEmbedding(entryIds: List<UUID>, importType: ImportDataOperationType): List<ImportDataOperation>
 
     @Query("""
         select ido from ImportDataOperation ido 
@@ -31,10 +31,10 @@ interface ImportDataOperationRepository : JpaRepository<ImportDataOperation, UUI
     @Query("""
         select ido from ImportDataOperation ido
         where
-            ido.importDataEntry.id = :id
+            ido.importDataEntry.id in :ids
             and ido.importType = :importType
             and ido.hint is not null
     """)
-    fun findForInterpretation(id: UUID, importType: ImportDataOperationType): ImportDataOperation?
+    fun findForInterpretation(ids: List<UUID>, importType: ImportDataOperationType): List<ImportDataOperation>
 
 }

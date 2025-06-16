@@ -2,7 +2,7 @@
 import { FetchStoreState } from "@/store/common";
 import { useNotificationStore } from "@/store/notification";
 import { useEffect } from "react";
-import { Patch } from "@/lib/patch";
+import { Patch, PatchEvent } from "@/lib/patch";
 
 export interface PatchListenerProps {
   fetchStore: FetchStoreState<any>

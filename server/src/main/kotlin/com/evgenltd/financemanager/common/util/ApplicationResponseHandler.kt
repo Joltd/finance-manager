@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.common.util
 
+import com.evgenltd.financemanager.common.controller.SseController
 import org.springframework.core.MethodParameter
 import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
@@ -17,7 +18,7 @@ class ApplicationResponseHandler : ResponseBodyAdvice<Any>, Loggable() {
         returnType: MethodParameter,
         converterType: Class<out HttpMessageConverter<*>>
     ): Boolean {
-        return true
+        return returnType.declaringClass !in listOf(SseController::class.java)
     }
 
     override fun beforeBodyWrite(

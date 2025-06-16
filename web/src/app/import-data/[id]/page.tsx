@@ -21,7 +21,10 @@ export default function Page() {
     importData.updatePathParams({ id: params.id })
     importData.fetch()
 
-    subscribe<Patch>(`importData-${params.id}`, (patch) => importData.applyPatch(patch.path, patch.value))
+    subscribe<Patch[]>(`importData-${params.id}`, (patches) => importData.applyPatch(patches))
+    return () => {
+      unsubscribe(`importData-${params.id}`)
+    }
   }, []);
 
   return (

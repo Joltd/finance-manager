@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport2.service
 
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.importexport.converter.ImportParserConverter
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
@@ -11,6 +12,7 @@ import com.evgenltd.financemanager.reference.record.Reference
 import org.springframework.stereotype.Service
 
 @Service
+@SkipLogging
 class ImportDataConverter(
     private val accountConverter: AccountConverter,
     private val importParserConverter: ImportParserConverter

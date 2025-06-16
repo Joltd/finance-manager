@@ -1,11 +1,6 @@
 package com.evgenltd.financemanager.importexport2.service
 
-import com.evgenltd.financemanager.ai.service.AiProviderResolver
 import com.evgenltd.financemanager.common.config.ExecutorConfig
-import com.evgenltd.financemanager.common.repository.EmbeddingRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.importexport2.record.ImportDataCreateRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -20,6 +15,7 @@ import java.util.concurrent.Executor
 class ImportDataProcessService(
     private val importDataService: ImportDataService,
     private val importDataActionService: ImportDataActionService,
+    private val importDataStateService: ImportDataStateService,
 //    @Qualifier(ExecutorConfig.BACKGROUND_CALCULATION_EXECUTOR)
 //    private val executor: Executor,
 ) {
@@ -32,20 +28,21 @@ class ImportDataProcessService(
         importDataActionService.parseImportData(importDataId, inputStream)
         importDataActionService.sendImportData(importDataId)
 
-//        val entryIds = importDataStateService.lockAllEntries()
-//
-//        entryIds.chunked(50)
-//            .map {
-//                CompletableFuture.allOf(
-//                    CompletableFuture.supplyAsync({ importDataActionService.prepareHintEmbeddings() }, executor)
-//                        .thenApplyAsync({ importDataActionService.interpretImportDataEntry() }, executor)
-//                        .thenApplyAsync({ importDataActionService.prepareFullEmbeddings() }, executor)
-//                ).exceptionally {
-//                    log.error("", it)
-//                    return@exceptionally null
-//                }
-//            }
-//            .let { CompletableFuture.allOf(*it.toTypedArray()) }
+        val entryIds = importDataStateService.lockAllEntries(importDataId)
+        importDataActionService.sendImportDataEntry(importDataId, entryIds)
+
+        entryIds.chunked(50)
+            .onEach { ids ->
+                CompletableFuture.supplyAsync({ importDataActionService.prepareHintEmbeddings(ids) })
+                        .thenApplyAsync({ importDataActionService.interpretImportDataEntries(ids) })
+                        .thenApplyAsync({ importDataActionService.prepareFullEmbeddings(ids) })
+                        .exceptionally { log.error("Unable to handle entries", it) }
+                        .thenApply {
+                            importDataStateService.unlockEntries(ids)
+                            importDataActionService.sendImportDataEntry(importDataId, ids)
+                        }
+            }
+
     }
 
 

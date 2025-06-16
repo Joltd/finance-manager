@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.operation.record
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
@@ -37,7 +36,7 @@ data class OperationRecord(
     val description: String?
 )
 
-interface SimilarOperation {
-    val operation: Operation
-    val distance: Double
+interface AccountScore {
+    val accountId: UUID
+    val score: Double
 }

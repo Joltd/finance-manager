@@ -16,9 +16,10 @@ class ImportDataStateService(
     private val log: Logger = LoggerFactory.getLogger(ImportDataStateService::class.java)
 
     @Transactional
-    fun lockAllEntries(): List<UUID> {
-        return emptyList()
-    }
+    fun lockAllEntries(importDataId: UUID): List<UUID> = importDataEntryRepository.lockAll(importDataId)
+
+    @Transactional
+    fun unlockEntries(entryIds: List<UUID>) = importDataEntryRepository.unlock(entryIds)
 
     @Transactional
     fun findAndLock(id: UUID): ImportDataEntry? {

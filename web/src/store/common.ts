@@ -1,7 +1,7 @@
 import { create, createStore, StateCreator, StoreApi } from "zustand";
 import api from "@/lib/axios";
 import { useMemo } from "react";
-import { patch, Path } from "@/lib/patch";
+import { Patch, patch, Path } from "@/lib/patch";
 import { produce } from "immer";
 import { fillPathParams } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ export interface FetchStoreState<T> {
   updateQueryParams: (queryParams: Record<string, any>) => void
   fetch: () => void
   reset: () => void
-  applyPatch: (path: Path, value?: any) => void
+  applyPatch: (patches: Patch[]) => void
 }
 
 // in component as self standing store
@@ -68,12 +68,14 @@ const prepareFetchStoreCreator = <T>(path: string): StateCreator<FetchStoreState
       }
     }
 
-    const applyPatch = (path: Path, value?: any) => {
-      if (!path.pointers.length) {
-        set({ data: value })
-      } else {
-        const result = produce(get().data, (draft) => patch(draft, path, value))
-        set({ data: result })
+    const applyPatch = (patches: Patch[]) => {
+      for (const it of patches) {
+        if (!it.path.pointers.length) {
+          set({ data: it.value })
+        } else {
+          const result = produce(get().data, (draft) => patch(draft, it.path, it.value))
+          set({ data: result })
+        }
       }
     }
 
