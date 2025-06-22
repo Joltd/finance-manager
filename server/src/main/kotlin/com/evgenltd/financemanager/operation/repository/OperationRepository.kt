@@ -35,6 +35,14 @@ interface OperationRepository : JpaRepository<Operation,UUID>, JpaSpecificationE
 //    fun findByEmbeddingExclude(embedding: String, id: UUID): List<TestResult>
 
     @Query("""
+        select o.*, (f.vector <-> e.vector) as distance
+        from operations o
+        left join embedding f on o.full_id = f.id
+        left join embedding e on e.id = :embeddingId
+    """, nativeQuery = true)
+    fun findWithDistance(embedding: UUID): List<Array<Any>>
+
+    @Query("""
         select 
             top_similar.account_id,
             sum(1.0 / (top_similar.distance + 1e-5)) as score

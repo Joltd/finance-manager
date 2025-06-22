@@ -23,6 +23,7 @@ class LoggerAspect {
             execution(public * (@org.springframework.web.bind.annotation.RestController *).*(..))
         ) &&
         !execution(public * (@com.evgenltd.financemanager.common.component.SkipLogging *).*(..)) &&
+        !@annotation(com.evgenltd.financemanager.common.component.SkipLogging) &&
         !execution(public * *..*Converter.*(..))
         """
     )

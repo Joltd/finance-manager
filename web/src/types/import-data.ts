@@ -13,6 +13,7 @@ export interface ImportDataEntry {
   id: string
   progress: boolean
   approved: boolean
+  operationId?: string
   date?: string
   type?: OperationType
   amountFrom?: Amount
@@ -38,4 +39,16 @@ export interface ImportDataParsedEntry {
   amountTo: Amount
   accountTo?: Account
   description?: string
+}
+
+export interface ImportDataOperation {
+  id: string
+  date: string
+  type: OperationType
+  amountFrom: Amount
+  accountFrom: Account
+  amountTo: Amount
+  accountTo: Account
+  description?: string
+  distance?: number
 }

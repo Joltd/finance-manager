@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.entity.record
 
+import com.evgenltd.financemanager.common.record.SortRecord
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.metamodel.EntityType
 import jakarta.persistence.metamodel.SingularAttribute
@@ -65,18 +66,11 @@ data class EntityFilterNodeRecord(
     val children: List<EntityFilterNodeRecord>,
 )
 
-data class EntitySortEntryRecord(val field: String, val direction: SortDirection)
-
-enum class SortDirection {
-    ASC,
-    DESC
-}
-
 data class EntityListRequest(
     val page: Int = 0,
     val size: Int = 50,
     val filter: EntityFilterNodeRecord?,
-    val sort: List<EntitySortEntryRecord> = emptyList(),
+    val sort: List<SortRecord> = emptyList(),
 )
 
 data class EntityListPage(

@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport2.record
 
+import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.reference.entity.Account
@@ -21,7 +22,8 @@ data class ImportDataEntryRecord(
     val id: UUID,
     val progress: Boolean,
     val approved: Boolean,
-    val data: LocalDate?,
+    val operationId: UUID?,
+    val date: LocalDate?,
     val type: OperationType?,
     val amountFrom: Amount?,
     val accountFrom: AccountRecord?,
@@ -41,4 +43,26 @@ data class ImportDataParsedEntry(
     val amountTo: Amount,
     val description: String,
     val hint: String? = null,
+)
+
+data class OperationFilter(
+    val date: Range<LocalDate>,
+
+)
+
+data class ImportDataOperationRecord(
+    val id: UUID,
+    val date: LocalDate,
+    val type: OperationType,
+    val amountFrom: Amount,
+    val accountFrom: AccountRecord?,
+    val amountTo: Amount,
+    val accountTo: AccountRecord?,
+    val description: String?,
+    val distance: Double?,
+)
+
+data class LinkOperationRequest(
+    val entryId: UUID,
+    val operationId: UUID,
 )

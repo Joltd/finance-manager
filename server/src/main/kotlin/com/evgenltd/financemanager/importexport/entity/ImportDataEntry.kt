@@ -34,9 +34,6 @@ class ImportDataEntry(
     @JoinColumn(name = "import_data_id")
     var importData: ImportData,
 
-//    @JdbcTypeCode(SqlTypes.JSON)
-//    var parsedEntry: ImportDataParsedEntry = ImportDataParsedEntry(),
-
     var progress: Boolean = false,
 
     var approved: Boolean = false,

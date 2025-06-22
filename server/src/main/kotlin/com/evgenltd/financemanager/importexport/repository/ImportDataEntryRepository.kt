@@ -36,9 +36,9 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>,JpaSpe
         importResults: List<ImportResult> = listOf(ImportResult.NOT_IMPORTED, ImportResult.FAILED)
     ): List<UUID>
 
-    @Query("select ide from ImportDataEntry ide where ide.id = :id and ide.progress = :progress")
+    @Query("select ide from ImportDataEntry ide where ide.id = :id")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    fun findAndLock(id: UUID, progress: Boolean): ImportDataEntry?
+    fun findForLock(id: UUID): ImportDataEntry?
 
     @Modifying
     @Query("update import_data_entries set progress = true where import_data_id = :importDataId and progress = false returning id", nativeQuery = true)

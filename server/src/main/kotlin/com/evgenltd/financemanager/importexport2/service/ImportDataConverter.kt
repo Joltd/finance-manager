@@ -7,6 +7,8 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataOperationType
 import com.evgenltd.financemanager.importexport2.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport2.record.ImportDataEntryRecord
+import com.evgenltd.financemanager.importexport2.record.ImportDataOperationRecord
+import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.record.Reference
 import org.springframework.stereotype.Service
@@ -36,7 +38,8 @@ class ImportDataConverter(
             id = importDataEntry.id!!,
             progress = importDataEntry.progress,
             approved = importDataEntry.approved,
-            data = operation?.date,
+            operationId = operation?.id,
+            date = operation?.date,
             type = operation?.type,
             amountFrom = operation?.amountFrom,
             accountFrom = operation?.accountFrom?.let { accountConverter.toRecord(it) },
@@ -46,5 +49,17 @@ class ImportDataConverter(
             raw = operation?.raw ?: emptyList()
         )
     }
+
+    fun toRecord(operation: Operation): ImportDataOperationRecord = ImportDataOperationRecord(
+        id = operation.id!!,
+        date = operation.date,
+        type = operation.type,
+        amountFrom = operation.amountFrom,
+        accountFrom = operation.accountFrom.let { accountConverter.toRecord(it) },
+        amountTo = operation.amountTo,
+        accountTo = operation.accountTo.let { accountConverter.toRecord(it) },
+        description = operation.description,
+        distance = 0.0,
+    )
 
 }

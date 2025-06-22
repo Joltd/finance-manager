@@ -23,9 +23,14 @@ class ImportDataStateService(
 
     @Transactional
     fun findAndLock(id: UUID): ImportDataEntry? {
-        val importDataEntry = importDataEntryRepository.findAndLock(id, false)
+        val importDataEntry = importDataEntryRepository.findForLock(id)
         if (importDataEntry == null) {
-            log.warn("ImportDataEntry [$id] not found or already in progress")
+            log.warn("ImportDataEntry $id not found")
+            return null
+        }
+
+        if (importDataEntry.progress) {
+            log.warn("ImportDataEntry $id already locked")
             return null
         }
 
@@ -35,16 +40,19 @@ class ImportDataStateService(
     }
 
     @Transactional
-    fun findAndUnlock(id: UUID): ImportDataEntry? {
-        val importDataEntry = importDataEntryRepository.findAndLock(id, true)
+    fun findAndUnlock(id: UUID) {
+        val importDataEntry = importDataEntryRepository.findForLock(id)
         if (importDataEntry == null) {
-            log.warn("ImportDataEntry [$id] not found or already released")
-            return null
+            log.warn("ImportDataEntry $id not found")
+            return
+        }
+
+        if (importDataEntry.progress) {
+            log.warn("ImportDataEntry $id already unlocked")
+            return
         }
 
         importDataEntry.progress = false
-
-        return importDataEntry
     }
 
 }

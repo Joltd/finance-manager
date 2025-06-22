@@ -149,6 +149,16 @@ class ImportDataActionService(
     }
 
     @Transactional
+    fun linkOperation(entryId: UUID, operationId: UUID): UUID {
+        val entry = importDataEntryRepository.find(entryId)
+        val operation = operationRepository.find(operationId)
+        entry.operation = operation
+        return entry.importData.id!!
+    }
+
+    //
+
+    @Transactional
     fun sendImportData(id: UUID) {
         val importData = importDataRepository.find(id)
         val record = importDataConverter.toRecord(importData)

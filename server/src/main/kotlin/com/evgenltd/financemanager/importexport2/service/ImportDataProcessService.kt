@@ -1,11 +1,14 @@
 package com.evgenltd.financemanager.importexport2.service
 
 import com.evgenltd.financemanager.common.config.ExecutorConfig
+import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.operation.repository.OperationRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
@@ -16,6 +19,7 @@ class ImportDataProcessService(
     private val importDataService: ImportDataService,
     private val importDataActionService: ImportDataActionService,
     private val importDataStateService: ImportDataStateService,
+    private val operationRepository: OperationRepository,
 //    @Qualifier(ExecutorConfig.BACKGROUND_CALCULATION_EXECUTOR)
 //    private val executor: Executor,
 ) {
@@ -45,5 +49,9 @@ class ImportDataProcessService(
 
     }
 
+    fun linkOperation(entryId: UUID, operationId: UUID) {
+        val importDataId = importDataActionService.linkOperation(entryId, operationId)
+        importDataActionService.sendImportDataEntry(importDataId, listOf(entryId))
+    }
 
 }

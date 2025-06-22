@@ -53,8 +53,3 @@ class Account(
     }
 }
 
-enum class AccountType {
-    ACCOUNT,
-    EXPENSE,
-    INCOME,
-}
