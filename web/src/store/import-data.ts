@@ -4,18 +4,15 @@ import { importDataUrls } from "@/api/import-data";
 import { Reference } from "@/types/common";
 import { ImportData, ImportDataOperation } from "@/types/import-data";
 import { EntityPage } from "@/types/entity";
+import { createOpenStore, OpenStoreState } from "@/store/open";
 
 interface ImportDataStoreState {
   importDataList: FetchStoreState<Reference[]>
   importData: FetchStoreState<ImportData>
   accountList: FetchStoreState<Reference[]>
   operationList: FetchStoreState<EntityPage<ImportDataOperation>>
-  newDialogOpened: boolean
-  setNewDialogOpened: (opened: boolean) => void
-  operationSheetOpened: boolean
-  setOperationSheetOpened: (opened: boolean) => void
-  entryId?: string
-  setEntryId: (id?: string) => void
+  newDialog: OpenStoreState
+  operationSheet: OpenStoreState
 }
 
 export const useImportDataStore = create<ImportDataStoreState>()((set, get) => {
@@ -23,17 +20,15 @@ export const useImportDataStore = create<ImportDataStoreState>()((set, get) => {
   const importData = createFetchStore<ImportData>(importDataUrls.id)
   const accountList = createFetchStore<Reference[]>(importDataUrls.account)
   const operationList = createFetchStore<EntityPage<ImportDataOperation>>(importDataUrls.operation)
+  const newDialog = createOpenStore()
+  const operationSheet = createOpenStore()
 
   return {
     importDataList: observable(importDataList, set, 'importDataList'),
     importData: observable(importData, set, 'importData'),
     accountList: observable(accountList, set, 'accountList'),
     operationList: observable(operationList, set, 'operationList'),
-    newDialogOpened: false,
-    setNewDialogOpened: (opened: boolean) => set({ newDialogOpened: opened }),
-    operationSheetOpened: false,
-    setOperationSheetOpened: (opened: boolean) => set({operationSheetOpened: opened}),
-    entryId: undefined,
-    setEntryId: (id?: string) => set({entryId: id})
+    newDialog: observable(newDialog, set, 'newDialog'),
+    operationSheet: observable(operationSheet, set, 'operationSheet'),
   }
 })

@@ -1,7 +1,7 @@
 import { Account, AccountType } from "@/types/account";
 import { Operation, OperationType } from "@/types/operation";
-import { Amount } from "@/types/amount";
 import { ImportDataEntry, ImportDataParsedEntry } from "@/types/import-data";
+import { Amount } from "@/types/common";
 
 // Account definitions
 export const cashAccount: Account = {

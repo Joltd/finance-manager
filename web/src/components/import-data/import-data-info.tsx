@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AmountLabel } from "@/components/common/amount-label";
-import { Amount } from "@/types/amount";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Amount } from "@/types/common";
 
 export interface ImportDataInfoProps {
   className?: string

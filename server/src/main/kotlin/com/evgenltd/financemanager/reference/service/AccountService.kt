@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.common.repository.like
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
+import com.evgenltd.financemanager.reference.record.AccountBalanceRecord
 import com.evgenltd.financemanager.reference.record.AccountRecord
 import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository

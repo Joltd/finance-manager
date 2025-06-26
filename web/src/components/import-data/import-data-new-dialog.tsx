@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormBody, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { useImportDataStore } from "@/store/import-data";
@@ -27,7 +27,7 @@ const formSchema = z.object({
 })
 
 export function ImportDataNewDialog() {
-  const { importDataList, accountList, newDialogOpened, setNewDialogOpened } = useImportDataStore()
+  const { importDataList, accountList, newDialog } = useImportDataStore()
   const { loading, error, submit, reset } = useRequest(importDataUrls.begin, { multipart: true })
   const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
@@ -38,10 +38,10 @@ export function ImportDataNewDialog() {
   })
 
   useEffect(() => {
-    if (newDialogOpened) {
+    if (newDialog.opened) {
       accountList.fetch()
     }
-  }, [newDialogOpened]);
+  }, [newDialog.opened]);
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     const formData = new FormData()
@@ -49,7 +49,7 @@ export function ImportDataNewDialog() {
     formData.append("file", data.file[0])
     submit(formData)
       .then((result) => {
-        setNewDialogOpened(false)
+        newDialog.setOpened(false)
         router.push(`/import-data/${result}`)
         importDataList.fetch()
       })
@@ -60,11 +60,11 @@ export function ImportDataNewDialog() {
       form.reset()
       reset()
     }
-    setNewDialogOpened(opened)
+    newDialog.setOpened(opened)
   }
 
   return (
-    <Dialog open={newDialogOpened} onOpenChange={handleOpenChange}>
+    <Dialog open={newDialog.opened} onOpenChange={handleOpenChange}>
       <DialogContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -73,8 +73,7 @@ export function ImportDataNewDialog() {
                 New import
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              {error && <div className="text-red-400">{error}</div>}
+            <FormBody error={error}>
               <FormField
                 control={form.control}
                 name="account"
@@ -110,7 +109,7 @@ export function ImportDataNewDialog() {
                   </FormItem>
                 )}
               />
-            </div>
+            </FormBody>
             <DialogFooter>
               <DialogClose>Cancel</DialogClose>
               <Button type="submit" disabled={loading}>Begin</Button>

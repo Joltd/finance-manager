@@ -61,6 +61,19 @@ class Operation(
     var full: Embedding? = null,
 ) {
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Operation
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+
     companion object {
         fun date(root: Root<Operation>): Path<LocalDate> = root.get(Operation::date.name)
 

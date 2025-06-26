@@ -1,9 +1,9 @@
 'use client'
 
-import { Amount } from "@/types/amount";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
+import { Amount } from "@/types/common";
 
 export interface AmountInputProps {
   amount?: Amount

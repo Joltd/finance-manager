@@ -1,7 +1,6 @@
 import { Operation, OperationType } from "@/types/operation";
-import { Amount } from "@/types/amount";
 import { Account } from "@/types/account";
-import { Reference } from "@/types/common";
+import { Amount, Reference } from "@/types/common";
 
 export interface ImportData {
   id: string

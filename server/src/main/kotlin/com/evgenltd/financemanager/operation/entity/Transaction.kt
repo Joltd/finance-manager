@@ -49,6 +49,18 @@ class Transaction(
 
     fun signedAmount(): Amount = if (type == TransactionType.OUT) -amount else amount
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Transaction
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
 }
 
 enum class TransactionType { IN, OUT }

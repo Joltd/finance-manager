@@ -30,6 +30,16 @@ class TurnoverService(
     private val entityService: EntityService,
 ) : Loggable() {
 
+    fun sliceLast(): Map<Account, Map<String, Turnover>> {
+        val ids = turnoverRepository.findSliceLast()
+        return turnoverRepository.findAllById(ids)
+            .groupBy { it.account }
+            .map {
+                it.key to it.value.associateBy { turnover -> turnover.amount.currency }
+            }
+            .associate { it }
+    }
+
     fun listByAccountType(): List<Turnover> = turnoverRepository.findByAccountType(AccountType.ACCOUNT)
 
     fun listByAccount(account: Account): List<Turnover> {

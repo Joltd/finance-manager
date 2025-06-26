@@ -7,7 +7,8 @@ import { MoveRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { Account } from "@/types/account";
-import { Amount } from "@/types/amount";
+
+import { Amount } from "@/types/common";
 
 export interface OperationLabelProps {
   date?: string

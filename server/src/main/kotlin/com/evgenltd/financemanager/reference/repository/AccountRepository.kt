@@ -19,6 +19,8 @@ interface AccountRepository : JpaRepository<Account, UUID>,JpaSpecificationExecu
 
     fun findByName(name: String): Account?
 
+    fun findByType(type: AccountType): List<Account>
+
     fun findByTypeAndParserIsNotNull(type: AccountType): List<Account>
 
 }

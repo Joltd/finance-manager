@@ -155,6 +155,20 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   )
 }
 
+interface FormBodyProps extends React.ComponentProps<"div"> {
+  error?: string
+  children?: React.ReactNode
+}
+
+function FormBody({ error, className, ...props }: FormBodyProps) {
+  return (
+    <div className={cn("space-y-4 py-4", className)} {...props}>
+      {error && <div className="text-red-400">{error}</div>}
+      {props.children}
+    </div>
+  )
+}
+
 export {
   useFormField,
   Form,
@@ -164,4 +178,5 @@ export {
   FormDescription,
   FormMessage,
   FormField,
+  FormBody,
 }

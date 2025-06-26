@@ -6,3 +6,7 @@ export const importDataUrls = {
   begin: '/import-data/begin',
   linkOperation: '/import-data/link-operation'
 }
+
+export const importDataEvents = {
+  root: 'importData-:id'
+}

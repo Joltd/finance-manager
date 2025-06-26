@@ -55,4 +55,16 @@ class PricingOrder(
         return "PricingOrder(date=$date, item=${item.name}, price=$price, quantity=$quantity, country='$country', city='$city', store='$store', comment=$comment)"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PricingOrder
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
 }

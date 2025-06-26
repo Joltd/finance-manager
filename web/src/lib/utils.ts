@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { addDays, format, isAfter } from "date-fns";
+import { addDays, format, isAfter, parse } from "date-fns";
 import { RangeValue } from "@/types/common";
 
 export function cn(...inputs: ClassValue[]) {
@@ -38,11 +38,19 @@ export function trim(value?: string, maxLength: number = 50): string | undefined
   return value
 }
 
+export function formatDate(date?: Date): string | undefined {
+  return date ? format(date, 'yyyy-MM-dd') : undefined
+}
+
+export function parseDate(date?: string): Date | undefined {
+  return date ? parse(date, 'yyyy-MM-dd', new Date()) : new Date()
+}
+
 export function prepareRange(from?: Date, to?: Date): RangeValue<string | undefined> {
   if (!from || !to) {
     return {
-      from: from ? format(from, 'yyyy-MM-dd') : undefined,
-      to: to ? format(to, 'yyyy-MM-dd') : undefined
+      from: formatDate(from),
+      to: formatDate(to)
     }
   }
 
@@ -60,7 +68,7 @@ export function prepareRange(from?: Date, to?: Date): RangeValue<string | undefi
   }
 
   return {
-    from: format(actualFrom, 'yyyy-MM-dd'),
-    to: format(actualTo, 'yyyy-MM-dd'),
+    from: formatDate(actualFrom),
+    to: formatDate(actualTo),
   }
 }

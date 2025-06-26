@@ -1,7 +1,7 @@
-import { Amount } from "@/types/amount";
 import { CurrencyLabel } from "@/components/common/currency-label";
 import { cn } from "@/lib/utils";
 import { ValueLabel } from "@/components/common/value-label";
+import { Amount } from "@/types/common";
 
 export interface AmountLabelProps {
   amount: Amount
