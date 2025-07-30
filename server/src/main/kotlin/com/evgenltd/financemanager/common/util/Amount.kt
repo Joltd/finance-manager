@@ -13,12 +13,18 @@ data class Amount(val value: Long, val currency: String) {
 
     operator fun not(): Amount = unaryMinus()
 
-    operator fun plus(other: Amount): Amount {
+    operator fun plus(other: Amount?): Amount {
+        if (other == null) {
+            return this
+        }
         checkCurrencySame(other)
         return Amount(value + other.value, currency)
     }
 
-    operator fun minus(other: Amount): Amount {
+    operator fun minus(other: Amount?): Amount {
+        if (other == null) {
+            return this
+        }
         checkCurrencySame(other)
         return Amount(value - other.value, currency)
     }
@@ -93,3 +99,5 @@ fun String.parseAmount(): Amount {
     }
     return fromFractionalString(parts[0], parts[1])
 }
+
+fun <T> Iterable<T>.sumOf(selector: (T) -> Amount): Amount = map { selector(it) }.reduce { acc, amount -> acc + amount }

@@ -8,10 +8,18 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Repository
 interface TurnoverRepository : JpaRepository<Turnover, UUID>, JpaSpecificationExecutor<Turnover> {
+
+    fun deleteByAccountAndAmountCurrencyAndDateGreaterThanEqual(account: Account, currency: String, date: LocalDate)
+
+    fun findByAccountAndAmountCurrencyAndDateLessThan(account: Account, currency: String, date: LocalDate): List<Turnover>
+
+    fun findFirstByAccountAndAmountCurrencyAndDateLessThanOrderByDateDesc(account: Account, currency: String, date: LocalDate): Turnover?
+
+    //
 
     fun deleteByDateGreaterThanEqual(date: LocalDate)
 

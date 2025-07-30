@@ -12,12 +12,10 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "transactions")
@@ -47,8 +45,6 @@ class Transaction(
     val updatedAt: LocalDateTime? = null,
 ) {
 
-    fun signedAmount(): Amount = if (type == TransactionType.OUT) -amount else amount
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -62,5 +58,3 @@ class Transaction(
         return id?.hashCode() ?: 0
     }
 }
-
-enum class TransactionType { IN, OUT }

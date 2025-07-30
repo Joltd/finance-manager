@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.importexport.entity
 
 import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -13,6 +12,8 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.*
 
 @Entity
@@ -36,10 +37,16 @@ class ImportData(
 
     var message: String? = null,
 
-    var progress: Double = 0.0,
+    var progress: Boolean = false,
 
     @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var entries: MutableList<ImportDataEntry> = mutableListOf(),
+
+    @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    var totals: MutableList<ImportDataTotal> = mutableListOf(),
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    var hiddenOperations: MutableSet<UUID> = mutableSetOf()
 
 ) {
     override fun equals(other: Any?): Boolean {

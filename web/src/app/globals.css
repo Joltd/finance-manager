@@ -76,6 +76,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --info: var(--color-blue-100);
+  --info-foreground: var(--color-blue-500);
+  --warning: var(--color-yellow-100);
+  --warning-foreground: var(--color-yellow-500);
+  --success: var(--color-green-100);
+  --success-foreground: var(--color-green-500);
 }
 
 .dark {
@@ -110,6 +116,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-900);
+  --warning: var(--color-yellow-500);
+  --warning-foreground: var(--color-yellow-900);
+  --success: var(--color-green-900);
+  --success-foreground: var(--color-green-900);
 }
 
 @layer base {
@@ -128,4 +140,13 @@
     &::-webkit-scrollbar {
         display: none;
     }
+}
+
+@theme inline {
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
 }

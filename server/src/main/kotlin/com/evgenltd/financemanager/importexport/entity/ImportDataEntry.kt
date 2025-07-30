@@ -67,7 +67,9 @@ class ImportDataEntry(
     @Enumerated(EnumType.STRING)
     var importResult: ImportResult = ImportResult.NOT_IMPORTED,
 
-    var importError: String? = null
+    var importError: String? = null,
+
+    var visible: Boolean = false
 ) {
 
     override fun equals(other: Any?): Boolean {

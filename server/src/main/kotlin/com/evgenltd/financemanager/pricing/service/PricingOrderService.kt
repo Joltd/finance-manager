@@ -8,7 +8,6 @@ import com.evgenltd.financemanager.pricing.record.PricingOrderDefaults
 import com.evgenltd.financemanager.pricing.record.PricingOrderRecord
 import com.evgenltd.financemanager.pricing.repository.PricingOrderRepository
 import com.evgenltd.financemanager.settings.service.SettingService
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
@@ -55,7 +54,7 @@ class PricingOrderService(
         pricingOrderRepository.save(pricingOrder)
     }
 
-    @Scheduled(cron = "0 0 * * * *")
+//    @Scheduled(cron = "0 0 * * * *")
     @Transactional
     fun updateUsdPrice() {
         val orders = pricingOrderRepository.findByRateIsNull()

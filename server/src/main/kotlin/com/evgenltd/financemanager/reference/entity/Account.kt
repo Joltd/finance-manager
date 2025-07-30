@@ -52,6 +52,9 @@ class Account(
         return id?.hashCode() ?: 0
     }
 
+    override fun toString(): String = "Account(id=$id, name='$name')"
+
+
     companion object {
         fun name(root: Root<Account>): Path<String> = root.get(Account::name.name)
 

@@ -1,27 +1,25 @@
 package com.evgenltd.financemanager.importexport.service
 
-import com.evgenltd.financemanager.common.repository.*
+import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.importexport.converter.OperationReviseConverter
 import com.evgenltd.financemanager.importexport.converter.OperationReviseEntryConverter
-import com.evgenltd.financemanager.importexport.entity.*
+import com.evgenltd.financemanager.importexport.entity.ImportData
+import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
+import com.evgenltd.financemanager.importexport.entity.OperationRevise
+import com.evgenltd.financemanager.importexport.entity.OperationReviseDate
+import com.evgenltd.financemanager.importexport.entity.OperationReviseEntry
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryFilter
 import com.evgenltd.financemanager.importexport.record.OperationReviseEntryRecord
 import com.evgenltd.financemanager.importexport.record.OperationReviseRecord
 import com.evgenltd.financemanager.importexport.repository.OperationReviseEntryRepository
 import com.evgenltd.financemanager.importexport.repository.OperationReviseRepository
-import com.evgenltd.financemanager.operation.converter.OperationConverter
-import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationFilter
-import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.reference.converter.AccountConverter
-import com.evgenltd.financemanager.reference.entity.AccountType
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
-import java.util.UUID
-import kotlin.reflect.jvm.internal.impl.utils.SmartSet.Companion
+import java.util.*
 
 @Service
 class OperationReviseService(
@@ -85,7 +83,6 @@ class OperationReviseService(
             currency = operationRevise.currency,
             account = operationRevise.account,
             status = ImportDataStatus.NEW,
-            progress = .0,
         )
         return parser.parse(importData, file)
             .map {

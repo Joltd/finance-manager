@@ -1,19 +1,23 @@
 package com.evgenltd.financemanager.turnover.service
 
+import com.evgenltd.financemanager.common.repository.and
+import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.common.util.sumOf
 import com.evgenltd.financemanager.entity.record.EntityFilterNodeRecord
 import com.evgenltd.financemanager.entity.service.ConditionBuilderService
 import com.evgenltd.financemanager.entity.service.EntityService
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
+import com.evgenltd.financemanager.operation.service.signedAmount
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.settings.service.SettingService
 import com.evgenltd.financemanager.turnover.entity.Turnover
 import com.evgenltd.financemanager.turnover.record.TurnoverKey
+import com.evgenltd.financemanager.turnover.repository.BalanceRepository
 import com.evgenltd.financemanager.turnover.repository.TurnoverRepository
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -25,10 +29,24 @@ import java.util.*
 class TurnoverService(
     private val turnoverRepository: TurnoverRepository,
     private val transactionRepository: TransactionRepository,
+    private val balanceRepository: BalanceRepository,
     private val settingService: SettingService,
     private val conditionBuilderService: ConditionBuilderService,
     private val entityService: EntityService,
+    private val balanceService: BalanceService,
+    private val turnoverActionService: BalanceActionService,
 ) : Loggable() {
+
+    fun calculateTotal(account: Account, date: LocalDate): List<Amount> =
+        transactionRepository.findAll((Transaction::account eq account) and (Transaction::date eq date))
+            .groupBy { it.amount.currency }
+            .map { (_, transactions) -> transactions.sumOf { it.signedAmount() } }
+
+    //
+
+
+
+    //
 
     fun sliceLast(): Map<Account, Map<String, Turnover>> {
         val ids = turnoverRepository.findSliceLast()
@@ -90,7 +108,7 @@ class TurnoverService(
 
     }
 
-    @Scheduled(cron = "0 * * * * *")
+//    @Scheduled(cron = "0 * * * * *")
     @Transactional
     fun rebuild() {
         val turnoverLastUpdate = settingService.turnoverLastUpdate() ?: LocalDateTime.of(2000, 1, 1, 0, 0)

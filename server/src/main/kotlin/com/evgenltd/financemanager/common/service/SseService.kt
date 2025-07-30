@@ -5,8 +5,10 @@ import com.evgenltd.financemanager.common.record.SseEvent
 import com.evgenltd.financemanager.common.util.Loggable
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
+import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
@@ -15,7 +17,7 @@ class SseService : Loggable() {
 
     private val emitters: MutableList<SseEmitter> = CopyOnWriteArrayList()
 
-    fun subscribe(): SseEmitter = SseEmitter().also { emitter ->
+    fun subscribe(): SseEmitter = SseEmitter(0L).also { emitter ->
         emitter.onTimeout {
             emitter.complete()
         }
@@ -23,6 +25,16 @@ class SseService : Loggable() {
             emitters.remove(emitter)
         }
         emitters.add(emitter)
+    }
+
+    @Scheduled(fixedRate = 30_000)
+    fun heartbeat() {
+        val event = SseEvent(
+            id = UUID.randomUUID(),
+            name = "heartbeat",
+            data = ""
+        )
+        onEvent(event)
     }
 
     @EventListener

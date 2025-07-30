@@ -27,9 +27,9 @@ class LoggerAspect {
         !execution(public * *..*Converter.*(..))
         """
     )
-    fun targetPointcut() {}
+    fun pointcut() {}
 
-    @Around("targetPointcut()")
+    @Around("pointcut()")
     fun logAround(joinPoint: ProceedingJoinPoint): Any? {
         val methodSignature = joinPoint.signature as MethodSignature
         val className = methodSignature.declaringType.simpleName

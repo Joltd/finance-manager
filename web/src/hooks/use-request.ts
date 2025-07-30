@@ -1,6 +1,6 @@
-import { useState } from "react";
-import api from "@/lib/axios";
-import { fillPathParams } from "@/lib/utils";
+import { useState } from 'react'
+import api from '@/lib/axios'
+import { fillPathParams } from '@/lib/utils'
 
 export interface RequestOptions {
   method?: string
@@ -20,9 +20,7 @@ export const useRequest = (path: string, options?: RequestOptions) => {
         method: options?.method || 'POST',
         url: preparedPath,
         data: data,
-        headers: options?.multipart
-          ? { 'Content-Type': 'multipart/form-data' }
-          : undefined
+        headers: options?.multipart ? { 'Content-Type': 'multipart/form-data' } : undefined,
       })
       if (response.status !== 200) {
         setError('Something wrong')
@@ -31,14 +29,14 @@ export const useRequest = (path: string, options?: RequestOptions) => {
       } else {
         return response.data.body
       }
-
-      return null
     } catch (e: any) {
-      console.error(e)
       setError(e?.message || 'Something wrong')
+      throw e
     } finally {
       setLoading(false)
     }
+
+    throw new Error()
   }
 
   const reset = () => {
@@ -50,6 +48,6 @@ export const useRequest = (path: string, options?: RequestOptions) => {
     loading,
     error,
     submit,
-    reset
+    reset,
   }
 }

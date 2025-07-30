@@ -33,7 +33,7 @@ data class OperationRecord(
     val accountFrom: AccountRecord,
     val amountTo: Amount,
     val accountTo: AccountRecord,
-    val description: String?
+    val description: String?,
 )
 
 interface AccountScore {

@@ -11,7 +11,6 @@ import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.fromFractional
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.settings.service.SettingService
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -59,7 +58,7 @@ class CandyService(
         candyRepository.save(candy)
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+//    @Scheduled(cron = "0 0 0 * * *")
     fun createIncome() {
         val lastIncome = candyRepository.findFirstByDirectionOrderByDateDesc(Direction.IN)
 

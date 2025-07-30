@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns"
+import { format, parseISO } from 'date-fns'
 
 export interface DateLabelProps {
   date: string
@@ -6,9 +6,5 @@ export interface DateLabelProps {
 
 export function DateLabel({ date }: DateLabelProps) {
   const actualDate = parseISO(date)
-  return (
-    <span>
-      {format(actualDate, 'd MMMM yyyy')}
-    </span>
-  )
+  return <span className="select-none">{format(actualDate, 'd MMMM yyyy')}</span>
 }

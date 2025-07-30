@@ -1,11 +1,8 @@
 'use client'
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAccountStore } from "@/store/account";
-import { Input } from "@/components/ui/input";
-import { Reference } from "@/types/common";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { AccountGroupNewDialog } from "@/components/account/account-group-new-dialog";
+import { useAccountGroupListStore } from '@/store/account'
+import { Reference } from '@/types/common'
+import { useEffect } from 'react'
+import { AccountGroupNewDialog } from '@/components/account/account-group-new-dialog'
 
 export interface AccountGroupSelectProps {
   value?: Reference
@@ -13,11 +10,11 @@ export interface AccountGroupSelectProps {
 }
 
 export function AccountGroupSelect({ value, onChange }: AccountGroupSelectProps) {
-  const { groupList, newGroupDialog } = useAccountStore()
+  const groupList = useAccountGroupListStore('data', 'fetch')
 
   useEffect(() => {
     groupList.fetch()
-  }, []);
+  }, [])
 
   const setGroupById = (id: string) => {
     onChange?.(groupList.data?.find((it) => it.id === id))
@@ -26,7 +23,7 @@ export function AccountGroupSelect({ value, onChange }: AccountGroupSelectProps)
   const handleSelect = (value: string) => {
     if (value === '0') {
       onChange?.(undefined)
-      newGroupDialog.setOpened(true)
+      // newGroupDialog.setOpened(true)
     } else {
       setGroupById(value)
     }

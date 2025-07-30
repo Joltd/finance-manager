@@ -1,13 +1,13 @@
-import { FilterPrimitive } from "@/components/common/filter/filter";
+import { FilterPrimitive } from '@/components/common/filter-proto/filter'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { FilterOperator } from "@/types/entity";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
+import { FilterOperator } from '@/types/entity'
 import {
   Dialog,
   DialogClose,
@@ -15,14 +15,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { RangeValue } from "@/types/common";
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { RangeValue } from '@/types/common'
 
-export interface RangeFilterProps<T> extends FilterPrimitive<RangeValue<T>> {
-
-}
+export interface RangeFilterProps<T> extends FilterPrimitive<RangeValue<T>> {}
 
 interface Preset {
   operator: FilterOperator
@@ -37,7 +35,7 @@ const presets: Preset[] = [
   {
     operator: FilterOperator.LESS,
     label: 'less',
-  }
+  },
 ]
 
 export function RangeFilter<T>({ onFilterChange }: RangeFilterProps<T>) {
@@ -57,23 +55,33 @@ export function RangeFilter<T>({ onFilterChange }: RangeFilterProps<T>) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="rounded-none">{preset.label}</Button>
+          <Button variant="secondary" className="rounded-none">
+            {preset.label}
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {presets.map((it, index) => (
-            <DropdownMenuItem key={index} onClick={() => setPreset(it)}>{it.label}</DropdownMenuItem>
+            <DropdownMenuItem key={index} onClick={() => setPreset(it)}>
+              {it.label}
+            </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="secondary" className="rounded-none">{value !== undefined ? value : '...'}</Button>
+          <Button variant="secondary" className="rounded-none">
+            {value !== undefined ? value : '...'}
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Enter value</DialogTitle>
           </DialogHeader>
-          <Input type="number" value={inputValue} onChange={(event) => setInputValue(event.target.value)} />
+          <Input
+            type="number"
+            value={inputValue}
+            onChange={(event) => setInputValue(event.target.value)}
+          />
           <DialogFooter>
             <DialogClose asChild>
               <Button onClick={handleApplyValue}>Apply</Button>

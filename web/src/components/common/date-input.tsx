@@ -1,8 +1,8 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { useState } from "react";
-import { formatDate, parseDate } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { useState } from 'react'
+import { formatDate, parseDate } from '@/lib/utils'
 
 export interface DateInputProps {
   placeholder?: string
@@ -16,9 +16,11 @@ export function DateInput({ placeholder, value, onChange }: DateInputProps) {
   return (
     <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button>{value || placeholder || 'Select date'}</Button>
+        <Button variant="outline" className="justify-start px-3 py-1">
+          {value || placeholder || 'Select date'}
+        </Button>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent align="start">
         <Calendar
           mode="single"
           selected={parseDate(value)}

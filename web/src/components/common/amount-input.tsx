@@ -1,9 +1,15 @@
 'use client'
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { Amount } from "@/types/common";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { useEffect, useState } from 'react'
+import { Amount } from '@/types/common'
 
 export interface AmountInputProps {
   amount?: Amount
@@ -13,7 +19,9 @@ export interface AmountInputProps {
 export function AmountInput({ amount, onChange }: AmountInputProps) {
   const currencies = ['USD', 'EUR', 'RUB', 'GEL']
   const [inputCurrency, setInputCurrency] = useState<string>(amount?.currency || currencies[0])
-  const [inputValue, setInputValue] = useState<string>(amount?.value ? (amount?.value / 10000).toString() : '')
+  const [inputValue, setInputValue] = useState<string>(
+    amount?.value ? (amount?.value / 10000).toString() : '',
+  )
 
   useEffect(() => {
     const newAmount = { value: +inputValue * 10000, currency: inputCurrency }
@@ -21,14 +29,16 @@ export function AmountInput({ amount, onChange }: AmountInputProps) {
       return
     }
     onChange?.(newAmount)
-  }, [inputValue, inputCurrency]);
+  }, [inputValue, inputCurrency])
 
   const handleChangeValue = (value: string) => {
     setInputValue(value)
+    // onChange?.({ value: +inputValue * 10000, currency: inputCurrency })
   }
 
   const handleChangeCurrency = (currency: string) => {
     setInputCurrency(currency)
+    // onChange?.({ value: +inputValue * 10000, currency: inputCurrency })
   }
 
   return (
@@ -47,7 +57,9 @@ export function AmountInput({ amount, onChange }: AmountInputProps) {
         </SelectTrigger>
         <SelectContent>
           {currencies.map((it) => (
-            <SelectItem key={it} value={it}>{it}</SelectItem>
+            <SelectItem key={it} value={it}>
+              {it}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>

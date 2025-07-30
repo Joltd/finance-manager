@@ -1,4 +1,4 @@
-import z from "zod"
+import z from 'zod'
 
 export interface Reference {
   id: string
@@ -24,3 +24,7 @@ export const amountShema = z.object({
   value: z.number(),
   currency: z.string(),
 })
+
+export function amount(value: number, currency: string): Amount {
+  return { value: value * 10000, currency }
+}

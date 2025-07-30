@@ -1,27 +1,18 @@
-import { create } from "zustand";
-import { createFetchStore, FetchStoreState, observable } from "@/store/common";
-import { accountUrls } from "@/api/account";
-import { AccountBalance } from "@/types/account";
-import { Reference } from "@/types/common";
-import { createOpenStore, OpenStoreState } from "@/store/open";
+import { accountUrls } from '@/api/account'
+import { Account } from '@/types/account'
+import { Reference } from '@/types/common'
+import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
+import { useStoreSelect } from '@/hooks/use-store-select'
 
-interface AccountStoreState {
-  accountList: FetchStoreState<AccountBalance[]>
-  groupList: FetchStoreState<Reference[]>
-  accountSheet: OpenStoreState
-  newGroupDialog: OpenStoreState
-}
+const accountListStore = createFetchStore<Account[]>(accountUrls.reference)
 
-export const useAccountStore = create<AccountStoreState>()((set, get) => {
-  const accountList = createFetchStore<AccountBalance[]>(accountUrls.balance)
-  const groupList = createFetchStore<Reference[]>(accountUrls.groupReference)
-  const accountSheet = createOpenStore()
-  const newGroupDialog = createOpenStore()
+export const useAccountListStore = <K extends keyof FetchStoreState<Account[]>>(...fields: K[]) =>
+  useStoreSelect<FetchStoreState<Account[]>, K>(accountListStore, ...fields)
 
-  return {
-    accountList: observable(accountList, set, 'accountList'),
-    groupList: observable(groupList, set, 'groupList'),
-    accountSheet: observable(accountSheet, set, 'accountSheet'),
-    newGroupDialog: observable(newGroupDialog, set, 'newGroupDialog'),
-  }
-})
+//
+
+const accountGroupListStore = createFetchStore<Reference[]>(accountUrls.groupReference)
+
+export const useAccountGroupListStore = <K extends keyof FetchStoreState<Reference[]>>(
+  ...fields: K[]
+) => useStoreSelect<FetchStoreState<Reference[]>, K>(accountGroupListStore, ...fields)

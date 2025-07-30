@@ -9,7 +9,6 @@ import com.evgenltd.financemanager.reference.entity.Currency
 import com.evgenltd.financemanager.reference.repository.CurrencyRepository
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.concurrent.BlockingQueue
@@ -30,7 +29,7 @@ class ExchangeRateGatheringService(
         queue.put(event)
     }
 
-    @Scheduled(cron = "0 0 22 * * *")
+//    @Scheduled(cron = "0 0 22 * * *")
     fun processLatest() {
 
         val now = LocalDate.now()
@@ -66,7 +65,7 @@ class ExchangeRateGatheringService(
 
     }
 
-    @Scheduled(fixedDelay = 10_000)
+//    @Scheduled(fixedDelay = 10_000)
     fun processDiscovery() {
         val request = queue.poll() ?: return
         processDiscovery(request)

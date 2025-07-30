@@ -1,9 +1,6 @@
 package com.evgenltd.financemanager.reference.service
 
-import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.repository.findAllByCondition
-import com.evgenltd.financemanager.common.repository.like
 import com.evgenltd.financemanager.reference.converter.AccountGroupConverter
 import com.evgenltd.financemanager.reference.entity.AccountGroup
 import com.evgenltd.financemanager.reference.record.AccountGroupRecord

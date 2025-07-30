@@ -1,8 +1,5 @@
 package com.evgenltd.financemanager.common.component
 
-import com.evgenltd.financemanager.common.record.SseEvent
-import java.util.*
-
 data class Pointer(
     val field: String,
     val value: Any? = null,
@@ -17,19 +14,18 @@ data class Patch(
     val value: Any?,
 )
 
-class PathBuilder {
-    private val pointers = mutableListOf<Pointer>()
-
-    fun path(field: String, value: Any? = null): PathBuilder {
-        pointers.add(Pointer(field, value))
-        return this
-    }
-
-    fun build(): Path = Path(pointers)
-}
-
-fun patch(value: Any?, block: (PathBuilder) -> Unit = {}): Patch = PathBuilder().apply(block)
-    .build()
+fun patch(value: Any?, path: String = ""): Patch = path.split("/")
+    .filter { it.isNotBlank() }
+    .map { it.pointer() }
+    .let { Path(it) }
     .let { Patch(it, value) }
 
-fun patchEvent(name: String, patches: List<Patch>): SseEvent = SseEvent(UUID.randomUUID(), name, patches)
+private fun String.pointer(): Pointer {
+    val parts = split("=")
+    if (parts.size > 1) {
+        val (field, value) = parts
+        return Pointer(field, value)
+    } else {
+        return Pointer(this)
+    }
+}

@@ -1,167 +1,83 @@
-import { Sheet, SheetClose, SheetContent, SheetFooter, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "../ui/button";
-import { Form, FormBody, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { OperationType } from "@/types/operation";
-import { amountShema, referenceSchema } from "@/types/common";
-import { format } from "date-fns";
-import { useAccountStore } from "@/store/account";
-import { useRequest } from "@/hooks/use-request";
-import { operationUrls } from "@/api/operation";
-import { ReferenceSelect } from "@/components/common/reference-select";
-import { AmountInput } from "@/components/common/amount-input";
-import { DateInput } from "@/components/common/date-input";
-import { useEffect } from "react";
-import { useOperationStore } from "@/store/operation";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
+import { Button } from '../ui/button'
+import { Form } from '@/components/ui/form'
+import { useRequest } from '@/hooks/use-request'
+import { operationUrls } from '@/api/operation'
+import { useEffect, useRef } from 'react'
+import { useOperationStore } from '@/store/operation'
+import {
+  OperationForm,
+  OperationFormData,
+  useOperationForm,
+} from '@/components/operation/operation-form'
+import { createStore } from 'zustand'
+import { openStoreSlice, OpenStoreState } from '@/store/common/open'
+import { useStoreSelect } from '@/hooks/use-store-select'
 
-export interface OperationSheetProps {
-
+export interface OperationSheetStoreState extends OpenStoreState {
+  operationId?: string
+  openWith: (operationId?: string) => void
 }
 
-const formSchema = z.object({
-  type: z.nativeEnum(OperationType),
-  date: z.string().date().optional(),
-  accountFrom: referenceSchema,
-  amountFrom: amountShema,
-  accountTo: referenceSchema,
-  amountTo: amountShema,
-  description: z.string().optional(),
-})
+const operationSheetStore = createStore<OperationSheetStoreState>((set, get, store) => ({
+  ...openStoreSlice(set, get, store),
+  openWith: (operationId?: string) => set({ operationId }),
+}))
+
+export const useOperationSheetStore = <K extends keyof OperationSheetStoreState>(...fields: K[]) =>
+  useStoreSelect<OperationSheetStoreState, K>(operationSheetStore, ...fields)
 
 export function OperationSheet() {
-  const { accountList } = useAccountStore()
-  const { operationSheet } = useOperationStore()
+  const operation = useOperationStore('updatePathParams', 'fetch')
+  const { opened, operationId, close } = useOperationSheetStore('opened', 'operationId', 'close')
   const { loading, error, submit, reset } = useRequest(operationUrls.root)
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      type: OperationType.EXCHANGE,
-      date: format(new Date(), "yyyy-MM-dd"),
-      description: "",
-    }
-  })
-  const typeValue = form.watch('type')
-  const amountToValue = form.watch('amountTo')
+  const { form } = useOperationForm()
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (typeValue !== OperationType.EXCHANGE) {
-      form.setValue('amountFrom', amountToValue)
+    operation.updatePathParams({ id: operationId })
+    if (operationId) {
+      operation.fetch()
     }
-  }, [amountToValue]);
+  }, [operationId])
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    // submit(data)
-    //   .then(() => {
-    //
-    //   })
-    console.log(data)
+  const onSubmit = (data: OperationFormData) => {
+    submit(data).then(() => {
+      form.reset()
+      reset()
+      close()
+    })
+  }
+
+  const onClose = () => {
+    form.reset()
+    reset()
+    close()
   }
 
   return (
-    <Sheet open={operationSheet.opened} onOpenChange={operationSheet.setOpened}>
-      <SheetContent>
+    <Sheet open={opened} onOpenChange={onClose}>
+      <SheetContent ref={ref}>
+        <SheetHeader>
+          <SheetTitle>Operation</SheetTitle>
+        </SheetHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <SheetTitle>
-              Operation
-            </SheetTitle>
-            <FormBody error={error}>
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={OperationType.EXCHANGE}>Exchange</SelectItem>
-                          <SelectItem value={OperationType.TRANSFER}>Transfer</SelectItem>
-                          <SelectItem value={OperationType.EXPENSE}>Expense</SelectItem>
-                          <SelectItem value={OperationType.INCOME}>Income</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date</FormLabel>
-                    <FormControl>
-                      <DateInput value={field.value} onChange={field.onChange} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="accountFrom"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>From</FormLabel>
-                    <FormControl>
-                      <ReferenceSelect store={accountList} value={field.value} onChange={field.onChange} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              {typeValue === OperationType.EXCHANGE && (
-                <FormField
-                  control={form.control}
-                  name="amountFrom"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <AmountInput amount={field.value} onChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <FormField
-                control={form.control}
-                name="accountTo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>To</FormLabel>
-                    <FormControl>
-                      <ReferenceSelect store={accountList} value={field.value} onChange={field.onChange} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="amountTo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                      <AmountInput amount={field.value} onChange={field.onChange} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </FormBody>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <OperationForm form={form} error={error} className="grow px-4" />
             <SheetFooter>
-              <SheetClose>Cancel</SheetClose>
-              <Button type="submit" disabled={loading}>Save</Button>
+              <SheetClose asChild>
+                <Button variant="secondary">Cancel</Button>
+              </SheetClose>
+              <Button type="submit" disabled={loading}>
+                Save
+              </Button>
             </SheetFooter>
           </form>
         </Form>

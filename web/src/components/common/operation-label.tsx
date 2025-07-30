@@ -1,37 +1,34 @@
-import { Operation, OperationType } from "@/types/operation";
-import { AmountLabel } from "@/components/common/amount-label";
-import { AccountLabel } from "@/components/common/account-label";
-import { DateLabel } from "@/components/common/date-label";
-import { OperationTypeIcon } from "@/components/common/operation-type-icon";
-import { MoveRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { cva } from "class-variance-authority";
-import { Account } from "@/types/account";
+import { OperationType } from '@/types/operation'
+import { AmountLabel } from '@/components/common/amount-label'
+import { AccountLabel } from '@/components/common/account-label'
+import { DateLabel } from '@/components/common/date-label'
+import { OperationTypeIcon } from '@/components/common/operation-type-icon'
+import { MoveRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { cva } from 'class-variance-authority'
+import { Account } from '@/types/account'
 
-import { Amount } from "@/types/common";
+import { Amount } from '@/types/common'
 
 export interface OperationLabelProps {
   date?: string
   type: OperationType
   amountFrom: Amount
-  accountFrom: Account
+  accountFrom?: Account
   amountTo: Amount
-  accountTo: Account
+  accountTo?: Account
   relatedAccount?: Account
   variant?: 'filled'
   className?: string
 }
 
-const operationLabelVariants = cva(
-  "flex items-center gap-2 min-w-2",
-  {
-    variants: {
-      variant: {
-        filled: "border rounded-sm bg-accent p-2 max-h-8 grow-0"
-      }
+const operationLabelVariants = cva('flex items-center gap-2 min-w-2', {
+  variants: {
+    variant: {
+      filled: 'border rounded-sm bg-accent p-2 max-h-8 grow-0',
     },
-  }
-)
+  },
+})
 
 export function OperationLabel({
   date,

@@ -1,11 +1,18 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { FetchStoreState } from "@/store/common";
-import { Reference } from "@/types/common";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { Check, CheckIcon, Loader } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { Reference } from '@/types/common'
+import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
+import { CheckIcon, Loader2Icon } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useDebounce } from '@/hooks/use-debounce'
+import { FetchStoreState } from '@/store/common/fetch'
 
 export interface ReferenceSelectProps {
   store: FetchStoreState<Reference[]>
@@ -14,20 +21,15 @@ export interface ReferenceSelectProps {
   onChange?: (value?: Reference) => void
 }
 
-export function ReferenceSelect({ store, placeholder, value, onChange }: ReferenceSelectProps) {
+export function ReferenceInput({ store, placeholder, value, onChange }: ReferenceSelectProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const actualQuery = useDebounce(query, 300)
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      store.updateQueryParams({ mask: query ? query : undefined })
-      store.fetch()
-    }, 300)
-
-    return () => {
-      clearTimeout(timeoutId)
-    }
-  }, [query]);
+    store.updateQueryParams({ mask: actualQuery ? actualQuery : undefined })
+    store.fetch()
+  }, [actualQuery, store])
 
   const changePopoverOpen = (open: boolean) => {
     setOpen(open)
@@ -44,7 +46,10 @@ export function ReferenceSelect({ store, placeholder, value, onChange }: Referen
       </PopoverTrigger>
       <PopoverContent>
         <Command shouldFilter={false} className="gap-4">
-          <CommandInput placeholder="Search" onValueChange={setQuery} />
+          <div className="relative flex">
+            <CommandInput placeholder="Search" onValueChange={setQuery} />
+            <Loader2Icon className="absolute top-0 right-0 animate-spin" />
+          </div>
           <CommandList>
             <CommandEmpty>Not found</CommandEmpty>
             {store.data?.map((it) => (
@@ -57,10 +62,14 @@ export function ReferenceSelect({ store, placeholder, value, onChange }: Referen
                 }}
               >
                 {it.name}
-                <CheckIcon className={cn("ml-auto", value?.id !== it.id && "opacity-0")} />
+                <CheckIcon className={cn('ml-auto', value?.id !== it.id && 'opacity-0')} />
               </CommandItem>
             ))}
           </CommandList>
+          <div>
+            <Button variant="link">New</Button>
+            <Button variant="link">Clear</Button>
+          </div>
         </Command>
       </PopoverContent>
     </Popover>

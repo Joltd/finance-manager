@@ -1,17 +1,16 @@
 package com.evgenltd.financemanager.reference.service
 
 import com.evgenltd.financemanager.common.repository.and
+import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.repository.findAllByCondition
-import com.evgenltd.financemanager.common.repository.inList
 import com.evgenltd.financemanager.common.repository.like
 import com.evgenltd.financemanager.reference.converter.AccountConverter
 import com.evgenltd.financemanager.reference.entity.Account
 import com.evgenltd.financemanager.reference.entity.AccountType
-import com.evgenltd.financemanager.reference.record.AccountBalanceRecord
 import com.evgenltd.financemanager.reference.record.AccountRecord
-import com.evgenltd.financemanager.reference.record.Reference
 import com.evgenltd.financemanager.reference.repository.AccountRepository
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,14 +22,13 @@ class AccountService(
     private val accountConverter: AccountConverter
 ) {
 
-    fun listReference(mask: String?, id: UUID?, types: List<AccountType>?): List<Reference> =
-        if (id != null) {
-            accountRepository.findByIdOrNull(id)?.let { listOf(accountConverter.toReference(it)) } ?: emptyList()
-        } else {
-            accountRepository.findAllByCondition {
-                (Account.Companion::type inList types) and (Account.Companion::name like mask)
-            }.map { accountConverter.toReference(it) }
-        }.sortedBy { it.name }
+    fun listReference(mask: String?, type: AccountType?): List<AccountRecord> {
+        val filter = (Account::type eq type) and (Account::name like mask)
+        val pageable = PageRequest.of(0, 20, Sort.by(Account::name.name))
+        return accountRepository.findAll(filter, pageable)
+            .content
+            .map { accountConverter.toRecord(it) }
+    }
 
     fun list(): List<AccountRecord> = accountRepository.findAll()
         .map { accountConverter.toRecord(it) }
@@ -41,9 +39,10 @@ class AccountService(
     fun byIdOrNull(id: UUID): Account? = accountRepository.findByIdOrNull(id)
 
     @Transactional
-    fun update(record: AccountRecord) {
+    fun update(record: AccountRecord): AccountRecord {
         val entity = accountConverter.toEntity(record)
-        accountRepository.save(entity)
+        val saved = accountRepository.save(entity)
+        return accountConverter.toRecord(saved)
     }
 
     @Transactional

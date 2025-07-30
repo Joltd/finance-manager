@@ -1,127 +1,118 @@
-'use client'
-import React, { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ListFilterPlusIcon, XIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { produce } from "immer";
-
-import { FilterExpression, FilterOperator } from "@/types/entity";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { ListFilterPlusIcon, XIcon } from 'lucide-react'
+import React, { useMemo, useState } from 'react'
+import { FilterPrimitiveProps } from '@/types/filter'
+import { cn } from '@/lib/utils'
+import { produce, WritableDraft } from 'immer'
 
 export interface FilterProps {
-  onFilterChange?: (expressions: FilterExpression[]) => void
+  value?: Record<string, any>
+  onChange?: (value: Record<string, any>) => void
+  className?: string
   children: React.ReactNode
 }
 
-export interface FilterPrimitive<T> {
-  id: string
-  label: string
-  onFilterChange?: (negate: boolean, operator: FilterOperator, value?: T) => void
+interface FilterDefinition {
+  name: string
+  label?: string
+  alwaysVisible: boolean
+  defaultValue?: any
+  component: React.ReactNode
 }
 
-interface Definition {
-  id: string
-  label: string
-  prototype: any
-}
+export function Filter({ value, onChange, className, children }: FilterProps) {
+  const [visible, setVisible] = useState<string[]>([])
 
-interface Instance {
-  id: string
-  definition: Definition
-  negate?: boolean
-  operator?: FilterOperator
-  value?: any
-}
+  const definitions: FilterDefinition[] = useMemo(() => {
+    return React.Children.toArray(children)
+      .filter((it) => React.isValidElement(it))
+      .map((it) => {
+        const props = it.props as FilterPrimitiveProps
+        return {
+          name: props.name,
+          label: props.label,
+          alwaysVisible: !!props.alwaysVisible,
+          defaultValue: props.defaultValue,
+          component: it,
+        }
+      })
+  }, [children])
 
-export function Filter({ onFilterChange, children }: FilterProps) {
-  const [instances, setInstances] = useState<Record<string, Instance>>({})
-
-  const definitions = useMemo(() => {
-    const definitions: Record<string, Definition> = {}
-
-    for (const child of React.Children.toArray(children)) {
-      if (!React.isValidElement(child)) {
-        continue
-      }
-
-      const childProps = child.props as FilterPrimitive<any>
-
-      definitions[childProps.id] = {
-        id: childProps.id,
-        label: childProps.label,
-        prototype: child
-      }
+  function setFilter(updater: (draft: WritableDraft<Record<string, any>>) => void) {
+    const filter = produce(value || {}, updater)
+    if (JSON.stringify(filter) === JSON.stringify(value)) {
+      return
     }
-
-    return definitions
-  }, [])
-
-  useEffect(() => {
-    const expressions = Object.values(instances)
-      .filter((it) => it.operator && it.value)
-      .map((it) => ({
-        negate: it.negate || false,
-        id: it.definition.id,
-        operator: it.operator!!,
-        value: it.value,
-      }))
-
-    // onFilterChange?.(expressions)
-  }, [instances]);
-
-  const handleFilterChange = (id: string, negate: boolean, operator: FilterOperator, value: any) => {
-    setInstances((previous) =>
-      produce(previous, (draft) => {
-        const instance = draft[id]
-        instance.negate = negate
-        instance.operator = operator
-        instance.value = value
-      }))
+    onChange?.(filter)
   }
 
-  const handleAddFilter = (definition: Definition) => {
-    const id = `${definition.id}-${Math.floor(Math.random() * 1000000)}`
-    setInstances((previous) => produce(previous, (draft) => {
-      draft[id] = {
-        id,
-        definition,
-      }
-    }))
+  const handleShow = (filter: FilterDefinition) => {
+    setFilter((draft) => {
+      draft[filter.name] = filter.defaultValue
+    })
+    setVisible((prev) => (prev.indexOf(filter.name) !== -1 ? prev : [...prev, filter.name]))
   }
 
-  const handleRemoveFilter = (id: string) => {
-    setInstances((previous) => produce(previous, (draft) => {
-      delete draft[id]
-    }))
+  const handleHide = (filter: FilterDefinition) => {
+    setFilter((draft) => {
+      delete draft[filter.name]
+    })
+    setVisible((prev) => prev.filter((it) => it !== filter.name))
+  }
+
+  const handleFilterChange = (name: string, value: any) => {
+    setFilter((draft) => {
+      draft[name] = value
+    })
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {Object.entries(instances).map(([ id, instance ]) => (
-        <div key={id} className="flex gap-0.5">
-          <Button variant="secondary" className="rounded-r-none">{instance.definition.label}</Button>
-          {React.cloneElement(instance.definition.prototype, {
-            onFilterChange: (negate: boolean, operator: FilterOperator, value: any) => handleFilterChange(id, negate, operator, value)
-          })}
-          <Button variant="secondary" className="rounded-l-none" onClick={() => handleRemoveFilter(id)}>
-            <XIcon />
-          </Button>
-        </div>
-      ))}
+    <div className={cn('flex flex-wrap gap-2', className)}>
+      {definitions
+        .filter((it) => it.alwaysVisible || visible.includes(it.name))
+        .map((it) => (
+          <div className="flex" key={it.name}>
+            {it.label && (
+              <Button size="sm" variant="outline" className="rounded-r-none">
+                {it.label}
+              </Button>
+            )}
+            {React.cloneElement(it.component as any, {
+              value: value?.[it.name],
+              onChange: (value: any) => handleFilterChange(it.name, value),
+            })}
+            {!it.alwaysVisible && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-l-none"
+                onClick={() => handleHide(it)}
+              >
+                <XIcon />
+              </Button>
+            )}
+          </div>
+        ))}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary">
+          <Button size="sm" variant="outline">
             <ListFilterPlusIcon />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {Object.values(definitions).map((it) => (
-            <DropdownMenuItem key={it.id} onClick={() => handleAddFilter(it)}>{it.label}</DropdownMenuItem>
-          ))}
+          {definitions
+            .filter((it) => !it.alwaysVisible)
+            .map((it) => (
+              <DropdownMenuItem key={it.name} onClick={() => handleShow(it)}>
+                {it.label}
+              </DropdownMenuItem>
+            ))}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

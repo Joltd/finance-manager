@@ -13,7 +13,6 @@ export interface Patch {
 }
 
 export function patch(source: any, path: Path, value?: any) {
-
   const pathToTarget = path.pointers.slice(0, path.pointers.length - 1)
 
   const target = getTarget(source, pathToTarget)
@@ -70,5 +69,5 @@ function getTarget(source: any, pointers: Pointer[]): any | null {
 }
 
 function pointersToString(pointers: Pointer[]) {
-  return '/' + pointers.map((it) => !!it.value ? `${it.field}=${it.value}` : it).join('/')
+  return '/' + pointers.map((it) => (!!it.value ? `${it.field}=${it.value}` : it)).join('/')
 }

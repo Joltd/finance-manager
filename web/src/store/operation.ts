@@ -1,15 +1,17 @@
-import { create } from "zustand";
-import { createOpenStore, OpenStoreState } from "@/store/open";
-import { observable } from "@/store/common";
+import { operationUrls } from '@/api/operation'
+import { Operation } from '@/types/operation'
+import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
+import { useStoreSelect } from '@/hooks/use-store-select'
 
-interface OperationStoreState {
-  operationSheet: OpenStoreState,
-}
+const operationListStore = createFetchStore<Operation[]>(operationUrls.root)
 
-export const useOperationStore = create<OperationStoreState>()((set, get) => {
-  const operationSheet = createOpenStore()
+export const useOperationListStore = <K extends keyof FetchStoreState<Operation[]>>(
+  ...fields: K[]
+) => useStoreSelect<FetchStoreState<Operation[]>, K>(operationListStore, ...fields)
 
-  return {
-    operationSheet: observable(operationSheet, set, 'operationSheet')
-  }
-})
+//
+
+const operationStore = createFetchStore<Operation>(operationUrls.id)
+
+export const useOperationStore = <K extends keyof FetchStoreState<Operation>>(...fields: K[]) =>
+  useStoreSelect<FetchStoreState<Operation>, K>(operationStore, ...fields)

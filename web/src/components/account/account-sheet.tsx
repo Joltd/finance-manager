@@ -1,23 +1,30 @@
-import z from "zod";
-import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "../ui/sheet";
-import { useRequest } from "@/hooks/use-request";
-import { accountUrls } from "@/api/account";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormBody, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { useAccountStore } from "@/store/account";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AccountGroupSelect } from "@/components/account/account-group-select";
-import { ReferenceSelect } from "@/components/common/reference-select";
+import z from 'zod'
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '../ui/sheet'
+import { useRequest } from '@/hooks/use-request'
+import { accountUrls } from '@/api/account'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import {
+  Form,
+  FormBody,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const formSchema = z.object({
   name: z.string(),
-  group: z.object({
-    id: z.string().uuid().optional(),
-    name: z.string(),
-  }).optional(),
+  group: z
+    .object({
+      id: z.string().uuid().optional(),
+      name: z.string(),
+    })
+    .optional(),
   parser: z.string().optional(),
   deleted: z.boolean(),
   // reviseDate: z.string().date().optional(),
@@ -25,15 +32,14 @@ const formSchema = z.object({
 })
 
 export function AccountSheet() {
-  const { groupList, accountSheet } = useAccountStore()
   const { loading, error, submit, reset } = useRequest(accountUrls.root)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      name: '',
       deleted: false,
       // noRevise: true,
-    }
+    },
   })
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
@@ -45,7 +51,7 @@ export function AccountSheet() {
   }
 
   return (
-    <Sheet open={accountSheet.opened} onOpenChange={accountSheet.setOpened}>
+    <Sheet open={false} onOpenChange={() => null}>
       <SheetContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -73,7 +79,7 @@ export function AccountSheet() {
                   <FormItem>
                     <FormLabel>Group</FormLabel>
                     <FormControl>
-                      <ReferenceSelect store={groupList} value={field.value} onChange={field.onChange} />
+                      {/*<ReferenceInput store={groupList} value={field.value} onChange={field.onChange} />*/}
                     </FormControl>
                   </FormItem>
                 )}
@@ -121,7 +127,9 @@ export function AccountSheet() {
 
             <SheetFooter>
               <SheetClose>Cancel</SheetClose>
-              <Button type="submit" disabled={loading}>Save</Button>
+              <Button type="submit" disabled={loading}>
+                Save
+              </Button>
             </SheetFooter>
           </form>
         </Form>

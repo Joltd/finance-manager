@@ -1,13 +1,13 @@
-import { FilterPrimitive } from "@/components/common/filter/filter";
+import { FilterPrimitive } from '@/components/common/filter-proto/filter'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { FilterOperator } from "@/types/entity";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
+import { FilterOperator } from '@/types/entity'
 import {
   Dialog,
   DialogClose,
@@ -15,17 +15,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Calendar } from "@/components/ui/calendar";
-import { RangeValue } from "@/types/common";
-import { DateRange } from "react-day-picker";
-import { add, addDays, Duration, format, isAfter, startOfToday } from "date-fns";
-import { prepareRange } from "@/lib/utils";
+} from '@/components/ui/dialog'
+import { Calendar } from '@/components/ui/calendar'
+import { RangeValue } from '@/types/common'
+import { DateRange } from 'react-day-picker'
+import { add, addDays, Duration, startOfToday } from 'date-fns'
+import { prepareRange } from '@/lib/utils'
 
-export interface DateFilterProps extends FilterPrimitive<RangeValue<string | undefined>> {
-
-}
+export interface DateFilterProps extends FilterPrimitive<RangeValue<string | undefined>> {}
 
 interface Preset {
   id: string
@@ -60,25 +57,25 @@ const presets: Preset[] = [
     id: 'today',
     label: 'today',
     operator: FilterOperator.BETWEEN,
-    duration: { days: 1 }
+    duration: { days: 1 },
   },
   {
     id: 'last-week',
     label: 'last week',
     operator: FilterOperator.BETWEEN,
-    duration: { weeks: -1 }
+    duration: { weeks: -1 },
   },
   {
     id: 'last-month',
     label: 'last month',
     operator: FilterOperator.BETWEEN,
-    duration: { months: -1 }
+    duration: { months: -1 },
   },
   {
     id: 'last-3-month',
     label: 'last 3 month',
     operator: FilterOperator.BETWEEN,
-    duration: { months: -3 }
+    duration: { months: -3 },
   },
   afterPreset,
   beforePreset,
@@ -94,7 +91,7 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
 
   useEffect(() => {
     onFilterChange?.(false, FilterOperator.BETWEEN, value)
-  }, [value]);
+  }, [value])
 
   const handleChangePreset = (preset: Preset) => {
     if (preset.id === 'custom' || preset.id === 'after' || preset.id === 'before') {
@@ -120,11 +117,15 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="rounded-none">{preset.label}</Button>
+          <Button variant="secondary" className="rounded-none">
+            {preset.label}
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {presets.map((it) => (
-            <DropdownMenuItem key={it.id} onSelect={() => handleChangePreset(it)}>{it.label}</DropdownMenuItem>
+            <DropdownMenuItem key={it.id} onSelect={() => handleChangePreset(it)}>
+              {it.label}
+            </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>

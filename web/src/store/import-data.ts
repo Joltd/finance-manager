@@ -1,34 +1,52 @@
-import { create } from "zustand";
-import { createFetchStore, FetchStoreState, observable } from "@/store/common";
-import { importDataUrls } from "@/api/import-data";
-import { Reference } from "@/types/common";
-import { ImportData, ImportDataOperation } from "@/types/import-data";
-import { EntityPage } from "@/types/entity";
-import { createOpenStore, OpenStoreState } from "@/store/open";
+import { importDataUrls } from '@/api/import-data'
+import { Reference } from '@/types/common'
+import { ImportData, ImportDataEntryGroup, ImportDataOperation } from '@/types/import-data'
+import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
+import { useStoreSelect } from '@/hooks/use-store-select'
+import { createSelectionStore, SelectionStoreState } from '@/store/common/selection'
+import { Operation } from '@/types/operation'
 
-interface ImportDataStoreState {
-  importDataList: FetchStoreState<Reference[]>
-  importData: FetchStoreState<ImportData>
-  accountList: FetchStoreState<Reference[]>
-  operationList: FetchStoreState<EntityPage<ImportDataOperation>>
-  newDialog: OpenStoreState
-  operationSheet: OpenStoreState
-}
+const importDataListStore = createFetchStore<Reference[]>(importDataUrls.root)
 
-export const useImportDataStore = create<ImportDataStoreState>()((set, get) => {
-  const importDataList = createFetchStore<Reference[]>(importDataUrls.root)
-  const importData = createFetchStore<ImportData>(importDataUrls.id)
-  const accountList = createFetchStore<Reference[]>(importDataUrls.account)
-  const operationList = createFetchStore<EntityPage<ImportDataOperation>>(importDataUrls.operation)
-  const newDialog = createOpenStore()
-  const operationSheet = createOpenStore()
+export const useImportDataListStore = <K extends keyof FetchStoreState<Reference[]>>(
+  ...fields: K[]
+) => useStoreSelect<FetchStoreState<Reference[]>, K>(importDataListStore, ...fields)
 
-  return {
-    importDataList: observable(importDataList, set, 'importDataList'),
-    importData: observable(importData, set, 'importData'),
-    accountList: observable(accountList, set, 'accountList'),
-    operationList: observable(operationList, set, 'operationList'),
-    newDialog: observable(newDialog, set, 'newDialog'),
-    operationSheet: observable(operationSheet, set, 'operationSheet'),
-  }
-})
+//
+
+const importDataStore = createFetchStore<ImportData>(importDataUrls.id)
+
+export const useImportDataStore = <K extends keyof FetchStoreState<ImportData>>(...fields: K[]) =>
+  useStoreSelect(importDataStore, ...fields)
+
+//
+
+const importDataEntryListStore = createFetchStore<ImportDataEntryGroup[]>(importDataUrls.entry)
+
+export const useImportDataEntryListStore = <
+  K extends keyof FetchStoreState<ImportDataEntryGroup[]>,
+>(
+  ...fields: K[]
+) => useStoreSelect(importDataEntryListStore, ...fields)
+
+//
+
+const importDataOperationSelectionStore = createSelectionStore<Operation>((item) => item.id!!)
+
+export const useImportDataOperationSelectionStore = <
+  K extends keyof SelectionStoreState<Operation>,
+>(
+  ...fields: K[]
+) => useStoreSelect(importDataOperationSelectionStore, ...fields)
+
+//
+
+const importDataParsedSelectionStore = createSelectionStore<ImportDataOperation>(
+  (item) => item.entryId!!,
+)
+
+export const useImportDataParsedSelectionStore = <
+  K extends keyof SelectionStoreState<ImportDataOperation>,
+>(
+  ...fields: K[]
+) => useStoreSelect(importDataParsedSelectionStore, ...fields)
