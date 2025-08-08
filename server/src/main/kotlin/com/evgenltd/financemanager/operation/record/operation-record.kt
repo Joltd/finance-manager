@@ -4,27 +4,23 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.record.Reference
 import org.springframework.context.ApplicationEvent
 import java.time.LocalDate
 import java.util.*
 
 data class OperationFilter(
-    val page: Int = 0,
-    val size: Int = 50,
-    val dateFrom: LocalDate? = null,
-    val dateTo: LocalDate? = null,
+    val date: DateRange,
     val type: OperationType? = null,
-    val account: Reference? = null,
-    val category: Reference? = null,
+    val account: UUID? = null,
+    val category: UUID? = null,
     val currency: String? = null,
 )
 
-data class OperationPage(
-    val total: Long,
-    val page: Int,
-    val size: Int,
-    val operations: List<OperationRecord>
+data class OperationGroupRecord(
+    val date: LocalDate,
+    val operations: List<OperationRecord> = emptyList(),
 )
 
 data class OperationRecord(

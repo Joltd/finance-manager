@@ -8,6 +8,11 @@ export enum OperationType {
   TRANSFER = 'TRANSFER',
 }
 
+export interface OperationGroup {
+  date: string
+  operations: Operation[]
+}
+
 export interface Operation {
   id?: string
   date: string

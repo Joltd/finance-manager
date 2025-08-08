@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 export interface TextLabelProps {
   variant?: 'title'
   children: React.ReactNode
+  className?: string
 }
 
 const variants = cva('', {
@@ -16,6 +17,10 @@ const variants = cva('', {
   },
 })
 
-export function TextLabel({ variant, children }: TextLabelProps) {
-  return <div className={cn('flex items-center gap-2', variants({ variant }))}>{children}</div>
+export function TextLabel({ variant, children, className }: TextLabelProps) {
+  return (
+    <div className={cn('flex items-center gap-2', variants({ variant }), className)}>
+      {children}
+    </div>
+  )
 }

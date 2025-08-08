@@ -31,14 +31,15 @@ class TaxService(
     }
 
     fun getIncomeForMonth(date: LocalDate): List<OperationRecord> {
-        val from = date.withDayOfMonth(1)
-        val to = from.plusMonths(1)
-        val filter = OperationFilter(
-            dateFrom = from,
-            dateTo = to,
-            type = OperationType.INCOME,
-        )
-        return operationService.list(filter).operations
+//        val from = date.withDayOfMonth(1)
+//        val to = from.plusMonths(1)
+//        val filter = OperationFilter(
+//            dateFrom = from,
+//            dateTo = to,
+//            type = OperationType.INCOME,
+//        )
+//        return operationService.list(filter).operations
+        return emptyList()
     }
 
     fun saveNewTax(newTax: NewTax) {

@@ -56,6 +56,8 @@ export default function Page() {
           <AlertCircleIcon />
           <AlertTitle>{accountBalance.error}</AlertTitle>
         </Alert>
+      ) : !accountBalance.data || !accountBalance.data?.length ? (
+        <EmptyLabel className="m-6" />
       ) : accountBalance.data ? (
         <>
           <div className="relative flex flex-col gap-12 p-6 overflow-y-auto">

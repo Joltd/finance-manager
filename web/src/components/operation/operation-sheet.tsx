@@ -28,14 +28,14 @@ export interface OperationSheetStoreState extends OpenStoreState {
 
 const operationSheetStore = createStore<OperationSheetStoreState>((set, get, store) => ({
   ...openStoreSlice(set, get, store),
-  openWith: (operationId?: string) => set({ operationId }),
+  openWith: (operationId?: string) => set({ opened: true, operationId }),
 }))
 
 export const useOperationSheetStore = <K extends keyof OperationSheetStoreState>(...fields: K[]) =>
   useStoreSelect<OperationSheetStoreState, K>(operationSheetStore, ...fields)
 
 export function OperationSheet() {
-  const operation = useOperationStore('updatePathParams', 'fetch')
+  const operation = useOperationStore('updatePathParams', 'fetch', 'data')
   const { opened, operationId, close } = useOperationSheetStore('opened', 'operationId', 'close')
   const { loading, error, submit, reset } = useRequest(operationUrls.root)
   const { form } = useOperationForm()
@@ -47,6 +47,12 @@ export function OperationSheet() {
       operation.fetch()
     }
   }, [operationId])
+
+  useEffect(() => {
+    if (operation.data) {
+      form.reset(operation.data)
+    }
+  }, [operation.data])
 
   const onSubmit = (data: OperationFormData) => {
     submit(data).then(() => {
@@ -64,7 +70,7 @@ export function OperationSheet() {
 
   return (
     <Sheet open={opened} onOpenChange={onClose}>
-      <SheetContent ref={ref}>
+      <SheetContent ref={ref} aria-describedby="">
         <SheetHeader>
           <SheetTitle>Operation</SheetTitle>
         </SheetHeader>

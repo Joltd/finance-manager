@@ -1,13 +1,20 @@
 package com.evgenltd.financemanager.operation.service
 
+import com.evgenltd.financemanager.common.repository.account
+import com.evgenltd.financemanager.common.repository.and
+import com.evgenltd.financemanager.common.repository.or
+import com.evgenltd.financemanager.common.repository.between
+import com.evgenltd.financemanager.common.repository.currency
+import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.service.validWeek
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationEvent
 import com.evgenltd.financemanager.operation.record.OperationEventEntry
 import com.evgenltd.financemanager.operation.record.OperationFilter
-import com.evgenltd.financemanager.operation.record.OperationPage
+import com.evgenltd.financemanager.operation.record.OperationGroupRecord
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import jakarta.transaction.Transactional
@@ -27,41 +34,17 @@ class OperationService(
     private val publisher: ApplicationEventPublisher,
 ) {
 
-    fun list(filter: OperationFilter): OperationPage = pagedList(filter, Sort.by(Sort.Direction.DESC, Operation::date.name))
-        .let { page ->
-            OperationPage(
-                total = page.totalElements,
-                page = filter.page,
-                size = filter.size,
-                operations = page.content
-                    .sortedByDescending { it.date }
-                    .map { operationConverter.toRecord(it) }
-            )
-        }
-
-    fun pagedList(filter: OperationFilter, sort: Sort = Sort.unsorted()): Page<Operation> =
-        operationRepository.findAll(Pageable.unpaged())
-//        operationRepository.findAllByCondition(filter.page, filter.size, sort) {
-//            (Operation.Companion::date gte filter.dateFrom) and
-//            (Operation.Companion::date lt filter.dateTo) and
-//            (Operation.Companion::type eq filter.type) and
-//            (
-//                filter.account?.let {
-//                    ((Operation.Companion::accountFromType eq AccountType.ACCOUNT) and (Operation.Companion::accountFromId eq it.id)) or
-//                    ((Operation.Companion::accountToType eq AccountType.ACCOUNT) and (Operation.Companion::accountToId eq it.id))
-//                } ?: emptyCondition()
-//            ) and
-//            (
-//                filter.category?.let {
-//                    ((Operation.Companion::accountFromType notEq AccountType.ACCOUNT) and (Operation.Companion::accountFromId eq it.id)) or
-//                    ((Operation.Companion::accountToType notEq AccountType.ACCOUNT) and (Operation.Companion::accountToId eq it.id))
-//                } ?: emptyCondition()
-//            ) and
-//            (
-//                (Operation.Companion::currencyFrom eq filter.currency) or
-//                (Operation.Companion::currencyTo eq filter.currency)
-//            )
-//        }
+    fun list(filter: OperationFilter): List<OperationGroupRecord> = (
+        (Operation::date between filter.date.validWeek()) and
+            (Operation::type eq filter.type) and
+            ((Operation::accountFrom account filter.account) or (Operation::accountTo account filter.account)) and
+            ((Operation::accountFrom account filter.category) or (Operation::accountTo account filter.category)) and
+            ((Operation::amountFrom currency filter.currency) or (Operation::amountTo currency filter.currency))
+    ).let { operationRepository.findAll(it) }
+        .groupBy { it.date }
+        .mapValues { it.value.map { operation -> operationConverter.toRecord(operation)} }
+        .map { (date, operations) -> OperationGroupRecord(date, operations) }
+        .sortedBy { it.date }
 
     fun byId(id: UUID): OperationRecord = operationRepository.find(id).let { operationConverter.toRecord(it) }
 

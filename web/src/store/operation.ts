@@ -1,13 +1,13 @@
 import { operationUrls } from '@/api/operation'
-import { Operation } from '@/types/operation'
+import { Operation, OperationGroup } from '@/types/operation'
 import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
 import { useStoreSelect } from '@/hooks/use-store-select'
 
-const operationListStore = createFetchStore<Operation[]>(operationUrls.root)
+const operationListStore = createFetchStore<OperationGroup[]>(operationUrls.root)
 
-export const useOperationListStore = <K extends keyof FetchStoreState<Operation[]>>(
+export const useOperationListStore = <K extends keyof FetchStoreState<OperationGroup[]>>(
   ...fields: K[]
-) => useStoreSelect<FetchStoreState<Operation[]>, K>(operationListStore, ...fields)
+) => useStoreSelect<FetchStoreState<OperationGroup[]>, K>(operationListStore, ...fields)
 
 //
 

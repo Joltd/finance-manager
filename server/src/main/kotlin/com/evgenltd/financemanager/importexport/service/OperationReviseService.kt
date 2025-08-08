@@ -96,72 +96,72 @@ class OperationReviseService(
     }
 
     private fun performRevise(operationRevise: OperationRevise, entries: List<OperationReviseEntry>) {
-        val actualEntries = entries.toMutableList()
-        for (entry in entries) {
-            if (entry.parsedEntry == null) {
-                operationReviseEntryRepository.delete(entry)
-                actualEntries.remove(entry)
-            } else {
-                entry.operation = null
-            }
-        }
-
-        val account = accountConverter.toReference(operationRevise.account)
-        var pageNumber = 0
-        while (true) {
-
-            val filter = OperationFilter(
-                page = pageNumber,
-                dateFrom = operationRevise.dateFrom,
-                dateTo = operationRevise.dateTo,
-                currency = operationRevise.currency,
-                account = account
-            )
-            val page = operationService.pagedList(filter)
-            pageNumber++
-            if (page.content.isEmpty()) {
-                break
-            }
-
-            for (operation in page.content) {
-
-                val operationReviseEntry = actualEntries.find {
-                    val parsedEntry = it.parsedEntry
-                    parsedEntry != null
-                            && it.operation == null
-                            && parsedEntry.date == operation.date
-                            && parsedEntry.amountFrom == operation.amountFrom
-                            && parsedEntry.amountTo == operation.amountTo
-                }
-
-                if (operationReviseEntry != null) {
-                    operationReviseEntry.operation = operation
-                } else {
-                    val newEntry = OperationReviseEntry(
-                        operationRevise = operationRevise,
-                        date = operation.date,
-                        operation = operation,
-                        parsedEntry = null,
-                    )
-                    operationReviseEntryRepository.save(newEntry)
-                    actualEntries.add(newEntry)
-                }
-
-            }
-
-        }
-
-        val previousState = operationRevise.dates.associateBy { it.date }
-        operationRevise.dates = actualEntries.groupBy { it.date }
-            .entries
-            .map {
-                OperationReviseDate(
-                    date = it.key,
-                    revised = it.value.all { entry -> entry.operation != null && entry.parsedEntry != null },
-                    hidden = previousState[it.key]?.hidden ?: false
-                )
-            }
-            .sortedBy { it.date }
+//        val actualEntries = entries.toMutableList()
+//        for (entry in entries) {
+//            if (entry.parsedEntry == null) {
+//                operationReviseEntryRepository.delete(entry)
+//                actualEntries.remove(entry)
+//            } else {
+//                entry.operation = null
+//            }
+//        }
+//
+//        val account = accountConverter.toReference(operationRevise.account)
+//        var pageNumber = 0
+//        while (true) {
+//
+//            val filter = OperationFilter(
+//                page = pageNumber,
+//                dateFrom = operationRevise.dateFrom,
+//                dateTo = operationRevise.dateTo,
+//                currency = operationRevise.currency,
+//                account = account
+//            )
+//            val page = operationService.pagedList(filter)
+//            pageNumber++
+//            if (page.content.isEmpty()) {
+//                break
+//            }
+//
+//            for (operation in page.content) {
+//
+//                val operationReviseEntry = actualEntries.find {
+//                    val parsedEntry = it.parsedEntry
+//                    parsedEntry != null
+//                            && it.operation == null
+//                            && parsedEntry.date == operation.date
+//                            && parsedEntry.amountFrom == operation.amountFrom
+//                            && parsedEntry.amountTo == operation.amountTo
+//                }
+//
+//                if (operationReviseEntry != null) {
+//                    operationReviseEntry.operation = operation
+//                } else {
+//                    val newEntry = OperationReviseEntry(
+//                        operationRevise = operationRevise,
+//                        date = operation.date,
+//                        operation = operation,
+//                        parsedEntry = null,
+//                    )
+//                    operationReviseEntryRepository.save(newEntry)
+//                    actualEntries.add(newEntry)
+//                }
+//
+//            }
+//
+//        }
+//
+//        val previousState = operationRevise.dates.associateBy { it.date }
+//        operationRevise.dates = actualEntries.groupBy { it.date }
+//            .entries
+//            .map {
+//                OperationReviseDate(
+//                    date = it.key,
+//                    revised = it.value.all { entry -> entry.operation != null && entry.parsedEntry != null },
+//                    hidden = previousState[it.key]?.hidden ?: false
+//                )
+//            }
+//            .sortedBy { it.date }
     }
 
 }

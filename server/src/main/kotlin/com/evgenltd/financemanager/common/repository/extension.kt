@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.common.repository
 
+import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import jakarta.persistence.criteria.CriteriaBuilder
@@ -12,6 +13,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import java.util.UUID
 import kotlin.reflect.KProperty1
 
 typealias GetPath<T,E> = Root<E>.() -> Path<T>
@@ -169,4 +171,12 @@ infix fun <E> KProperty1<E, Amount?>.currency(currency: String?): Specification<
 
 fun <E> KProperty1<E, Amount?>.isNotZero(): Specification<E> = Specification<E> { root, _, builder ->
     builder.notEqual(root.get<Amount>(name).get<Long>("value"), 0L)
+}
+
+// account
+
+infix fun <E> KProperty1<E, Account?>.account(id: UUID?): Specification<E> = valueNonNull(id) {
+    Specification<E> { root, _, builder ->
+        builder.equal(root.get<Account>(name).get<String>("id"), it)
+    }
 }

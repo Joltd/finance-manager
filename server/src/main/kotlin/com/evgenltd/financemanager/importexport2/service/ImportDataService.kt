@@ -23,6 +23,7 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.byAccount
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.repository.AccountRepository
+import com.evgenltd.financemanager.common.service.validWeek
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -52,7 +53,7 @@ class ImportDataService(
     fun entryList(id: UUID, request: EntryFilter): List<ImportDataEntryGroupRecord> {
         val importData = importDataRepository.find(id)
 
-        val dateRange = request.date.validRange()
+        val dateRange = request.date.validWeek()
 
         val totalIndex = ((ImportDataTotal::date between dateRange) and
                 (ImportDataTotal::importData eq importData) and
@@ -113,12 +114,6 @@ class ImportDataService(
 
     fun delete(id: UUID) {
         importDataRepository.deleteById(id)
-    }
-
-    private fun DateRange?.validRange(): Range<LocalDate> {
-        val actualFrom = this?.from ?: this?.to ?: LocalDate.now()
-        val actualTo = actualFrom.plusWeeks(1L)
-        return Range(actualFrom, actualTo)
     }
 
 }
