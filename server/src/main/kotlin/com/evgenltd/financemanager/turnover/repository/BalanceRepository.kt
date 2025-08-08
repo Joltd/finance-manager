@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.turnover.repository
 
-import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.turnover.entity.Balance
 import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository

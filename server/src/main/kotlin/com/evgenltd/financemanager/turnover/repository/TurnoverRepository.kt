@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.turnover.repository
 
-import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.reference.entity.AccountType
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.turnover.entity.Turnover
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor

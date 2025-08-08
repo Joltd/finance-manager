@@ -15,7 +15,7 @@ import com.evgenltd.financemanager.importexport.repository.OperationReviseEntryR
 import com.evgenltd.financemanager.importexport.repository.OperationReviseRepository
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.service.OperationService
-import com.evgenltd.financemanager.reference.converter.AccountConverter
+import com.evgenltd.financemanager.account.converter.AccountConverter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream

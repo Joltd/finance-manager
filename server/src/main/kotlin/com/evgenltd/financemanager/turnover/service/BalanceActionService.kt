@@ -5,12 +5,13 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.operation.service.signedAmount
-import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.turnover.entity.Balance
 import com.evgenltd.financemanager.turnover.entity.Turnover
 import com.evgenltd.financemanager.turnover.repository.BalanceRepository
 import com.evgenltd.financemanager.turnover.repository.TurnoverRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.*
@@ -23,7 +24,7 @@ class BalanceActionService(
     private val balanceEventService: BalanceEventService,
 ) : Loggable() {
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun invalidateBalance(account: Account, currency: String, date: LocalDate) {
         val balance = balanceRepository.findAndLock(account, currency)
         if (balance == null) {

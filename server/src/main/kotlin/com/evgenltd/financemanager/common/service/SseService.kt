@@ -17,17 +17,23 @@ class SseService : Loggable() {
 
     private val emitters: MutableList<SseEmitter> = CopyOnWriteArrayList()
 
-    fun subscribe(): SseEmitter = SseEmitter(0L).also { emitter ->
+    fun subscribe(): SseEmitter = SseEmitter(0).also { emitter ->
         emitter.onTimeout {
-            emitter.complete()
+            emitters.remove(emitter)
+            log.warn("Emitter timed out")
         }
         emitter.onCompletion {
             emitters.remove(emitter)
+            log.warn("Emitter completed")
+        }
+        emitter.onError {
+            emitters.remove(emitter)
+            log.warn("Emitter error", it)
         }
         emitters.add(emitter)
     }
 
-    @Scheduled(fixedRate = 30_000)
+    @Scheduled(fixedRate = 10_000)
     fun heartbeat() {
         val event = SseEvent(
             id = UUID.randomUUID(),
@@ -40,12 +46,20 @@ class SseService : Loggable() {
     @EventListener
     @Async
     fun onEvent(event: SseEvent) {
-        emitters.onEach { emitter ->
-            SseEmitter.event()
+
+        for (emitter in emitters) {
+            val emitterEvent = SseEmitter.event()
                 .id(event.id.toString())
                 .name(event.name)
                 .data(event.data)
-                .also { emitter.send(it) }
+
+            try {
+                emitter.send(emitterEvent)
+            } catch (e: Exception) {
+                log.error("Unable to send SSE event", e)
+                emitters.remove(emitter)
+                continue
+            }
         }
     }
 

@@ -36,7 +36,7 @@ export const useRequest = (path: string, options?: RequestOptions) => {
       setLoading(false)
     }
 
-    throw new Error()
+    throw new Error(error)
   }
 
   const reset = () => {

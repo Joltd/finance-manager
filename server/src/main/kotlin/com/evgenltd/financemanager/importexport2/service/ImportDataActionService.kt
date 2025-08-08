@@ -2,16 +2,14 @@ package com.evgenltd.financemanager.importexport2.service
 
 import com.evgenltd.financemanager.ai.service.AiProviderResolver
 import com.evgenltd.financemanager.common.entity.Embedding
-import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.repository.EmbeddingRepository
 import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.between
+import com.evgenltd.financemanager.common.repository.contains
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.operationEmbeddingInput
-import com.evgenltd.financemanager.common.util.sumOf
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataOperation
@@ -23,16 +21,14 @@ import com.evgenltd.financemanager.importexport.repository.ImportDataOperationRe
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataTotalRepository
 import com.evgenltd.financemanager.importexport.service.amountsForAccount
-import com.evgenltd.financemanager.importexport.service.amountsForAccount1
 import com.evgenltd.financemanager.importexport.service.parsed
-import com.evgenltd.financemanager.importexport.service.selectedSuggestion
-import com.evgenltd.financemanager.importexport2.record.ImportDataLinkResul
 import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
-import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.OperationRepository
-import com.evgenltd.financemanager.operation.service.byAccount
-import com.evgenltd.financemanager.reference.repository.AccountRepository
+import com.evgenltd.financemanager.operation.repository.TransactionRepository
+import com.evgenltd.financemanager.operation.service.signedAmount
+import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.turnover.service.TurnoverService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpStatus
@@ -58,92 +54,17 @@ class ImportDataActionService(
     private val accountRepository: AccountRepository,
     private val importDataService: ImportDataService,
     private val turnoverService: TurnoverService,
+    private val transactionRepository: TransactionRepository,
 ) : Loggable() {
 
     @Transactional
     fun parseImportData(id: UUID, stream: InputStream) {
         val importData = importDataRepository.find(id)
-        try {
-            val parsed = importDataParserResolver.resolve(importData.account.parser)
+        val parsed = importDataParserResolver.resolve(importData.account.parser)
                 .parse(importData, stream)
                 .map { saveParsedEntry(it, importData) }
 
-            parsed.groupBy { it.date }
-                .flatMap { (date, operations) ->
-                    operations.asSequence()
-                        .amountsForAccount(importData.account)
-                        .groupingBy { it.currency }
-                        .aggregate { _, accumulator: Amount?, element, _ ->
-                            element + accumulator
-                        }
-                        .map {
-                            ImportDataTotal(
-                                importData = importData,
-                                type = ImportDataTotalType.PARSED,
-                                date = date,
-                                amount = it.value,
-                            )
-                        }
-                }
-                .let { importDataTotalRepository.saveAll(it) }
-                .groupingBy { it.amount.currency }
-                .aggregate { key, accumulator: Amount?, element, first ->
-                    element.amount + accumulator
-                }
-                .map {
-                    ImportDataTotal(
-                        importData = importData,
-                        type = ImportDataTotalType.PARSED,
-                        date = null,
-                        amount = it.value,
-                    )
-                }
-                .let { importDataTotalRepository.saveAll(it) }
-
-            val from = parsed.minOfOrNull { it.date }
-            val to = parsed.maxOfOrNull { it.date }
-            if (from != null && to != null) {
-                // todo rewrite as transaction sum
-                operationRepository.findAll((Operation::date between Range(from, to)) and byAccount(importData.account))
-                    .groupBy { it.date }
-                    .flatMap { (date, operations) ->
-                        operations.asSequence()
-                            .amountsForAccount1(importData.account)
-                            .groupingBy { it.currency }
-                            .aggregate { _, accumulator: Amount?, element, _ ->
-                                element + accumulator
-                            }
-                            .map {
-                                ImportDataTotal(
-                                    importData = importData,
-                                    type = ImportDataTotalType.OPERATION,
-                                    date = date,
-                                    amount = it.value,
-                                )
-                            }
-                            .let { importDataTotalRepository.saveAll(it) }
-                            .groupingBy { it.amount.currency }
-                            .aggregate { key, accumulator: Amount?, element, first ->
-                                element.amount + accumulator
-                            }
-                            .map {
-                                ImportDataTotal(
-                                    importData = importData,
-                                    type = ImportDataTotalType.OPERATION,
-                                    date = null,
-                                    amount = it.value,
-                                )
-                            }
-                            .let { importDataTotalRepository.saveAll(it) }
-                    }
-            }
-
-        } catch (e: Exception) {
-            log.error("Unable to parse import data", e)
-            importData.message = e.message ?: "Unable to parse import data"
-        } finally {
-            importData.progress = false
-        }
+        calculateTotal(importData, parsed)
     }
 
     private fun saveParsedEntry(entry: ImportDataParsedEntry, importData: ImportData): ImportDataOperation {
@@ -260,9 +181,9 @@ class ImportDataActionService(
     }
 
     @Transactional
-    fun linkOperation(entryId: UUID, operationId: UUID): ImportDataLinkResul {
+    fun linkOperation(id: UUID, entryId: UUID, operationId: UUID): Set<LocalDate> {
+        val importData = importDataRepository.find(id)
         val entry = importDataEntryRepository.find(entryId)
-        val importData = entry.importData
 
         val alreadyLinked = importDataEntryRepository.existsByImportDataAndOperationId(importData, operationId)
         if (alreadyLinked) {
@@ -277,50 +198,33 @@ class ImportDataActionService(
 
         entry.operation = operation
 
-        return ImportDataLinkResul(
-            importDataId = importData.id!!,
-            operationDate = operation.date,
-            entryDate = entry.date,
-        )
+        return setOf(operation.date, entry.date)
     }
 
     @Transactional
-    fun operationVisible(id: UUID, operationId: UUID, visible: Boolean): LocalDate? {
+    fun entryVisible(id: UUID, operationIds: List<UUID>, entryIds: List<UUID>, visible: Boolean): Set<LocalDate> {
         val importData = importDataRepository.find(id)
-        val operation = operationRepository.find(operationId)
-        val alreadyHidden = operationId in importData.hiddenOperations
 
-        if (visible) {
-            if (alreadyHidden) {
-                importData.hiddenOperations.remove(operationId)
-                return operation.date
-            }
+        val affectedEntryDates = importDataEntryRepository.findByIdInAndVisible(entryIds, !visible)
+            .onEach { it.visible = visible }
+            .map { it.date }
+            .toSet()
+
+        val affectedOperationIds = if (visible) {
+            operationIds.filter { it in importData.hiddenOperations }
+                .toSet()
+                .also { importData.hiddenOperations.removeAll(it) }
         } else {
-            if (!alreadyHidden) {
-                importData.hiddenOperations.add(operationId)
-                return operation.date
-            }
+            operationIds.filter { it !in importData.hiddenOperations }
+                .toSet()
+                .also { importData.hiddenOperations.addAll(it) }
         }
 
-        return null
-    }
+        val affectedOperationDates = operationRepository.findAllById(affectedOperationIds)
+            .map { it.date }
+            .toSet()
 
-    @Transactional
-    fun entryVisible(id: UUID, entryId: UUID, visible: Boolean): LocalDate? {
-        val entry = importDataEntryRepository.find(entryId)
-        if (visible) {
-            if (!entry.visible) {
-                entry.visible = true
-                return entry.date
-            }
-        } else {
-            if (entry.visible) {
-                entry.visible = false
-                return entry.date
-            }
-        }
-
-        return null
+        return affectedEntryDates + affectedOperationDates
     }
 
     @Transactional
@@ -329,52 +233,75 @@ class ImportDataActionService(
     }
 
     @Transactional
-    fun calculateDayTotal(id: UUID, date: LocalDate) {
+    fun calculateTotal(id: UUID, dates: Iterable<LocalDate> = emptyList()) {
         val importData = importDataRepository.find(id)
 
-        importDataTotalRepository.deleteByImportDataAndDateIs(importData, date)
-
-        turnoverService.calculateTotal(importData.account, date)
-            .map { ImportDataTotal(null, importData, ImportDataTotalType.OPERATION, date, it) }
-            .let { importDataTotalRepository.saveAll(it) }
-
-        val entries = importDataEntryRepository.findAll((ImportDataEntry::importData eq importData) and (ImportDataEntry::date eq date))
-
-        entries
-            .asSequence()
+        ((ImportDataEntry::importData eq importData) and (ImportDataEntry::date contains dates) and (ImportDataEntry::visible eq true))
+            .let { importDataEntryRepository.findAll(it) }
             .mapNotNull { it.parsed() }
-            .amountsForAccount(importData.account)
-            .groupBy { it.currency }
-            .map { it.value.sumOf { it } }
-            .map { ImportDataTotal(null, importData, ImportDataTotalType.PARSED, date, it) }
-            .let { importDataTotalRepository.saveAll(it) }
-
-        entries
-            .asSequence()
-            .mapNotNull { it.selectedSuggestion() }
-            .amountsForAccount(importData.account)
-            .groupBy { it.currency }
-            .map { it.value.sumOf { it } }
-            .map { ImportDataTotal(null, importData, ImportDataTotalType.BY_IMPORT, date, it) }
-            .let { importDataTotalRepository.saveAll(it) }
-
+            .let { calculateTotal(importData, it) }
     }
 
-    @Transactional
-    fun calculateTotal(id: UUID) {
-        val importData = importDataRepository.find(id)
+    private fun calculateTotal(importData: ImportData, parsed: List<ImportDataOperation>) {
+        val dates = parsed.map { it.date }.toSet()
 
+        importDataTotalRepository.deleteByImportDataAndDateIn(importData, dates)
         importDataTotalRepository.deleteByImportDataAndDateIsNull(importData)
-        importDataTotalRepository.findByImportData(importData)
-            .groupBy { it.type to it.amount.currency }
-            .map { (group, totals) ->
-                ImportDataTotal(null, importData, group.first, null, totals.sumOf { it.amount })
+
+        parsed.groupBy { it.date }
+            .flatMap { (date, operations) ->
+                operations.asSequence()
+                    .amountsForAccount(importData.account)
+                    .groupingBy { it.currency }
+                    .aggregate { _, accumulator: Amount?, element, _ -> element + accumulator }
+                    .map {
+                        ImportDataTotal(
+                            importData = importData,
+                            type = ImportDataTotalType.PARSED,
+                            date = date,
+                            amount = it.value,
+                        )
+                    }
+            }
+            .let { importDataTotalRepository.saveAll(it) }
+            .groupingBy { it.amount.currency }
+            .aggregate { _, accumulator: Amount?, element, _ -> element.amount + accumulator }
+            .map {
+                ImportDataTotal(
+                    importData = importData,
+                    type = ImportDataTotalType.PARSED,
+                    date = null,
+                    amount = it.value,
+                )
+            }
+            .let { importDataTotalRepository.saveAll(it) }
+
+        ((Transaction::account eq importData.account) and (Transaction::date contains dates))
+            .let { transactionRepository.findAll(it) }
+            .filter { it.operation.id !in importData.hiddenOperations }
+            .groupingBy { it.date to it.amount.currency }
+            .aggregate { _, accumulator: Amount?, element, _ -> element.signedAmount() + accumulator }
+            .map {
+                ImportDataTotal(
+                    importData = importData,
+                    type = ImportDataTotalType.OPERATION,
+                    date = it.key.first,
+                    amount = it.value,
+                )
+            }
+            .let { importDataTotalRepository.saveAll(it) }
+            .groupingBy { it.amount.currency }
+            .aggregate { _, accumulator: Amount?, element, _ -> element.amount + accumulator }
+            .map {
+                ImportDataTotal(
+                    importData = importData,
+                    type = ImportDataTotalType.OPERATION,
+                    date = null,
+                    amount = it.value,
+                )
             }
             .let { importDataTotalRepository.saveAll(it) }
     }
-
-    // calculate total for day
-    // calculate total for all period
 
     private fun ImportDataOperation.fullInput(): String = operationEmbeddingInput(
         date = date,

@@ -19,13 +19,14 @@ export interface ImportDataTotal {
 
 export interface ImportDataEntryGroup {
   date: string
+  valid?: boolean
   totals: ImportDataTotal[]
   entries: ImportDataEntry[]
 }
 
 export interface ImportDataEntry {
   id?: string
-  linked?: boolean
+  linked: boolean
   operation?: Operation
   operationVisible?: boolean
   parsed?: ImportDataOperation
@@ -35,13 +36,14 @@ export interface ImportDataEntry {
 
 export interface ImportDataOperation {
   id: string
-  entryId: string
   date: string
   type: OperationType
   amountFrom: Amount
   accountFrom?: Account
   amountTo: Amount
   accountTo?: Account
+  description?: string
+  raw: string[]
   selected: boolean
   distance?: number
 }

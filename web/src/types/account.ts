@@ -31,9 +31,14 @@ export const accountReferenceShema = z.object({
   group: accountGroupSchema.optional(),
 })
 
+export interface AccountBalanceGroup {
+  id?: string
+  name?: string
+  accounts?: AccountBalance[]
+}
+
 export interface AccountBalance {
   id: string
   name: string
-  group?: AccountGroup
   balances: Amount[]
 }

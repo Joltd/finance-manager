@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.reference.converter.AccountConverter
+import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.report.record.CurrentFundsChartAmountEntryRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartEntryRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartRecord

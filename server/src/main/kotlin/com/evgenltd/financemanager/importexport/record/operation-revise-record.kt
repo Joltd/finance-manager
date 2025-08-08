@@ -3,8 +3,8 @@ package com.evgenltd.financemanager.importexport.record
 import com.evgenltd.financemanager.importexport.entity.OperationReviseDate
 import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.reference.record.AccountRecord
-import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.common.record.Reference
 import java.time.LocalDate
 import java.util.UUID
 

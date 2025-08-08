@@ -10,8 +10,10 @@ export interface FetchStoreState<T> {
   error: string | null
   data: T | null
   pathParams?: Record<string, any>
+  setPathParams: (pathParams: Record<string, any>) => void
   updatePathParams: (pathParams: Record<string, any>) => void
   queryParams?: Record<string, any>
+  setQueryParams: (queryParams: Record<string, any>) => void
   updateQueryParams: (queryParams: Record<string, any>) => void
   fetch: () => Promise<void>
   reset: () => void
@@ -60,9 +62,12 @@ export const createFetchStore = <T>(path: string) =>
       error: null,
       data: null,
       pathParams: {},
+      setPathParams: (pathParams: Record<string, any>) => set({ pathParams }),
       updatePathParams: (pathParams: Record<string, any>) =>
         set({ pathParams: { ...get().pathParams, ...pathParams } }),
       queryParams: {},
+      setQueryParams: (queryParams: Record<string, any>) =>
+        set({ queryParams: flatten(queryParams) }),
       updateQueryParams: (queryParams: Record<string, any>) =>
         set({ queryParams: { ...get().queryParams, ...flatten(queryParams) } }),
       fetch,

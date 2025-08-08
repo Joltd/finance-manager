@@ -56,7 +56,7 @@ export function AskTextDialog() {
 
   return (
     <Dialog open={opened} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby="">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {label && (

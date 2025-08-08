@@ -1,0 +1,2 @@
+alter table import_data_entries drop constraint fk_import_data_entries_operation;
+alter table import_data_entries add constraint fk_import_data_entries_operation foreign key (operation_id) references operations(id) on delete set null;

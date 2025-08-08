@@ -3,13 +3,11 @@ package com.evgenltd.financemanager.entity.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.entity.record.*
-import com.evgenltd.financemanager.reference.record.Reference
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate
 import jakarta.persistence.criteria.Root
-import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.util.UUID

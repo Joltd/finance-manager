@@ -1,6 +1,6 @@
 import { FormBody, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { z } from 'zod'
-import { OperationType } from '@/types/operation'
+import { Operation, OperationType } from '@/types/operation'
 import { accountReferenceShema, AccountType } from '@/types/account'
 import { amountShema } from '@/types/common'
 import { useForm, UseFormReturn } from 'react-hook-form'
@@ -18,6 +18,8 @@ import { AccountInput } from '@/components/common/account-input'
 import { AmountInput } from '@/components/common/amount-input'
 import React, { useEffect } from 'react'
 import { Input } from '@/components/ui/input'
+import { operations } from '@/types/stub'
+import { Textarea } from '@/components/ui/textarea'
 
 export interface OperationFormProps {
   form: UseFormReturn<OperationFormData>
@@ -29,6 +31,7 @@ export interface OperationFormProps {
 export type OperationFormData = z.infer<typeof formSchema>
 
 const formSchema = z.object({
+  id: z.string().uuid().optional(),
   type: z.nativeEnum(OperationType),
   date: z.string().date().optional(),
   accountFrom: accountReferenceShema,
@@ -36,12 +39,13 @@ const formSchema = z.object({
   accountTo: accountReferenceShema,
   amountTo: amountShema,
   description: z.string().optional(),
+  raw: z.array(z.string()),
 })
 
-export const useOperationForm = () => {
+export const useOperationForm = (operation?: OperationFormData) => {
   const form = useForm<OperationFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: operation || {
       type: OperationType.EXCHANGE,
       date: format(new Date(), 'yyyy-MM-dd'),
       description: '',
@@ -81,6 +85,12 @@ export const useOperationForm = () => {
 
     return () => unsubscribe()
   }, [form])
+
+  useEffect(() => {
+    if (operation) {
+      form.reset(operation)
+    }
+  }, [form, operation])
 
   return {
     form,
@@ -191,6 +201,24 @@ export function OperationForm({ form, error, ref, className }: OperationFormProp
             <FormLabel>Description</FormLabel>
             <FormControl>
               <Input {...field} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      {/* todo hide when value null */}
+      <FormField
+        control={form.control}
+        name="raw"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Raw</FormLabel>
+            <FormControl>
+              <Textarea
+                readOnly
+                value={field.value?.join('\n') || ''}
+                className="whitespace-pre max-h-40"
+              />
             </FormControl>
           </FormItem>
         )}

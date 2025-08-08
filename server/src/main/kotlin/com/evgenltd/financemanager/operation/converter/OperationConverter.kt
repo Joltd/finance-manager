@@ -4,8 +4,7 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
-import com.evgenltd.financemanager.reference.converter.AccountConverter
-import com.evgenltd.financemanager.reference.record.AccountRecord
+import com.evgenltd.financemanager.account.converter.AccountConverter
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -25,7 +24,8 @@ class OperationConverter(
         accountFrom = entity.accountFrom.let { accountConverter.toRecord(it) },
         amountTo = entity.amountTo,
         accountTo = entity.accountTo.let { accountConverter.toRecord(it) },
-        description = entity.description
+        description = entity.description,
+        raw = entity.raw,
     )
 
     fun toEntity(record: OperationRecord): Operation = Operation(
@@ -38,5 +38,7 @@ class OperationConverter(
         accountTo = accountConverter.toEntity(record.accountTo),
         description = record.description
     )
+
+    fun copy(entity: Operation): Operation = toEntity(toRecord(entity))
 
 }

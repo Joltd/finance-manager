@@ -1,7 +1,8 @@
 package com.evgenltd.financemanager.importexport2.service
 
-import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
+import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
+import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -10,6 +11,7 @@ import java.util.*
 
 @Service
 class ImportDataStateService(
+    private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
 ) {
 
@@ -22,37 +24,36 @@ class ImportDataStateService(
     fun unlockEntries(entryIds: List<UUID>) = importDataEntryRepository.unlock(entryIds)
 
     @Transactional
-    fun findAndLock(id: UUID): ImportDataEntry? {
-        val importDataEntry = importDataEntryRepository.findAndLock(id)
-        if (importDataEntry == null) {
-            log.warn("ImportDataEntry $id not found")
+    fun findAndLock(id: UUID): ImportData? {
+        val importData = importDataRepository.findAndLock(id)
+        if (importData == null) {
+            log.warn("ImportData $id not found")
             return null
         }
 
-        if (importDataEntry.progress) {
-            log.warn("ImportDataEntry $id already locked")
+        if (importData.progress) {
+            log.warn("ImportData $id already locked")
             return null
         }
 
-        importDataEntry.progress = true
-
-        return importDataEntry
+        importData.progress = true
+        return importData
     }
 
     @Transactional
     fun findAndUnlock(id: UUID) {
-        val importDataEntry = importDataEntryRepository.findAndLock(id)
-        if (importDataEntry == null) {
-            log.warn("ImportDataEntry $id not found")
+        val importData = importDataRepository.findAndLock(id)
+        if (importData == null) {
+            log.warn("ImportData $id not found")
             return
         }
 
-        if (importDataEntry.progress) {
-            log.warn("ImportDataEntry $id already unlocked")
+        if (!importData.progress) {
+            log.warn("ImportData $id already unlocked")
             return
         }
 
-        importDataEntry.progress = false
+        importData.progress = false
     }
 
 }

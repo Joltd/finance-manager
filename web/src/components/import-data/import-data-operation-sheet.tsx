@@ -7,29 +7,31 @@ import {
 import { Button } from '@/components/ui/button'
 import { createStore } from 'zustand'
 import { Operation } from '@/types/operation'
-import { ImportDataOperation } from '@/types/import-data'
+import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { Form } from '@/components/ui/form'
 import { ImportDataOperationLabel } from '@/components/import-data/import-data-operation-label'
 import { Account } from '@/types/account'
 import { Pointable } from '@/components/common/pointable'
 import { openStoreSlice, OpenStoreState } from '@/store/common/open'
 import { useStoreSelect } from '@/hooks/use-store-select'
+import { useRequest } from '@/hooks/use-request'
+import { operationUrls } from '@/api/operation'
+import { importDataUrls } from '@/api/import-data'
 
 export interface ImportDataOperationSheetProps {
+  importDataId: string
   relatedAccount: Account
 }
 
 export interface ImportDataOperationSheetStoreState extends OpenStoreState {
-  operation?: Operation
-  suggestions?: ImportDataOperation[]
-  openWith: (operation?: Operation, suggestions?: ImportDataOperation[]) => void
+  entry?: ImportDataEntry
+  openWith: (entry: ImportDataEntry) => void
 }
 
 const importDataOperationSheetStore = createStore<ImportDataOperationSheetStoreState>(
   (set, get, store) => ({
     ...openStoreSlice(set, get, store),
-    openWith: (operation?: Operation, suggestions?: ImportDataOperation[]) =>
-      set({ operation, suggestions }),
+    openWith: (entry: ImportDataEntry) => set({ opened: true, entry }),
   }),
 )
 
@@ -39,22 +41,41 @@ export const useImportDataOperationSheetStore = <
   ...fields: K[]
 ) => useStoreSelect<ImportDataOperationSheetStoreState, K>(importDataOperationSheetStore, ...fields)
 
-export function ImportDataOperationSheet({ relatedAccount }: ImportDataOperationSheetProps) {
-  const { opened, setOpened, operation, suggestions } = useImportDataOperationSheetStore(
+export function ImportDataOperationSheet({
+  importDataId,
+  relatedAccount,
+}: ImportDataOperationSheetProps) {
+  const { opened, setOpened, close, entry } = useImportDataOperationSheetStore(
     'opened',
     'setOpened',
-    'operation',
-    'suggestions',
+    'close',
+    'entry',
   )
-  const { form } = useOperationForm()
+  const { form } = useOperationForm((entry?.operation || entry?.parsed) as any)
+  const operationRequest = useRequest(operationUrls.root)
+  const operationLinkRequest = useRequest(importDataUrls.entryIdLink)
 
   const onSubmit = (data: OperationFormData) => {
-    return
+    if (!!entry?.operation) {
+      operationRequest.submit(data)
+    } else if (!!entry?.id) {
+      operationLinkRequest.submit(data, { id: importDataId, entryId: entry?.id })
+    } else {
+      operationRequest.submit(data)
+    }
+    close()
+  }
+
+  const onOpenChange = (value: boolean) => {
+    setOpened(value)
+    form.reset()
+    operationRequest.reset()
+    operationLinkRequest.reset()
   }
 
   return (
-    <Sheet open={opened} onOpenChange={setOpened}>
-      <SheetContent>
+    <Sheet open={opened} onOpenChange={onOpenChange}>
+      <SheetContent aria-describedby="">
         <SheetHeader>
           <SheetTitle>Operation</SheetTitle>
         </SheetHeader>
@@ -64,11 +85,11 @@ export function ImportDataOperationSheet({ relatedAccount }: ImportDataOperation
             className="flex flex-col h-full overflow-hidden"
           >
             <div className="flex flex-col grow overflow-auto gap-8 px-4">
-              {!operation && !!suggestions?.length && (
+              {!entry?.operation && !!entry?.suggestions?.length && (
                 <div className="flex flex-col gap-2">
                   <div>Suggestions</div>
                   <div className="flex flex-col gap-2">
-                    {suggestions?.map((it, index) => (
+                    {entry?.suggestions?.map((it, index) => (
                       <Pointable key={index}>
                         <ImportDataOperationLabel
                           type={it.type}
@@ -83,10 +104,18 @@ export function ImportDataOperationSheet({ relatedAccount }: ImportDataOperation
                   </div>
                 </div>
               )}
-              <OperationForm form={form} />
+              <OperationForm
+                form={form}
+                error={operationRequest.error || operationLinkRequest.error}
+              />
             </div>
             <SheetFooter>
-              <Button type="submit">Save</Button>
+              <Button
+                type="submit"
+                disabled={operationRequest.loading || operationLinkRequest.loading}
+              >
+                Save
+              </Button>
               <Button variant="secondary">Cancel</Button>
             </SheetFooter>
           </form>

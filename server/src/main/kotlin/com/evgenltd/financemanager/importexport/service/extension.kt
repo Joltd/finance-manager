@@ -5,7 +5,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataOperation
 import com.evgenltd.financemanager.importexport.entity.ImportDataOperationType
 import com.evgenltd.financemanager.operation.entity.Operation
-import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.account.entity.Account
 
 fun ImportDataEntry.parsed(): ImportDataOperation? = operations.firstOrNull { it.importType == ImportDataOperationType.PARSED }
 

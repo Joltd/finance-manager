@@ -8,5 +8,5 @@ export const accountUrls = {
 }
 
 export const accountEvents = {
-  root: 'account'
+  balance: '/account/balance',
 }

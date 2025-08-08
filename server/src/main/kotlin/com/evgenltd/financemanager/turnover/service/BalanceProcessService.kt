@@ -1,15 +1,17 @@
 package com.evgenltd.financemanager.turnover.service
 
 import com.evgenltd.financemanager.common.util.Loggable
-import com.evgenltd.financemanager.reference.entity.AccountType
+import com.evgenltd.financemanager.operation.record.OperationEvent
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.turnover.entity.Balance
-import com.evgenltd.financemanager.turnover.record.InvalidateBalanceEvent
 import com.evgenltd.financemanager.turnover.repository.BalanceRepository
 import com.evgenltd.financemanager.turnover.repository.TurnoverRepository
 import jakarta.annotation.PostConstruct
-import org.springframework.context.event.EventListener
+import org.springframework.core.annotation.Order
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.event.TransactionalEventListener
 import java.time.LocalDate
 import java.util.*
 
@@ -39,10 +41,29 @@ class BalanceProcessService(
             .let { balanceRepository.saveAll(it) }
     }
 
-    @Async
-    @EventListener
-    fun invalidateBalanceListener(event: InvalidateBalanceEvent) {
-        balanceActionService.invalidateBalance(event.account, event.currency, event.date)
+    @TransactionalEventListener
+    @Order(10)
+    fun operationChanged(event: OperationEvent) {
+        event.entries
+            .asSequence()
+            .flatMap { listOf(it.old, it.new) }
+            .filterNotNull()
+            .flatMap {
+                listOf(
+                    TransactionKey(it.date, it.accountFrom, it.amountFrom.currency),
+                    TransactionKey(it.date, it.accountTo, it.amountTo.currency),
+                )
+            }
+            .filter { it.account.type == AccountType.ACCOUNT }
+            .distinct()
+            .onEach {
+                balanceActionService.invalidateBalance(
+                    it.account,
+                    it.currency,
+                    it.date,
+                )
+            }
+            .toList()
     }
 
     @Async
@@ -57,5 +78,7 @@ class BalanceProcessService(
             balanceActionService.unlockBalance(id)
         }
     }
+
+    private data class TransactionKey(val date: LocalDate, val account: Account, val currency: String)
 
 }

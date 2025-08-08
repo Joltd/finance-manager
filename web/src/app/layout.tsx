@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/common/app-sidebar'
 import { AskTextDialog } from '@/components/common/ask-text-dialog'
+import { ActionBarContainer } from '@/components/common/action-bar'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -39,9 +40,9 @@ export default function RootLayout({
         >
           <SidebarProvider className="h-full">
             <AppSidebar />
-            <main className="flex flex-col w-full h-full overflow-x-auto overflow-y-hidden">
-              {/*<main className="flex flex-col w-full h-full p-8 overflow-x-auto overflow-y-hidden">*/}
+            <main className="flex flex-col w-full h-full overflow-x-auto overflow-y-hidden relative">
               {children}
+              <ActionBarContainer />
             </main>
             <AskTextDialog />
           </SidebarProvider>

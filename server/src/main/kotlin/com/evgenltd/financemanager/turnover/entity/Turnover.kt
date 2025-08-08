@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.turnover.entity
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.account.entity.Account
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.util.*

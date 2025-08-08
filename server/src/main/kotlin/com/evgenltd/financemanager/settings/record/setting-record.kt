@@ -1,8 +1,8 @@
 package com.evgenltd.financemanager.settings.record
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.reference.record.AccountRecord
-import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.common.record.Reference
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 

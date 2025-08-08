@@ -1,37 +1,55 @@
 import { DateLabel } from '@/components/common/date-label'
-import { AlertCircleIcon, CheckCheck, TriangleAlert } from 'lucide-react'
+import { AlertCircleIcon, CheckCheck, EyeIcon, TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AmountLabel } from '@/components/common/amount-label'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, MouseEvent, useCallback } from 'react'
 import { ImportDataEntryBrowserRow } from '@/components/import-data/import-data-entry-browser-row'
 import {
   useImportDataEntryListStore,
   useImportDataOperationSelectionStore,
-  useImportDataParsedSelectionStore,
+  useImportDataEntrySelectionStore,
   useImportDataStore,
 } from '@/store/import-data'
 import { Spinner } from '@/components/ui/spinner'
 import { Alert, AlertTitle } from '@/components/ui/alert'
+import { ImportDataActionBar } from '@/components/import-data/import-data-action-bar'
+import { EmptyLabel } from '@/components/common/empty-label'
+import { ValidityIcon } from '@/components/common/validity-icon'
+import { TextLabel } from '@/components/common/text-label'
 
 export interface ImportDataOperationBrowserProps {}
 
 export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
   const importData = useImportDataStore('data')
-  const importDataEntryList = useImportDataEntryListStore('loading', 'dataFetched', 'error', 'data')
+  const importDataEntryList = useImportDataEntryListStore(
+    'loading',
+    'dataFetched',
+    'error',
+    'data',
+    'queryParams',
+  )
   const ref = useRef<HTMLDivElement>(null)
 
-  const operationSelection = useImportDataOperationSelectionStore('selected', 'has', 'clear')
-  const parsedSelection = useImportDataParsedSelectionStore('selected', 'has', 'clear')
+  const operationSelection = useImportDataOperationSelectionStore(
+    'selected',
+    'has',
+    'select',
+    'clear',
+  )
+  const entrySelection = useImportDataEntrySelectionStore('selected', 'has', 'select', 'clear')
 
   useEffect(() => {
-    if (ref.current && !!importDataEntryList.data?.length) {
+    if (ref.current && !!importDataEntryList.queryParams?.length) {
       ref.current.scrollTo({ behavior: 'smooth', top: 0 })
     }
-  }, [importDataEntryList.data])
+  }, [importDataEntryList.queryParams])
 
-  const handleClickOutside = () => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (event.ctrlKey) {
+      return
+    }
     operationSelection.clear()
-    parsedSelection.clear()
+    entrySelection.clear()
   }
 
   return importDataEntryList.loading && !importDataEntryList.dataFetched ? (
@@ -42,15 +60,15 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
       <AlertTitle>{importDataEntryList.error}</AlertTitle>
     </Alert>
   ) : !importData.data || !importDataEntryList.data?.length ? (
-    <div className="text-muted m-6">No data</div>
+    <EmptyLabel className="m-6" />
   ) : (
-    <div ref={ref} className="flex flex-col overflow-y-auto m-6 gap-6" onClick={handleClickOutside}>
+    <div ref={ref} className="flex flex-col relative overflow-y-auto m-6 mb-12 gap-12">
       {importDataEntryList.data?.map((group) => (
-        <div key={group.date} className="flex flex-col gap-6">
-          <div className="flex items-center gap-2 text-3xl">
-            <CheckCheck className="shrink-0 text-green-500" />
+        <div key={group.date} className="flex flex-col gap-6" onClick={handleClickOutside}>
+          <TextLabel variant="title">
+            <ValidityIcon valid={group.valid} />
             <DateLabel date={group.date} />
-          </div>
+          </TextLabel>
           {!!group.totals?.length && (
             <div className="flex flex-col bg-accent rounded-sm p-2">
               {group.totals.map((it, index) => (
@@ -75,6 +93,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                 key={index}
                 importDataId={importData.data!!.id}
                 id={entry.id}
+                entry={entry}
                 linked={entry.linked}
                 operation={entry.operation}
                 operationVisible={entry.operationVisible}
@@ -83,12 +102,14 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                 suggestions={entry.suggestions}
                 relatedAccount={importData.data!!.account}
                 operationSelected={operationSelection.has(entry.operation)}
-                parsedSelected={parsedSelection.has(entry.parsed)}
+                parsedSelected={entrySelection.has(entry)}
               />
             ))}
           </div>
         </div>
       ))}
+
+      <ImportDataActionBar />
     </div>
   )
 }

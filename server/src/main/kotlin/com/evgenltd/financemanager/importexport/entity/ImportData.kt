@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.importexport.entity
 
-import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.account.entity.Account
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType

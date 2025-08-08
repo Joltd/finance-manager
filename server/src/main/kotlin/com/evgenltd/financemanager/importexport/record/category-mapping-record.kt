@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.reference.record.AccountRecord
-import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.common.record.Reference
 import java.util.UUID
 
 data class CategoryMappingFilter(

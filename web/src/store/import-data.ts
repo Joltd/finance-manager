@@ -1,6 +1,11 @@
 import { importDataUrls } from '@/api/import-data'
 import { Reference } from '@/types/common'
-import { ImportData, ImportDataEntryGroup, ImportDataOperation } from '@/types/import-data'
+import {
+  ImportData,
+  ImportDataEntry,
+  ImportDataEntryGroup,
+  ImportDataOperation,
+} from '@/types/import-data'
 import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { createSelectionStore, SelectionStoreState } from '@/store/common/selection'
@@ -41,12 +46,10 @@ export const useImportDataOperationSelectionStore = <
 
 //
 
-const importDataParsedSelectionStore = createSelectionStore<ImportDataOperation>(
-  (item) => item.entryId!!,
-)
+const importDataEntrySelectionStore = createSelectionStore<ImportDataEntry>((item) => item.id!!)
 
-export const useImportDataParsedSelectionStore = <
-  K extends keyof SelectionStoreState<ImportDataOperation>,
+export const useImportDataEntrySelectionStore = <
+  K extends keyof SelectionStoreState<ImportDataEntry>,
 >(
   ...fields: K[]
-) => useStoreSelect(importDataParsedSelectionStore, ...fields)
+) => useStoreSelect(importDataEntrySelectionStore, ...fields)

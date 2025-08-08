@@ -6,7 +6,7 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.entity.TransactionType
-import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.account.entity.Account
 import org.springframework.data.jpa.domain.Specification
 
 fun Transaction.signedAmount(): Amount = if (type == TransactionType.OUT) -amount else amount

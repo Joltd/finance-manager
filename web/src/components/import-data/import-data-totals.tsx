@@ -1,5 +1,5 @@
 import { AmountLabel } from '@/components/common/amount-label'
-import { Fragment } from 'react'
+import { Fragment, useEffect } from 'react'
 import { EditIcon } from 'lucide-react'
 import { amount, Amount } from '@/types/common'
 import { cn } from '@/lib/utils'
@@ -7,13 +7,26 @@ import { ImportDataTotal } from '@/types/import-data'
 import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
 import { askText } from '@/components/common/ask-text-dialog'
+import { useBalanceStore } from '@/store/balance'
+import { Account } from '@/types/account'
 
 export interface ImportDataTotalsProps {
   importDataId: string
+  account: Account
   totals?: ImportDataTotal[]
 }
 
-export function ImportDataTotals({ importDataId, totals = [] }: ImportDataTotalsProps) {
+export function ImportDataTotals({ importDataId, account, totals = [] }: ImportDataTotalsProps) {
+  const balance = useBalanceStore('data', 'fetch')
+
+  useEffect(() => {
+    balance.fetch()
+  }, [])
+
+  const getCurrentBalance = (currency: string): Amount | undefined =>
+    balance.data?.find((it) => it.account.id === account.id && it.amount.currency === currency)
+      ?.amount
+
   return !totals?.length ? (
     <div className="text-muted">No totals</div>
   ) : (
@@ -31,8 +44,8 @@ export function ImportDataTotals({ importDataId, totals = [] }: ImportDataTotals
           key={it.currency}
           importDataId={importDataId}
           currency={it.currency}
-          operation={it.operation}
-          parsed={it.parsed}
+          operation={getCurrentBalance(it.currency)}
+          // parsed={it.parsed}
           actual={it.actual}
         />
       ))}

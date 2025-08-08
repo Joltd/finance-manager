@@ -10,7 +10,7 @@ export interface ImportDataOperationFilterProps {}
 
 export function ImportDataFilter({}: ImportDataOperationFilterProps) {
   const importData = useImportDataStore('data')
-  const importDataEntryList = useImportDataEntryListStore('data', 'updateQueryParams', 'fetch')
+  const importDataEntryList = useImportDataEntryListStore('data', 'setQueryParams', 'fetch')
   const [value, setValue] = useState<Record<string, any>>({})
 
   useEffect(() => {
@@ -20,16 +20,18 @@ export function ImportDataFilter({}: ImportDataOperationFilterProps) {
     }
     setValue((previous) =>
       produce(previous, (draft) => {
-        draft.date = asDateRangeValue(asWeek(dateRangeFrom))
+        if (!draft.date) {
+          draft.date = asDateRangeValue(asWeek(dateRangeFrom))
+        }
       }),
     )
   }, [importData.data])
 
   useEffect(() => {
-    if (!importData.data) {
+    if (!importData.data || !Object.keys(value).length) {
       return
     }
-    importDataEntryList.updateQueryParams(value)
+    importDataEntryList.setQueryParams(value)
     importDataEntryList.fetch()
   }, [value])
 
@@ -45,13 +47,17 @@ export function ImportDataFilter({}: ImportDataOperationFilterProps) {
         <SelectFilterOption value={true} label="established" />
         <SelectFilterOption value={false} label="not established" />
       </SelectFilter>
-      <SelectFilter name="entry" label="Entry" defaultValue={true}>
-        <SelectFilterOption value={true} label="skipped" />
-        <SelectFilterOption value={false} label="not skipped" />
+      <SelectFilter name="entryVisible" label="Entry" defaultValue={true}>
+        <SelectFilterOption value={false} label="hidden" />
+        <SelectFilterOption value={true} label="visible" />
       </SelectFilter>
-      <SelectFilter name="operation" label="Operation" defaultValue={true}>
-        <SelectFilterOption value={true} label="skipped" />
-        <SelectFilterOption value={false} label="not skipped" />
+      <SelectFilter name="operationVisible" label="Operation" defaultValue={true}>
+        <SelectFilterOption value={false} label="hidden" />
+        <SelectFilterOption value={true} label="visible" />
+      </SelectFilter>
+      <SelectFilter name="totalValid" label="Total" defaultValue={false}>
+        <SelectFilterOption value={false} label="is invalid" />
+        <SelectFilterOption value={true} label="is valid" />
       </SelectFilter>
     </Filter>
   )

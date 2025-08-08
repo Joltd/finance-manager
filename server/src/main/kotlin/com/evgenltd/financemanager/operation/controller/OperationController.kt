@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.operation.controller
 
+import com.evgenltd.financemanager.common.component.DataResponse
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationPage
 import com.evgenltd.financemanager.operation.record.OperationRecord
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
+@DataResponse
 class OperationController(
     private val operationService: OperationService
 ) {
@@ -28,5 +30,8 @@ class OperationController(
 
     @DeleteMapping("/operation/{id}")
     fun delete(@PathVariable("id") id: UUID) = operationService.delete(id)
+
+    @DeleteMapping("/operation")
+    fun delete(@RequestBody ids: List<UUID>) = ids.forEach { delete(it) }
 
 }

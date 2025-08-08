@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.report.record
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.reference.record.AccountRecord
+import com.evgenltd.financemanager.account.record.AccountRecord
 
 data class CurrentFundsChartSettingsRecord(
     val currency: String?

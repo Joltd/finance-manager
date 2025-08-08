@@ -4,8 +4,8 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.entity.record.EntityFieldRecord
 import com.evgenltd.financemanager.entity.record.EntityFieldType
 import com.evgenltd.financemanager.entity.record.EntityRecord
-import com.evgenltd.financemanager.reference.record.Reference
-import com.evgenltd.financemanager.reference.repository.CurrencyRepository
+import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.account.repository.CurrencyRepository
 import jakarta.persistence.metamodel.Attribute
 import jakarta.persistence.metamodel.EmbeddableType
 import jakarta.persistence.metamodel.EntityType

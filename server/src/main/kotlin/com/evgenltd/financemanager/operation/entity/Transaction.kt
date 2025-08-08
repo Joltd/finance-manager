@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.operation.entity
 
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.reference.entity.Account
+import com.evgenltd.financemanager.account.entity.Account
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType

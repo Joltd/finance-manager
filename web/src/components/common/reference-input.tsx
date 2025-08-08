@@ -8,67 +8,108 @@ import {
 } from '@/components/ui/command'
 import { Reference } from '@/types/common'
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
-import { CheckIcon, Loader2Icon } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { CheckIcon, Loader2Icon, XIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDebounce } from '@/hooks/use-debounce'
 import { FetchStoreState } from '@/store/common/fetch'
+import { Spinner } from '@/components/ui/spinner'
+import { ErrorLabel } from '@/components/common/error-label'
 
-export interface ReferenceSelectProps {
-  store: FetchStoreState<Reference[]>
+export interface ReferenceInputProps<T> {
   placeholder?: string
-  value?: Reference
-  onChange?: (value?: Reference) => void
+  value?: T
+  onChange?: (value?: T) => void
+  getId: (it: T) => string
+  fetchStore: Pick<
+    FetchStoreState<T[]>,
+    'loading' | 'dataFetched' | 'setQueryParams' | 'fetch' | 'data' | 'error'
+  >
+  onNew: () => Promise<T>
+  renderItem: (item: T) => React.ReactNode
 }
 
-export function ReferenceInput({ store, placeholder, value, onChange }: ReferenceSelectProps) {
+export function ReferenceInput<T>({
+  placeholder,
+  value,
+  onChange,
+  getId,
+  fetchStore,
+  onNew,
+  renderItem,
+}: ReferenceInputProps<T>) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const actualQuery = useDebounce(query, 300)
 
   useEffect(() => {
-    store.updateQueryParams({ mask: actualQuery ? actualQuery : undefined })
-    store.fetch()
-  }, [actualQuery, store])
-
-  const changePopoverOpen = (open: boolean) => {
-    setOpen(open)
     if (open) {
-      store.updateQueryParams({ mask: undefined })
-      store.fetch()
+      fetchStore.setQueryParams({ mask: actualQuery })
+      fetchStore.fetch()
+    }
+  }, [open, actualQuery])
+
+  const handleSelect = (item: T) => {
+    onChange?.(item)
+    onOpenChange(false)
+  }
+
+  const handleNew = () => {
+    onOpenChange(false)
+    onNew().then((result) => onChange?.(result))
+  }
+
+  const handleClear = () => {
+    onChange?.(undefined)
+  }
+
+  const onOpenChange = (value: boolean) => {
+    setOpen(value)
+    if (!value) {
+      setQuery('')
     }
   }
 
   return (
-    <Popover modal open={open} onOpenChange={changePopoverOpen}>
+    <Popover modal open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant="outline">{value?.name || placeholder || 'Select'}</Button>
+        <Button variant="outline" className="w-full justify-start px-3 py-1">
+          {value ? renderItem(value) : placeholder}
+        </Button>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent align="start">
         <Command shouldFilter={false} className="gap-4">
-          <div className="relative flex">
-            <CommandInput placeholder="Search" onValueChange={setQuery} />
-            <Loader2Icon className="absolute top-0 right-0 animate-spin" />
+          <div className="relative">
+            <CommandInput placeholder="Search" value={query} onValueChange={setQuery} />
+            <div className="absolute top-0 bottom-0 right-0 flex items-center">
+              {fetchStore.loading && <Spinner />}
+              {!!query && (
+                <Button size="sm" variant="ghost" onClick={() => setQuery('')}>
+                  <XIcon />
+                </Button>
+              )}
+            </div>
           </div>
           <CommandList>
-            <CommandEmpty>Not found</CommandEmpty>
-            {store.data?.map((it) => (
-              <CommandItem
-                key={it.id}
-                value={it.id}
-                onSelect={() => {
-                  onChange?.(it)
-                  changePopoverOpen(false)
-                }}
-              >
-                {it.name}
-                <CheckIcon className={cn('ml-auto', value?.id !== it.id && 'opacity-0')} />
+            <ErrorLabel error={fetchStore.error} />
+            {fetchStore.dataFetched && <CommandEmpty>Not found</CommandEmpty>}
+            {fetchStore.data?.map((it) => (
+              <CommandItem key={getId(it)} value={getId(it)} onSelect={() => handleSelect(it)}>
+                {renderItem(it)}
+                <CheckIcon
+                  className={cn('ml-auto', (!value || getId(value) !== getId(it)) && 'opacity-0')}
+                />
               </CommandItem>
             ))}
           </CommandList>
-          <div>
-            <Button variant="link">New</Button>
-            <Button variant="link">Clear</Button>
+          <div className="flex">
+            <Button variant="link" className="p-0" onClick={handleNew}>
+              New
+            </Button>
+            <div className="flex-grow" />
+            <Button variant="link" className="p-0" onClick={handleClear}>
+              Clear
+            </Button>
           </div>
         </Command>
       </PopoverContent>

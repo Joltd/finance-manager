@@ -5,8 +5,8 @@ import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRequestEvent
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
-import com.evgenltd.financemanager.reference.entity.Currency
-import com.evgenltd.financemanager.reference.repository.CurrencyRepository
+import com.evgenltd.financemanager.account.entity.Currency
+import com.evgenltd.financemanager.account.repository.CurrencyRepository
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service

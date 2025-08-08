@@ -1,21 +1,12 @@
 package com.evgenltd.financemanager.report.service
 
-import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.common.util.fromFractional
-import com.evgenltd.financemanager.entity.record.EntityFilterNodeRecord
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
-import com.evgenltd.financemanager.operation.service.TransactionService
-import com.evgenltd.financemanager.reference.entity.AccountType
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartRecord
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartSettingsRecord
-import com.evgenltd.financemanager.turnover.entity.Turnover
 import com.evgenltd.financemanager.turnover.service.TurnoverService
-import com.evgenltd.financemanager.turnover.service.sliceLast
 import org.springframework.stereotype.Service
 import java.math.RoundingMode
 import java.time.LocalDate
-import java.util.*
 
 @Service
 class CumulativeFundsChartService(

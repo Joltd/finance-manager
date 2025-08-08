@@ -4,7 +4,7 @@ import com.evgenltd.financemanager.entity.record.EntityListRequest
 import com.evgenltd.financemanager.entity.record.EntityListPage
 import com.evgenltd.financemanager.entity.record.EntityRecord
 import com.evgenltd.financemanager.entity.service.EntityService
-import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.common.record.Reference
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 

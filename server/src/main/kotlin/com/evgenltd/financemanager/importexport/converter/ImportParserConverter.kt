@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.importexport.converter
 
 import com.evgenltd.financemanager.importexport.repository.ImportParserRepository
 import com.evgenltd.financemanager.importexport.service.parser.ImportParser
-import com.evgenltd.financemanager.reference.record.Reference
+import com.evgenltd.financemanager.common.record.Reference
 import org.springframework.stereotype.Service
 import java.util.UUID
 

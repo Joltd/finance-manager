@@ -58,4 +58,6 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>,JpaSpe
     @Query("select min(ide.date) as min, max(ide.date) as max from ImportDataEntry ide where ide.importData = :importData")
     fun findImportDataDateRange(importData: ImportData): ImportDataDateRange
 
+    fun findByIdInAndVisible(ids: List<UUID>, visible: Boolean): List<ImportDataEntry>
+
 }

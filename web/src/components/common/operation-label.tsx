@@ -22,7 +22,7 @@ export interface OperationLabelProps {
   className?: string
 }
 
-const operationLabelVariants = cva('flex items-center gap-2 min-w-2', {
+const variants = cva('flex items-center gap-2 min-w-2', {
   variants: {
     variant: {
       filled: 'border rounded-sm bg-accent p-2 max-h-8 grow-0',
@@ -44,7 +44,7 @@ export function OperationLabel({
   const withFrom = accountFrom?.id !== relatedAccount?.id
   const withTo = accountTo?.id !== relatedAccount?.id
   return (
-    <div className={cn(operationLabelVariants({ variant }), className)}>
+    <div className={cn(variants({ variant }), className)}>
       <OperationTypeIcon type={type} />
       {date && <DateLabel date={date} />}
       <span className="flex items-center text-nowrap gap-1 min-w-[210]">

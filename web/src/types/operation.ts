@@ -1,5 +1,5 @@
-import { Account } from "@/types/account";
-import { Amount } from "@/types/common";
+import { Account } from '@/types/account'
+import { Amount } from '@/types/common'
 
 export enum OperationType {
   EXPENSE = 'EXPENSE',
@@ -17,4 +17,5 @@ export interface Operation {
   amountTo: Amount
   accountTo: Account
   description?: string
+  raw: string[]
 }

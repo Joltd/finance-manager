@@ -4,7 +4,7 @@ import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.reference.converter.AccountConverter
+import com.evgenltd.financemanager.account.converter.AccountConverter
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.util.*

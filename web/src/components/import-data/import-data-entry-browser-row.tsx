@@ -1,4 +1,4 @@
-import { ImportDataOperation } from '@/types/import-data'
+import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { Account } from '@/types/account'
 import { cn } from '@/lib/utils'
 import { ImportDataOperationLabel } from '@/components/import-data/import-data-operation-label'
@@ -8,14 +8,16 @@ import { Pointable } from '@/components/common/pointable'
 import { FC, memo, MouseEvent } from 'react'
 import {
   useImportDataOperationSelectionStore,
-  useImportDataParsedSelectionStore,
+  useImportDataEntrySelectionStore,
 } from '@/store/import-data'
 import { Operation } from '@/types/operation'
+import { useImportDataOperationSheetStore } from '@/components/import-data/import-data-operation-sheet'
 
 export interface ImportDataEntryBrowserRowProps {
   importDataId: string
   id?: string
-  linked?: boolean
+  entry: ImportDataEntry
+  linked: boolean
   operation?: Operation
   operationVisible?: boolean
   parsed?: ImportDataOperation
@@ -30,6 +32,7 @@ export const ImportDataEntryBrowserRow: FC<ImportDataEntryBrowserRowProps> = mem
   ({
     importDataId,
     id,
+    entry,
     linked,
     operation,
     operationVisible,
@@ -40,20 +43,19 @@ export const ImportDataEntryBrowserRow: FC<ImportDataEntryBrowserRowProps> = mem
     operationSelected,
     parsedSelected,
   }) => {
-    // const { open } = useImportDataOperationSheetStore()
+    const { openWith } = useImportDataOperationSheetStore('openWith')
     const operationSelection = useImportDataOperationSelectionStore('select', 'clear')
-    const parsedSelection = useImportDataParsedSelectionStore('select', 'clear')
+    const entrySelection = useImportDataEntrySelectionStore('select', 'clear')
 
     const selectedSuggestion = suggestions?.find((it) => it.selected)
     const actualOperation = operation || selectedSuggestion
 
     const handleOperationClick = (event: MouseEvent) => {
-      // open(entry.operation, entry.suggestions)
       if (!event.ctrlKey) {
+        openWith(entry)
         operationSelection.clear()
-        parsedSelection.clear()
+        entrySelection.clear()
       } else if (operation) {
-        event.stopPropagation()
         operationSelection.select(operation)
       }
     }
@@ -61,10 +63,9 @@ export const ImportDataEntryBrowserRow: FC<ImportDataEntryBrowserRowProps> = mem
     const handleParsedClick = (event: MouseEvent) => {
       if (!event.ctrlKey) {
         operationSelection.clear()
-        parsedSelection.clear()
-      } else if (parsed) {
-        event.stopPropagation()
-        parsedSelection.select(parsed)
+        entrySelection.clear()
+      } else {
+        entrySelection.select(entry)
       }
     }
 

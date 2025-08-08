@@ -2,9 +2,9 @@ package com.evgenltd.financemanager.settings.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.exchangerate.service.provider.Provider
-import com.evgenltd.financemanager.reference.converter.AccountConverter
-import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.reference.service.AccountService
+import com.evgenltd.financemanager.account.converter.AccountConverter
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.service.AccountService
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.record.ApplicationSettings
 import com.evgenltd.financemanager.settings.record.UpdateApplicationSettings

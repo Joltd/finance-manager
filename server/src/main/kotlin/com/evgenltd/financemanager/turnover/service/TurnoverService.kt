@@ -11,8 +11,8 @@ import com.evgenltd.financemanager.entity.service.EntityService
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.operation.service.signedAmount
-import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.reference.entity.AccountType
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.settings.service.SettingService
 import com.evgenltd.financemanager.turnover.entity.Turnover
 import com.evgenltd.financemanager.turnover.record.TurnoverKey
@@ -37,8 +37,9 @@ class TurnoverService(
     private val turnoverActionService: BalanceActionService,
 ) : Loggable() {
 
-    fun calculateTotal(account: Account, date: LocalDate): List<Amount> =
+    fun calculateTotal(account: Account, date: LocalDate, excludeOperationIds: Iterable<UUID> = emptyList()): List<Amount> =
         transactionRepository.findAll((Transaction::account eq account) and (Transaction::date eq date))
+            .filter { it.operation.id !in excludeOperationIds }
             .groupBy { it.amount.currency }
             .map { (_, transactions) -> transactions.sumOf { it.signedAmount() } }
 

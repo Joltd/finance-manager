@@ -2,7 +2,7 @@ package com.evgenltd.financemanager.importexport.converter
 
 import com.evgenltd.financemanager.importexport.entity.OperationRevise
 import com.evgenltd.financemanager.importexport.record.OperationReviseRecord
-import com.evgenltd.financemanager.reference.converter.AccountConverter
+import com.evgenltd.financemanager.account.converter.AccountConverter
 import org.springframework.stereotype.Service
 
 @Service

@@ -1,3 +1,5 @@
+import { fillPathParams } from '@/lib/utils'
+
 const source =
   typeof window !== 'undefined'
     ? new EventSource(process.env.NEXT_PUBLIC_BACKEND_HOST + '/sse')
@@ -9,11 +11,13 @@ export const subscribeSse = <T>(
   params: Record<string, any>,
   listener: (data: T) => void,
 ): (() => void) => {
-  unsubscribeSse(eventName)
-  const actualListener = (event: MessageEvent) => listener(JSON.parse(event.data))
-  listeners[eventName] = actualListener
-  source?.addEventListener(eventName, actualListener)
-  return () => unsubscribeSse(eventName)
+  const actualEventName = fillPathParams(eventName, params)
+  unsubscribeSse(actualEventName)
+  const actualListener = (event: MessageEvent) =>
+    listener(!!event.data ? JSON.parse(event.data) : undefined)
+  listeners[actualEventName] = actualListener
+  source?.addEventListener(actualEventName, actualListener)
+  return () => unsubscribeSse(actualEventName)
 }
 
 export const unsubscribeSse = (eventName: string) => {

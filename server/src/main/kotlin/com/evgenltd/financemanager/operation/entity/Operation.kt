@@ -2,8 +2,8 @@ package com.evgenltd.financemanager.operation.entity
 
 import com.evgenltd.financemanager.common.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.reference.entity.AccountType
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import jakarta.persistence.*
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Root
@@ -59,6 +59,10 @@ class Operation(
     @ManyToOne
     @JoinColumn(name = "full_id")
     var full: Embedding? = null,
+
+    @OneToMany(mappedBy = "operation", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    var transactions: MutableList<Transaction> = mutableListOf(),
+
 ) {
 
     override fun equals(other: Any?): Boolean {

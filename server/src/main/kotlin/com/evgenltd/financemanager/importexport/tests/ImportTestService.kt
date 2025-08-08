@@ -1,21 +1,12 @@
 package com.evgenltd.financemanager.importexport.tests
 
 import com.evgenltd.financemanager.ai.service.AiProviderResolver
-import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.importexport.entity.CategoryMapping
-import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
-import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
 import com.evgenltd.financemanager.importexport.service.CategoryMappingService
 import com.evgenltd.financemanager.importexport.service.parser.TinkoffImportParser
 import com.evgenltd.financemanager.operation.converter.OperationConverter
-import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
-import com.evgenltd.financemanager.reference.converter.AccountConverter
-import com.evgenltd.financemanager.reference.entity.AccountType
-import com.evgenltd.financemanager.reference.repository.AccountRepository
-import jakarta.annotation.PostConstruct
-import java.io.File
+import com.evgenltd.financemanager.account.converter.AccountConverter
+import com.evgenltd.financemanager.account.repository.AccountRepository
 import java.util.*
 
 //@Service

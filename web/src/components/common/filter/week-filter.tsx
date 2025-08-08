@@ -49,6 +49,18 @@ export function WeekFilter({ from, to, value, onChange }: WeekFilterProps) {
     onChange?.(asDateRangeValue(week))
   }
 
+  const handleFirstWeek = () => {
+    if (from) {
+      handleDayClick(asUtc(from))
+    }
+  }
+
+  const handleLastWeek = () => {
+    if (to) {
+      handleDayClick(asUtc(to))
+    }
+  }
+
   const buttonProps: { size: 'sm'; variant: 'outline'; className: string } = {
     size: 'sm',
     variant: 'outline',
@@ -60,7 +72,7 @@ export function WeekFilter({ from, to, value, onChange }: WeekFilterProps) {
       {actualFrom && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button {...buttonProps}>
+            <Button {...buttonProps} onClick={handleFirstWeek}>
               <ChevronFirstIcon />
             </Button>
           </TooltipTrigger>
@@ -91,7 +103,7 @@ export function WeekFilter({ from, to, value, onChange }: WeekFilterProps) {
       {actualTo && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button {...buttonProps}>
+            <Button {...buttonProps} onClick={handleLastWeek}>
               <ChevronLastIcon />
             </Button>
           </TooltipTrigger>

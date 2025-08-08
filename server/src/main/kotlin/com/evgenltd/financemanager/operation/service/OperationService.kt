@@ -1,22 +1,21 @@
 package com.evgenltd.financemanager.operation.service
 
 import com.evgenltd.financemanager.common.repository.find
-//import com.evgenltd.financemanager.common.repository.findAllByCondition
-//import com.evgenltd.financemanager.common.repository.notEq
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.operation.record.OperationEvent
+import com.evgenltd.financemanager.operation.record.OperationEventEntry
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationPage
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
-import com.evgenltd.financemanager.reference.entity.AccountType
-import com.evgenltd.financemanager.turnover.record.InvalidateBalanceEvent
 import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.*
@@ -25,7 +24,6 @@ import java.util.*
 class OperationService(
     private val operationRepository: OperationRepository,
     private val operationConverter: OperationConverter,
-    private val transactionService: TransactionService,
     private val publisher: ApplicationEventPublisher,
 ) {
 
@@ -69,34 +67,39 @@ class OperationService(
 
     @Transactional
     fun update(record: OperationRecord): OperationRecord {
+        val existed = record.id?.let { operationRepository.findByIdOrNull(it) }
         val entity = operationConverter.toEntity(record)
-        operationRepository.save(entity)
-
-        transactionService.refillByOperation(entity)
-
-        invalidateBalance(entity)
-
-        return operationConverter.toRecord(entity)
+        val saved = operationRepository.save(entity)
+        notifyChanged(existed, saved)
+        return operationConverter.toRecord(saved)
     }
 
     @Transactional
     fun delete(id: UUID) {
         val operation = operationRepository.find(id)
-        transactionService.deleteByOperation(id)
         operationRepository.delete(operation)
-
-        invalidateBalance(operation)
+        notifyChanged(operation, null)
     }
 
-    private fun invalidateBalance(operation: Operation) {
-        listOf(
-            operation.accountFrom to operation.amountFrom.currency,
-            operation.accountTo to operation.amountTo.currency,
-        ).filter { it.first.type == AccountType.ACCOUNT }
-            .distinct()
-            .onEach {
-                publisher.publishEvent(InvalidateBalanceEvent(it.first, it.second, operation.date))
-            }
+    @Transactional
+    fun delete(ids: List<UUID>) {
+        operationRepository.findAllById(ids)
+            .onEach { operationRepository.delete(it) }
+            .map { OperationEventEntry(old = operationConverter.copy(it)) }
+            .let { OperationEvent(it) }
+            .let { notifyChanged(it)}
+    }
+
+    private fun notifyChanged(old: Operation?, new: Operation?) {
+        val entry = OperationEventEntry(
+            old?.let { operationConverter.copy(it) },
+            new?.let { operationConverter.copy(it) },
+        )
+        notifyChanged(OperationEvent(listOf(entry)))
+    }
+
+    private fun notifyChanged(event: OperationEvent) {
+        publisher.publishEvent(event)
     }
 
     fun findSimilar(operation: OperationRecord): List<Operation> = findSimilar(

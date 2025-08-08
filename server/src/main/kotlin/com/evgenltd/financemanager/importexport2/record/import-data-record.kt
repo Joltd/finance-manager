@@ -5,8 +5,8 @@ import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.reference.entity.Account
-import com.evgenltd.financemanager.reference.record.AccountRecord
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.record.AccountRecord
 import java.time.LocalDate
 import java.util.*
 
@@ -46,18 +46,21 @@ data class ImportDataTotalRecord(
 data class EntryFilter(
     val date: DateRange? = null,
     val linkage: Boolean? = null,
-    val entrySkipped: Boolean? = null,
-    val operationSkipped: Boolean? = null,
+    val entryVisible: Boolean? = null,
+    val operationVisible: Boolean? = null,
+    val totalValid: Boolean? = null,
 )
 
 data class ImportDataEntryGroupRecord(
     val date: LocalDate,
-    val totals: List<ImportDataTotalRecord>,
-    val entries: List<ImportDataEntryRecord>,
+    val valid: Boolean? = null,
+    val totals: List<ImportDataTotalRecord> = emptyList(),
+    val entries: List<ImportDataEntryRecord> = emptyList(),
 )
 
 data class ImportDataEntryRecord(
     val id: UUID? = null,
+    val linked: Boolean = false,
     val operation: OperationRecord? = null,
     val operationVisible: Boolean = true,
     val parsed: ImportDataOperationRecord? = null,
@@ -67,17 +70,23 @@ data class ImportDataEntryRecord(
 
 data class ImportDataOperationRecord(
     val id: UUID? = null,
-    val entryId: UUID? = null,
     val date: LocalDate,
     val type: OperationType,
     val amountFrom: Amount,
     val accountFrom: AccountRecord?,
     val amountTo: Amount,
     val accountTo: AccountRecord?,
+    val description: String?,
+    val raw: List<String> = emptyList(),
     val selected: Boolean,
     val distance: Double?,
 )
 
+data class ImportDataEntryVisibilityRequest(
+    val operations: List<UUID>,
+    val entries: List<UUID>,
+    val visible: Boolean,
+)
 
 //data class ImportDataRecord(
 //    val id: UUID,
