@@ -99,7 +99,9 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <AppearanceTrigger />
+        <div>
+          <AppearanceTrigger />
+        </div>
       </SidebarFooter>
     </Sidebar>
   )
