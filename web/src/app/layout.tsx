@@ -6,6 +6,8 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/common/app-sidebar'
 import { AskTextDialog } from '@/components/common/ask-text-dialog'
 import { ActionBarContainer } from '@/components/common/action-bar'
+import React from 'react'
+import { CurrencyInitialFetcher } from '@/components/account/currency-initial-fetcher'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -39,6 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SidebarProvider className="h-full">
+            <CurrencyInitialFetcher />
             <AppSidebar />
             <main className="flex flex-col w-full h-full overflow-x-auto overflow-y-hidden relative">
               {children}

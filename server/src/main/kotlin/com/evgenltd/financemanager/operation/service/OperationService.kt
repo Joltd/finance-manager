@@ -31,6 +31,7 @@ import java.util.*
 class OperationService(
     private val operationRepository: OperationRepository,
     private val operationConverter: OperationConverter,
+    private val operationEventService: OperationEventService,
     private val publisher: ApplicationEventPublisher,
 ) {
 
@@ -42,7 +43,13 @@ class OperationService(
             ((Operation::amountFrom currency filter.currency) or (Operation::amountTo currency filter.currency))
     ).let { operationRepository.findAll(it) }
         .groupBy { it.date }
-        .mapValues { it.value.map { operation -> operationConverter.toRecord(operation)} }
+        .mapValues { (_, operations) ->
+            operations.map { operation -> operationConverter.toRecord(operation)}
+                .sortedWith(compareBy(
+                    { it.amountFrom.currency },
+                    { it.amountFrom.value },
+                ))
+        }
         .map { (date, operations) -> OperationGroupRecord(date, operations) }
         .sortedBy { it.date }
 
@@ -83,6 +90,7 @@ class OperationService(
 
     private fun notifyChanged(event: OperationEvent) {
         publisher.publishEvent(event)
+        operationEventService.operation()
     }
 
     fun findSimilar(operation: OperationRecord): List<Operation> = findSimilar(

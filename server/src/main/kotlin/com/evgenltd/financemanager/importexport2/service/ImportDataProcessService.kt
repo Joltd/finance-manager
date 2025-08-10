@@ -45,9 +45,6 @@ class ImportDataProcessService(
             importDataEventService.importData(id)
         }
 
-//        importDataEventService.importDataEntry(result.importDataId, affectedDates) todo first week
-
-
 //        val entryIds = importDataStateService.lockAllEntries(importDataId)
 //
 //        entryIds.chunked(50)

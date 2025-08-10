@@ -9,6 +9,8 @@ import { importDataUrls } from '@/api/import-data'
 import { askText } from '@/components/common/ask-text-dialog'
 import { useBalanceStore } from '@/store/balance'
 import { Account } from '@/types/account'
+import { Spinner } from '@/components/ui/spinner'
+import { ErrorLabel } from '@/components/common/error-label'
 
 export interface ImportDataTotalsProps {
   importDataId: string
@@ -68,16 +70,19 @@ function ImportDataTotalEntry({
   parsed,
   actual,
 }: ImportDataTotalEntryProps) {
-  const { submit, loading, error } = useRequest(importDataUrls.actualBalance) // todo use loading and error
+  const { submit, loading, error } = useRequest(importDataUrls.actualBalance)
 
   // todo instead parsed total there is necessary for amount during import process
   const balanceAfterImport = (operation?.value || 0) + (parsed?.value || 0)
   const delta = (actual?.value || 0) - balanceAfterImport
 
   const handleEditActualBalance = async () => {
-    // todo pass current balance (?)
     const value = await askText('Actual balance')
-    await submit(amount(+value, currency), { id: importDataId }) // todo handle parse error
+    const actualValue = +value
+    if (!actualValue) {
+      return
+    }
+    await submit(amount(actualValue, currency), { id: importDataId })
   }
 
   return (
@@ -87,7 +92,13 @@ function ImportDataTotalEntry({
       {parsed ? <AmountLabel amount={parsed} /> : <div />}
       <div className="flex gap-2 items-center" onClick={handleEditActualBalance}>
         <EditIcon size={16} />
-        {actual && <AmountLabel amount={actual} />}
+        {loading ? (
+          <Spinner className="w-4" />
+        ) : error ? (
+          <ErrorLabel error={error} />
+        ) : actual ? (
+          <AmountLabel amount={actual} />
+        ) : null}
       </div>
       {actual && delta !== 0 ? (
         <AmountLabel amount={{ value: delta, currency }} className="text-red-500" />

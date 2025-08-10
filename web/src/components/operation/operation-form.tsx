@@ -198,29 +198,30 @@ export function OperationForm({ form, error, className }: OperationFormProps) {
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value || ''} />
             </FormControl>
           </FormItem>
         )}
       />
 
-      {/* todo hide when value null */}
-      <FormField
-        control={form.control}
-        name="raw"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Raw</FormLabel>
-            <FormControl>
-              <Textarea
-                readOnly
-                value={field.value?.join('\n') || ''}
-                className="whitespace-pre max-h-40"
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
+      {!!form.getValues().raw?.length && (
+        <FormField
+          control={form.control}
+          name="raw"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Raw {field.value}</FormLabel>
+              <FormControl>
+                <Textarea
+                  readOnly
+                  value={field.value?.join('\n') || ''}
+                  className="whitespace-pre max-h-40"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      )}
     </FormBody>
   )
 }

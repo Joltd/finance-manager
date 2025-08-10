@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import {
   useImportDataOperationSelectionStore,
   useImportDataEntrySelectionStore,
@@ -9,11 +8,10 @@ import { EyeClosedIcon, EyeIcon, Link2Icon, TrashIcon } from 'lucide-react'
 import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
 import { operationUrls } from '@/api/operation'
-import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function ImportDataActionBar() {
   const importData = useImportDataStore('data')
-  const visibility = useRequest(importDataUrls.entryVisibility) // todo handle loading and error
+  const visibility = useRequest(importDataUrls.entryVisibility) // todo handle error
   const link = useRequest(importDataUrls.entryLink)
   const deleteOperations = useRequest(operationUrls.root, { method: 'DELETE' })
   const operationSelection = useImportDataOperationSelectionStore(

@@ -96,11 +96,20 @@ class ImportDataService(
         val consolidated = entries + operationIndex.values
             .map { it.date to importDataConverter.toEntryRecord(importData, it) }
 
-        return consolidated.groupBy({ it.first }) { it.second }
+        return consolidated.groupBy { it.first }
+            .mapValues { (_, records) ->
+                records.map { it.second }
+                    .sortedWith(compareBy(
+                        { it.parsed?.amountFrom?.currency ?: "" },
+                        { it.parsed?.amountFrom?.value ?: 0 },
+                        { it.operation?.amountFrom?.currency ?: "" },
+                        { it.operation?.amountFrom?.value ?: 0 },
+                    ))
+            }
             .map { (date, records) ->
                 totalIndex[date]
                     ?.copy(entries = records)
-                    ?: ImportDataEntryGroupRecord(date, entries = records) // todo sort by amount somehow
+                    ?: ImportDataEntryGroupRecord(date, entries = records)
             }
             .sortedBy { it.date }
     }

@@ -101,3 +101,7 @@ fun String.parseAmount(): Amount {
 }
 
 fun <T> Iterable<T>.sumOf(selector: (T) -> Amount): Amount = map { selector(it) }.reduce { acc, amount -> acc + amount }
+
+private val safeComparator = compareBy<Amount?>({ it?.currency ?: "" }, { it?.value ?: 0 })
+
+fun Amount?.compareSafe(other: Amount): Int = safeComparator.compare(this, other)

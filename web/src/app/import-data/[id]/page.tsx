@@ -71,30 +71,34 @@ export default function Page() {
 
   return (
     <DataSection store={importData}>
-      <div className="flex flex-col gap-4 px-6 mt-6">
-        <div className="flex">
-          <ImportDataTotals
-            importDataId={importData.data!!.id}
-            account={importData.data!!.account}
-            totals={importData.data!!.totals}
+      {importData.data && (
+        <>
+          <div className="flex flex-col gap-4 px-6 mt-6">
+            <div className="flex">
+              <ImportDataTotals
+                importDataId={importData.data.id}
+                account={importData.data.account}
+                totals={importData.data.totals}
+              />
+              <div className="flex-grow" />
+              <TextLabel variant="title">
+                {importData.data.account.name}
+                {importData.data.progress ? (
+                  <Spinner />
+                ) : (
+                  <ValidityIcon valid={importValid} collapseIfEmpty />
+                )}
+              </TextLabel>
+            </div>
+            <ImportDataFilter />
+          </div>
+          <ImportDataEntryBrowser />
+          <ImportDataOperationSheet
+            importDataId={importData.data.id}
+            relatedAccount={importData.data.account}
           />
-          <div className="flex-grow" />
-          <TextLabel variant="title">
-            {importData.data!!.account.name}
-            {importData.data!!.progress ? (
-              <Spinner />
-            ) : (
-              <ValidityIcon valid={importValid} collapseIfEmpty />
-            )}
-          </TextLabel>
-        </div>
-        <ImportDataFilter />
-      </div>
-      <ImportDataEntryBrowser />
-      <ImportDataOperationSheet
-        importDataId={importData.data!!.id}
-        relatedAccount={importData.data!!.account}
-      />
+        </>
+      )}
     </DataSection>
   )
 }
