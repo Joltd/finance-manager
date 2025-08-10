@@ -8,11 +8,11 @@ import com.evgenltd.financemanager.common.repository.like
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
-import com.evgenltd.financemanager.account.record.AccountGroupEntryRecord
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.account.record.AccountBalanceFilter
 import com.evgenltd.financemanager.account.record.AccountBalanceGroupRecord
 import com.evgenltd.financemanager.account.record.AccountBalanceRecord
+import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.turnover.entity.Balance
 import com.evgenltd.financemanager.turnover.repository.BalanceRepository
@@ -28,16 +28,18 @@ class AccountService(
     private val accountRepository: AccountRepository,
     private val accountConverter: AccountConverter,
     private val balanceRepository: BalanceRepository,
-    private val accountEventService: AccountEventService,
 ) {
 
-    fun listReference(mask: String?, type: AccountType?): List<AccountRecord> {
+    fun listReference(mask: String?, type: AccountType?): List<AccountReferenceRecord> {
         val filter = (Account::type eq type) and (Account::name like mask)
         val pageable = PageRequest.of(0, 20, Sort.by(Account::name.name))
         return accountRepository.findAll(filter, pageable)
             .content
-            .map { accountConverter.toRecord(it) }
+            .map { accountConverter.toReference(it) }
     }
+
+    fun list(type: AccountType?): List<AccountRecord> = accountRepository.findAll((Account::type eq type), Sort.by(Account::name.name))
+        .map { accountConverter.toRecord(it) }
 
     fun listBalances(filter: AccountBalanceFilter): List<AccountBalanceGroupRecord> {
         val balances = balanceRepository.findAll(Balance::amount.isNotZero().takeIf { filter.hideZeroBalances })
@@ -72,15 +74,18 @@ class AccountService(
     fun update(record: AccountRecord): AccountRecord {
         val entity = accountConverter.toEntity(record)
         val saved = accountRepository.save(entity)
-        accountEventService.accountBalance()
         return accountConverter.toRecord(saved)
     }
 
-    @Transactional
     fun delete(id: UUID) {
-        val account = accountRepository.findAndLock(id) ?: return
-        account.deleted = true
-        accountEventService.accountBalance()
+        try {
+            val account = accountRepository.find(id)
+            accountRepository.delete(account)
+        } catch (e: Exception) {
+            val account = accountRepository.find(id)
+            account.deleted = true
+            accountRepository.save(account)
+        }
     }
 
 }

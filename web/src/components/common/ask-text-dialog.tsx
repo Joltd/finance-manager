@@ -15,31 +15,44 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '@/components/ui/input'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { AskDialogStoreState, createAskDialogStore } from '@/store/common/ask-dialog'
+import { useEffect } from 'react'
 
-const askTextDialogStore = createAskDialogStore<string, string>()
+export interface AskTextDialogConfig {
+  label: string
+  value?: string
+}
 
-const useAskTextDialogStore = <K extends keyof AskDialogStoreState<string, string>>(
+const askTextDialogStore = createAskDialogStore<AskTextDialogConfig, string>()
+
+const useAskTextDialogStore = <K extends keyof AskDialogStoreState<AskTextDialogConfig, string>>(
   ...fields: K[]
-) => useStoreSelect<AskDialogStoreState<string, string>, K>(askTextDialogStore, ...fields)
+) =>
+  useStoreSelect<AskDialogStoreState<AskTextDialogConfig, string>, K>(askTextDialogStore, ...fields)
 
 const formSchema = z.object({
   value: z.string(),
 })
 
 export function AskTextDialog() {
-  const {
-    config: label,
-    opened,
-    close,
-    resolve,
-  } = useAskTextDialogStore('config', 'opened', 'close', 'resolve')
+  const { config, opened, close, resolve } = useAskTextDialogStore(
+    'config',
+    'opened',
+    'close',
+    'resolve',
+  )
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      value: '',
+      value: config?.value || '',
     },
   })
+
+  useEffect(() => {
+    if (config?.value) {
+      form.reset({ value: config.value })
+    }
+  }, [config])
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     close()
@@ -59,9 +72,9 @@ export function AskTextDialog() {
       <DialogContent aria-describedby="">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            {label && (
+            {config?.label && (
               <DialogHeader>
-                <DialogTitle>{label}</DialogTitle>
+                <DialogTitle>{config.label}</DialogTitle>
               </DialogHeader>
             )}
             <FormBody className="py-4">
@@ -90,7 +103,7 @@ export function AskTextDialog() {
   )
 }
 
-export const askText = (label: string): Promise<string> =>
+export const askText = (label: string, value?: string): Promise<string> =>
   new Promise<string>((resolve) => {
-    askTextDialogStore.getState().ask(resolve, label)
+    askTextDialogStore.getState().ask(resolve, { label, value })
   })

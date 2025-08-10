@@ -1,6 +1,6 @@
 import { FormBody, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { z } from 'zod'
-import { Operation, OperationType } from '@/types/operation'
+import { OperationType } from '@/types/operation'
 import { accountReferenceShema, AccountType } from '@/types/account'
 import { amountShema } from '@/types/common'
 import { useForm, UseFormReturn } from 'react-hook-form'
@@ -18,13 +18,11 @@ import { AccountInput } from '@/components/common/account-input'
 import { AmountInput } from '@/components/common/amount-input'
 import React, { useEffect } from 'react'
 import { Input } from '@/components/ui/input'
-import { operations } from '@/types/stub'
 import { Textarea } from '@/components/ui/textarea'
 
 export interface OperationFormProps {
   form: UseFormReturn<OperationFormData>
   error?: string
-  ref?: any
   className?: string
 }
 
@@ -97,7 +95,7 @@ export const useOperationForm = (operation?: OperationFormData) => {
   }
 }
 
-export function OperationForm({ form, error, ref, className }: OperationFormProps) {
+export function OperationForm({ form, error, className }: OperationFormProps) {
   const type = form.watch('type')
   const accountFromType = type === OperationType.INCOME ? AccountType.INCOME : AccountType.ACCOUNT
   const accountToType = type === OperationType.EXPENSE ? AccountType.EXPENSE : AccountType.ACCOUNT

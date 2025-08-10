@@ -53,9 +53,11 @@ export function Filter({ value, onChange, className, children }: FilterProps) {
   }
 
   const handleShow = (filter: FilterDefinition) => {
-    setFilter((draft) => {
-      draft[filter.name] = filter.defaultValue
-    })
+    if (filter.defaultValue !== undefined) {
+      setFilter((draft) => {
+        draft[filter.name] = filter.defaultValue
+      })
+    }
     setVisible((prev) => (prev.indexOf(filter.name) !== -1 ? prev : [...prev, filter.name]))
   }
 

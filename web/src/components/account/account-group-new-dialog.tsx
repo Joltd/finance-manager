@@ -14,14 +14,14 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useRequest } from '@/hooks/use-request'
 import { accountUrls } from '@/api/account'
-import { useAccountGroupListStore } from '@/store/account'
+import { useAccountGroupReferenceStore } from '@/store/account'
 
 const formSchema = z.object({
   name: z.string(),
 })
 
 export function AccountGroupNewDialog() {
-  const groupList = useAccountGroupListStore('fetch')
+  const groupList = useAccountGroupReferenceStore('fetch')
   const { loading, error, submit, reset } = useRequest(accountUrls.group)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

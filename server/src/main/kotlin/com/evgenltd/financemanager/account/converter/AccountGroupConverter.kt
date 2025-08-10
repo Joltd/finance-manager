@@ -18,15 +18,18 @@ class AccountGroupConverter(
     fun toRecord(entity: AccountGroup): AccountGroupRecord = AccountGroupRecord(
         id = entity.id,
         name = entity.name,
+        deleted = entity.deleted,
     )
 
     fun toReference(entity: AccountGroup): Reference = Reference(
         id = entity.id!!,
-        name = entity.name
+        name = entity.name,
+        deleted = entity.deleted,
     )
 
     fun toEntity(record: AccountGroupRecord): AccountGroup = AccountGroup(
         id = record.id,
-        name = record.name
+        name = record.name,
+        deleted = record.deleted,
     )
 }

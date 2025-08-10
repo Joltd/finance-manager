@@ -20,6 +20,8 @@ class AccountGroup(
 
     var name: String,
 
+    var deleted: Boolean = false,
+
     @OneToMany(mappedBy = "group")
     var accounts: MutableList<Account> = mutableListOf(),
 

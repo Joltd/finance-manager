@@ -43,7 +43,6 @@ class SseEventAspect(
         }
 
         val event = SseEvent(
-            id = UUID.randomUUID(),
             name = channel,
             data = data
         )

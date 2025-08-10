@@ -8,6 +8,7 @@ import java.util.*
 data class AccountGroupRecord(
     val id: UUID?,
     val name: String,
+    val deleted: Boolean,
 )
 
 data class AccountRecord(
@@ -17,6 +18,13 @@ data class AccountRecord(
     val group: AccountGroupRecord?,
     val deleted: Boolean,
     val reviseDate: LocalDate?,
+)
+
+data class AccountReferenceRecord(
+    val id: UUID,
+    val name: String,
+    val deleted: Boolean,
+    val type: AccountType,
 )
 
 data class AccountGroupEntryRecord(

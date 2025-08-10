@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AccountGroupInput } from '@/components/account/account-group-input'
+import { referenceSchema } from '@/types/common'
 
 interface AccountSheetStoreState extends OpenStoreState {
   id?: string
@@ -42,12 +43,7 @@ type AccountFormData = z.infer<typeof formSchema>
 const formSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string(),
-  group: z
-    .object({
-      id: z.string().uuid().optional(),
-      name: z.string(),
-    })
-    .optional(),
+  group: referenceSchema.optional(),
   parser: z.string().optional(),
   // deleted: z.boolean(),
   // reviseDate: z.string().date().optional(),

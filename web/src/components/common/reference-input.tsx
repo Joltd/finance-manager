@@ -6,7 +6,6 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
-import { Reference } from '@/types/common'
 import { Button } from '@/components/ui/button'
 import React, { useEffect, useState } from 'react'
 import { CheckIcon, Loader2Icon, XIcon } from 'lucide-react'
@@ -25,8 +24,10 @@ export interface ReferenceInputProps<T> {
     FetchStoreState<T[]>,
     'loading' | 'dataFetched' | 'setQueryParams' | 'fetch' | 'data' | 'error'
   >
-  onNew: () => Promise<T>
+  onNew?: () => Promise<T>
   renderItem: (item: T) => React.ReactNode
+  size?: 'default' | 'sm'
+  className?: string
 }
 
 export function ReferenceInput<T>({
@@ -37,6 +38,8 @@ export function ReferenceInput<T>({
   fetchStore,
   onNew,
   renderItem,
+  size = 'default',
+  className,
 }: ReferenceInputProps<T>) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -56,7 +59,7 @@ export function ReferenceInput<T>({
 
   const handleNew = () => {
     onOpenChange(false)
-    onNew().then((result) => onChange?.(result))
+    onNew?.().then((result) => onChange?.(result))
   }
 
   const handleClear = () => {
@@ -73,8 +76,14 @@ export function ReferenceInput<T>({
   return (
     <Popover modal open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start px-3 py-1">
-          {value ? renderItem(value) : placeholder}
+        <Button
+          variant="outline"
+          size={size}
+          className={cn('w-30 shrink-0 justify-start px-3 py-1', className)}
+        >
+          <span className={cn('truncate', !value && 'text-muted-foreground')}>
+            {value ? renderItem(value) : placeholder}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start">
@@ -103,9 +112,11 @@ export function ReferenceInput<T>({
             ))}
           </CommandList>
           <div className="flex">
-            <Button variant="link" className="p-0" onClick={handleNew}>
-              New
-            </Button>
+            {onNew && (
+              <Button variant="link" className="p-0" onClick={handleNew}>
+                New
+              </Button>
+            )}
             <div className="flex-grow" />
             <Button variant="link" className="p-0" onClick={handleClear}>
               Clear

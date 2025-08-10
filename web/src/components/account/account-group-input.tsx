@@ -1,17 +1,17 @@
 import { ReferenceInput } from '@/components/common/reference-input'
-import { AccountGroup } from '@/types/account'
 import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountUrls } from '@/api/account'
-import { useAccountGroupListStore } from '@/store/account'
+import { useAccountGroupReferenceStore } from '@/store/account'
+import { Reference } from '@/types/common'
 
 export interface AccountGroupInputProps {
-  value?: AccountGroup
-  onChange?: (value?: AccountGroup) => void
+  value?: Reference
+  onChange?: (value?: Reference) => void
 }
 
 export function AccountGroupInput({ value, onChange }: AccountGroupInputProps) {
-  const groupList = useAccountGroupListStore(
+  const groupList = useAccountGroupReferenceStore(
     'loading',
     'dataFetched',
     'setQueryParams',
@@ -37,10 +37,11 @@ export function AccountGroupInput({ value, onChange }: AccountGroupInputProps) {
     <ReferenceInput
       value={value}
       onChange={onChange}
-      getId={(it) => it.id!!}
+      getId={(it) => it.id}
       fetchStore={groupList}
       onNew={handleNew}
       renderItem={(group) => <div>{group.name}</div>}
+      className="w-full"
     />
   )
 }

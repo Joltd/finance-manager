@@ -5,6 +5,8 @@ import { useOperationListStore } from '@/store/operation'
 import { SelectFilter, SelectFilterOption } from '@/components/common/filter/select-filter'
 import { OperationType } from '@/types/operation'
 import { asDateRangeValue, asWeek } from '@/lib/date'
+import { AccountFilter } from '@/components/common/filter/account-filter'
+import { CurrencyFilter } from '@/components/common/filter/currency-filter'
 
 export function OperationFilter() {
   const operationList = useOperationListStore('setQueryParams', 'fetch')
@@ -13,7 +15,11 @@ export function OperationFilter() {
   })
 
   useEffect(() => {
-    operationList.setQueryParams(value)
+    const actualValue = {
+      ...value,
+      account: value.account?.id,
+    }
+    operationList.setQueryParams(actualValue)
     operationList.fetch()
   }, [value])
 
@@ -26,6 +32,8 @@ export function OperationFilter() {
         <SelectFilterOption value={OperationType.EXPENSE} label="is expense" />
         <SelectFilterOption value={OperationType.INCOME} label="is income" />
       </SelectFilter>
+      <AccountFilter name="account" label="Account" />
+      <CurrencyFilter name="currency" label="Currency" />
     </Filter>
   )
 }

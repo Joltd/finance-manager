@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountGroup
 import com.evgenltd.financemanager.account.record.AccountBalanceGroupRecord
 import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import org.springframework.stereotype.Service
@@ -27,10 +28,11 @@ class AccountConverter(
         reviseDate = entity.reviseDate,
     )
 
-    fun toReference(entity: Account): Reference = Reference(
+    fun toReference(entity: Account): AccountReferenceRecord = AccountReferenceRecord(
         id = entity.id!!,
         name = entity.name,
-        deleted = entity.deleted
+        deleted = entity.deleted,
+        type = entity.type,
     )
 
     fun toEntity(record: AccountRecord): Account = Account(

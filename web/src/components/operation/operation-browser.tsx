@@ -3,14 +3,11 @@ import { OperationSheet, useOperationSheetStore } from '@/components/operation/o
 import React, { useEffect, useRef } from 'react'
 import { subscribeSse } from '@/lib/notification'
 import { operationEvents } from '@/api/operation'
-import { Spinner } from '@/components/ui/spinner'
-import { Alert, AlertTitle } from '@/components/ui/alert'
-import { AlertCircleIcon } from 'lucide-react'
-import { EmptyLabel } from '@/components/common/empty-label'
 import { TextLabel } from '@/components/common/text-label'
 import { DateLabel } from '@/components/common/date-label'
 import { Pointable } from '@/components/common/pointable'
 import { OperationLabel } from '@/components/common/operation-label'
+import { DataSection } from '@/components/common/data-section'
 
 export function OperationBrowser() {
   const operationList = useOperationListStore(
@@ -32,16 +29,7 @@ export function OperationBrowser() {
 
   return (
     <>
-      {operationList.loading && !operationList.dataFetched ? (
-        <Spinner className="m-6" />
-      ) : operationList.error ? (
-        <Alert variant="destructive" className="m-6">
-          <AlertCircleIcon />
-          <AlertTitle>{operationList.error}</AlertTitle>
-        </Alert>
-      ) : !operationList.data || !operationList.data?.length ? (
-        <EmptyLabel className="m-6" />
-      ) : (
+      <DataSection store={operationList}>
         <div ref={ref} className="relative flex flex-col gap-12 overflow-y-auto">
           {operationList.data?.map((group) => (
             <div key={group.date} className="flex flex-col gap-6">
@@ -67,27 +55,8 @@ export function OperationBrowser() {
               </div>
             </div>
           ))}
-
-          {/*<div className="absolute top-6 right-6 flex gap-2 items-center">*/}
-          {/*  <DropdownMenu>*/}
-          {/*    <DropdownMenuTrigger asChild>*/}
-          {/*      <Button size="sm" variant="outline">*/}
-          {/*        <ListFilterPlusIcon />*/}
-          {/*      </Button>*/}
-          {/*    </DropdownMenuTrigger>*/}
-          {/*    <DropdownMenuContent>*/}
-          {/*      <DropdownMenuItem onClick={handleToggleFilters}>*/}
-          {/*        Toggle filters*/}
-          {/*      </DropdownMenuItem>*/}
-          {/*    </DropdownMenuContent>*/}
-          {/*  </DropdownMenu>*/}
-          {/*  <Button size="sm" onClick={handleAddOperation}>*/}
-          {/*    <PlusIcon />*/}
-          {/*    Add operation*/}
-          {/*  </Button>*/}
-          {/*</div>*/}
         </div>
-      )}
+      </DataSection>
       <OperationSheet />
     </>
   )

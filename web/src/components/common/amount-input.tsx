@@ -1,15 +1,9 @@
 'use client'
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { useEffect, useState } from 'react'
 import { Amount } from '@/types/common'
+import { CurrencyInput } from '@/components/common/currency-input'
 
 export interface AmountInputProps {
   amount?: Amount
@@ -17,13 +11,18 @@ export interface AmountInputProps {
 }
 
 export function AmountInput({ amount, onChange }: AmountInputProps) {
-  const currencies = ['USD', 'EUR', 'RUB', 'GEL']
-  const [inputCurrency, setInputCurrency] = useState<string>(amount?.currency || currencies[0])
-  const [inputValue, setInputValue] = useState<string>(
-    amount?.value ? (amount?.value / 10000).toString() : '',
-  )
+  const [inputCurrency, setInputCurrency] = useState<string>('')
+  const [inputValue, setInputValue] = useState<string>('')
 
   useEffect(() => {
+    setInputCurrency(amount?.currency || '')
+    setInputValue(amount?.value ? (amount?.value / 10000).toString() : '')
+  }, [amount])
+
+  useEffect(() => {
+    if (!inputCurrency) {
+      return
+    }
     const newAmount = { value: +inputValue * 10000, currency: inputCurrency }
     if (amount?.value === newAmount.value && amount?.currency === newAmount.currency) {
       return
@@ -33,12 +32,10 @@ export function AmountInput({ amount, onChange }: AmountInputProps) {
 
   const handleChangeValue = (value: string) => {
     setInputValue(value)
-    // onChange?.({ value: +inputValue * 10000, currency: inputCurrency })
   }
 
-  const handleChangeCurrency = (currency: string) => {
-    setInputCurrency(currency)
-    // onChange?.({ value: +inputValue * 10000, currency: inputCurrency })
+  const handleChangeCurrency = (currency?: string) => {
+    setInputCurrency(currency || '')
   }
 
   return (
@@ -51,18 +48,7 @@ export function AmountInput({ amount, onChange }: AmountInputProps) {
         onWheel={(e) => e.currentTarget.blur()}
       />
 
-      <Select value={inputCurrency} onValueChange={handleChangeCurrency}>
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {currencies.map((it) => (
-            <SelectItem key={it} value={it}>
-              {it}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <CurrencyInput value={inputCurrency} onChange={handleChangeCurrency} />
     </div>
   )
 }

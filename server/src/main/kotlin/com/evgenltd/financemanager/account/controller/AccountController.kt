@@ -5,6 +5,8 @@ import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.record.AccountBalanceFilter
 import com.evgenltd.financemanager.account.record.AccountBalanceGroupRecord
 import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.account.record.AccountReferenceRecord
+import com.evgenltd.financemanager.account.service.AccountEventService
 import com.evgenltd.financemanager.account.service.AccountService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,13 +21,17 @@ import java.util.*
 @DataResponse
 class AccountController(
     private val accountService: AccountService,
+    private val accountEventService: AccountEventService,
 ) {
 
     @GetMapping("/account/reference")
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,
         @RequestParam("type", required = false) type: AccountType?,
-    ): List<AccountRecord> = accountService.listReference(mask, type)
+    ): List<AccountReferenceRecord> = accountService.listReference(mask, type)
+
+    @GetMapping("/account")
+    fun list(@RequestParam("type", required = false) type: AccountType?): List<AccountRecord> = accountService.list(type)
 
     @GetMapping("/account/balance")
     fun listBalance(filter: AccountBalanceFilter): List<AccountBalanceGroupRecord> = accountService.listBalances(filter)
@@ -34,9 +40,9 @@ class AccountController(
     fun byId(@PathVariable("id") id: UUID): AccountRecord = accountService.byId(id)
 
     @PostMapping("/account")
-    fun update(@RequestBody record: AccountRecord): AccountRecord = accountService.update(record)
+    fun update(@RequestBody record: AccountRecord): AccountRecord = accountService.update(record).also { accountEventService.account() }
 
     @DeleteMapping("/account/{id}")
-    fun delete(@PathVariable("id") id: UUID) = accountService.delete(id)
+    fun delete(@PathVariable("id") id: UUID) = accountService.delete(id).also { accountEventService.account() }
 
 }

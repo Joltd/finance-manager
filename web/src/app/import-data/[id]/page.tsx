@@ -14,6 +14,7 @@ import { ImportDataActionBar } from '@/components/import-data/import-data-action
 import { ImportDataOperationSheet } from '@/components/import-data/import-data-operation-sheet'
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
+import { DataSection } from '@/components/common/data-section'
 
 export default function Page() {
   const { id } = useParams()
@@ -69,42 +70,31 @@ export default function Page() {
     ).length === importData.data.totals.length
 
   return (
-    <>
-      {importData.loading && !importData.dataFetched ? (
-        <Spinner className="m-6" />
-      ) : importData.error ? (
-        <Alert variant="destructive" className="m-6">
-          <AlertCircleIcon />
-          <AlertTitle>{importData.error}</AlertTitle>
-        </Alert>
-      ) : importData.data ? (
-        <>
-          <div className="flex flex-col gap-4 px-6 mt-6">
-            <div className="flex">
-              <ImportDataTotals
-                importDataId={importData.data.id}
-                account={importData.data.account}
-                totals={importData.data.totals}
-              />
-              <div className="flex-grow" />
-              <TextLabel variant="title">
-                {importData.data.account.name}
-                {importData.data.progress ? (
-                  <Spinner />
-                ) : (
-                  <ValidityIcon valid={importValid} collapseIfEmpty />
-                )}
-              </TextLabel>
-            </div>
-            <ImportDataFilter />
-          </div>
-          <ImportDataEntryBrowser />
-          <ImportDataOperationSheet
-            importDataId={importData.data.id}
-            relatedAccount={importData.data.account}
+    <DataSection store={importData}>
+      <div className="flex flex-col gap-4 px-6 mt-6">
+        <div className="flex">
+          <ImportDataTotals
+            importDataId={importData.data!!.id}
+            account={importData.data!!.account}
+            totals={importData.data!!.totals}
           />
-        </>
-      ) : null}
-    </>
+          <div className="flex-grow" />
+          <TextLabel variant="title">
+            {importData.data!!.account.name}
+            {importData.data!!.progress ? (
+              <Spinner />
+            ) : (
+              <ValidityIcon valid={importValid} collapseIfEmpty />
+            )}
+          </TextLabel>
+        </div>
+        <ImportDataFilter />
+      </div>
+      <ImportDataEntryBrowser />
+      <ImportDataOperationSheet
+        importDataId={importData.data!!.id}
+        relatedAccount={importData.data!!.account}
+      />
+    </DataSection>
   )
 }

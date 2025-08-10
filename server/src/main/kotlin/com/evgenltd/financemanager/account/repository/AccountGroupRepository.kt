@@ -8,8 +8,4 @@ import java.util.*
 
 @Repository
 interface AccountGroupRepository : JpaRepository<AccountGroup, UUID>, JpaSpecificationExecutor<AccountGroup> {
-
-    fun findByName(name: String): AccountGroup?
-
-    fun findByNameLike(name: String): List<AccountGroup>
 }

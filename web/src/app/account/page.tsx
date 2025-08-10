@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { DataSection } from '@/components/common/data-section'
 
 export default function Page() {
   const accountBalance = useAccountBalanceStore(
@@ -48,60 +49,45 @@ export default function Page() {
   }
 
   return (
-    <>
-      {accountBalance.loading && !accountBalance.dataFetched ? (
-        <Spinner className="m-6" />
-      ) : accountBalance.error ? (
-        <Alert variant="destructive" className="m-6">
-          <AlertCircleIcon />
-          <AlertTitle>{accountBalance.error}</AlertTitle>
-        </Alert>
-      ) : !accountBalance.data || !accountBalance.data?.length ? (
-        <EmptyLabel className="m-6" />
-      ) : accountBalance.data ? (
-        <>
-          <div className="relative flex flex-col gap-12 p-6 overflow-y-auto">
-            {accountBalance.data?.map((group) => (
-              <div key={group.id} className="flex flex-col gap-4">
-                <TextLabel variant="title">
-                  {group.name || <EmptyLabel>No group</EmptyLabel>}
-                </TextLabel>
-                <div className="flex flex-wrap gap-4">
-                  {group.accounts?.map((account) => (
-                    <AccountBalanceCard
-                      key={account.id}
-                      id={account.id}
-                      name={account.name}
-                      balances={account.balances}
-                      onClick={() => accountSheet.openWith(account.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            <div className="absolute top-6 right-6 flex gap-2 items-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="outline">
-                    <ListFilterPlusIcon />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={handleToggleZeroBalances}>
-                    Toggle zero balances
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button size="sm" onClick={handleAddAccount}>
-                <PlusIcon />
-                Add account
-              </Button>
+    <DataSection store={accountBalance}>
+      <div className="relative flex flex-col gap-12 p-6 overflow-y-auto">
+        {accountBalance.data?.map((group) => (
+          <div key={group.id} className="flex flex-col gap-4">
+            <TextLabel variant="title">{group.name || <EmptyLabel>No group</EmptyLabel>}</TextLabel>
+            <div className="flex flex-wrap gap-4">
+              {group.accounts?.map((account) => (
+                <AccountBalanceCard
+                  key={account.id}
+                  id={account.id}
+                  name={account.name}
+                  balances={account.balances}
+                  onClick={() => accountSheet.openWith(account.id)}
+                />
+              ))}
             </div>
           </div>
-          <AccountSheet />
-        </>
-      ) : null}
-    </>
+        ))}
+
+        <div className="absolute top-6 right-6 flex gap-2 items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline">
+                <ListFilterPlusIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleToggleZeroBalances}>
+                Toggle zero balances
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button size="sm" onClick={handleAddAccount}>
+            <PlusIcon />
+            Add account
+          </Button>
+        </div>
+      </div>
+      <AccountSheet />
+    </DataSection>
   )
 }

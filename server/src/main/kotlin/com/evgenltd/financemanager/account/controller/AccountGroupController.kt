@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.account.controller
 
 import com.evgenltd.financemanager.common.component.DataResponse
 import com.evgenltd.financemanager.account.record.AccountGroupRecord
+import com.evgenltd.financemanager.account.service.AccountGroupEventService
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.service.AccountGroupService
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -16,7 +17,8 @@ import java.util.*
 @RestController
 @DataResponse
 class AccountGroupController(
-    private val accountGroupService: AccountGroupService
+    private val accountGroupService: AccountGroupService,
+    private val accountGroupEventService: AccountGroupEventService,
 ) {
 
     @GetMapping("/account-group/reference")
@@ -33,8 +35,10 @@ class AccountGroupController(
 
     @PostMapping("/account-group")
     fun update(@RequestBody record: AccountGroupRecord): AccountGroupRecord = accountGroupService.update(record)
+        .also { accountGroupEventService.accountGroup() }
 
     @DeleteMapping("/account-group/{id}")
     fun delete(@PathVariable("id") id: UUID) = accountGroupService.delete(id)
+        .also { accountGroupEventService.accountGroup() }
 
 }

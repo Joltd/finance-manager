@@ -10,6 +10,7 @@ export enum AccountType {
 export interface AccountGroup {
   id?: string
   name: string
+  deleted: boolean
 }
 
 export const accountGroupSchema = z.object({
@@ -21,14 +22,20 @@ export interface Account {
   id?: string
   name: string
   type: AccountType
+  deleted: boolean
   group?: AccountGroup
+}
+
+export interface AccountReference {
+  id: string
+  name: string
+  type: AccountType
 }
 
 export const accountReferenceShema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   type: z.nativeEnum(AccountType),
-  group: accountGroupSchema.optional(),
 })
 
 export interface AccountBalanceGroup {
@@ -41,4 +48,9 @@ export interface AccountBalance {
   id: string
   name: string
   balances: Amount[]
+}
+
+export interface Currency {
+  id?: string
+  name: string
 }

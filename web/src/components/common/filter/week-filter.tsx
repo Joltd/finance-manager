@@ -87,9 +87,10 @@ export function WeekFilter({ from, to, value, onChange }: WeekFilterProps) {
           <Button {...buttonProps}>{formatWeek(value)}</Button>
         </PopoverTrigger>
         <PopoverContent>
+          Month {value?.from}
           <Calendar
             mode="single"
-            month={value?.from ? asUtc(value?.from) : undefined}
+            defaultMonth={value?.from ? asUtc(value?.from) : undefined}
             onDayClick={handleDayClick}
             modifiers={{
               selected,

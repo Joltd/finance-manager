@@ -1,12 +1,12 @@
 'use client'
-import { Account } from '@/types/account'
+import { Account, AccountReference } from '@/types/account'
 import { AccountTypeIcon } from '@/components/common/account-type-icon'
 import { useEffect, useRef, useState } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 export interface AccountProps {
-  account?: Account
+  account?: Account | AccountReference
   icon?: boolean
   className?: string
 }

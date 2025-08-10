@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.account.controller
 import com.evgenltd.financemanager.account.record.CurrencyRecord
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.service.CurrencyService
+import com.evgenltd.financemanager.common.component.DataResponse
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
+@DataResponse
 class CurrencyController(
     private val currencyService: CurrencyService
 ) {

@@ -35,11 +35,7 @@ class SseService : Loggable() {
 
     @Scheduled(fixedRate = 10_000)
     fun heartbeat() {
-        val event = SseEvent(
-            id = UUID.randomUUID(),
-            name = "heartbeat",
-            data = ""
-        )
+        val event = SseEvent(name = "heartbeat")
         onEvent(event)
     }
 
