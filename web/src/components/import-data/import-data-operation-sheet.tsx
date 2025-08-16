@@ -7,7 +7,6 @@ import {
 } from '@/components/operation/operation-form'
 import { Button } from '@/components/ui/button'
 import { createStore } from 'zustand'
-import { Operation } from '@/types/operation'
 import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { Form } from '@/components/ui/form'
 import { ImportDataOperationLabel } from '@/components/import-data/import-data-operation-label'
@@ -18,9 +17,7 @@ import { useStoreSelect } from '@/hooks/use-store-select'
 import { useRequest } from '@/hooks/use-request'
 import { operationUrls } from '@/api/operation'
 import { importDataUrls } from '@/api/import-data'
-import { useImportDataStore, useImportDataSuggestionStore } from '@/store/import-data'
-import { Fragment, useEffect, useState } from 'react'
-import { OperationLabel } from '@/components/common/operation-label'
+import { useEffect, useState } from 'react'
 import { RatingIcon } from '@/components/common/rating-icon'
 
 export interface ImportDataOperationSheetProps {

@@ -2,7 +2,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import { AlertCircleIcon } from 'lucide-react'
 import { EmptyLabel } from '@/components/common/empty-label'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { FetchStoreState } from '@/store/common/fetch'
 
 export interface DataSection<T> {

@@ -1,6 +1,6 @@
 import { useOperationListStore, useOperationSelectionStore } from '@/store/operation'
 import { OperationSheet, useOperationSheetStore } from '@/components/operation/operation-sheet'
-import React, { useEffect, useRef, MouseEvent } from 'react'
+import React, { useEffect, MouseEvent } from 'react'
 import { subscribeSse } from '@/lib/notification'
 import { operationEvents } from '@/api/operation'
 import { TextLabel } from '@/components/common/text-label'

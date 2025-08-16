@@ -1,5 +1,5 @@
 import { AccountType } from '@/types/account'
-import { Squircle, SquircleIcon } from 'lucide-react'
+import { SquircleIcon } from 'lucide-react'
 
 export interface AccountTypeIconProps {
   type?: AccountType

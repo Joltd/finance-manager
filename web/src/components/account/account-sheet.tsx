@@ -1,7 +1,7 @@
 import z from 'zod'
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '../ui/sheet'
 import { createStore } from 'zustand'
-import { Account, AccountType } from '@/types/account'
+import { AccountType } from '@/types/account'
 import { openStoreSlice, OpenStoreState } from '@/store/common/open'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { useRequest } from '@/hooks/use-request'
@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { AccountGroupInput } from '@/components/account/account-group-input'
 import { referenceSchema } from '@/types/common'
 

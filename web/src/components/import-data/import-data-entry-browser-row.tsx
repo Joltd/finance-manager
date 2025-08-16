@@ -2,10 +2,9 @@ import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { Account } from '@/types/account'
 import { cn } from '@/lib/utils'
 import { ImportDataOperationLabel } from '@/components/import-data/import-data-operation-label'
-import { BotIcon, Link2Icon } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Link2Icon } from 'lucide-react'
 import { Pointable } from '@/components/common/pointable'
-import { FC, memo, MouseEvent } from 'react'
+import { memo, MouseEvent } from 'react'
 import {
   useImportDataOperationSelectionStore,
   useImportDataEntrySelectionStore,
@@ -17,8 +16,6 @@ import { RatingIcon } from '@/components/common/rating-icon'
 const rowStyle = 'grid items-center grid-cols-[minmax(0,_1fr)_64px_minmax(0,_1fr)] my-1'
 
 export interface ImportDataEntryBrowserRowProps {
-  importDataId: string
-  id?: string
   entry: ImportDataEntry
   linked: boolean
   operation?: Operation
@@ -31,8 +28,6 @@ export interface ImportDataEntryBrowserRowProps {
 }
 
 function _ImportDataEntryBrowserRow({
-  importDataId,
-  id,
   entry,
   linked,
   operation,

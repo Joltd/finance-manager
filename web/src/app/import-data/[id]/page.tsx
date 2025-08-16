@@ -8,18 +8,14 @@ import { useParams, useRouter } from 'next/navigation'
 import { importDataEvents } from '@/api/import-data'
 import { ImportDataFilter } from '@/components/import-data/import-data-filter'
 import { ImportDataTotals } from '@/components/import-data/import-data-totals'
-import { AlertCircleIcon } from 'lucide-react'
 import { useEffect } from 'react'
 import { Spinner } from '@/components/ui/spinner'
-import { Alert, AlertTitle } from '@/components/ui/alert'
 import { ImportDataEntryBrowser } from '@/components/import-data/import-data-entry-browser'
 import { subscribeSse } from '@/lib/notification'
-import { ImportDataActionBar } from '@/components/import-data/import-data-action-bar'
 import { ImportDataOperationSheet } from '@/components/import-data/import-data-operation-sheet'
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
-import { minus, plus } from '@/types/common'
 
 export default function Page() {
   const { id } = useParams()

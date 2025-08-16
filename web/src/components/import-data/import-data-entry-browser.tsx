@@ -1,5 +1,5 @@
 import { DateLabel } from '@/components/common/date-label'
-import { useEffect, useRef, MouseEvent } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   ImportDataEntryBrowserOperationRow,
   ImportDataEntryBrowserRow,
@@ -58,8 +58,6 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                 entry.id ? (
                   <ImportDataEntryBrowserRow
                     key={index}
-                    importDataId={importData.data!!.id}
-                    id={entry.id}
                     entry={entry}
                     linked={entry.linked}
                     operation={entry.operation}

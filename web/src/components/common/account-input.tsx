@@ -5,7 +5,6 @@ import { accountUrls } from '@/api/account'
 import { askText } from '@/components/common/ask-text-dialog'
 import { AccountLabel } from '@/components/common/account-label'
 import { ReferenceInput } from '@/components/common/reference-input'
-import { useEffect } from 'react'
 
 export interface AccountInputProps {
   type: AccountType
