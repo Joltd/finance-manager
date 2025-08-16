@@ -9,3 +9,5 @@ fun DateRange?.validWeek(): Range<LocalDate> {
     val actualTo = actualFrom.plusWeeks(1L)
     return Range(actualFrom, actualTo)
 }
+
+infix fun <T> T?.until(other: T?): Range<T> = Range(this, other)

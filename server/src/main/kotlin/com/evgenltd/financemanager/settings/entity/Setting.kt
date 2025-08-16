@@ -27,7 +27,8 @@ class Setting(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
+
+    override fun toString(): String = "Setting(id=$id, name='$name', value=$value)"
+
 }

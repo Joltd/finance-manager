@@ -38,7 +38,8 @@ class ExchangeRate(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
+
+    override fun toString(): String = "ExchangeRate(id=$id, date=$date, from='$from', to='$to', value=$value)"
+
 }

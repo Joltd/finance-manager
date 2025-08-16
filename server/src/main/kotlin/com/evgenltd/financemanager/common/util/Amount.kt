@@ -54,9 +54,6 @@ data class Amount(val value: Long, val currency: String) {
         }
     }
 
-    fun isSimilar(that: Amount): Boolean =
-        this.currency == that.currency && (this.value - that.value).absoluteValue < this.value / 10
-
     fun isZero(): Boolean = value == 0L
 
     fun isNotZero(): Boolean = value != 0L
@@ -91,17 +88,3 @@ fun fromFractionalString(value: String, currency: String): Amount = Amount(
     BigDecimal(value.replace(",",".")).movePointRight(Amount.SCALE).toLong(),
     currency
 )
-
-fun String.parseAmount(): Amount {
-    val parts = this.split(" ")
-    if (parts.size != 2) {
-        throw IllegalArgumentException("Unable to parse amount [$this]")
-    }
-    return fromFractionalString(parts[0], parts[1])
-}
-
-fun <T> Iterable<T>.sumOf(selector: (T) -> Amount): Amount = map { selector(it) }.reduce { acc, amount -> acc + amount }
-
-private val safeComparator = compareBy<Amount?>({ it?.currency ?: "" }, { it?.value ?: 0 })
-
-fun Amount?.compareSafe(other: Amount): Int = safeComparator.compare(this, other)

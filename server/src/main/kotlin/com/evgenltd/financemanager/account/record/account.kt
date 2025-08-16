@@ -28,12 +28,6 @@ data class AccountReferenceRecord(
     val type: AccountType,
 )
 
-data class AccountGroupEntryRecord(
-    val id: UUID,
-    val name: String,
-    val accounts: List<AccountRecord>,
-)
-
 data class AccountBalanceFilter(
     val hideZeroBalances: Boolean = false,
 )

@@ -4,7 +4,6 @@ import com.evgenltd.financemanager.common.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.account.entity.Account
-import com.evgenltd.financemanager.importexport2.record.OperationScoreRecord
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
@@ -70,10 +69,7 @@ class ImportDataOperation(
 
     var selected: Boolean = false,
 
-    var distance: Double? = null, // todo rename to score
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    var similarOperations: List<OperationScoreRecord> = emptyList(),
+    var score: Double? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -84,7 +80,9 @@ class ImportDataOperation(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
+
+    override fun toString(): String =
+        "ImportDataOperation(id=$id, date=$date, type=$type, amountFrom=$amountFrom, accountFrom=$accountFrom, amountTo=$amountTo, accountTo=$accountTo, score=$score, selected=$selected)"
+
 }

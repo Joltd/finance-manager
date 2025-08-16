@@ -6,8 +6,6 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Root
 import java.util.*
 
 @Entity
@@ -36,11 +34,8 @@ class AccountGroup(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
 
-    companion object {
-        fun name(root: Root<AccountGroup>): Path<String> = root.get(AccountGroup::name.name)
-    }
+    override fun toString(): String = "AccountGroup(id=$id, name='$name')"
+
 }

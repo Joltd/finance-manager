@@ -9,8 +9,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Root
 import java.time.LocalDate
 import java.util.*
 
@@ -54,10 +52,4 @@ class Account(
 
     override fun toString(): String = "Account(id=$id, name='$name')"
 
-
-    companion object {
-        fun name(root: Root<Account>): Path<String> = root.get(Account::name.name)
-
-        fun type(root: Root<Account>): Path<AccountType> = root.get(Account::type.name)
-    }
 }

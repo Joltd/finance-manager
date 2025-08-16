@@ -14,7 +14,7 @@ export function AccountGroupInput({ value, onChange }: AccountGroupInputProps) {
   const groupList = useAccountGroupReferenceStore(
     'loading',
     'dataFetched',
-    'setQueryParams',
+    'updateQueryParams',
     'fetch',
     'data',
     'error',

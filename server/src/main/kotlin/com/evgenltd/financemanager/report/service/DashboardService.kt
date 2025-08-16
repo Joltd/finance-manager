@@ -1,12 +1,10 @@
 package com.evgenltd.financemanager.report.service
 
-import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.operation.service.TransactionService
 import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.settings.service.SettingService
-import com.evgenltd.financemanager.turnover.service.TurnoverService
-import com.evgenltd.financemanager.turnover.service.sliceLast
+import com.evgenltd.financemanager.account.service.TurnoverService
+import com.evgenltd.financemanager.account.service.sliceLast
 import org.springframework.stereotype.Service
 
 @Service

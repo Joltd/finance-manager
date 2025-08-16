@@ -2,8 +2,6 @@ package com.evgenltd.financemanager.taxes.service
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.taxes.entity.Tax

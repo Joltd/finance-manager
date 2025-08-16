@@ -12,9 +12,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 @Entity
@@ -41,8 +39,6 @@ class Transaction(
     @JoinColumn(name = "operation_id")
     var operation: Operation,
 
-    @UpdateTimestamp
-    val updatedAt: LocalDateTime? = null,
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -54,7 +50,8 @@ class Transaction(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
+
+    override fun toString(): String = "Transaction(id=$id, type=$type, date=$date, amount=$amount, account=$account)"
+
 }

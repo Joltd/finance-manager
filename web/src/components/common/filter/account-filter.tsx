@@ -11,7 +11,7 @@ export function AccountFilter({ value, onChange }: AccountFilterProps) {
     'dataFetched',
     'loading',
     'error',
-    'setQueryParams',
+    'updateQueryParams',
     'fetch',
   )
 

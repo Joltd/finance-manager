@@ -3,8 +3,6 @@ package com.evgenltd.financemanager.importexport.entity
 import com.evgenltd.financemanager.account.entity.Account
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -24,18 +22,12 @@ class ImportData(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
-    var parser: UUID = UUID.randomUUID(),
-
     @ManyToOne
     @JoinColumn(name = "account_id")
     var account: Account,
 
+    @Deprecated("Should be removed")
     var currency: String? = null,
-
-    @Enumerated(EnumType.STRING)
-    var status: ImportDataStatus = ImportDataStatus.NEW,
-
-    var message: String? = null,
 
     var progress: Boolean = false,
 
@@ -58,11 +50,8 @@ class ImportData(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
-}
+    override fun hashCode(): Int = id?.hashCode() ?: 0
 
-enum class ImportDataStatus {
-    NEW, PREPARE_IN_PROGRESS, PREPARE_DONE, IMPORT_IN_PROGRESS, IMPORT_DONE, FAILED
+    override fun toString(): String = "ImportData(id=$id, account=$account)"
+
 }

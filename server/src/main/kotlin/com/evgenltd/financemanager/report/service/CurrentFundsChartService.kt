@@ -7,8 +7,8 @@ import com.evgenltd.financemanager.report.record.CurrentFundsChartAmountEntryRec
 import com.evgenltd.financemanager.report.record.CurrentFundsChartEntryRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartRecord
 import com.evgenltd.financemanager.report.record.CurrentFundsChartSettingsRecord
-import com.evgenltd.financemanager.turnover.service.TurnoverService
-import com.evgenltd.financemanager.turnover.service.sliceLast
+import com.evgenltd.financemanager.account.service.TurnoverService
+import com.evgenltd.financemanager.account.service.sliceLast
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 

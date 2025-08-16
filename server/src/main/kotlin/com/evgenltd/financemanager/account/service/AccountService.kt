@@ -14,8 +14,8 @@ import com.evgenltd.financemanager.account.record.AccountBalanceGroupRecord
 import com.evgenltd.financemanager.account.record.AccountBalanceRecord
 import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.account.repository.AccountRepository
-import com.evgenltd.financemanager.turnover.entity.Balance
-import com.evgenltd.financemanager.turnover.repository.BalanceRepository
+import com.evgenltd.financemanager.account.entity.Balance
+import com.evgenltd.financemanager.account.repository.BalanceRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull

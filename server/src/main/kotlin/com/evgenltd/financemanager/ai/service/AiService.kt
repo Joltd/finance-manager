@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.ai.service
 
 import com.evgenltd.financemanager.ai.record.EmbeddingResult
-import com.evgenltd.financemanager.common.repository.EmbeddingRepository
 import org.springframework.stereotype.Service
 
 @Service

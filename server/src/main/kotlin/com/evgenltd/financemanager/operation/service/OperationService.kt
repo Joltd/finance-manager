@@ -1,15 +1,13 @@
 package com.evgenltd.financemanager.operation.service
 
-import com.evgenltd.financemanager.common.entity.Embedding
 import com.evgenltd.financemanager.common.repository.account
 import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.repository.currency
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.common.service.validWeek
-import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationEvent
@@ -20,12 +18,8 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.*
 
 @Service

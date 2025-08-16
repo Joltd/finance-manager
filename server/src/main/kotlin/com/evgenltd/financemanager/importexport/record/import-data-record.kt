@@ -1,64 +1,129 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.importexport.entity.ImportDataStatus
-import com.evgenltd.financemanager.importexport.entity.ImportOption
-import com.evgenltd.financemanager.importexport.entity.ImportResult
-import com.evgenltd.financemanager.importexport2.record.ImportDataParsedEntry
+import com.evgenltd.financemanager.common.record.DateRange
+import com.evgenltd.financemanager.common.record.Range
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
+import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.record.AccountRecord
-import com.evgenltd.financemanager.common.record.Reference
-import java.util.UUID
+import java.time.LocalDate
+import java.util.*
+
+data class ImportDataCreateRequest(
+    val account: UUID,
+)
+
+data class ImportDataLinkRequest(
+    val entryId: UUID,
+    val operationId: UUID,
+)
+
+data class ImportDataUnlinkRequest(
+    val entryIds: List<UUID>,
+)
 
 data class ImportDataRecord(
     val id: UUID,
-    val parser: Reference,
     val account: AccountRecord,
-    val currency: String?,
-    val status: ImportDataStatus,
-    val message: String?,
-    val progress: Double
+    val dateRange: Range<LocalDate>?,
+    val progress: Boolean,
+    val totals: List<ImportDataTotalRecord>
+)
+
+data class ImportDataTotalRecord(
+    val currency: String,
+    val operation: Amount?,
+    val suggested: Amount?,
+    val parsed: Amount?,
+    val actual: Amount?,
+    val valid: Boolean,
+)
+
+data class EntryFilter(
+    val date: DateRange? = null,
+    val linkage: Boolean? = null,
+    val entryVisible: Boolean? = null,
+    val operationVisible: Boolean? = null,
+    val totalValid: Boolean? = null,
+)
+
+data class ImportDataEntryGroupRecord(
+    val date: LocalDate,
+    val valid: Boolean? = null,
+    val totals: List<ImportDataTotalRecord> = emptyList(),
+    val entries: List<ImportDataEntryRecord> = emptyList(),
 )
 
 data class ImportDataEntryRecord(
-    val id: UUID,
-    val parsedEntry: ImportDataParsedEntry,
-    val suggestedOperation: OperationRecord?,
-    val similarOperations: List<OperationRecord>,
-    val matchedCategoryMappings: List<CategoryMappingRecord>,
-    val preparationResult: Boolean,
-    val preparationError: String?,
-    val option: ImportOption,
-    val importResult: ImportResult,
-    val importError: String?,
+    val id: UUID? = null,
+    val linked: Boolean = false,
+    val operation: OperationRecord? = null,
+    val operationVisible: Boolean = true,
+    val parsed: ImportDataOperationRecord? = null,
+    val parsedVisible: Boolean = true,
+    val suggestions: List<ImportDataOperationRecord> = emptyList(),
 )
 
-data class ImportDataEntryFilter(
-    val page: Int,
-    val size: Int = 20,
-    val operationType: OperationType? = null,
-    val preparationResult: Boolean? = null,
-    val option: ImportOption? = null,
-    val hideSkip: Boolean = false,
-    val importResult: ImportResult? = null
+data class ImportDataOperationRecord(
+    val id: UUID? = null,
+    val date: LocalDate,
+    val type: OperationType,
+    val amountFrom: Amount,
+    val accountFrom: AccountRecord?,
+    val amountTo: Amount,
+    val accountTo: AccountRecord?,
+    val description: String?,
+    val raw: List<String> = emptyList(),
+    val selected: Boolean,
+    val distance: Double?,
+    val rating: SuggestionRating? = null,
 )
 
-data class ImportDataEntryPage(
-    val page: Int,
-    val size: Int,
-    val total: Long,
-    val entries: List<ImportDataEntryRecord>,
+data class ImportDataEntryVisibilityRequest(
+    val operations: List<UUID>,
+    val entries: List<UUID>,
+    val visible: Boolean,
 )
 
-data class ImportDataEntryUpdateRequest(
-    val suggestedOperation: OperationRecord? = null,
-    val preparationResult: Boolean? = null,
-    val option: ImportOption? = null,
+enum class SuggestionRating {
+    GOOD,
+    FAIR,
+    POOR,
+}
+
+data class ImportDataParsedEntry(
+    val rawEntries: List<String> = emptyList(),
+    val date: LocalDate,
+    val type: OperationType,
+    val accountFrom: Account? = null,
+    val amountFrom: Amount,
+    val accountTo: Account? = null,
+    val amountTo: Amount,
+    val description: String,
+    val hint: String? = null,
 )
 
-data class ImportDataState(
-    val id: UUID,
-    val status: ImportDataStatus,
-    val progress: Double,
+interface ImportDataDateRange {
+    val min: LocalDate
+    val max: LocalDate
+}
+
+interface AccountScore {
+    val accountId: UUID
+    val score: Double
+}
+
+data class OperationKey(
+    val date: LocalDate,
+    val type: OperationType,
+    val amountFrom: Amount,
+    val accountFrom: UUID,
+    val amountTo: Amount,
+    val accountTo: UUID
 )
 
+data class TotalEntry(
+    val date: LocalDate,
+    val amount: Amount,
+)

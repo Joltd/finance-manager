@@ -8,7 +8,7 @@ import com.evgenltd.financemanager.report.record.FlowChartEntryRecord
 import com.evgenltd.financemanager.report.record.FlowChartGroupRecord
 import com.evgenltd.financemanager.report.record.FlowChartRecord
 import com.evgenltd.financemanager.report.record.FlowChartSettingsRecord
-import com.evgenltd.financemanager.turnover.service.TurnoverService
+import com.evgenltd.financemanager.account.service.TurnoverService
 import org.springframework.stereotype.Service
 
 @Service

@@ -50,7 +50,9 @@ class ImportDataTotal(
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
+
+    override fun toString(): String =
+        "ImportDataTotal(importData=$importData, type=$type, date=$date, amount=$amount, id=$id)"
+
 }

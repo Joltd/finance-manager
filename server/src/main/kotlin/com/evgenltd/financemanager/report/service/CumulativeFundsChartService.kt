@@ -3,7 +3,7 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartRecord
 import com.evgenltd.financemanager.report.record.CumulativeFundsChartSettingsRecord
-import com.evgenltd.financemanager.turnover.service.TurnoverService
+import com.evgenltd.financemanager.account.service.TurnoverService
 import org.springframework.stereotype.Service
 import java.math.RoundingMode
 import java.time.LocalDate

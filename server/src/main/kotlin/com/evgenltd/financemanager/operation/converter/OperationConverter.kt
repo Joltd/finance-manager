@@ -42,16 +42,6 @@ class OperationConverter(
         full = existed?.full,
     )
 
-    fun fillEntity(entity: Operation, record: OperationRecord) {
-        entity.date = record.date
-        entity.type = record.type
-        entity.amountFrom = record.amountFrom
-        entity.accountFrom = accountConverter.toEntity(record.accountFrom)
-        entity.amountTo = record.amountTo
-        entity.accountTo = accountConverter.toEntity(record.accountTo)
-        entity.description = record.description
-    }
-
     fun copy(entity: Operation): Operation = toEntity(toRecord(entity))
 
 }

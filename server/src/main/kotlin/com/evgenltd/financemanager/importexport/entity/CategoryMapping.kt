@@ -8,12 +8,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.criteria.Path
-import jakarta.persistence.criteria.Root
 import java.util.*
 
 @Entity
 @Table(name = "category_mappings")
+@Deprecated("Don't use it")
 class CategoryMapping(
 
     @Id
@@ -41,12 +40,6 @@ class CategoryMapping(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    companion object {
-        fun parser(root: Root<CategoryMapping>): Path<UUID> = root.get(CategoryMapping::parser.name)
-
-        fun categoryId(root: Root<CategoryMapping>): Path<UUID> = root.get<UUID?>(CategoryMapping::category.name).get(Account::id.name)
     }
 
 }

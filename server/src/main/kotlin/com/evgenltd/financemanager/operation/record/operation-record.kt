@@ -1,11 +1,10 @@
 package com.evgenltd.financemanager.operation.record
 
+import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.account.record.AccountRecord
-import com.evgenltd.financemanager.common.record.DateRange
-import com.evgenltd.financemanager.common.record.Reference
 import org.springframework.context.ApplicationEvent
 import java.time.LocalDate
 import java.util.*
