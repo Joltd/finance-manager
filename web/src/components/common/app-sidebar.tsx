@@ -25,9 +25,10 @@ import {
 import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
 import { cn } from '@/lib/utils'
+import { NotificationList } from '@/components/common/notification-list'
 
 export function AppSidebar() {
-  const { data, fetch } = useImportDataListStore('data', 'fetch')
+  const { data, fetch } = useImportDataListStore('data', 'fetch') // todo support loadig, error
   const { open } = useImportDataNewDialogStore('open')
   const { submit } = useRequest(importDataUrls.id, { method: 'DELETE' })
 
@@ -101,6 +102,7 @@ export function AppSidebar() {
       <SidebarFooter>
         <div>
           <AppearanceTrigger />
+          <NotificationList />
         </div>
       </SidebarFooter>
     </Sidebar>

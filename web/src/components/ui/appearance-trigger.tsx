@@ -1,5 +1,4 @@
 'use client'
-
 import { Button } from '@/components/ui/button'
 import { useTheme } from 'next-themes'
 import {
@@ -11,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './dropdown-menu'
-import { Palette } from 'lucide-react'
+import { PaletteIcon } from 'lucide-react'
 
 export function AppearanceTrigger() {
   const { setTheme, theme, themes } = useTheme()
@@ -20,7 +19,7 @@ export function AppearanceTrigger() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost">
-          <Palette />
+          <PaletteIcon />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

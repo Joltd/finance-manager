@@ -35,3 +35,14 @@ data class Reference(
     val name: String,
     val deleted: Boolean = false,
 )
+
+enum class NotificationType {
+    ERROR,
+    WARNING,
+    INFO,
+}
+
+data class NotificationRecord(
+    val type: NotificationType,
+    val message: String,
+)

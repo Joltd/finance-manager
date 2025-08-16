@@ -8,6 +8,7 @@ import { AskTextDialog } from '@/components/common/ask-text-dialog'
 import { ActionBarContainer } from '@/components/common/action-bar'
 import React from 'react'
 import { CurrencyInitialFetcher } from '@/components/account/currency-initial-fetcher'
+import { Toaster } from '@/components/ui/sonner'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -49,6 +50,7 @@ export default function RootLayout({
             </main>
             <AskTextDialog />
           </SidebarProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

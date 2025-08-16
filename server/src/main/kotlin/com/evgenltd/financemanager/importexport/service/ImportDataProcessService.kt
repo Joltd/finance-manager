@@ -7,6 +7,8 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
+import com.evgenltd.financemanager.common.record.NotificationType
+import com.evgenltd.financemanager.common.service.NotificationEventService
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,6 +28,7 @@ class ImportDataProcessService(
     private val importDataStateService: ImportDataStateService,
     private val importDataEventService: ImportDataEventService,
     private val operationService: OperationService,
+    private val notificationEventService: NotificationEventService,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
@@ -53,6 +56,7 @@ class ImportDataProcessService(
 
         } catch (e: Exception) {
             log.error("Unable to parse data", e)
+            notificationEventService.notification(e.message ?: "Unable to parse data", NotificationType.ERROR)
         } finally {
             importDataStateService.findAndUnlock(id)
             importDataEventService.importData(id)
@@ -73,6 +77,7 @@ class ImportDataProcessService(
             }
         } catch (e: Exception) {
             log.error("Unable to link operation", e)
+            notificationEventService.notification(e.message ?: "Unable to link operation", NotificationType.ERROR)
         }
     }
 
@@ -93,6 +98,7 @@ class ImportDataProcessService(
             }
         } catch (e: Exception) {
             log.error("Unable to unlink operation", e)
+            notificationEventService.notification(e.message ?: "Unable to unlink operation", NotificationType.ERROR)
         }
     }
 
@@ -104,6 +110,7 @@ class ImportDataProcessService(
             }
         } catch (e: Exception) {
             log.error("Unable to change entry visibility", e)
+            notificationEventService.notification(e.message ?: "Unable to change entry visibility", NotificationType.ERROR)
         }
     }
 

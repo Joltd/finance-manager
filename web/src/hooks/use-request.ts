@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 export interface RequestOptions {
   method?: string
   multipart?: boolean
+  noErrorToast?: boolean
 }
 
 export const useRequest = (path: string, options?: RequestOptions) => {
@@ -13,7 +14,9 @@ export const useRequest = (path: string, options?: RequestOptions) => {
   const [error, setError] = useState('')
 
   const onError = (error: string) => {
-    toast(error)
+    if (!options?.noErrorToast) {
+      toast(error) // todo link to notification list
+    }
     setError(error)
   }
 

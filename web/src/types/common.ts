@@ -50,3 +50,14 @@ export function minus(left?: Amount, right?: Amount): Amount | undefined {
     currency: (left?.currency || right?.currency)!!,
   }
 }
+
+export enum NotificationType {
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+}
+
+export interface Notification {
+  type: NotificationType
+  message: string
+}

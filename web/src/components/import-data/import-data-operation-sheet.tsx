@@ -57,8 +57,8 @@ export function ImportDataOperationSheet({
   )
   const [operation, setOperation] = useState<OperationFormData | undefined>()
   const { form } = useOperationForm(operation)
-  const operationRequest = useRequest(operationUrls.root)
-  const operationLinkRequest = useRequest(importDataUrls.entryIdLink)
+  const operationRequest = useRequest(operationUrls.root, { noErrorToast: true })
+  const operationLinkRequest = useRequest(importDataUrls.entryIdLink, { noErrorToast: true })
 
   useEffect(() => {
     if (entry) {

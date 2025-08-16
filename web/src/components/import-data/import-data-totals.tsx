@@ -19,7 +19,7 @@ export interface ImportDataTotalsProps {
 }
 
 export function ImportDataTotals({ importDataId, account, totals = [] }: ImportDataTotalsProps) {
-  const balance = useBalanceStore('data', 'fetch')
+  const balance = useBalanceStore('data', 'fetch') // todo support loading, error, sse
 
   useEffect(() => {
     balance.fetch()
@@ -70,7 +70,9 @@ function ImportDataTotalEntry({
   suggested,
   actual,
 }: ImportDataTotalEntryProps) {
-  const { submit, loading, error } = useRequest(importDataUrls.actualBalance)
+  const { submit, loading, error } = useRequest(importDataUrls.actualBalance, {
+    noErrorToast: true,
+  })
 
   const balanceWithSuggestions = plus(operation, suggested)
   const delta = minus(actual, balanceWithSuggestions)

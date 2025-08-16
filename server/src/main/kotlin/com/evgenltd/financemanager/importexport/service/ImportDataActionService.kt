@@ -78,29 +78,19 @@ class ImportDataActionService(
     }
 
     fun prepareHintEmbeddings(entryIds: List<UUID>) {
-        try {
-            val operations = importDataOperationRepository.findForHintEmbedding(entryIds, ImportDataOperationType.PARSED)
+        val operations = importDataOperationRepository.findForHintEmbedding(entryIds, ImportDataOperationType.PARSED)
 
-            operations.map { it.hintInput!! }
-                .let { embeddingActionService.prepareEmbeddings(it) }
-                .zip(operations) { embedding, operation -> operation.hint = embedding }
+        operations.map { it.hintInput!! }
+            .let { embeddingActionService.prepareEmbeddings(it) }
+            .zip(operations) { embedding, operation -> operation.hint = embedding }
 
-            importDataOperationRepository.saveAll(operations)
-        } catch (e: Exception) {
-            log.error("Failed to prepare hint embeddings", e)
-            // todo send info about error to db or/and frontend
-        }
+        importDataOperationRepository.saveAll(operations)
     }
 
     fun interpretImportDataEntries(ids: List<UUID>) {
         importDataOperationRepository.findForInterpretation(ids, ImportDataOperationType.PARSED)
             .onEach {
-                try {
-                    interpretImportDataEntry(it)
-                } catch (e: Exception) {
-                    log.error("Failed to interpret import data entry", e)
-                    // todo send info about error to db or/and frontend
-                }
+                interpretImportDataEntry(it)
             }
     }
 
@@ -324,25 +314,32 @@ class ImportDataActionService(
         }
 
         val entries = ((ImportDataEntry::importData eq importData) and
-                (ImportDataEntry::date contains dates) and
-                (ImportDataEntry::visible eq true))
+                (ImportDataEntry::date contains dates))
             .let { importDataEntryRepository.findAll(it) }
 
-        entries.mapNotNull { it.parsed() }
+        entries
+            .filter { it.visible }
+            .mapNotNull { it.parsed() }
             .toTotalEntries(importData.account)
             .calculateTotal(importData, ImportDataTotalType.PARSED)
 
         entries
-            .filter { it.operation != null }
+            .filter { it.visible }
+            .filter { it.operation == null }
             .flatMap { it.suggested() }
             .filter { it.selected }
             .toTotalEntries(importData.account)
             .calculateTotal(importData, ImportDataTotalType.SUGGESTED)
 
+        val hiddenEntries = entries.filter { !it.visible }
+            .mapNotNull { it.operation?.id }
+            .toSet()
+
         val actualDates = dates ?: entries.map { it.date }.distinct()
         ((Transaction::account eq importData.account) and (Transaction::date contains actualDates))
             .let { transactionRepository.findAll(it) }
             .filter { it.operation.id !in importData.hiddenOperations }
+            .filter { it.operation.id !in hiddenEntries }
             .map { TotalEntry(it.date, it.signedAmount()) }
             .calculateTotal(importData, ImportDataTotalType.OPERATION)
     }

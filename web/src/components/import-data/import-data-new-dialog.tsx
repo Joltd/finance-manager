@@ -37,7 +37,7 @@ export const useImportDataNewDialogStore = <K extends keyof OpenStoreState>(...f
 export function ImportDataNewDialog() {
   const { opened, setOpened, close } = useImportDataNewDialogStore('opened', 'setOpened', 'close')
   const importDataList = useImportDataListStore('fetch')
-  const { loading, error, submit, reset } = useRequest(importDataUrls.begin, { multipart: true })
+  const { loading, submit, reset } = useRequest(importDataUrls.begin, { multipart: true })
   const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,7 +73,7 @@ export function ImportDataNewDialog() {
             <DialogHeader>
               <DialogTitle>New import</DialogTitle>
             </DialogHeader>
-            <FormBody error={error} className="py-4">
+            <FormBody className="py-4">
               <FormField
                 control={form.control}
                 name="account"

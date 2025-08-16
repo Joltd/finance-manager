@@ -11,7 +11,7 @@ import { operationUrls } from '@/api/operation'
 
 export function ImportDataActionBar() {
   const importData = useImportDataStore('data')
-  const visibility = useRequest(importDataUrls.entryVisibility) // todo handle error
+  const visibility = useRequest(importDataUrls.entryVisibility)
   const link = useRequest(importDataUrls.entryLink)
   const unlink = useRequest(importDataUrls.entryUnlink)
   const deleteOperations = useRequest(operationUrls.root, { method: 'DELETE' })

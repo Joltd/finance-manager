@@ -17,7 +17,7 @@ export interface CurrencyInputProps {
 }
 
 export function CurrencyInput({ value, onChange, hideIcon, size, className }: CurrencyInputProps) {
-  const { dataFetched, data, fetch } = useCurrencyListStore('dataFetched', 'data', 'fetch')
+  const { dataFetched, data, fetch } = useCurrencyListStore('dataFetched', 'data', 'fetch') // todo support loading, error
 
   useEffect(() => {
     if (!dataFetched) {

@@ -65,7 +65,7 @@ function _ImportDataEntryBrowserRow({
           <ImportDataOperationLabel
             {...actualOperation}
             relatedAccount={relatedAccount}
-            className="min-w-0 shrink overflow-hidden"
+            className={cn('min-w-0 shrink overflow-hidden', !visible && 'line-through')}
           />
         ) : (
           <div className="text-muted">New...</div>

@@ -35,9 +35,9 @@ export const useOperationSheetStore = <K extends keyof OperationSheetStoreState>
   useStoreSelect<OperationSheetStoreState, K>(operationSheetStore, ...fields)
 
 export function OperationSheet() {
-  const operation = useOperationStore('updatePathParams', 'fetch', 'data')
+  const operation = useOperationStore('updatePathParams', 'fetch', 'data') // todo support loading, error
   const { opened, operationId, close } = useOperationSheetStore('opened', 'operationId', 'close')
-  const { loading, error, submit, reset } = useRequest(operationUrls.root)
+  const { loading, error, submit, reset } = useRequest(operationUrls.root, { noErrorToast: true })
   const { form } = useOperationForm()
   const ref = useRef<HTMLDivElement>(null)
 

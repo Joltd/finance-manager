@@ -1,5 +1,5 @@
 import { DateLabel } from '@/components/common/date-label'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, MouseEvent } from 'react'
 import {
   ImportDataEntryBrowserOperationRow,
   ImportDataEntryBrowserRow,
@@ -15,6 +15,7 @@ import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
 import { ImportDataGroupHeader } from '@/components/import-data/import-data-group'
+import { subscribeGlobal } from '@/lib/global-event'
 
 export interface ImportDataOperationBrowserProps {}
 
@@ -38,6 +39,15 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
   const entrySelection = useImportDataEntrySelectionStore('selected', 'has', 'select', 'clear')
 
   useEffect(() => {
+    return subscribeGlobal('click', (event: MouseEvent) => {
+      if (!event.ctrlKey) {
+        operationSelection.clear()
+        entrySelection.clear()
+      }
+    })
+  }, [])
+
+  useEffect(() => {
     if (ref.current && !!importDataEntryList.queryParams?.length) {
       ref.current.scrollTo({ behavior: 'smooth', top: 0 })
     }
@@ -54,10 +64,10 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
             </TextLabel>
             <ImportDataGroupHeader group={group} />
             <div className="flex flex-col px-0.5">
-              {group.entries.map((entry, index) =>
+              {group.entries.map((entry) =>
                 entry.id ? (
                   <ImportDataEntryBrowserRow
-                    key={index}
+                    key={entry.id}
                     entry={entry}
                     linked={entry.linked}
                     operation={entry.operation}
@@ -70,6 +80,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                   />
                 ) : entry.operation ? (
                   <ImportDataEntryBrowserOperationRow
+                    key={entry.operation.id}
                     operation={entry.operation}
                     relatedAccount={importData.data!!.account}
                     visible={entry.operationVisible}

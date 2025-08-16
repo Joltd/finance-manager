@@ -14,10 +14,6 @@ interface TransactionRepository : JpaRepository<Transaction, UUID>, JpaSpecifica
 
     fun deleteByOperation(operation: Operation)
 
-    fun findByDateGreaterThanEqual(date: LocalDate): List<Transaction>
-
-    fun findFirstByOrderByUpdatedAtDesc(): Transaction?
-
     fun findByAccountAndAmountCurrencyAndDateGreaterThanEqual(account: Account, currency: String, date: LocalDate): List<Transaction>
 
 }
