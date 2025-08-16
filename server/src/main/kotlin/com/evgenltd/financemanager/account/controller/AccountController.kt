@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.account.service.AccountEventService
 import com.evgenltd.financemanager.account.service.AccountService
+import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,12 +25,14 @@ class AccountController(
     private val accountEventService: AccountEventService,
 ) {
 
+    @SkipLogging
     @GetMapping("/account/reference")
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,
         @RequestParam("type", required = false) type: AccountType?,
     ): List<AccountReferenceRecord> = accountService.listReference(mask, type)
 
+    @SkipLogging
     @GetMapping("/account")
     fun list(@RequestParam("type", required = false) type: AccountType?): List<AccountRecord> = accountService.list(type)
 

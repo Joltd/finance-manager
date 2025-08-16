@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.account.record.CurrencyRecord
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.service.CurrencyService
 import com.evgenltd.financemanager.common.component.DataResponse
+import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -19,8 +20,9 @@ class CurrencyController(
     private val currencyService: CurrencyService
 ) {
 
+    @SkipLogging
     @GetMapping("/currency/reference")
-    fun references(
+    fun listReference(
         @RequestParam("mask", required = false) mask: String?,
         @RequestParam("id", required = false) id: UUID?
     ): List<Reference> = currencyService.listReference(mask, id)

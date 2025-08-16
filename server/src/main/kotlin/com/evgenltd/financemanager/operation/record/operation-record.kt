@@ -35,11 +35,6 @@ data class OperationRecord(
     val raw: List<String> = emptyList(),
 )
 
-interface AccountScore {
-    val accountId: UUID
-    val score: Double
-}
-
 data class OperationEvent(
     val entries: List<OperationEventEntry> = emptyList(),
 ) : ApplicationEvent(entries)

@@ -71,6 +71,7 @@ export function AccountSheet() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
+      parser: '',
       // deleted: false,
       // noRevise: true,
     },
@@ -139,6 +140,20 @@ export function AccountSheet() {
                     <FormControl>
                       <AccountGroupInput {...field} />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="parser"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Parser</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

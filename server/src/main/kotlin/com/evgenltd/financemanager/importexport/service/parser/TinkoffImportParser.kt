@@ -21,7 +21,7 @@ class TinkoffImportParser : ImportParser {
             val amount = cells[6].clean().amount("RUB")
             val description = cells[11].clean()
             val category = cells[9].clean()
-            val mcc = cells[10].clean().takeIf { it.isNotBlank() }?.let { " ($it)" }
+            val mcc = cells[10].clean().takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""
             val type = if (amount.value < 0) OperationType.EXPENSE else OperationType.INCOME
             val hint = type.hint()?.let { typeHint -> "$typeHint $description - $category$mcc" }
             ImportDataParsedEntry(

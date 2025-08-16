@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/command'
 import { Button } from '@/components/ui/button'
 import React, { useEffect, useState } from 'react'
-import { CheckIcon, Loader2Icon, XIcon } from 'lucide-react'
+import { CheckIcon, XIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDebounce } from '@/hooks/use-debounce'
 import { FetchStoreState } from '@/store/common/fetch'
@@ -22,8 +22,9 @@ export interface ReferenceInputProps<T> {
   getId: (it: T) => string
   fetchStore: Pick<
     FetchStoreState<T[]>,
-    'loading' | 'dataFetched' | 'setQueryParams' | 'fetch' | 'data' | 'error'
+    'loading' | 'dataFetched' | 'updateQueryParams' | 'fetch' | 'data' | 'error'
   >
+  queryParams?: Record<string, any>
   onNew?: () => Promise<T>
   renderItem: (item: T) => React.ReactNode
   size?: 'default' | 'sm'
@@ -36,6 +37,7 @@ export function ReferenceInput<T>({
   onChange,
   getId,
   fetchStore,
+  queryParams,
   onNew,
   renderItem,
   size = 'default',
@@ -47,7 +49,7 @@ export function ReferenceInput<T>({
 
   useEffect(() => {
     if (open) {
-      fetchStore.setQueryParams({ mask: actualQuery })
+      fetchStore.updateQueryParams({ mask: actualQuery, ...queryParams })
       fetchStore.fetch()
     }
   }, [open, actualQuery])

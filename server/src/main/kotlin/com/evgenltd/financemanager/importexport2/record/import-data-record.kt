@@ -19,10 +19,8 @@ data class ImportDataLinkRequest(
     val operationId: UUID,
 )
 
-data class ImportDataLinkResul(
-    val importDataId: UUID,
-    val operationDate: LocalDate,
-    val entryDate: LocalDate,
+data class ImportDataUnlinkRequest(
+    val entryIds: List<UUID>,
 )
 
 //
@@ -38,9 +36,10 @@ data class ImportDataRecord(
 data class ImportDataTotalRecord(
     val currency: String,
     val operation: Amount?,
-    val byImport: Amount?,
+    val suggested: Amount?,
     val parsed: Amount?,
     val actual: Amount?,
+    val valid: Boolean,
 )
 
 data class EntryFilter(
@@ -80,6 +79,7 @@ data class ImportDataOperationRecord(
     val raw: List<String> = emptyList(),
     val selected: Boolean,
     val distance: Double?,
+    val rating: SuggestionRating? = null,
 )
 
 data class ImportDataEntryVisibilityRequest(
@@ -87,6 +87,12 @@ data class ImportDataEntryVisibilityRequest(
     val entries: List<UUID>,
     val visible: Boolean,
 )
+
+enum class SuggestionRating {
+    GOOD,
+    FAIR,
+    POOR,
+}
 
 //data class ImportDataRecord(
 //    val id: UUID,
@@ -153,3 +159,42 @@ interface ImportDataDateRange {
     val min: LocalDate
     val max: LocalDate
 }
+
+interface AccountScore {
+    val accountId: UUID
+    val score: Double
+}
+
+interface OperationScore {
+    val operationId: UUID
+    val score: Double
+}
+
+data class OperationScoreRecord(
+    val operationId: UUID,
+    val score: Double,
+)
+
+data class ImportDataSuggestionRecord(
+    val suggestion: ImportDataOperationRecord,
+    val similar: List<ImportDataSuggestionSimilarRecord>,
+)
+
+data class ImportDataSuggestionSimilarRecord(
+    val operation: OperationRecord,
+    val score: Double,
+)
+
+data class OperationKey(
+    val date: LocalDate,
+    val type: OperationType,
+    val amountFrom: Amount,
+    val accountFrom: UUID,
+    val amountTo: Amount,
+    val accountTo: UUID
+)
+
+data class TotalEntry(
+    val date: LocalDate,
+    val amount: Amount,
+)

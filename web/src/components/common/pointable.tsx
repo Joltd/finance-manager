@@ -3,17 +3,19 @@ import { cn } from '@/lib/utils'
 
 export interface PointableProps {
   selected?: boolean
+  disabled?: boolean
   onClick?: (event: MouseEvent) => void
   className?: string
   children: React.ReactNode
 }
 
-export function Pointable({ selected, onClick, className, children }: PointableProps) {
+export function Pointable({ selected, disabled, onClick, className, children }: PointableProps) {
   return (
     <div
-      onClick={onClick}
+      onClick={!disabled ? onClick : undefined}
       className={cn(
-        'hover:bg-muted hover:rounded-sm select-none',
+        'select-none',
+        !disabled && 'hover:bg-muted hover:rounded-sm ',
         selected && 'outline-2 outline-dotted outline-accent-foreground rounded-sm',
         className,
       )}

@@ -8,6 +8,6 @@ class AiProviderResolver(
     private val providers: List<AiProvider>,
 ) {
 
-    fun resolve(): AiProvider = providers.first { it.name == Provider.STUB }
+    fun resolve(): AiProvider = providers.first { it.name == Provider.OPEN_AI }
 
 }

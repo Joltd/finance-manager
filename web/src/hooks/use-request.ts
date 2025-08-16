@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import api from '@/lib/axios'
 import { fillPathParams } from '@/lib/utils'
+import { toast } from 'sonner'
 
 export interface RequestOptions {
   method?: string
@@ -10,6 +11,11 @@ export interface RequestOptions {
 export const useRequest = (path: string, options?: RequestOptions) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const onError = (error: string) => {
+    toast(error)
+    setError(error)
+  }
 
   const submit = async (data: Record<string, any>, pathParams?: Record<string, any>) => {
     setLoading(true)
@@ -23,14 +29,14 @@ export const useRequest = (path: string, options?: RequestOptions) => {
         headers: options?.multipart ? { 'Content-Type': 'multipart/form-data' } : undefined,
       })
       if (response.status !== 200) {
-        setError('Something wrong')
+        onError('Something wrong')
       } else if (!response.data.success) {
-        setError(response.data.error)
+        onError(response.data.error)
       } else {
         return response.data.body
       }
     } catch (e: any) {
-      setError(e?.message || 'Something wrong')
+      onError(e?.message || 'Something wrong')
       throw e
     } finally {
       setLoading(false)

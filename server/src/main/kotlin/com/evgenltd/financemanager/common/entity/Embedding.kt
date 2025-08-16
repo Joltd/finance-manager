@@ -12,6 +12,8 @@ class Embedding(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
+    var input: String? = null,
+
     @JdbcTypeCode(SqlTypes.VECTOR)
     var vector: FloatArray? = null,
 ) {

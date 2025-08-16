@@ -13,11 +13,14 @@ import com.evgenltd.financemanager.importexport2.service.ImportDataProcessServic
 import com.evgenltd.financemanager.importexport2.service.ImportDataService
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.importexport2.record.ImportDataSuggestionRecord
+import com.evgenltd.financemanager.importexport2.record.ImportDataUnlinkRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
@@ -29,6 +32,11 @@ class ImportDataController(
     private val importDataService: ImportDataService,
     private val importDataProcessService: ImportDataProcessService,
 ) {
+
+    @PostMapping("/import-data/{id}/manage")
+    fun importDataManage(@PathVariable id: UUID, @RequestParam progress: Boolean) {
+        importDataProcessService.importDataManage(id, progress)
+    }
 
     @GetMapping("/import-data")
     fun list(): List<Reference> = importDataService.list()
@@ -65,7 +73,7 @@ class ImportDataController(
     }
 
     @PostMapping("/import-data/{id}/entry/unlink")
-    fun unlinkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataLinkRequest) {}
+    fun unlinkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataUnlinkRequest) {}
 
     @PostMapping("/import-data/{id}/entry/visibility")
     fun entryVisibility(@PathVariable id: UUID, @RequestBody request: ImportDataEntryVisibilityRequest) {

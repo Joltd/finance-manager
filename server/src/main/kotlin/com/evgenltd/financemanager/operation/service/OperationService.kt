@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.operation.service
 
+import com.evgenltd.financemanager.common.entity.Embedding
 import com.evgenltd.financemanager.common.repository.account
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.or
@@ -58,11 +59,13 @@ class OperationService(
     @Transactional
     fun update(record: OperationRecord): OperationRecord {
         val existed = record.id?.let { operationRepository.findByIdOrNull(it) }
-        val entity = operationConverter.toEntity(record)
+        val entity = operationConverter.toEntity(record, existed)
         val saved = operationRepository.save(entity)
         notifyChanged(existed, saved)
         return operationConverter.toRecord(saved)
     }
+
+
 
     @Transactional
     fun delete(id: UUID) {
@@ -91,45 +94,6 @@ class OperationService(
     private fun notifyChanged(event: OperationEvent) {
         publisher.publishEvent(event)
         operationEventService.operation()
-    }
-
-    fun findSimilar(operation: OperationRecord): List<Operation> = findSimilar(
-        date = operation.date,
-        accountFromId = operation.accountFrom.id,
-        amountFrom = operation.amountFrom,
-        accountToId = operation.accountTo.id,
-        amountTo = operation.amountTo
-    )
-
-    fun findSimilar(
-        date: LocalDate,
-        accountFromId: UUID? = null,
-        amountFrom: Amount,
-        accountToId: UUID? = null,
-        amountTo: Amount
-    ): List<Operation> {
-        val result = LinkedList<List<Operation>>()
-
-        var operations = operationRepository.findByDate(date)
-        result.push(operations)
-
-        operations = operations.filter { it.amountFrom.isSimilar(amountFrom) && it.amountTo.isSimilar(amountTo) }
-        result.push(operations)
-
-        operations = operations.filter { it.amountFrom == amountFrom && it.amountTo == amountTo }
-        result.push(operations)
-
-        operations = operations.filter { it.accountFrom.id == accountFromId && it.accountTo.id == accountToId }
-        result.push(operations)
-
-        while (result.isNotEmpty()) {
-            val possiblyOperation = result.poll()
-            if (possiblyOperation.isNotEmpty()) {
-                return possiblyOperation
-            }
-        }
-
-        return emptyList()
     }
 
 }

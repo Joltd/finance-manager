@@ -9,6 +9,10 @@ data class Range<T>(val from: T?, val to: T?)
 
 data class DateRange(val from: LocalDate?, val to: LocalDate?)
 
+infix fun <T> T?.until(other: T?): Range<T> = Range(this, other)
+
+
+
 data class SortRecord(val field: String, val direction: SortDirection)
 
 enum class SortDirection {

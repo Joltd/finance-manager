@@ -1,0 +1,1 @@
+alter table embeddings add column input varchar(255);

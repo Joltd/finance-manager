@@ -41,13 +41,14 @@ class LoggerAspect {
 
         val startTime = System.nanoTime()
         try {
+            log.info("Enter {}({})", methodName, formatArguments(parameterNames, args))
+
             val result = joinPoint.proceed()
             val executionTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime)
 
             // Log method exit with return value and execution time
-            log.info("{}({}) return: {} -- {} ms",
+            log.info("Exit {} return: {} -- {} ms",
                 methodName,
-                formatArguments(parameterNames, args),
                 formatReturnValue(result),
                 executionTime
             )
@@ -57,9 +58,8 @@ class LoggerAspect {
             val executionTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime)
 
             // Log method exit with exception and execution time
-            log.error("{}({}) -- {} ms",
+            log.error("Exit {} -- {} ms",
                 methodName,
-                formatArguments(parameterNames, args),
                 executionTime,
             )
 

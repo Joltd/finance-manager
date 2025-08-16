@@ -1,8 +1,6 @@
 package com.evgenltd.financemanager.importexport2.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
-import com.evgenltd.financemanager.common.record.DateRange
-import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.repository.eq
@@ -24,8 +22,12 @@ import com.evgenltd.financemanager.operation.service.byAccount
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.common.service.validWeek
+import com.evgenltd.financemanager.importexport.entity.ImportDataOperationType
+import com.evgenltd.financemanager.importexport2.record.ImportDataSuggestionRecord
+import com.evgenltd.financemanager.importexport2.record.ImportDataSuggestionSimilarRecord
+import com.evgenltd.financemanager.operation.converter.OperationConverter
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
@@ -36,8 +38,10 @@ class ImportDataService(
     private val importDataConverter: ImportDataConverter,
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataTotalRepository: ImportDataTotalRepository,
+    private val operationConverter: OperationConverter,
 ) {
 
+    @SkipLogging
     fun list(): List<Reference> = importDataRepository.findAll()
         .map { importDataConverter.toReference(it) }
 

@@ -18,6 +18,9 @@ import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.importexport.service.parsed
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -58,25 +61,33 @@ class ImportDataConverter(
         raw = operation.raw,
         selected = operation.selected,
         distance = operation.distance,
+        rating = suggestionRating(operation.distance)
     )
 
     fun toRecords(totals: List<ImportDataTotal>): List<ImportDataTotalRecord> = totals.groupBy { it.amount.currency }
         .map { toRecord(it.key, it.value) }
 
-    fun toRecord(currency: String, totals: List<ImportDataTotal>): ImportDataTotalRecord = ImportDataTotalRecord(
-        currency = currency,
-        operation = totals.firstOrNull { it.type == ImportDataTotalType.OPERATION }?.amount,
-        byImport = totals.firstOrNull { it.type == ImportDataTotalType.OPERATION }?.amount,
-        parsed = totals.firstOrNull { it.type == ImportDataTotalType.PARSED }?.amount,
-        actual = totals.firstOrNull { it.type == ImportDataTotalType.ACTUAL }?.amount,
-    )
-
+    fun toRecord(currency: String, totals: List<ImportDataTotal>): ImportDataTotalRecord {
+        val operation = totals.firstOrNull { it.type == ImportDataTotalType.OPERATION }?.amount
+        val suggested = totals.firstOrNull { it.type == ImportDataTotalType.SUGGESTED }?.amount
+        val parsed = totals.firstOrNull { it.type == ImportDataTotalType.PARSED }?.amount
+        val actual = totals.firstOrNull { it.type == ImportDataTotalType.ACTUAL }?.amount
+        val expectedBalance = emptyAmount(currency) + operation + suggested
+        return ImportDataTotalRecord(
+            currency = currency,
+            operation = operation,
+            suggested = suggested,
+            parsed = parsed,
+            actual = actual,
+            valid = expectedBalance == parsed && (actual == null || actual == expectedBalance),
+        )
+    }
 
     fun toEntryGroupRecord(date: LocalDate, totals: List<ImportDataTotal>): ImportDataEntryGroupRecord {
         val totalsByDate = toRecords(totals)
         return ImportDataEntryGroupRecord(
             date = date,
-            valid = totalsByDate.all { it.operation == it.parsed },
+            valid = totalsByDate.all { (emptyAmount(it.currency) + it.operation + it.suggested) == it.parsed },
             totals = totalsByDate,
             entries = emptyList()
         )
@@ -88,13 +99,13 @@ class ImportDataConverter(
             linked = entry.operation != null,
             operation = entry.operation?.let { operation -> operationConverter.toRecord(operation) },
             operationVisible = entry.operation?.id !in importData.hiddenOperations,
-            parsed = entry.operations
-                .firstOrNull { operation -> operation.importType == ImportDataOperationType.PARSED }
+            parsed = entry.parsed()
                 ?.let { operation -> toRecord(operation) },
             parsedVisible = entry.visible,
             suggestions = entry.operations
                 .filter { operation -> operation.importType == ImportDataOperationType.SUGGESTION }
-                .map { operation -> toRecord(operation) },
+                .map { operation -> toRecord(operation) }
+                .sortedByDescending { it.distance },
         )
 
     fun toEntryRecord(importData: ImportData, operation: Operation): ImportDataEntryRecord =

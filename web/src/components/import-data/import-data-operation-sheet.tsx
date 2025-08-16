@@ -1,4 +1,5 @@
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Separator } from '@/components/ui/separator'
 import {
   OperationForm,
   OperationFormData,
@@ -17,10 +18,15 @@ import { useStoreSelect } from '@/hooks/use-store-select'
 import { useRequest } from '@/hooks/use-request'
 import { operationUrls } from '@/api/operation'
 import { importDataUrls } from '@/api/import-data'
+import { useImportDataStore, useImportDataSuggestionStore } from '@/store/import-data'
+import { Fragment, useEffect, useState } from 'react'
+import { OperationLabel } from '@/components/common/operation-label'
+import { RatingIcon } from '@/components/common/rating-icon'
 
 export interface ImportDataOperationSheetProps {
   importDataId: string
   relatedAccount: Account
+  disabled: boolean
 }
 
 export interface ImportDataOperationSheetStoreState extends OpenStoreState {
@@ -44,6 +50,7 @@ export const useImportDataOperationSheetStore = <
 export function ImportDataOperationSheet({
   importDataId,
   relatedAccount,
+  disabled,
 }: ImportDataOperationSheetProps) {
   const { opened, setOpened, close, entry } = useImportDataOperationSheetStore(
     'opened',
@@ -51,14 +58,25 @@ export function ImportDataOperationSheet({
     'close',
     'entry',
   )
-  const { form } = useOperationForm((entry?.operation || entry?.parsed) as any)
+  const [operation, setOperation] = useState<OperationFormData | undefined>()
+  const { form } = useOperationForm(operation)
   const operationRequest = useRequest(operationUrls.root)
   const operationLinkRequest = useRequest(importDataUrls.entryIdLink)
 
+  useEffect(() => {
+    if (entry) {
+      const operationForForm =
+        entry.operation || entry.suggestions.find((it) => it.selected) || entry.parsed
+      setOperation(operationForForm as any)
+    }
+  }, [entry])
+
+  const handleSelectSuggestion = (suggestion: ImportDataOperation) => {
+    setOperation(suggestion as any)
+  }
+
   const onSubmit = (data: OperationFormData) => {
-    if (!!entry?.operation) {
-      operationRequest.submit(data)
-    } else if (!!entry?.id) {
+    if (!!entry?.id) {
       operationLinkRequest.submit(data, { id: importDataId, entryId: entry?.id })
     } else {
       operationRequest.submit(data)
@@ -84,13 +102,21 @@ export function ImportDataOperationSheet({
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col h-full overflow-hidden"
           >
-            <div className="flex flex-col grow overflow-auto gap-8 px-4">
+            <div className="flex flex-col grow overflow-auto gap-4 px-4">
               {!entry?.operation && !!entry?.suggestions?.length && (
                 <div className="flex flex-col gap-2">
+                  <Separator />
                   <div>Suggestions</div>
                   <div className="flex flex-col gap-2">
                     {entry?.suggestions?.map((it, index) => (
-                      <Pointable key={index}>
+                      <Pointable
+                        key={index}
+                        className="flex gap-2"
+                        selected={it.selected}
+                        disabled={disabled}
+                        onClick={() => handleSelectSuggestion(it)}
+                      >
+                        <RatingIcon rating={it.rating} score={it.distance} />
                         <ImportDataOperationLabel
                           type={it.type}
                           accountFrom={it.accountFrom}
@@ -98,10 +124,12 @@ export function ImportDataOperationSheet({
                           accountTo={it.accountTo}
                           amountTo={it.amountTo}
                           relatedAccount={relatedAccount}
+                          amountFieldTight
                         />
                       </Pointable>
                     ))}
                   </div>
+                  <Separator />
                 </div>
               )}
               <OperationForm
@@ -112,7 +140,7 @@ export function ImportDataOperationSheet({
             <SheetFooter>
               <Button
                 type="submit"
-                disabled={operationRequest.loading || operationLinkRequest.loading}
+                disabled={disabled || operationRequest.loading || operationLinkRequest.loading}
               >
                 Save
               </Button>

@@ -36,6 +36,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.57.0",
     "remeda": "^2.23.0",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.2.0",
     "tw-animate-css": "^1.2.8",
     "use-sync-external-store": "^1.5.0",

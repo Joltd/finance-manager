@@ -15,6 +15,7 @@ data class AccountRecord(
     val id: UUID?,
     val name: String,
     val type: AccountType,
+    val parser: String?,
     val group: AccountGroupRecord?,
     val deleted: Boolean,
     val reviseDate: LocalDate?,

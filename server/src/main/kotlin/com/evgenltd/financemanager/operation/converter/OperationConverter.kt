@@ -28,7 +28,7 @@ class OperationConverter(
         raw = entity.raw,
     )
 
-    fun toEntity(record: OperationRecord): Operation = Operation(
+    fun toEntity(record: OperationRecord, existed: Operation? = null): Operation = Operation(
         id = record.id,
         date = record.date,
         type = record.type,
@@ -36,8 +36,21 @@ class OperationConverter(
         accountFrom = accountConverter.toEntity(record.accountFrom),
         amountTo = record.amountTo,
         accountTo = accountConverter.toEntity(record.accountTo),
-        description = record.description
+        description = record.description,
+        raw = existed?.raw ?: emptyList(),
+        hint = existed?.hint,
+        full = existed?.full,
     )
+
+    fun fillEntity(entity: Operation, record: OperationRecord) {
+        entity.date = record.date
+        entity.type = record.type
+        entity.amountFrom = record.amountFrom
+        entity.accountFrom = accountConverter.toEntity(record.accountFrom)
+        entity.amountTo = record.amountTo
+        entity.accountTo = accountConverter.toEntity(record.accountTo)
+        entity.description = record.description
+    }
 
     fun copy(entity: Operation): Operation = toEntity(toRecord(entity))
 

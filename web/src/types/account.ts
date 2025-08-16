@@ -22,6 +22,7 @@ export interface Account {
   id?: string
   name: string
   type: AccountType
+  parser?: string
   deleted: boolean
   group?: AccountGroup
 }

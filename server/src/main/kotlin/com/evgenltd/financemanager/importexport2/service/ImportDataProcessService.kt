@@ -8,9 +8,14 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
+import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
+import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
+import com.evgenltd.financemanager.operation.service.OperationEmbeddingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
+import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,42 +27,43 @@ import java.util.*
 @Service
 class ImportDataProcessService(
     private val importDataRepository: ImportDataRepository,
-    private val importDataService: ImportDataService,
+    private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataActionService: ImportDataActionService,
     private val importDataStateService: ImportDataStateService,
     private val importDataEventService: ImportDataEventService,
-    private val operationRepository: OperationRepository,
     private val operationService: OperationService,
-//    @Qualifier(ExecutorConfig.BACKGROUND_CALCULATION_EXECUTOR)
-//    private val executor: Executor,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
 
+    fun importDataManage(id: UUID, progress: Boolean) {
+        importDataEventService.importDataProgress(id, progress)
+    }
+
     @Async
     fun beginNewImport(id: UUID, inputStream: InputStream) {
         try {
+
             importDataActionService.parseImportData(id, inputStream)
+
+            importDataEntryRepository.findByImportDataId(id)
+                .chunked(50)
+                .onEach { ids ->
+                    importDataActionService.prepareHintEmbeddings(ids)
+                    importDataActionService.interpretImportDataEntries(ids)
+                }
+
+            importDataActionService.linkExistedOperations(id)
+
+            importDataActionService.calculateTotal(id)
+
         } catch (e: Exception) {
             log.error("Unable to parse data", e)
         } finally {
             importDataStateService.findAndUnlock(id)
             importDataEventService.importData(id)
+            importDataEventService.importDataEntry(id, emptyList())
         }
-
-//        val entryIds = importDataStateService.lockAllEntries(importDataId)
-//
-//        entryIds.chunked(50)
-//            .onEach { ids ->
-//                CompletableFuture.supplyAsync({ importDataActionService.prepareHintEmbeddings(ids) })
-//                        .thenApplyAsync({ importDataActionService.interpretImportDataEntries(ids) })
-//                        .thenApplyAsync({ importDataActionService.prepareFullEmbeddings(ids) })
-//                        .exceptionally { log.error("Unable to handle entries", it) }
-//                        .thenApply {
-//                            importDataStateService.unlockEntries(ids)
-//                        }
-//            }
-
     }
 
     fun saveActualBalance(id: UUID, balance: Amount) {
@@ -77,9 +83,8 @@ class ImportDataProcessService(
     }
 
     @Async
-    @Transactional
     fun linkOperation(id: UUID, entryId: UUID, operation: OperationRecord) {
-        val result = operationService.update(operation)
+        val result = operationService.update(operation) // recalculation by operation events
         importDataActionService.linkOperation(id, entryId, result.id!!)
     }
 
@@ -128,7 +133,7 @@ class ImportDataProcessService(
             .groupBy { it.account }
             .flatMap { (account, keys) ->
                 importDataRepository.findByAccount(account)
-                    .map { importData -> importData to keys.map { key -> key.date} }
+                    .map { importData -> importData to keys.map { key -> key.date } }
             }
             .onEach { (importData, affectedDates) ->
                 runWithCalculationTotal(importData.id!!) {
@@ -137,11 +142,11 @@ class ImportDataProcessService(
             }
     }
 
-    private fun runWithCalculationTotal(id: UUID, block: () -> Collection<LocalDate>) {
+    private fun runWithCalculationTotal(id: UUID, block: () -> List<LocalDate>) {
         importDataStateService.findAndLock(id) ?: return
         importDataEventService.importDataProgress(id, true)
         try {
-            val affectedDates = block()
+            val affectedDates = block().distinct()
             if (affectedDates.isEmpty()) {
                 return
             }

@@ -13,8 +13,10 @@ export interface ImportData {
 export interface ImportDataTotal {
   currency: string
   operation?: Amount
+  suggested?: Amount
   parsed?: Amount
   actual?: Amount
+  valid: boolean
 }
 
 export interface ImportDataEntryGroup {
@@ -46,6 +48,13 @@ export interface ImportDataOperation {
   raw: string[]
   selected: boolean
   distance?: number
+  rating?: SuggestionRating
+}
+
+export enum SuggestionRating {
+  GOOD = 'GOOD',
+  FAIR = 'FAIR',
+  POOR = 'POOR',
 }
 
 // export interface ImportData {
@@ -97,3 +106,13 @@ export interface ImportDataOperation {
 //   description?: string
 //   distance?: number
 // }
+
+export interface ImportDataSuggestion {
+  suggestion: ImportDataOperation
+  similar: ImportDataSuggestionSimilar[]
+}
+
+export interface ImportDataSuggestionSimilar {
+  operation: Operation
+  score: number
+}

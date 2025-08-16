@@ -14,6 +14,7 @@ export interface ImportDataOperationLabelProps {
   accountTo?: Account
   relatedAccount: Account
   className?: string
+  amountFieldTight?: boolean
 }
 
 export function ImportDataOperationLabel({
@@ -24,6 +25,7 @@ export function ImportDataOperationLabel({
   amountTo,
   relatedAccount,
   className,
+  amountFieldTight,
 }: ImportDataOperationLabelProps) {
   let account
   if (relatedAccount.id !== accountFrom?.id) {
@@ -35,7 +37,12 @@ export function ImportDataOperationLabel({
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <OperationTypeIcon type={type} />
-      <OperationAmountLabel type={type} from={amountFrom} to={amountTo} className="min-w-44" />
+      <OperationAmountLabel
+        type={type}
+        from={amountFrom}
+        to={amountTo}
+        className={cn(amountFieldTight ? 'min-w-26' : 'min-w-44')}
+      />
       <AccountLabel account={account} className="min-w-0" />
     </div>
   )

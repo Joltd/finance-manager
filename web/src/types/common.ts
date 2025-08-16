@@ -28,3 +28,25 @@ export const amountShema = z.object({
 export function amount(value: number, currency: string): Amount {
   return { value: value * 10000, currency }
 }
+
+export function plus(left?: Amount, right?: Amount): Amount | undefined {
+  if (!left && !right) {
+    return
+  }
+
+  return {
+    value: (left?.value || 0) + (right?.value || 0),
+    currency: (left?.currency || right?.currency)!!,
+  }
+}
+
+export function minus(left?: Amount, right?: Amount): Amount | undefined {
+  if (!left && !right) {
+    return
+  }
+
+  return {
+    value: (left?.value || 0) - (right?.value || 0),
+    currency: (left?.currency || right?.currency)!!,
+  }
+}

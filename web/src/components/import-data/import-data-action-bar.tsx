@@ -4,7 +4,7 @@ import {
   useImportDataStore,
 } from '@/store/import-data'
 import { ActionBar, ActionBarButton } from '@/components/common/action-bar'
-import { EyeClosedIcon, EyeIcon, Link2Icon, TrashIcon } from 'lucide-react'
+import { EyeClosedIcon, EyeIcon, Link2Icon, Link2OffIcon, TrashIcon } from 'lucide-react'
 import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
 import { operationUrls } from '@/api/operation'
@@ -13,6 +13,7 @@ export function ImportDataActionBar() {
   const importData = useImportDataStore('data')
   const visibility = useRequest(importDataUrls.entryVisibility) // todo handle error
   const link = useRequest(importDataUrls.entryLink)
+  const unlink = useRequest(importDataUrls.entryUnlink)
   const deleteOperations = useRequest(operationUrls.root, { method: 'DELETE' })
   const operationSelection = useImportDataOperationSelectionStore(
     'selected',
@@ -27,19 +28,15 @@ export function ImportDataActionBar() {
       return
     }
 
-    visibility
-      .submit(
-        {
-          operations: Array.from(operationSelection.selected),
-          entries: Array.from(entrySelection.selected),
-          visible,
-        },
-        { id: importData.data.id },
-      )
-      .then(() => {
-        operationSelection.clear()
-        entrySelection.clear()
-      })
+    const data = {
+      operations: Array.from(operationSelection.selected),
+      entries: Array.from(entrySelection.selected),
+      visible,
+    }
+    visibility.submit(data, { id: importData.data.id }).then(() => {
+      operationSelection.clear()
+      entrySelection.clear()
+    })
   }
 
   const handleLink = () => {
@@ -47,18 +44,28 @@ export function ImportDataActionBar() {
       return
     }
 
-    link
-      .submit(
-        {
-          operationId: Object.values(operationSelection.items)[0].id,
-          entryId: Object.values(entrySelection.items)[0].id,
-        },
-        { id: importData.data.id },
-      )
-      .then(() => {
-        operationSelection.clear()
-        entrySelection.clear()
-      })
+    const data = {
+      operationId: Object.values(operationSelection.items)[0].id,
+      entryId: Object.values(entrySelection.items)[0].id,
+    }
+    link.submit(data, { id: importData.data.id }).then(() => {
+      operationSelection.clear()
+      entrySelection.clear()
+    })
+  }
+
+  const handleUnlink = () => {
+    if (!importData.data) {
+      return
+    }
+
+    const entryIds = Object.values(entrySelection.items)
+      .filter((it) => it.linked)
+      .map((it) => it.id)
+    unlink.submit({ entryIds }, { id: importData.data.id }).then(() => {
+      operationSelection.clear()
+      entrySelection.clear()
+    })
   }
 
   const handleDelete = () => {
@@ -75,6 +82,7 @@ export function ImportDataActionBar() {
   const progress =
     visibility.loading ||
     link.loading ||
+    unlink.loading ||
     deleteOperations.loading ||
     !importData.data ||
     !!importData.data?.progress
@@ -84,6 +92,11 @@ export function ImportDataActionBar() {
     operationSelection.selected.size !== 1 ||
     entrySelection.selected.size !== 1 ||
     !!Object.values(entrySelection.items).find((it) => it.linked)
+
+  const unlinkDisabled =
+    progress ||
+    !entrySelection.selected.size ||
+    !Object.values(entrySelection.items).find((it) => it.linked)
 
   const deleteDisabled = progress || !operationSelection.selected.size
 
@@ -106,6 +119,12 @@ export function ImportDataActionBar() {
         icon={<Link2Icon />}
         disabled={linkDisabled}
         onClick={handleLink}
+      />
+      <ActionBarButton
+        hint="Break the link of operation and entry"
+        icon={<Link2OffIcon />}
+        disabled={unlinkDisabled}
+        onClick={handleUnlink}
       />
       <ActionBarButton
         hint="Delete operations"

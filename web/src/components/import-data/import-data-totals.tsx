@@ -1,7 +1,7 @@
 import { AmountLabel } from '@/components/common/amount-label'
 import { Fragment, useEffect } from 'react'
 import { EditIcon } from 'lucide-react'
-import { amount, Amount } from '@/types/common'
+import { amount, Amount, minus, plus } from '@/types/common'
 import { cn } from '@/lib/utils'
 import { ImportDataTotal } from '@/types/import-data'
 import { useRequest } from '@/hooks/use-request'
@@ -38,7 +38,7 @@ export function ImportDataTotals({ importDataId, account, totals = [] }: ImportD
       )}
     >
       <div>Operations</div>
-      <div>From import</div>
+      <div>Suggested</div>
       <div>Actual balance</div>
       <div />
       {totals.map((it) => (
@@ -47,7 +47,7 @@ export function ImportDataTotals({ importDataId, account, totals = [] }: ImportD
           importDataId={importDataId}
           currency={it.currency}
           operation={getCurrentBalance(it.currency)}
-          // parsed={it.parsed}
+          suggested={it.suggested}
           actual={it.actual}
         />
       ))}
@@ -59,7 +59,7 @@ interface ImportDataTotalEntryProps {
   importDataId: string
   currency: string
   operation?: Amount
-  parsed?: Amount
+  suggested?: Amount
   actual?: Amount
 }
 
@@ -67,14 +67,13 @@ function ImportDataTotalEntry({
   importDataId,
   currency,
   operation,
-  parsed,
+  suggested,
   actual,
 }: ImportDataTotalEntryProps) {
   const { submit, loading, error } = useRequest(importDataUrls.actualBalance)
 
-  // todo instead parsed total there is necessary for amount during import process
-  const balanceAfterImport = (operation?.value || 0) + (parsed?.value || 0)
-  const delta = (actual?.value || 0) - balanceAfterImport
+  const balanceWithSuggestions = plus(operation, suggested)
+  const delta = minus(actual, balanceWithSuggestions)
 
   const handleEditActualBalance = async () => {
     const value = await askText('Actual balance')
@@ -87,9 +86,8 @@ function ImportDataTotalEntry({
 
   return (
     <>
-      {/*<CurrencyLabel currency={currency} />*/}
-      {operation ? <AmountLabel amount={operation} /> : <div />}
-      {parsed ? <AmountLabel amount={parsed} /> : <div />}
+      <AmountLabel amount={operation} />
+      <AmountLabel amount={suggested} />
       <div className="flex gap-2 items-center" onClick={handleEditActualBalance}>
         <EditIcon size={16} />
         {loading ? (
@@ -100,11 +98,7 @@ function ImportDataTotalEntry({
           <AmountLabel amount={actual} />
         ) : null}
       </div>
-      {actual && delta !== 0 ? (
-        <AmountLabel amount={{ value: delta, currency }} className="text-red-500" />
-      ) : (
-        <div />
-      )}
+      {actual && delta ? <AmountLabel amount={delta} className="text-red-500" /> : <div />}
     </>
   )
 }

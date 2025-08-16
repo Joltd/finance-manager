@@ -43,7 +43,7 @@ const formSchema = z.object({
 export const useOperationForm = (operation?: OperationFormData) => {
   const form = useForm<OperationFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: operation || {
+    defaultValues: {
       type: OperationType.EXCHANGE,
       date: format(new Date(), 'yyyy-MM-dd'),
       description: '',
@@ -57,6 +57,7 @@ export const useOperationForm = (operation?: OperationFormData) => {
         values: true,
       },
       callback: ({ values }) => {
+        // todo resetField does not work
         if (values.type === OperationType.EXPENSE) {
           if (values.accountFrom?.type !== AccountType.ACCOUNT) {
             form.resetField('accountFrom')
@@ -89,6 +90,8 @@ export const useOperationForm = (operation?: OperationFormData) => {
       form.reset(operation)
     }
   }, [form, operation])
+
+  useEffect(() => () => form.reset(), [])
 
   return {
     form,
@@ -151,19 +154,19 @@ export function OperationForm({ form, error, className }: OperationFormProps) {
         )}
       />
 
-      {type === OperationType.EXCHANGE && (
-        <FormField
-          control={form.control}
-          name="amountFrom"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <AmountInput amount={field.value} onChange={field.onChange} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      )}
+      {/*{type === OperationType.EXCHANGE && (*/}
+      {/*  <FormField*/}
+      {/*    control={form.control}*/}
+      {/*    name="amountFrom"*/}
+      {/*    render={({ field }) => (*/}
+      {/*      <FormItem>*/}
+      {/*        <FormControl>*/}
+      {/*          <AmountInput amount={field.value} onChange={field.onChange} />*/}
+      {/*        </FormControl>*/}
+      {/*      </FormItem>*/}
+      {/*    )}*/}
+      {/*  />*/}
+      {/*)}*/}
 
       <FormField
         control={form.control}
@@ -210,7 +213,7 @@ export function OperationForm({ form, error, className }: OperationFormProps) {
           name="raw"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Raw {field.value}</FormLabel>
+              <FormLabel>Raw</FormLabel>
               <FormControl>
                 <Textarea
                   readOnly

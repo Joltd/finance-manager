@@ -1,5 +1,5 @@
 import { AccountType } from '@/types/account'
-import { Squircle } from 'lucide-react'
+import { Squircle, SquircleIcon } from 'lucide-react'
 
 export interface AccountTypeIconProps {
   type?: AccountType
@@ -8,10 +8,10 @@ export interface AccountTypeIconProps {
 export function AccountTypeIcon({ type }: AccountTypeIconProps) {
   switch (type) {
     case AccountType.EXPENSE:
-      return <Squircle size={14} className="text-red-500 shrink-0" />
+      return <SquircleIcon size={14} className="text-red-500 shrink-0" />
     case AccountType.INCOME:
-      return <Squircle size={14} className="text-green-500 shrink-0" />
+      return <SquircleIcon size={14} className="text-green-500 shrink-0" />
     default:
-      return <Squircle size={14} className="text-muted-foreground shrink-0" />
+      return <SquircleIcon size={14} className="text-muted-foreground shrink-0" />
   }
 }

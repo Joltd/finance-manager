@@ -1,9 +1,9 @@
 import { DateLabel } from '@/components/common/date-label'
-import { TriangleAlert } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { AmountLabel } from '@/components/common/amount-label'
 import { useEffect, useRef, MouseEvent } from 'react'
-import { ImportDataEntryBrowserRow } from '@/components/import-data/import-data-entry-browser-row'
+import {
+  ImportDataEntryBrowserOperationRow,
+  ImportDataEntryBrowserRow,
+} from '@/components/import-data/import-data-entry-browser-row'
 import {
   useImportDataEntryListStore,
   useImportDataOperationSelectionStore,
@@ -14,6 +14,7 @@ import { ImportDataActionBar } from '@/components/import-data/import-data-action
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
+import { ImportDataGroupHeader } from '@/components/import-data/import-data-group'
 
 export interface ImportDataOperationBrowserProps {}
 
@@ -42,65 +43,43 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
     }
   }, [importDataEntryList.queryParams])
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (event.ctrlKey) {
-      return
-    }
-    operationSelection.clear()
-    entrySelection.clear()
-  }
-
   return (
     <DataSection store={importDataEntryList}>
       <div ref={ref} className="flex flex-col relative overflow-y-auto m-6 mb-12 gap-12">
         {importDataEntryList.data?.map((group) => (
-          <div key={group.date} className="flex flex-col gap-6" onClick={handleClickOutside}>
+          <div key={group.date} className="flex flex-col gap-6">
             <TextLabel variant="title">
-              <ValidityIcon valid={group.valid} />
+              <ValidityIcon valid={group.valid} message="Some totals doesn't matched" />
               <DateLabel date={group.date} />
             </TextLabel>
-            {!!group.totals?.length && (
-              <div className="flex flex-col bg-accent rounded-sm p-2">
-                {group.totals.map((it, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      'grid items-center grid-cols-[minmax(0,_1fr)_64px_minmax(0,_1fr)]',
-                    )}
-                  >
-                    {it.operation ? (
-                      <AmountLabel amount={it.operation} className="ml-4" />
-                    ) : (
-                      <div />
-                    )}
-                    {it.operation?.value !== it.parsed?.value ? (
-                      <TriangleAlert className="text-yellow-500 justify-self-center" />
-                    ) : (
-                      <div />
-                    )}
-                    {it.parsed ? <AmountLabel amount={it.parsed} className="ml-6" /> : <div />}
-                  </div>
-                ))}
-              </div>
-            )}
+            <ImportDataGroupHeader group={group} />
             <div className="flex flex-col px-0.5">
-              {group.entries.map((entry, index) => (
-                <ImportDataEntryBrowserRow
-                  key={index}
-                  importDataId={importData.data!!.id}
-                  id={entry.id}
-                  entry={entry}
-                  linked={entry.linked}
-                  operation={entry.operation}
-                  operationVisible={entry.operationVisible}
-                  parsed={entry.parsed}
-                  parsedVisible={entry.parsedVisible}
-                  suggestions={entry.suggestions}
-                  relatedAccount={importData.data!!.account}
-                  operationSelected={operationSelection.has(entry.operation)}
-                  parsedSelected={entrySelection.has(entry)}
-                />
-              ))}
+              {group.entries.map((entry, index) =>
+                entry.id ? (
+                  <ImportDataEntryBrowserRow
+                    key={index}
+                    importDataId={importData.data!!.id}
+                    id={entry.id}
+                    entry={entry}
+                    linked={entry.linked}
+                    operation={entry.operation}
+                    parsed={entry.parsed}
+                    suggestions={entry.suggestions}
+                    relatedAccount={importData.data!!.account}
+                    visible={entry.parsedVisible}
+                    selected={entrySelection.has(entry)}
+                    disabled={importData.data?.progress}
+                  />
+                ) : entry.operation ? (
+                  <ImportDataEntryBrowserOperationRow
+                    operation={entry.operation}
+                    relatedAccount={importData.data!!.account}
+                    visible={entry.operationVisible}
+                    selected={operationSelection.has(entry.operation)}
+                    disabled={importData.data?.progress}
+                  />
+                ) : null,
+              )}
             </div>
           </div>
         ))}

@@ -5,6 +5,7 @@ import {
   ImportDataEntry,
   ImportDataEntryGroup,
   ImportDataOperation,
+  ImportDataSuggestion,
 } from '@/types/import-data'
 import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
 import { useStoreSelect } from '@/hooks/use-store-select'
@@ -53,3 +54,15 @@ export const useImportDataEntrySelectionStore = <
 >(
   ...fields: K[]
 ) => useStoreSelect(importDataEntrySelectionStore, ...fields)
+
+//
+
+const importDataSuggestionStore = createFetchStore<ImportDataSuggestion[]>(
+  importDataUrls.suggestion,
+)
+
+export const useImportDataSuggestionStore = <
+  K extends keyof FetchStoreState<ImportDataSuggestion[]>,
+>(
+  ...fields: K[]
+) => useStoreSelect(importDataSuggestionStore, ...fields)

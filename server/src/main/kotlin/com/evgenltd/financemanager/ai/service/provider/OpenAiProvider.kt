@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.ai.service.provider
 
+import com.evgenltd.financemanager.ai.record.EmbeddingResult
 import com.evgenltd.financemanager.ai.service.AiProvider
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
 import com.fasterxml.jackson.databind.JsonNode
@@ -22,7 +23,7 @@ class OpenAiProvider(
 
     override val name: Provider = Provider.OPEN_AI
 
-    override fun embedding(data: List<String>): List<FloatArray> {
+    override fun embedding(data: List<String>): List<EmbeddingResult> {
         val request = mapOf(
             "input" to data,
             "model" to "text-embedding-3-small",
@@ -34,6 +35,12 @@ class OpenAiProvider(
             ?.asSequence()
             ?.map { entry -> entry["embedding"]?.asText()?.asFloatArray() ?: FloatArray(0) }
             ?.toList()
+            ?.mapIndexed { index, it ->
+                EmbeddingResult(
+                    input = data[index],
+                    vector = it
+                )
+            }
             ?: emptyList()
     }
 

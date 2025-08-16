@@ -1,6 +1,10 @@
 'use client'
-import { useImportDataEntryListStore, useImportDataStore } from '@/store/import-data'
-import { useParams } from 'next/navigation'
+import {
+  useImportDataEntryListStore,
+  useImportDataListStore,
+  useImportDataStore,
+} from '@/store/import-data'
+import { useParams, useRouter } from 'next/navigation'
 import { importDataEvents } from '@/api/import-data'
 import { ImportDataFilter } from '@/components/import-data/import-data-filter'
 import { ImportDataTotals } from '@/components/import-data/import-data-totals'
@@ -15,10 +19,13 @@ import { ImportDataOperationSheet } from '@/components/import-data/import-data-o
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
+import { minus, plus } from '@/types/common'
 
 export default function Page() {
   const { id } = useParams()
+  const router = useRouter()
 
+  const importDataList = useImportDataListStore('data')
   const importData = useImportDataStore(
     'loading',
     'dataFetched',
@@ -52,7 +59,7 @@ export default function Page() {
       importDataEvents.entry,
       { id },
       (dates) => {
-        // check dates
+        // todo check dates
         importDataEntryList.fetch()
       },
     )
@@ -63,11 +70,20 @@ export default function Page() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!importDataList.data) {
+      return
+    }
+
+    const importDataExists = importDataList.data?.find((it) => it.id === id)
+    if (!importDataExists) {
+      router.push('/')
+    }
+  }, [importDataList.data])
+
   const importValid =
     !!importData.data?.totals?.length &&
-    importData.data.totals.filter(
-      (it) => !!it.operation && !!it.parsed && it.operation.value === it.parsed.value,
-    ).length === importData.data.totals.length
+    importData.data.totals.filter((it) => it.valid).length === importData.data.totals.length
 
   return (
     <DataSection store={importData}>
@@ -86,7 +102,11 @@ export default function Page() {
                 {importData.data.progress ? (
                   <Spinner />
                 ) : (
-                  <ValidityIcon valid={importValid} collapseIfEmpty />
+                  <ValidityIcon
+                    valid={importValid}
+                    message="Totals by import file doesn't mathced to totals in database with suggested records or actual balance is different"
+                    collapseIfEmpty
+                  />
                 )}
               </TextLabel>
             </div>
@@ -96,6 +116,7 @@ export default function Page() {
           <ImportDataOperationSheet
             importDataId={importData.data.id}
             relatedAccount={importData.data.account}
+            disabled={importData.data.progress}
           />
         </>
       )}

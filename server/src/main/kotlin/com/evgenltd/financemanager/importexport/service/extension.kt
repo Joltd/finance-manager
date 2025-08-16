@@ -9,6 +9,8 @@ import com.evgenltd.financemanager.account.entity.Account
 
 fun ImportDataEntry.parsed(): ImportDataOperation? = operations.firstOrNull { it.importType == ImportDataOperationType.PARSED }
 
+fun ImportDataEntry.suggested(): List<ImportDataOperation> = operations.filter { it.importType == ImportDataOperationType.SUGGESTION }
+
 fun ImportDataEntry.selectedSuggestion(): ImportDataOperation? = operations.firstOrNull { it.importType == ImportDataOperationType.SUGGESTION && it.selected }
 
 fun Sequence<ImportDataOperation>.amountsForAccount(account: Account): Sequence<Amount> = flatMap { operation ->

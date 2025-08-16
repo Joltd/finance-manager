@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.account.record.AccountGroupRecord
 import com.evgenltd.financemanager.account.service.AccountGroupEventService
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.service.AccountGroupService
+import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -21,6 +22,7 @@ class AccountGroupController(
     private val accountGroupEventService: AccountGroupEventService,
 ) {
 
+    @SkipLogging
     @GetMapping("/account-group/reference")
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,

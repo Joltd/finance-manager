@@ -29,8 +29,6 @@ class ImportDataEventService(
     fun importDataProgress(id: UUID, progress: Boolean): Patch = patch(progress, "/progress")
 
     @SseEventMapping("/import-data/{id}/entry")
-    fun importDataEntry(id: UUID, dates: Iterable<LocalDate>): Iterable<LocalDate> = dates
-
-
+    fun importDataEntry(id: UUID, dates: List<LocalDate>): List<LocalDate> = dates
 
 }

@@ -6,6 +6,8 @@ import com.evgenltd.financemanager.importexport.entity.ImportOption
 import com.evgenltd.financemanager.importexport.entity.ImportResult
 import com.evgenltd.financemanager.importexport2.record.ImportDataDateRange
 import jakarta.persistence.LockModeType
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Lock
@@ -16,6 +18,9 @@ import java.util.*
 
 @Repository
 interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>,JpaSpecificationExecutor<ImportDataEntry> {
+
+    @Query("select ide.id from ImportDataEntry ide where ide.importData.id = :id")
+    fun findByImportDataId(id: UUID): List<UUID>
 
     fun deleteByImportDataId(importDataId: UUID)
 
@@ -56,7 +61,7 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>,JpaSpe
     fun existsByImportDataAndOperationId(importData: ImportData, operationId: UUID): Boolean
 
     @Query("select min(ide.date) as min, max(ide.date) as max from ImportDataEntry ide where ide.importData = :importData")
-    fun findImportDataDateRange(importData: ImportData): ImportDataDateRange
+    fun findImportDataDateRange(importData: ImportData): ImportDataDateRange?
 
     fun findByIdInAndVisible(ids: List<UUID>, visible: Boolean): List<ImportDataEntry>
 
