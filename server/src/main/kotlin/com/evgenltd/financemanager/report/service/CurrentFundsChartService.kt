@@ -18,30 +18,30 @@ class CurrentFundsChartService(
     private val turnoverService: TurnoverService,
     private val exchangeRateService: ExchangeRateService,
 ) {
-
-    fun load(settings: CurrentFundsChartSettingsRecord): CurrentFundsChartRecord = turnoverService.listByAccountType()
-        .sliceLast()
-        .values
-        .groupBy { it.account.id!! }
-        .map {
-            val amounts = it.value
-                .map { value ->
-                    val rate = exchangeRateService.rate(LocalDate.now().minusDays(1L), value.cumulativeAmount.currency, ExchangeRateService.DEFAULT_TARGET_CURRENCY).rate
-                    CurrentFundsChartAmountEntryRecord(
-                        amount = value.cumulativeAmount,
-                        commonAmount = value.cumulativeAmount.convert(rate, ExchangeRateService.DEFAULT_TARGET_CURRENCY)
-                    )
-                }
-                .filter { entry -> entry.amount.isNotZero() }
-                .sortedByDescending { entry -> entry.amount.value }
-            CurrentFundsChartEntryRecord(
-                account = accountConverter.toRecord(it.value.first().account),
-                commonAmount = amounts.fold(emptyAmount(ExchangeRateService.DEFAULT_TARGET_CURRENCY)) { acc, entry -> acc + entry.commonAmount },
-                amounts = amounts
-            )
-        }
-        .filter { it.commonAmount.isNotZero() }
-        .sortedByDescending { it.commonAmount.value }
-        .let { CurrentFundsChartRecord(it) }
+//
+//    fun load(settings: CurrentFundsChartSettingsRecord): CurrentFundsChartRecord = turnoverService.listByAccountType()
+//        .sliceLast()
+//        .values
+//        .groupBy { it.account.id!! }
+//        .map {
+//            val amounts = it.value
+//                .map { value ->
+//                    val rate = exchangeRateService.rate(LocalDate.now().minusDays(1L), value.cumulativeAmount.currency, ExchangeRateService.DEFAULT_TARGET_CURRENCY).rate
+//                    CurrentFundsChartAmountEntryRecord(
+//                        amount = value.cumulativeAmount,
+//                        commonAmount = value.cumulativeAmount.convert(rate, ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+//                    )
+//                }
+//                .filter { entry -> entry.amount.isNotZero() }
+//                .sortedByDescending { entry -> entry.amount.value }
+//            CurrentFundsChartEntryRecord(
+//                account = accountConverter.toRecord(it.value.first().account),
+//                commonAmount = amounts.fold(emptyAmount(ExchangeRateService.DEFAULT_TARGET_CURRENCY)) { acc, entry -> acc + entry.commonAmount },
+//                amounts = amounts
+//            )
+//        }
+//        .filter { it.commonAmount.isNotZero() }
+//        .sortedByDescending { it.commonAmount.value }
+//        .let { CurrentFundsChartRecord(it) }
 
 }

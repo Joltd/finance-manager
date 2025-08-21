@@ -16,70 +16,70 @@ class FlowChartService(
     private val turnoverService: TurnoverService,
     private val exchangeRateService: ExchangeRateService,
 ) {
-
-    fun load(settings: FlowChartSettingsRecord): FlowChartRecord {
-
-        val turnovers = turnoverService.list(settings.filter)
-
-        val start = turnovers.minOfOrNull { it.date }
-        val end = turnovers.maxOfOrNull { it.date }
-        val dates = generateSequence(start) {
-            it.plusMonths(1).takeIf { date -> !date.isAfter(end) }
-        }.toList()
-        val emptyAmount = emptyAmount("USD")
-
-        val groups = turnovers.filter { it.account.type != AccountType.ACCOUNT }
-            .groupBy { it.date }
-            .map { entry ->
-                val entries = entry.value
-                    .groupingBy {
-                        if (settings.category) {
-                            GroupKey(it.account.id.toString(), it.account.name)
-                        } else {
-                            GroupKey(it.account.type.name, it.account.type.name)
-                        }
-                    }
-                    .aggregate { _, accumulator: Amount?, turnover, _ ->
-                        val rate = exchangeRateService.rate(entry.key, turnover.amount.currency, "USD").rate
-                        (accumulator ?: emptyAmount) + turnover.amount.convert(rate, "USD")
-                    }
-                    .map { (key, value) ->
-                        val actualValue = if (!settings.category && key.id == AccountType.INCOME.name) {
-                            value.toBigDecimal().negate()
-                        } else {
-                            value.toBigDecimal()
-                        }
-                        FlowChartEntryRecord(
-                            id = key.id,
-                            name = key.name,
-                            value = actualValue
-                        )
-                    }
-                entry.key to entries
-            }
-            .associate { it }
-
-        return dates
-            .map {  date ->
-                val entries = groups[date] ?: emptyList()
-                val sorted = if (settings.category) {
-                    entries.sortedByDescending { it.value }.take(5)
-                } else {
-                    entries.sortedBy { it.name }
-                }
-                FlowChartGroupRecord(
-                    date = date,
-                    entries = sorted
-                )
-            }
-            .sortedByDescending { it.date }
-            .let { FlowChartRecord(it) }
-
-    }
-
-    private data class GroupKey(
-        val id: String,
-        val name: String,
-    )
+//
+//    fun load(settings: FlowChartSettingsRecord): FlowChartRecord {
+//
+//        val turnovers = turnoverService.list(settings.filter)
+//
+//        val start = turnovers.minOfOrNull { it.date }
+//        val end = turnovers.maxOfOrNull { it.date }
+//        val dates = generateSequence(start) {
+//            it.plusMonths(1).takeIf { date -> !date.isAfter(end) }
+//        }.toList()
+//        val emptyAmount = emptyAmount("USD")
+//
+//        val groups = turnovers.filter { it.account.type != AccountType.ACCOUNT }
+//            .groupBy { it.date }
+//            .map { entry ->
+//                val entries = entry.value
+//                    .groupingBy {
+//                        if (settings.category) {
+//                            GroupKey(it.account.id.toString(), it.account.name)
+//                        } else {
+//                            GroupKey(it.account.type.name, it.account.type.name)
+//                        }
+//                    }
+//                    .aggregate { _, accumulator: Amount?, turnover, _ ->
+//                        val rate = exchangeRateService.rate(entry.key, turnover.amount.currency, "USD").rate
+//                        (accumulator ?: emptyAmount) + turnover.amount.convert(rate, "USD")
+//                    }
+//                    .map { (key, value) ->
+//                        val actualValue = if (!settings.category && key.id == AccountType.INCOME.name) {
+//                            value.toBigDecimal().negate()
+//                        } else {
+//                            value.toBigDecimal()
+//                        }
+//                        FlowChartEntryRecord(
+//                            id = key.id,
+//                            name = key.name,
+//                            value = actualValue
+//                        )
+//                    }
+//                entry.key to entries
+//            }
+//            .associate { it }
+//
+//        return dates
+//            .map {  date ->
+//                val entries = groups[date] ?: emptyList()
+//                val sorted = if (settings.category) {
+//                    entries.sortedByDescending { it.value }.take(5)
+//                } else {
+//                    entries.sortedBy { it.name }
+//                }
+//                FlowChartGroupRecord(
+//                    date = date,
+//                    entries = sorted
+//                )
+//            }
+//            .sortedByDescending { it.date }
+//            .let { FlowChartRecord(it) }
+//
+//    }
+//
+//    private data class GroupKey(
+//        val id: String,
+//        val name: String,
+//    )
 
 }

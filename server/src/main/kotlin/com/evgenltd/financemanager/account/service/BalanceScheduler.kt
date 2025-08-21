@@ -11,13 +11,13 @@ class BalanceScheduler(
     private val balanceProcessService: BalanceProcessService,
 ) {
 
-    @SkipLogging
-    @Scheduled(fixedDelay = 1000)
-    fun updateBalances() {
-        val balances = balanceRepository.findByNextDateIsNotNullAndProgressIsFalse()
-        for (balance in balances) {
-            balanceProcessService.updateBalance(balance.id!!)
-        }
-    }
+//    @SkipLogging
+//    @Scheduled(fixedDelay = 1000)
+//    fun updateBalances() {
+//        val balances = balanceRepository.findByNextDateIsNotNullAndProgressIsFalse()
+//        for (balance in balances) {
+//            balanceProcessService.updateBalance(balance.id!!)
+//        }
+//    }
 
 }

@@ -57,22 +57,22 @@ class PricingOrderService(
 //    @Scheduled(cron = "0 0 * * * *")
     @Transactional
     fun updateUsdPrice() {
-        val orders = pricingOrderRepository.findByRateIsNull()
-        val rateIndex = orders.map { it.date.with(DayOfWeek.MONDAY) to it.price.currency }
-            .distinct()
-            .associateWith { exchangeRateService.rate(it.first, it.second, "USD") }
-
-        for (order in orders) {
-            val priceForDefaultUnit = order.item.defaultQuantity / order.quantity * order.price.toBigDecimal()
-            val rateResult = rateIndex[order.date.with(DayOfWeek.MONDAY) to order.price.currency] ?: continue
-            if (rateResult.worst) {
-                continue
-            }
-            order.rate = rateResult.rate
-            order.priceUsd = (priceForDefaultUnit * rateResult.rate).fromFractional("USD")
-        }
-
-        pricingOrderRepository.saveAll(orders)
+//        val orders = pricingOrderRepository.findByRateIsNull()
+//        val rateIndex = orders.map { it.date.with(DayOfWeek.MONDAY) to it.price.currency }
+//            .distinct()
+//            .associateWith { exchangeRateService.rate(it.first, it.second, "USD") }
+//
+//        for (order in orders) {
+//            val priceForDefaultUnit = order.item.defaultQuantity / order.quantity * order.price.toBigDecimal()
+//            val rateResult = rateIndex[order.date.with(DayOfWeek.MONDAY) to order.price.currency] ?: continue
+//            if (rateResult.worst) {
+//                continue
+//            }
+//            order.rate = rateResult.rate
+//            order.priceUsd = (priceForDefaultUnit * rateResult.rate).fromFractional("USD")
+//        }
+//
+//        pricingOrderRepository.saveAll(orders)
     }
 
 }

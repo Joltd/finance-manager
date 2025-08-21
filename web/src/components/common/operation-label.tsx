@@ -46,7 +46,7 @@ export function OperationLabel({
   return (
     <div className={cn(variants({ variant }), className)}>
       <OperationTypeIcon type={type} />
-      {date && <DateLabel date={date} />}
+      {date && <DateLabel date={date} className="min-w-40" />}
       <span className="flex items-center text-nowrap gap-1 min-w-[210]">
         <AmountLabel amount={amountFrom} shorten />
         {type === OperationType.EXCHANGE && (

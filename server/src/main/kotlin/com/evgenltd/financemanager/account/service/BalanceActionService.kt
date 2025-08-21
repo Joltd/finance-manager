@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.account.service
 
-import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
@@ -8,84 +7,38 @@ import com.evgenltd.financemanager.operation.service.signedAmount
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.entity.Turnover
+import com.evgenltd.financemanager.account.record.CalculateBalanceData
+import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.account.repository.TurnoverRepository
+import com.evgenltd.financemanager.common.component.Task
+import com.evgenltd.financemanager.common.component.TaskKey
+import com.evgenltd.financemanager.common.component.TaskVersion
+import com.evgenltd.financemanager.common.repository.find
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.*
 
 @Service
 class BalanceActionService(
+    private val accountRepository: AccountRepository,
     private val balanceRepository: BalanceRepository,
     private val turnoverRepository: TurnoverRepository,
     private val transactionRepository: TransactionRepository,
     private val balanceEventService: BalanceEventService,
 ) : Loggable() {
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun invalidateBalance(account: Account, currency: String, date: LocalDate) {
-        val balance = balanceRepository.findAndLock(account, currency)
-        if (balance == null) {
-            Balance(
-                account = account,
-                amount = Amount(0, currency),
-                date = date,
-                nextDate = date,
-            ).let { balanceRepository.save(it) }
-        } else if (balance.nextDate == null || date.isBefore(balance.nextDate)) {
-            balance.nextDate = date
-        }
-    }
-
+    @Task
     @Transactional
-    fun lockBalance(id: UUID): LocalDate? {
-        val balance = balanceRepository.findAndLock(id)
-        if (balance == null) {
-            log.warn("Balance $id not found")
-            return null
-        }
+    fun updateBalance(@TaskKey accountId: UUID, @TaskKey currency: String, @TaskVersion(reversed = true) date: LocalDate) {
+        val account = accountRepository.find(accountId)
+        val balance = balanceRepository.findByAccountAndAmountCurrency(account, currency) ?: Balance(
+            account = account,
+            amount = Amount(0, currency),
+            date = date,
+        ).let { balanceRepository.save(it) }
 
-        val date = balance.nextDate
-        if (balance.progress || date == null) {
-            log.warn("Balance $id already in progress or not prepared for update")
-            return null
-        }
-
-        balance.progress = true
-        balance.nextDate = null
-        balanceRepository.saveAndFlush(balance)
-
-        balanceEventService.balanceProgress(id, true)
-
-        return date
-    }
-
-    @Transactional
-    fun unlockBalance(id: UUID) {
-        val balance = balanceRepository.findAndLock(id)
-        if (balance == null) {
-            log.warn("Balance $id not found")
-            return
-        }
-
-        if (!balance.progress) {
-            log.warn("Balance already not in progress")
-            return
-        }
-
-        balance.progress = false
-
-        balanceEventService.balanceProgress(id, false)
-    }
-
-    @Transactional
-    fun updateBalance(balanceId: UUID, date: LocalDate) {
-        val balance = balanceRepository.find(balanceId)
-
-        val account = balance.account
-        val currency = balance.amount.currency
         val updateFrom = date.withDayOfMonth(1)
 
         turnoverRepository.deleteByAccountAndAmountCurrencyAndDateGreaterThanEqual(account, currency, updateFrom)
@@ -96,7 +49,7 @@ class BalanceActionService(
 
         transactionRepository.findByAccountAndAmountCurrencyAndDateGreaterThanEqual(account, currency, updateFrom)
             .groupingBy { it.date.withDayOfMonth(1) }
-            .aggregate { key, accumulator: Amount?, element, first ->
+            .aggregate { _, accumulator: Amount?, element, _ ->
                 element.signedAmount() + accumulator
             }
             .map { it }
@@ -116,6 +69,6 @@ class BalanceActionService(
         balance.amount = cumulativeAmount
         balance.date = LocalDate.now()
 
-        balanceEventService.balance(balanceId)
+        balanceEventService.balance(balance.id!!)
     }
 }

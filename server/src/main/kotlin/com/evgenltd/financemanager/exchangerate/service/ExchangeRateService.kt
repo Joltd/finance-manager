@@ -1,6 +1,12 @@
 package com.evgenltd.financemanager.exchangerate.service
 
+import com.evgenltd.financemanager.common.repository.and
+import com.evgenltd.financemanager.common.repository.between
+import com.evgenltd.financemanager.common.repository.contains
+import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.repository.or
+import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.util.*
 import com.evgenltd.financemanager.exchangerate.converter.ExchangeRateConverter
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
@@ -21,48 +27,59 @@ class ExchangeRateService(
     private val publisher: ApplicationEventPublisher,
 ) : Loggable() {
 
-    fun index(from: LocalDate, to: LocalDate): ExchangeRateIndex {
-        val rates = exchangeRateRepository.findByDateGreaterThanEqualAndDateLessThan(from.minusDays(DELTA_DAY), to.plusDays(DELTA_DAY))
-        return ExchangeRateIndex(rates, DEFAULT_TARGET_CURRENCY, DELTA_DAY)
+
+    fun commonRates(currencies: List<String>) {
+        ((ExchangeRate::date between (LocalDate.now().minusDays(DELTA_DAY) until LocalDate.now())) and
+                (
+                        ((ExchangeRate::from contains currencies) and (ExchangeRate::to eq DEFAULT_TARGET_CURRENCY)) or
+                        ((ExchangeRate::from eq  DEFAULT_TARGET_CURRENCY) and (ExchangeRate::to contains currencies))
+                )
+        ).let { exchangeRateRepository.findAll(it) }
     }
 
-    fun rate(date: LocalDate, from: String, to: String): ExchangeRateResult {
-        if (from == to) {
-            return ExchangeRateResult(BigDecimal.ONE, false)
-        }
+//    fun index(from: LocalDate, to: LocalDate): ExchangeRateIndex {
+//        val rates = exchangeRateRepository.findByDateGreaterThanEqualAndDateLessThan(from.minusDays(DELTA_DAY), to.plusDays(DELTA_DAY))
+//        return ExchangeRateIndex(rates, DEFAULT_TARGET_CURRENCY, DELTA_DAY)
+//    }
 
-        val rates = exchangeRateRepository.findByDate(date)
-
-        rates.rate(from, to)?.let {
-            return ExchangeRateResult(it, false)
-        }
-
-        val leftRate = rates.rate(from, DEFAULT_TARGET_CURRENCY)
-        val rightRate = rates.rate(DEFAULT_TARGET_CURRENCY, to)
-        if (leftRate != null && rightRate != null) {
-            return ExchangeRateResult(leftRate * rightRate, false)
-        }
-
-        publisher.publishEvent(ExchangeRateRequestEvent(date, listOf(from, to)))
-        return ExchangeRateResult(BigDecimal.ZERO, true)
-    }
-
-    fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll()
-        .map { exchangeRateConverter.toRecord(it) }
-        .sortedBy { it.date }
-
-    fun byId(id: String): ExchangeRateRecord = exchangeRateRepository.find(id)
-        .let { exchangeRateConverter.toRecord(it) }
-
-    fun update(record: ExchangeRateRecord) {
-        if (record.from == record.to) {
-            return
-        }
-        val entity = exchangeRateConverter.toEntity(record)
-        exchangeRateRepository.save(entity)
-    }
-
-    fun delete(id: String) = exchangeRateRepository.deleteById(id)
+//
+//    fun rate(date: LocalDate, from: String, to: String): ExchangeRateResult {
+//        if (from == to) {
+//            return ExchangeRateResult(BigDecimal.ONE, false)
+//        }
+//
+//        val rates = exchangeRateRepository.findByDate(date)
+//
+//        rates.rate(from, to)?.let {
+//            return ExchangeRateResult(it, false)
+//        }
+//
+//        val leftRate = rates.rate(from, DEFAULT_TARGET_CURRENCY)
+//        val rightRate = rates.rate(DEFAULT_TARGET_CURRENCY, to)
+//        if (leftRate != null && rightRate != null) {
+//            return ExchangeRateResult(leftRate * rightRate, false)
+//        }
+//
+//        publisher.publishEvent(ExchangeRateRequestEvent(date, listOf(from, to)))
+//        return ExchangeRateResult(BigDecimal.ZERO, true)
+//    }
+//
+//    fun list(): List<ExchangeRateRecord> = exchangeRateRepository.findAll()
+//        .map { exchangeRateConverter.toRecord(it) }
+//        .sortedBy { it.date }
+//
+//    fun byId(id: String): ExchangeRateRecord = exchangeRateRepository.find(id)
+//        .let { exchangeRateConverter.toRecord(it) }
+//
+//    fun update(record: ExchangeRateRecord) {
+//        if (record.from == record.to) {
+//            return
+//        }
+//        val entity = exchangeRateConverter.toEntity(record)
+//        exchangeRateRepository.save(entity)
+//    }
+//
+//    fun delete(id: String) = exchangeRateRepository.deleteById(id)
 
     private fun List<ExchangeRate>.rate(from: String, to: String): BigDecimal? = firstOrNull { it.from == from && it.to == to }?.value
             ?: firstOrNull { it.from == to && it.to == from }?.value?.oppositeRate()

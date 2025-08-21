@@ -11,6 +11,8 @@ import java.util.*
 
 interface BalanceRepository : JpaRepository<Balance, UUID>, JpaSpecificationExecutor<Balance> {
 
+    fun findByAccountAndAmountCurrency(account: Account, currency: String): Balance?
+
     fun findByNextDateIsNotNullAndProgressIsFalse(): List<Balance>
 
     @Query("select b from Balance b where b.id = :id")

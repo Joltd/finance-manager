@@ -11,3 +11,15 @@ data class BalanceRecord(
     val date: LocalDate,
     val progress: Boolean,
 )
+
+data class BalanceCommonRecord(
+    val account: AccountReferenceRecord,
+    val amount: Amount,
+    val commonAmount: Amount,
+)
+
+data class CalculateBalanceData(
+    val account: UUID,
+    val currency: String,
+    val date: LocalDate,
+)

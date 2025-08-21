@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.account.converter
 
 import com.evgenltd.financemanager.account.entity.Balance
+import com.evgenltd.financemanager.account.record.BalanceCommonRecord
 import com.evgenltd.financemanager.account.record.BalanceRecord
 import org.springframework.stereotype.Service
 
@@ -16,5 +17,11 @@ class BalanceConverter(
         date = balance.date,
         progress = balance.progress,
     )
-    
+
+    fun toCommonRecord(balance: Balance): BalanceCommonRecord = BalanceCommonRecord(
+        account = accountConverter.toReference(balance.account),
+        amount = balance.amount,
+        commonAmount = balance.amount,
+    )
+
 }

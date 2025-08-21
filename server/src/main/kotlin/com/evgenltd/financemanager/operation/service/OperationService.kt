@@ -18,6 +18,7 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
@@ -48,6 +49,9 @@ class OperationService(
         .map { (date, operations) -> OperationGroupRecord(date, operations) }
         .sortedBy { it.date }
 
+    fun listLast(): List<OperationRecord> = operationRepository.findAllByOrderByDateDesc(Pageable.ofSize(5))
+        .map { operationConverter.toRecord(it) }
+
     fun byId(id: UUID): OperationRecord = operationRepository.find(id).let { operationConverter.toRecord(it) }
 
     @Transactional
@@ -58,8 +62,6 @@ class OperationService(
         notifyChanged(existed, saved)
         return operationConverter.toRecord(saved)
     }
-
-
 
     @Transactional
     fun delete(id: UUID) {

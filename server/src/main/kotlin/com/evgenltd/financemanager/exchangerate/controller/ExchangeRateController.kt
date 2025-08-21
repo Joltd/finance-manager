@@ -16,24 +16,24 @@ import java.time.LocalDate
 class ExchangeRateController(
         private val exchangeRateService: ExchangeRateService
 ) {
-
-    @GetMapping("/exchange-rate")
-    fun list(): List<ExchangeRateRecord> = exchangeRateService.list()
-
-    @GetMapping("/exchange-rate/{id}")
-    fun byId(@PathVariable("id") id: String): ExchangeRateRecord = exchangeRateService.byId(id)
-
-    @PostMapping("/exchange-rate")
-    fun update(@RequestBody record: ExchangeRateRecord) = exchangeRateService.update(record)
-
-    @DeleteMapping("/exchange-rate/{id}")
-    fun delete(@PathVariable("id") id: String) = exchangeRateService.delete(id)
-
-    @GetMapping("/exchange-rate/rate")
-    fun rate(
-        @RequestParam date: LocalDate,
-        @RequestParam from: String,
-        @RequestParam to: String,
-    ): BigDecimal = exchangeRateService.rate(date, from, to).rate
+//
+//    @GetMapping("/exchange-rate")
+//    fun list(): List<ExchangeRateRecord> = exchangeRateService.list()
+//
+//    @GetMapping("/exchange-rate/{id}")
+//    fun byId(@PathVariable("id") id: String): ExchangeRateRecord = exchangeRateService.byId(id)
+//
+//    @PostMapping("/exchange-rate")
+//    fun update(@RequestBody record: ExchangeRateRecord) = exchangeRateService.update(record)
+//
+//    @DeleteMapping("/exchange-rate/{id}")
+//    fun delete(@PathVariable("id") id: String) = exchangeRateService.delete(id)
+//
+//    @GetMapping("/exchange-rate/rate")
+//    fun rate(
+//        @RequestParam date: LocalDate,
+//        @RequestParam from: String,
+//        @RequestParam to: String,
+//    ): BigDecimal = exchangeRateService.rate(date, from, to).rate
 
 }
