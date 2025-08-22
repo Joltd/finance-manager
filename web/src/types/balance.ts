@@ -5,5 +5,4 @@ export interface Balance {
   account: Account
   amount: Amount
   date: string
-  progress: boolean
 }

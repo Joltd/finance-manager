@@ -16,9 +16,6 @@ class BalanceEventService(
 ) {
 
     @SseEventMapping("/balance")
-    fun balanceProgress(id: UUID, progress: Boolean): Patch = patch(progress, "/id=$id/progress")
-
-    @SseEventMapping("/balance")
     fun balance(id: UUID): Patch = balanceRepository.find(id)
         .let { balanceConverter.toRecord(it) }
         .let { patch(it, "/id=$id") }

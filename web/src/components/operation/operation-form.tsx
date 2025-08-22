@@ -16,7 +16,7 @@ import {
 import { DateInput } from '@/components/common/date-input'
 import { AccountInput } from '@/components/common/account-input'
 import { AmountInput } from '@/components/common/amount-input'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -31,70 +31,78 @@ export type OperationFormData = z.infer<typeof formSchema>
 const formSchema = z.object({
   id: z.string().uuid().optional(),
   type: z.nativeEnum(OperationType),
-  date: z.string().date().optional(),
+  date: z.string().date(),
   accountFrom: accountReferenceShema,
   amountFrom: amountShema,
   accountTo: accountReferenceShema,
   amountTo: amountShema,
-  description: z.string().optional(),
+  description: z.string(),
   raw: z.array(z.string()),
 })
 
-export const useOperationForm = (operation?: OperationFormData) => {
+export const useOperationForm = () => {
   const form = useForm<OperationFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: undefined,
       type: OperationType.EXCHANGE,
       date: format(new Date(), 'yyyy-MM-dd'),
+      accountFrom: undefined,
+      amountFrom: undefined,
+      accountTo: undefined,
+      amountTo: undefined,
       description: '',
+      raw: [],
     },
   })
 
-  useEffect(() => {
-    const unsubscribe = form.subscribe({
-      name: ['type', 'amountTo'],
-      formState: {
-        values: true,
-      },
-      callback: ({ values }) => {
-        // todo resetField does not work
-        if (values.type === OperationType.EXPENSE) {
-          if (values.accountFrom?.type !== AccountType.ACCOUNT) {
-            form.resetField('accountFrom')
-          }
-          if (values.accountTo?.type !== AccountType.EXPENSE) {
-            form.resetField('accountTo')
-          }
-        }
+  const clear = useCallback(() => form.reset(), [])
 
-        if (values.type === OperationType.INCOME) {
-          if (values.accountFrom?.type !== AccountType.INCOME) {
-            form.resetField('accountFrom')
-          }
-          if (values.accountTo?.type !== AccountType.ACCOUNT) {
-            form.resetField('accountTo')
-          }
-        }
+  const setData = useCallback((data: OperationFormData) => {
+    form.setValue('id', data.id)
+    form.setValue('type', data.type)
+    form.setValue('date', data.date)
+    form.setValue('accountFrom', data.accountFrom)
+    form.setValue('amountFrom', data.amountFrom)
+    form.setValue('accountTo', data.accountTo)
+    form.setValue('amountTo', data.amountTo)
+    form.setValue('description', data.description)
+    form.setValue('raw', data.raw)
+  }, [])
 
-        if (values.type !== OperationType.EXCHANGE) {
-          form.setValue('amountFrom', values.amountTo)
-        }
-      },
-    })
-
-    return () => unsubscribe()
-  }, [form])
+  const type = form.watch('type')
+  const amountTo = form.watch('amountTo')
 
   useEffect(() => {
-    if (operation) {
-      form.reset(operation)
+    if (type === OperationType.EXPENSE) {
+      if (form.getValues().accountFrom?.type !== AccountType.ACCOUNT) {
+        form.resetField('accountFrom')
+      }
+      if (form.getValues().accountTo?.type !== AccountType.EXPENSE) {
+        form.resetField('accountTo')
+      }
     }
-  }, [form, operation])
 
-  useEffect(() => () => form.reset(), [])
+    if (type === OperationType.INCOME) {
+      if (form.getValues().accountFrom?.type !== AccountType.INCOME) {
+        form.resetField('accountFrom')
+      }
+      if (form.getValues().accountTo?.type !== AccountType.ACCOUNT) {
+        form.resetField('accountTo')
+      }
+    }
+  }, [type])
+
+  useEffect(() => {
+    if (form.getValues().type !== OperationType.EXCHANGE) {
+      form.setValue('amountFrom', amountTo)
+    }
+  }, [amountTo])
 
   return {
     form,
+    setData,
+    clear,
   }
 }
 
@@ -146,7 +154,9 @@ export function OperationForm({ form, error, className }: OperationFormProps) {
         name="accountFrom"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{type === OperationType.INCOME ? 'Income' : 'From'}</FormLabel>
+            <FormLabel>
+              {type === OperationType.INCOME ? 'Income' : 'From'} {field.value?.id}
+            </FormLabel>
             <FormControl>
               <AccountInput type={accountFromType} value={field.value} onChange={field.onChange} />
             </FormControl>
@@ -154,19 +164,19 @@ export function OperationForm({ form, error, className }: OperationFormProps) {
         )}
       />
 
-      {/*{type === OperationType.EXCHANGE && (*/}
-      {/*  <FormField*/}
-      {/*    control={form.control}*/}
-      {/*    name="amountFrom"*/}
-      {/*    render={({ field }) => (*/}
-      {/*      <FormItem>*/}
-      {/*        <FormControl>*/}
-      {/*          <AmountInput amount={field.value} onChange={field.onChange} />*/}
-      {/*        </FormControl>*/}
-      {/*      </FormItem>*/}
-      {/*    )}*/}
-      {/*  />*/}
-      {/*)}*/}
+      {type === OperationType.EXCHANGE && (
+        <FormField
+          control={form.control}
+          name="amountFrom"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <AmountInput amount={field.value} onChange={field.onChange} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      )}
 
       <FormField
         control={form.control}

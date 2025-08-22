@@ -29,6 +29,7 @@ export interface OperationSheetStoreState extends OpenStoreState {
 const operationSheetStore = createStore<OperationSheetStoreState>((set, get, store) => ({
   ...openStoreSlice(set, get, store),
   openWith: (operationId?: string) => set({ opened: true, operationId }),
+  close: () => set({ opened: false, operationId: undefined }),
 }))
 
 export const useOperationSheetStore = <K extends keyof OperationSheetStoreState>(...fields: K[]) =>
@@ -38,7 +39,7 @@ export function OperationSheet() {
   const operation = useOperationStore('updatePathParams', 'fetch', 'data') // todo support loading, error
   const { opened, operationId, close } = useOperationSheetStore('opened', 'operationId', 'close')
   const { loading, error, submit, reset } = useRequest(operationUrls.root, { noErrorToast: true })
-  const { form } = useOperationForm()
+  const { form, setData, clear } = useOperationForm()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -50,26 +51,24 @@ export function OperationSheet() {
 
   useEffect(() => {
     if (operation.data) {
-      form.reset(operation.data)
+      setData(operation.data as any)
     }
   }, [operation.data])
 
   const onSubmit = (data: OperationFormData) => {
-    submit(data).then(() => {
-      form.reset()
-      reset()
-      close()
-    })
+    submit(data).then(() => close())
   }
 
-  const onClose = () => {
-    form.reset()
-    reset()
-    close()
+  const onOpenChange = (value: boolean) => {
+    if (!value) {
+      close()
+      clear()
+      reset()
+    }
   }
 
   return (
-    <Sheet open={opened} onOpenChange={onClose}>
+    <Sheet open={opened} onOpenChange={onOpenChange}>
       <SheetContent ref={ref} aria-describedby="">
         <SheetHeader>
           <SheetTitle>Operation</SheetTitle>

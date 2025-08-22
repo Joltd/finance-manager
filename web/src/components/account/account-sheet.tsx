@@ -32,6 +32,7 @@ interface AccountSheetStoreState extends OpenStoreState {
 const accountSheetStore = createStore<AccountSheetStoreState>((set, get, store) => ({
   ...openStoreSlice(set, get, store),
   openWith: (id?: string) => set({ opened: true, id }),
+  close: () => set({ opened: false, id: undefined }),
 }))
 
 export const useAccountSheetStore = <K extends keyof AccountSheetStoreState>(...fields: K[]) =>

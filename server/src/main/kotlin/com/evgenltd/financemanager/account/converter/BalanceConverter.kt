@@ -15,7 +15,6 @@ class BalanceConverter(
         account = accountConverter.toRecord(balance.account),
         amount = balance.amount,
         date = balance.date,
-        progress = balance.progress,
     )
 
     fun toCommonRecord(balance: Balance): BalanceCommonRecord = BalanceCommonRecord(

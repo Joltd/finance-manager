@@ -14,4 +14,5 @@ export const createAskDialogStore = <C, R>() =>
     ask: (resolve: (result: R) => void, config?: C) => {
       set({ opened: true, config: config, resolve })
     },
+    close: () => set({ opened: false, config: undefined, resolve: () => {} }),
   }))

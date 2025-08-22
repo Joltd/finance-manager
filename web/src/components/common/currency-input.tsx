@@ -26,7 +26,7 @@ export function CurrencyInput({ value, onChange, hideIcon, size, className }: Cu
   }, [])
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value || ''} onValueChange={onChange}>
       <SelectTrigger size={size} className={className} hideIcon={hideIcon}>
         <SelectValue />
       </SelectTrigger>

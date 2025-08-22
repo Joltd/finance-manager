@@ -35,6 +35,7 @@ const importDataOperationSheetStore = createStore<ImportDataOperationSheetStoreS
   (set, get, store) => ({
     ...openStoreSlice(set, get, store),
     openWith: (entry: ImportDataEntry) => set({ opened: true, entry }),
+    close: () => set({ opened: false, entry: undefined }),
   }),
 )
 
@@ -55,8 +56,7 @@ export function ImportDataOperationSheet({
     'close',
     'entry',
   )
-  const [operation, setOperation] = useState<OperationFormData | undefined>()
-  const { form } = useOperationForm(operation)
+  const { form, setData, clear } = useOperationForm()
   const operationRequest = useRequest(operationUrls.root, { noErrorToast: true })
   const operationLinkRequest = useRequest(importDataUrls.entryIdLink, { noErrorToast: true })
 
@@ -64,12 +64,12 @@ export function ImportDataOperationSheet({
     if (entry) {
       const operationForForm =
         entry.operation || entry.suggestions.find((it) => it.selected) || entry.parsed
-      setOperation(operationForForm as any)
+      setData(operationForForm as any)
     }
   }, [entry])
 
   const handleSelectSuggestion = (suggestion: ImportDataOperation) => {
-    setOperation(suggestion as any)
+    setData(suggestion as any)
   }
 
   const onSubmit = (data: OperationFormData) => {
@@ -82,10 +82,12 @@ export function ImportDataOperationSheet({
   }
 
   const onOpenChange = (value: boolean) => {
-    setOpened(value)
-    form.reset()
-    operationRequest.reset()
-    operationLinkRequest.reset()
+    if (!value) {
+      close()
+      clear()
+      operationRequest.reset()
+      operationLinkRequest.reset()
+    }
   }
 
   return (

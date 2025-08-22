@@ -9,7 +9,6 @@ data class BalanceRecord(
     val account: AccountRecord,
     val amount: Amount,
     val date: LocalDate,
-    val progress: Boolean,
 )
 
 data class BalanceCommonRecord(

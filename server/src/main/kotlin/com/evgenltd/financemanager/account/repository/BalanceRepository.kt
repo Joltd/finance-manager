@@ -13,15 +13,4 @@ interface BalanceRepository : JpaRepository<Balance, UUID>, JpaSpecificationExec
 
     fun findByAccountAndAmountCurrency(account: Account, currency: String): Balance?
 
-    fun findByNextDateIsNotNullAndProgressIsFalse(): List<Balance>
-
-    @Query("select b from Balance b where b.id = :id")
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    fun findAndLock(id: UUID): Balance?
-
-    @Query("select b from Balance b where b.account = :account and b.amount.currency = :currency")
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    fun findAndLock(account: Account, currency: String): Balance?
-
-
 }
