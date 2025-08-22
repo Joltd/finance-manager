@@ -1,6 +1,9 @@
 package com.evgenltd.financemanager.exchangerate.controller
 
+import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
+import com.evgenltd.financemanager.exchangerate.service.ExchangeRateGatheringService
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,7 +17,8 @@ import java.time.LocalDate
 
 @RestController
 class ExchangeRateController(
-        private val exchangeRateService: ExchangeRateService
+    private val exchangeRateService: ExchangeRateService,
+    private val exchangeRateGatheringService: ExchangeRateGatheringService,
 ) {
 //
 //    @GetMapping("/exchange-rate")

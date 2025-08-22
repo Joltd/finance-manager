@@ -20,7 +20,7 @@ data class AccountBalanceRecord(
 )
 
 data class GroupBalanceRecord(
-    val group: Reference,
+    val group: Reference?,
     val amount: Amount,
 )
 

@@ -17,9 +17,3 @@ data class BalanceCommonRecord(
     val amount: Amount,
     val commonAmount: Amount,
 )
-
-data class CalculateBalanceData(
-    val account: UUID,
-    val currency: String,
-    val date: LocalDate,
-)

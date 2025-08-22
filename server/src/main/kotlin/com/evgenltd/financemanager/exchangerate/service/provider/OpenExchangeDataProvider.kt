@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
+import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
@@ -31,7 +32,7 @@ class OpenExchangeDataProvider(
             .host("openexchangerates.org")
             .pathSegment("api", *path)
             .queryParam("app_id", appId)
-            .queryParam("base", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+            .queryParam("base", BASE_CURRENCY)
             .build()
             .toUri()
 

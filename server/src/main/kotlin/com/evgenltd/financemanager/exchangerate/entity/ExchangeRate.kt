@@ -1,32 +1,29 @@
 package com.evgenltd.financemanager.exchangerate.entity
 
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.UpdateTimestamp
 import java.math.BigDecimal
-import java.time.LocalDate
+import java.time.Instant
 import java.util.*
 
 @Entity
-@Table(name = "exchange_rates")
+@Table(name = "exchange_rate")
 class ExchangeRate(
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID?,
 
-    var date: LocalDate,
+    var currency: String,
 
-    @Column(name = "\"from\"")
-    var from: String,
+    var value: BigDecimal,
 
-    @Column(name = "\"to\"")
-    var to: String,
-
-    var value: BigDecimal
+    @UpdateTimestamp
+    var updatedAt: Instant? = null,
 
 ) {
     override fun equals(other: Any?): Boolean {
@@ -40,6 +37,6 @@ class ExchangeRate(
 
     override fun hashCode(): Int = id?.hashCode() ?: 0
 
-    override fun toString(): String = "ExchangeRate(id=$id, date=$date, from='$from', to='$to', value=$value)"
+    override fun toString(): String = "ExchangeRate(id=$id, currency='$currency', value=$value, updatedAt=$updatedAt)"
 
 }

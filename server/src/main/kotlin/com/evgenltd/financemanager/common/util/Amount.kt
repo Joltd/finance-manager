@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import kotlin.math.absoluteValue
 
 @Embeddable
-data class Amount(val value: Long, val currency: String) {
+data class Amount(val value: Long, val currency: String) : Comparable<Amount> {
 
     operator fun unaryPlus(): Amount = this
 
@@ -43,7 +43,7 @@ data class Amount(val value: Long, val currency: String) {
 
 //    operator fun div(other: Number): Amount = Amount(value / other.toLong(), currency)
 
-    operator fun compareTo(other: Amount): Int {
+    override operator fun compareTo(other: Amount): Int {
         checkCurrencySame(other)
         return value.compareTo(other.value)
     }
@@ -53,14 +53,6 @@ data class Amount(val value: Long, val currency: String) {
             throw ArithmeticException("Unable to operate amount with different currencies first=$this, second=$that")
         }
     }
-
-    fun isZero(): Boolean = value == 0L
-
-    fun isNotZero(): Boolean = value != 0L
-
-    fun isPositive(): Boolean = value > 0L
-
-    fun isNegative(): Boolean = value < 0L
 
     fun toBigDecimal(): BigDecimal = value.toBigDecimal()
             .movePointLeft(SCALE)
@@ -74,6 +66,14 @@ data class Amount(val value: Long, val currency: String) {
     }
 
 }
+
+fun Amount.isZero(): Boolean = value == 0L
+
+fun Amount.isNotZero(): Boolean = value != 0L
+
+fun Amount.isPositive(): Boolean = value > 0L
+
+fun Amount.isNegative(): Boolean = value < 0L
 
 fun emptyAmount(currency: String): Amount = Amount(0, currency)
 

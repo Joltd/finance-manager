@@ -5,9 +5,9 @@ import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.operation.service.signedAmount
 import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.entity.Turnover
-import com.evgenltd.financemanager.account.record.CalculateBalanceData
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.account.repository.TurnoverRepository
@@ -33,12 +33,15 @@ class BalanceActionService(
     @Transactional
     fun updateBalance(@TaskKey accountId: UUID, @TaskKey currency: String, @TaskVersion(reversed = true) date: LocalDate) {
         val account = accountRepository.find(accountId)
-        val balance = balanceRepository.findByAccountAndAmountCurrency(account, currency) ?: Balance(
-            account = account,
-            amount = Amount(0, currency),
-            date = date,
-        ).let { balanceRepository.save(it) }
 
+        val cumulativeAmount = updateTurnover(account, currency, date)
+
+        if (account.type == AccountType.ACCOUNT) {
+            updateBalance(account, currency, date, cumulativeAmount)
+        }
+    }
+
+    private fun updateTurnover(account: Account, currency: String, date: LocalDate): Amount {
         val updateFrom = date.withDayOfMonth(1)
 
         turnoverRepository.deleteByAccountAndAmountCurrencyAndDateGreaterThanEqual(account, currency, updateFrom)
@@ -66,9 +69,19 @@ class BalanceActionService(
             }
             .let { turnoverRepository.saveAll(it) }
 
-        balance.amount = cumulativeAmount
+        return cumulativeAmount
+    }
+
+    private fun updateBalance(account: Account, currency: String, date: LocalDate, amount: Amount) {
+        val balance = balanceRepository.findByAccountAndAmountCurrency(account, currency) ?: Balance(
+            account = account,
+            amount = Amount(0, currency),
+            date = date,
+        ).let { balanceRepository.save(it) }
+        balance.amount = amount
         balance.date = LocalDate.now()
 
         balanceEventService.balance(balance.id!!)
     }
+
 }

@@ -5,6 +5,8 @@ import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.account.converter.AccountConverter
+import com.evgenltd.financemanager.common.util.isNegative
+import com.evgenltd.financemanager.common.util.isPositive
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.util.*

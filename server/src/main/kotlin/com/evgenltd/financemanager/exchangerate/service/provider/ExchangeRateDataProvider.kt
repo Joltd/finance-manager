@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.exchangerate.service.provider
 
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
 import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
@@ -21,10 +22,10 @@ class ExchangeRateDataProvider(
 
     override val name: Provider = Provider.EXCHANGE_RATE
 
-    override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+    override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest", BASE_CURRENCY)
 
     override fun historical(date: LocalDate, currencyHints: List<String>): List<ExchangeRateToDefault> =
-        request("history", ExchangeRateService.DEFAULT_TARGET_CURRENCY, date.year.toString(), date.monthValue.toString(), date.dayOfMonth.toString())
+        request("history", BASE_CURRENCY, date.year.toString(), date.monthValue.toString(), date.dayOfMonth.toString())
 
     private fun request(vararg path: String): List<ExchangeRateToDefault> {
         val uri = UriComponentsBuilder

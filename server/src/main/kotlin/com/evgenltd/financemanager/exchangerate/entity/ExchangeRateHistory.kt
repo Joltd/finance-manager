@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.exchangerate.entity
 
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -20,11 +19,7 @@ class ExchangeRateHistory(
 
     var date: LocalDate,
 
-    @Column(name = "\"from\"")
-    var from: String,
-
-    @Column(name = "\"to\"")
-    var to: String,
+    var currency: String,
 
     var value: BigDecimal
 
@@ -40,6 +35,6 @@ class ExchangeRateHistory(
 
     override fun hashCode(): Int = id?.hashCode() ?: 0
 
-    override fun toString(): String = "ExchangeRateHistory(id=$id, date=$date, from='$from', to='$to', value=$value)"
+    override fun toString(): String = "ExchangeRateHistory(id=$id, date=$date, currency='$currency', value=$value)"
 
 }

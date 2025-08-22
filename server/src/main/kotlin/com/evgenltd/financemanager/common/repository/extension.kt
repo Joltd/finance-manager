@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.common.repository
 
 import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import org.springframework.data.jpa.domain.Specification
@@ -79,18 +80,26 @@ infix fun <E, F : Comparable<F>> KProperty1<E, F?>.between(range: Range<F>?): Sp
 
 infix fun <E> KProperty1<E, Amount?>.currency(currency: String?): Specification<E> = valueNonNull(currency) {
     Specification<E> { root, _, builder ->
-        builder.equal(root.get<Amount>(name).get<String>("currency"), it)
+        builder.equal(root.get<Amount>(name).get<String>(Amount::currency.name), it)
     }
 }
 
 fun <E> KProperty1<E, Amount?>.isNotZero(): Specification<E> = Specification<E> { root, _, builder ->
-    builder.notEqual(root.get<Amount>(name).get<Long>("value"), 0L)
+    builder.notEqual(root.get<Amount>(name).get<Long>(Amount::value.name), 0L)
 }
 
 // account
 
 infix fun <E> KProperty1<E, Account?>.account(id: UUID?): Specification<E> = valueNonNull(id) {
     Specification<E> { root, _, builder ->
-        builder.equal(root.get<Account>(name).get<String>("id"), it)
+        builder.equal(root.get<Account>(name).get<String>(Account::id.name), it)
+    }
+}
+
+infix fun <E> KProperty1<E, Account?>.accountTypes(types: List<AccountType>?): Specification<E> = valueNonNull(types) {
+    Specification<E> { root, _, builder ->
+        builder.`in`(root.get<Account>(name).get<AccountType>(Account::type.name)).also { expression ->
+            it.onEach { expression.value(it) }
+        }
     }
 }

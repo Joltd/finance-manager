@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.exchangerate.service.provider
 
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
 import com.evgenltd.financemanager.common.util.oppositeRate
+import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
@@ -47,7 +48,7 @@ class CoinGeckoProvider(
             .queryParam("community_data", "false")
             .queryParam("developer_data", "false")
             .queryParam("sparkline", "false")
-            .queryParam("vs_currency", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+            .queryParam("vs_currency", BASE_CURRENCY)
             .apply(block)
             .build()
             .toUri()
@@ -69,7 +70,7 @@ class CoinGeckoProvider(
         return response.body
             ?.get("market_data")
             ?.get("current_price")
-            ?.get(ExchangeRateService.DEFAULT_TARGET_CURRENCY.lowercase())
+            ?.get(BASE_CURRENCY.lowercase())
             ?.asText()
             ?.toBigDecimal()
             ?.oppositeRate()

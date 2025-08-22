@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.exchangerate.service.provider
 
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
 import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
@@ -44,7 +45,7 @@ class FreeCurrencyProvider(
             .host("api.freecurrencyapi.com")
             .pathSegment("v1", path)
             .queryParam("apikey", apiKey)
-            .queryParam("base_currency", ExchangeRateService.DEFAULT_TARGET_CURRENCY)
+            .queryParam("base_currency", BASE_CURRENCY)
             .also(block)
             .build()
             .toUri()

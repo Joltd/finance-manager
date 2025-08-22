@@ -1,41 +1,82 @@
 package com.evgenltd.financemanager.exchangerate.service
 
+import com.evgenltd.financemanager.account.repository.CurrencyRepository
+import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.repository.contains
-import com.evgenltd.financemanager.common.repository.eq
-import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.repository.or
-import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.util.*
 import com.evgenltd.financemanager.exchangerate.converter.ExchangeRateConverter
-import com.evgenltd.financemanager.exchangerate.entity.ExchangeRate
+import com.evgenltd.financemanager.exchangerate.entity.ExchangeRateHistory
+import com.evgenltd.financemanager.exchangerate.record.ExchangeRateHistoryIndex
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateIndex
-import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRecord
-import com.evgenltd.financemanager.exchangerate.record.ExchangeRateRequestEvent
-import com.evgenltd.financemanager.exchangerate.record.ExchangeRateResult
+import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateHistoryRepository
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Service
 class ExchangeRateService(
+    private val currencyRepository: CurrencyRepository,
     private val exchangeRateRepository: ExchangeRateRepository,
+    private val exchangeRateHistoryRepository: ExchangeRateHistoryRepository,
     private val exchangeRateConverter: ExchangeRateConverter,
     private val publisher: ApplicationEventPublisher,
+    private val exchangeRateGatheringService: ExchangeRateGatheringService,
 ) : Loggable() {
 
-
-    fun commonRates(currencies: List<String>) {
-        ((ExchangeRate::date between (LocalDate.now().minusDays(DELTA_DAY) until LocalDate.now())) and
-                (
-                        ((ExchangeRate::from contains currencies) and (ExchangeRate::to eq DEFAULT_TARGET_CURRENCY)) or
-                        ((ExchangeRate::from eq  DEFAULT_TARGET_CURRENCY) and (ExchangeRate::to contains currencies))
-                )
-        ).let { exchangeRateRepository.findAll(it) }
+    fun actualRateIndex(targetCurrency: String): ExchangeRateIndex {
+        val rates = actualRates()
+        return ExchangeRateIndex(targetCurrency, rates)
     }
+
+    fun actualRates(): Map<String, BigDecimal> {
+        val currencies = currencyRepository.findAll()
+        val rates = exchangeRateRepository.findAll()
+        rates.outdated(currencies)
+            .isNotEmpty()
+            .takeIf { it }
+            ?.let { exchangeRateGatheringService.updateActual() }
+        return rates.associate { it.currency to it.value }
+    }
+
+    fun historyRateIndex(targetCurrency: String, range: Range<LocalDate>, currencies: List<String>): ExchangeRateHistoryIndex {
+        val rates = historyRates(range, currencies)
+        return ExchangeRateHistoryIndex(targetCurrency, rates)
+    }
+
+    fun historyRates(range: Range<LocalDate>, currencies: List<String>): Map<LocalDate, Map<String, BigDecimal>> =
+        ((ExchangeRateHistory::date between range) and (ExchangeRateHistory::currency contains currencies))
+            .let { exchangeRateHistoryRepository.findAll(it) }
+            .groupBy { it.date }
+            .map { (date, rates) ->
+                date to rates.associate { it.currency to it.value }
+            }
+            .associate { it }
+            .also { index ->
+                generateSequence(range.from) { it.plusDays(1) }
+                    .takeWhile { it < range.to }
+                    .toList()
+                    .onEach { date ->
+                        val currencyWithoutRates = currencies - (index[date]?.keys ?: emptySet()).toSet()
+                        if (currencyWithoutRates.isNotEmpty()) {
+                            exchangeRateGatheringService.updateHistory(date, currencyWithoutRates)
+                        }
+                    }
+            }
+
+//    fun commonRates(currencies: List<String>) {
+//        ((ExchangeRate::date between (LocalDate.now().minusDays(DELTA_DAY) until LocalDate.now())) and
+//                (
+//                        ((ExchangeRate::from contains currencies) and (ExchangeRate::to eq DEFAULT_TARGET_CURRENCY)) or
+//                        ((ExchangeRate::from eq  DEFAULT_TARGET_CURRENCY) and (ExchangeRate::to contains currencies))
+//                )
+//        ).let { exchangeRateRepository.findAll(it) }
+//    }
 
 //    fun index(from: LocalDate, to: LocalDate): ExchangeRateIndex {
 //        val rates = exchangeRateRepository.findByDateGreaterThanEqualAndDateLessThan(from.minusDays(DELTA_DAY), to.plusDays(DELTA_DAY))
@@ -81,12 +122,13 @@ class ExchangeRateService(
 //
 //    fun delete(id: String) = exchangeRateRepository.deleteById(id)
 
-    private fun List<ExchangeRate>.rate(from: String, to: String): BigDecimal? = firstOrNull { it.from == from && it.to == to }?.value
-            ?: firstOrNull { it.from == to && it.to == from }?.value?.oppositeRate()
+//    private fun List<ExchangeRate>.rate(from: String, to: String): BigDecimal? = firstOrNull { it.from == from && it.to == to }?.value
+//            ?: firstOrNull { it.from == to && it.to == from }?.value?.oppositeRate()
 
-    companion object {
-        private const val DELTA_DAY = 2L
-        const val DEFAULT_TARGET_CURRENCY = "USD"
+    private companion object {
+        const val ACTUAL_RATE_THRESHOLD = 12
+//        private const val DELTA_DAY = 2L
+//        const val DEFAULT_TARGET_CURRENCY = "USD"
     }
 
 }

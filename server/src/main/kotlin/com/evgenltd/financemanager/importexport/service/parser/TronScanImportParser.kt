@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
+import com.evgenltd.financemanager.common.util.isZero
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
