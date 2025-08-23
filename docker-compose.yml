@@ -3,11 +3,11 @@ version: '3.8'
 services:
 
   server:
-    image: joltd/finance-manager:server-2.0.0-SNAPSHOT
+    image: joltd/finance-manager:server-3.0.0-SNAPSHOT
     ports:
       - "9500:8080"
     environment:
-      APP_VERSION: 2.0.0-SNAPSHOT
+      APP_VERSION: 3.0.0-SNAPSHOT
       DB_HOST: localhost:5432
       DB_USER: root_user
       DB_PASSWORD: root_password
@@ -15,8 +15,9 @@ services:
       OPEN_EXCHANGE_APP_ID: open_exchange_app_id
       EXCHANGE_RATE_API_KEY: exchange_rate_api_key
       COIN_GECKO_API_KEY: coin_gecko_api_key
+      OPEN_AI_API_KEY: open_ai_api_key
 
   web:
-    image: joltd/finance-manager:web-2.0.0-SNAPSHOT
+    image: joltd/finance-manager:web-3.0.0-SNAPSHOT
     ports:
       - "9300:80"

@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-COPY ./dist/finance-manager /usr/share/nginx/html
+COPY ./out /usr/share/nginx/html
 
 EXPOSE 80
 
