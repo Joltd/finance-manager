@@ -91,3 +91,15 @@ jobs:
             cd ~/build/${{ env.PROJECT_NAME }}
             docker compose pull server web
             docker compose up -d
+
+      - name: Delete old images
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+          script: |
+            docker images --format '{{.Repository}}:{{.Tag}}' \
+              | grep '^joltd/${{ env.PROJECT_NAME }}' \
+              | grep -v -f <(docker ps -a --format '{{.Image}}') \
+              | xargs -r docker rmi
