@@ -1,7 +1,11 @@
-FROM nginx:alpine
+FROM node:18-alpine
 
-COPY ./out /usr/share/nginx/html
+COPY ./.next ./.next
+COPY ./public ./public
+COPY ./package*.json ./
+COPY ./node_modules ./node_modules
 
-EXPOSE 80
+ENV NODE_ENV=production
+EXPOSE 3000
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "start"]
