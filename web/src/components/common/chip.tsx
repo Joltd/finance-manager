@@ -9,9 +9,10 @@ import { Badge } from '@/components/ui/badge'
 export interface ChipProps extends React.HTMLAttributes<HTMLDivElement> {
   text: string
   onDismiss?: () => void
+  icon?: React.ReactNode
 }
 
-export function Chip({ text, onDismiss, ...props }: ChipProps) {
+export function Chip({ text, onDismiss, icon, ...props }: ChipProps) {
   return (
     <Badge variant="outline" className={cn('p-0', props.className)} {...props}>
       <div className="pl-3 max-w-30">
@@ -26,7 +27,7 @@ export function Chip({ text, onDismiss, ...props }: ChipProps) {
             onDismiss()
           }}
         >
-          <XIcon />
+          {icon || <XIcon />}
         </Button>
       )}
     </Badge>

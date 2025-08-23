@@ -9,8 +9,8 @@ import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
 import { subscribeSse } from '@/lib/notification'
 import { Button } from '@/components/ui/button'
-import { PlusIcon } from 'lucide-react'
-import { AccountGroup } from '@/types/account'
+import { ArchiveRestoreIcon, PlusIcon } from 'lucide-react'
+import { Account, AccountGroup } from '@/types/account'
 import { cn } from '@/lib/utils'
 
 export function AccountGroupListSection() {
@@ -37,11 +37,15 @@ export function AccountGroupListSection() {
 
   const handleEdit = async (it: AccountGroup) => {
     const name = await askText('Name', it.name)
-    await saveGroup.submit({ id: it.id, name })
+    await saveGroup.submit({ ...it, name })
   }
 
-  const handleDelete = async (it: AccountGroup) => {
-    await deleteGroup.submit({}, { id: it.id })
+  const handleDeleteOrRestore = async (it: AccountGroup) => {
+    if (it.deleted) {
+      await saveGroup.submit({ ...it, deleted: false })
+    } else {
+      await deleteGroup.submit({}, { id: it.id })
+    }
   }
 
   return (
@@ -62,8 +66,9 @@ export function AccountGroupListSection() {
               key={it.id}
               text={it.name}
               onClick={() => handleEdit(it)}
-              onDismiss={() => handleDelete(it)}
-              className={cn(it.deleted && 'line-through')}
+              onDismiss={() => handleDeleteOrRestore(it)}
+              icon={it.deleted ? <ArchiveRestoreIcon className="text-white" /> : undefined}
+              className={cn(it.deleted && 'line-through text-muted')}
             />
           ))}
         </div>

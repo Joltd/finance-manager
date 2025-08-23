@@ -10,7 +10,7 @@ import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
 import { subscribeSse } from '@/lib/notification'
 import { Button } from '@/components/ui/button'
-import { PlusIcon } from 'lucide-react'
+import { ArchiveRestoreIcon, CheckIcon, PlusIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface AccountListSectionProps {
@@ -42,11 +42,15 @@ export function AccountListSection({ title, accountType }: AccountListSectionPro
 
   const handleEdit = async (it: Account) => {
     const name = await askText('Name', it.name)
-    await saveAccount.submit({ id: it.id, name, type: it.type })
+    await saveAccount.submit({ ...it, name })
   }
 
-  const handleDelete = async (it: Account) => {
-    await deleteAccount.submit({}, { id: it.id })
+  const handleDeleteOrRestore = async (it: Account) => {
+    if (it.deleted) {
+      await saveAccount.submit({ ...it, deleted: false })
+    } else {
+      await deleteAccount.submit({}, { id: it.id })
+    }
   }
 
   const filteredAccounts = accountList.data?.filter((it) => it.type === accountType) || []
@@ -69,8 +73,9 @@ export function AccountListSection({ title, accountType }: AccountListSectionPro
               key={it.id}
               text={it.name}
               onClick={() => handleEdit(it)}
-              onDismiss={() => handleDelete(it)}
-              className={cn(it.deleted && 'line-through')}
+              onDismiss={() => handleDeleteOrRestore(it)}
+              icon={it.deleted ? <ArchiveRestoreIcon className="text-white" /> : undefined}
+              className={cn(it.deleted && 'line-through text-muted')}
             />
           ))}
         </div>

@@ -54,4 +54,5 @@ export interface AccountBalance {
 export interface Currency {
   id?: string
   name: string
+  crypto: boolean
 }

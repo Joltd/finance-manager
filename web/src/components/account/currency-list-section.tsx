@@ -11,6 +11,12 @@ import { accountEvents, accountUrls } from '@/api/account'
 import { subscribeSse } from '@/lib/notification'
 import { Button } from '@/components/ui/button'
 import { PlusIcon } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function CurrencyListSection() {
   const currencyList = useCurrencyListStore(
@@ -29,14 +35,14 @@ export function CurrencyListSection() {
     return subscribeSse(accountEvents.currency, {}, () => currencyList.fetch())
   }, [])
 
-  const handleNew = async () => {
+  const handleNew = async (crypto: boolean) => {
     const name = await askText('Name')
-    await saveCurrency.submit({ name })
+    await saveCurrency.submit({ name, crypto })
   }
 
   const handleEdit = async (it: Currency) => {
     const name = await askText('Name', it.name)
-    await saveCurrency.submit({ id: it.id, name })
+    await saveCurrency.submit({ ...it, name })
   }
 
   const handleDelete = async (it: Currency) => {
@@ -45,14 +51,22 @@ export function CurrencyListSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex">
+      <div className="flex gap-2">
         <TextLabel variant="title" className="grow">
           Currencies
         </TextLabel>
-        <Button onClick={handleNew}>
-          <PlusIcon />
-          Add currency
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <PlusIcon />
+              Add currency
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleNew(false)}>Fiat</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNew(true)}>Crypto</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <DataSection store={currencyList}>
         <div className="flex flex-wrap gap-2">
