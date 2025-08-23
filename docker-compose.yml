@@ -20,4 +20,4 @@ services:
   web:
     image: joltd/finance-manager:web-3.0.0-SNAPSHOT
     ports:
-      - "9300:80"
+      - "9300:3000"
