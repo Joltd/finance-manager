@@ -9,6 +9,8 @@ import { ActionBarContainer } from '@/components/common/action-bar'
 import React from 'react'
 import { CurrencyInitialFetcher } from '@/components/account/currency-initial-fetcher'
 import { Toaster } from '@/components/ui/sonner'
+import { SettingInitialFetcher } from '@/components/account/setting-initial-fetcher'
+import { SettingDialog } from '@/components/setting/setting-dialog'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -43,6 +45,7 @@ export default function RootLayout({
         >
           <SidebarProvider className="h-full">
             <CurrencyInitialFetcher />
+            <SettingInitialFetcher />
             <AppSidebar />
             <main className="flex flex-col w-full h-full overflow-x-auto overflow-y-hidden relative">
               {children}

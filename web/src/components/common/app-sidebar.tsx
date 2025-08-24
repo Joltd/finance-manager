@@ -17,7 +17,7 @@ import {
 import { AppearanceTrigger } from '@/components/ui/appearance-trigger'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { useImportDataListStore } from '@/store/import-data'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import {
   ImportDataNewDialog,
   useImportDataNewDialogStore,
@@ -26,6 +26,7 @@ import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
 import { cn } from '@/lib/utils'
 import { NotificationList } from '@/components/common/notification-list'
+import { SettingDialog } from '@/components/setting/setting-dialog'
 
 export function AppSidebar() {
   const { data, fetch } = useImportDataListStore('data', 'fetch') // todo support loadig, error
@@ -103,6 +104,7 @@ export function AppSidebar() {
         <div>
           <AppearanceTrigger />
           <NotificationList />
+          <SettingDialog />
         </div>
       </SidebarFooter>
     </Sidebar>

@@ -37,7 +37,7 @@ export const useImportDataNewDialogStore = <K extends keyof OpenStoreState>(...f
 export function ImportDataNewDialog() {
   const { opened, close } = useImportDataNewDialogStore('opened', 'close')
   const importDataList = useImportDataListStore('fetch')
-  const { loading, submit, reset } = useRequest(importDataUrls.begin, { multipart: true })
+  const importBegin = useRequest(importDataUrls.begin, { multipart: true })
   const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,8 +51,8 @@ export function ImportDataNewDialog() {
     const formData = new FormData()
     formData.append('data', jsonAsBlob({ account: data.account.id }))
     formData.append('file', data.file[0])
-    submit(formData).then((result) => {
-      close()
+    importBegin.submit(formData).then((result) => {
+      closeDialog()
       router.push(`/import-data/${result}`)
       importDataList.fetch()
     })
@@ -60,10 +60,14 @@ export function ImportDataNewDialog() {
 
   const onOpenChange = (value: boolean) => {
     if (!value) {
-      close()
-      form.reset()
-      reset()
+      closeDialog()
     }
+  }
+
+  const closeDialog = () => {
+    close()
+    form.reset()
+    importBegin.reset()
   }
 
   return (
@@ -104,7 +108,7 @@ export function ImportDataNewDialog() {
               <DialogClose asChild>
                 <Button>Cancel</Button>
               </DialogClose>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={importBegin.loading}>
                 Begin
               </Button>
             </DialogFooter>
