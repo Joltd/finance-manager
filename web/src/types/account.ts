@@ -38,6 +38,7 @@ export const accountReferenceShema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   type: z.nativeEnum(AccountType),
+  deleted: z.boolean(),
 })
 
 export interface AccountBalanceGroup {
