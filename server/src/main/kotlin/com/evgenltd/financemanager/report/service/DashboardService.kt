@@ -49,10 +49,7 @@ class DashboardService(
     fun load(): DashboardRecord {
 
         val targetCurrency = settingService.operationDefaultCurrency() ?: BASE_CURRENCY
-        
-        val rates = exchangeRateService.actualRates()
-        val rateIndex = ExchangeRateIndex(targetCurrency, rates)
-        
+
         val balances = balanceRepository.findAll(Balance::amount.isNotZero())
         
         val accountBalances = balances.groupBy { it.account }
@@ -62,57 +59,38 @@ class DashboardService(
                     amounts = balances.map { it.amount },
                 )
             }
-        
-        val groupBalances = balances.map { 
-            it.account to rateIndex.toTarget(it.amount)
-        }.groupingBy { (account, _) -> account.group?.let { accountGroupConverter.toReference(it) } ?: Reference(UUID.randomUUID(), "No group") }
-            .aggregate { _, accumulator: Amount?, element, _ -> 
-                element.second + accumulator
-            }
-            .toList()
-            .sortedByDescending { it.second }
-        
-        val topGroupBalances = groupBalances.take(4)
-            .map { GroupBalanceRecord(it.first, it.second) }
+            .take(5)
 
-        val otherGroupBalance = groupBalances.drop(4)
-            .map { it.second }
-            .reduce { acc, amount -> acc + amount }
-            .let { listOf(GroupBalanceRecord(null, it)) }
-        
+//        val lastDate = accountRepository.findLastReviseDate() ?: transactionRepository.findLastDate() ?: LocalDate.now()
+//
+//        val to = lastDate.withDayOfMonth(1).plusMonths(1)
+//        val from = to.minusMonths(3)
+//        val range = from until to
+//
+//        val transactions = ((Transaction::date between range) and
+//                (Transaction::account accountTypes listOf(AccountType.EXPENSE, AccountType.INCOME)))
+//            .let { transactionRepository.findAll(it) }
 
-        val lastDate = accountRepository.findLastReviseDate() ?: transactionRepository.findLastDate() ?: LocalDate.now()
-
-        val to = lastDate.withDayOfMonth(1).plusMonths(1)
-        val from = to.minusMonths(3)
-        val range = from until to
-
-        val transactions = ((Transaction::date between range) and
-                (Transaction::account accountTypes listOf(AccountType.EXPENSE, AccountType.INCOME)))
-            .let { transactionRepository.findAll(it) }
-
-        val currencies = transactions.map { it.amount.currency }.distinct()
-
-        val rateHistoryIndex = exchangeRateService.historyRateIndex(targetCurrency, range, currencies)
-
-        transactions.filter { it.account.type == AccountType.EXPENSE }
-            .groupBy { it.date.withDayOfMonth(1) }
-            .map { (date, transactions) ->
-                val (e1, e2, e3) = transactions.groupingBy { it.account }
-                    .aggregate { _, accumulator: Amount?, element, _ ->
-                        rateHistoryIndex.toTarget(element.date, element.amount) + accumulator
-                    }
-                    .map { it }
-                    .sortedByDescending { it.value }
-                    .take(3)
-            }
-
-
+//        val currencies = transactions.map { it.amount.currency }.distinct()
+//
+//        val rateHistoryIndex = exchangeRateService.historyRateIndex(targetCurrency, range, currencies)
+//
+//        transactions.filter { it.account.type == AccountType.EXPENSE }
+//            .groupBy { it.date.withDayOfMonth(1) }
+//            .map { (date, transactions) ->
+//                val (e1, e2, e3) = transactions.groupingBy { it.account }
+//                    .aggregate { _, accumulator: Amount?, element, _ ->
+//                        rateHistoryIndex.toTarget(element.date, element.amount) + accumulator
+//                    }
+//                    .map { it }
+//                    .sortedByDescending { it.value }
+//                    .take(3)
+//            }
 
         return DashboardRecord(
             accountBalances = accountBalances,
             operations = operationService.listLast(),
-            groupBalances = topGroupBalances + otherGroupBalance,
+            groupBalances = groupBalances(targetCurrency, balances),
             topExpenses = emptyList(),
             incomeExpense = emptyList(),
         )
@@ -137,6 +115,32 @@ class DashboardService(
 //                .toList()
 //                .sortedBy { it.currency }
 //        )
+    }
+
+    private fun groupBalances(targetCurrency: String, balances: List<Balance>): List<GroupBalanceRecord> {
+        val rates = exchangeRateService.actualRates()
+        val rateIndex = ExchangeRateIndex(targetCurrency, rates)
+
+        val groupBalances = balances.map {
+            it.account to rateIndex.toTarget(it.amount)
+        }.groupingBy {
+            (account, _) -> account.group
+            ?.let { accountGroupConverter.toReference(it) }
+            ?: Reference(UUID.randomUUID(), "No group")
+        }
+            .aggregate { _, accumulator: Amount?, element, _ -> element.second + accumulator }
+            .toList()
+            .sortedByDescending { it.second }
+
+        val topGroupBalances = groupBalances.take(4)
+            .map { GroupBalanceRecord(it.first, it.second) }
+
+        val otherGroupBalance = groupBalances.drop(4)
+            .map { it.second }
+            .reduce { acc, amount -> acc + amount }
+            .let { listOf(GroupBalanceRecord(null, it)) }
+
+        return topGroupBalances + otherGroupBalance
     }
 
 }

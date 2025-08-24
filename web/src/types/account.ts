@@ -30,6 +30,7 @@ export interface Account {
 export interface AccountReference {
   id: string
   name: string
+  deleted: boolean
   type: AccountType
 }
 

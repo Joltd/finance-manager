@@ -36,11 +36,3 @@ data class IncomeExpenseRecord(
     val income: Amount,
     val expense: Amount,
 )
-
-//
-
-data class DashboardRecordOld(
-    val defaultCurrencyAmount: Amount,
-    val usdCashAmount: Amount?,
-    val cashFounds: List<Amount>
-)
