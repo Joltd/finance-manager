@@ -52,7 +52,13 @@ export default function Home() {
         </div>
         <div className="flex flex-wrap gap-4">
           {balances.map((it) => (
-            <AccountBalanceCard key={it.id} id={it.id} name={it.name} balances={it.balances} />
+            <AccountBalanceCard
+              key={it.id}
+              id={it.id}
+              name={it.name}
+              deleted={it.deleted}
+              balances={it.balances}
+            />
           ))}
         </div>
       </div>
