@@ -32,6 +32,7 @@ export interface AccountReference {
   name: string
   deleted: boolean
   type: AccountType
+  reviseDate?: string
 }
 
 export const accountReferenceShema = z.object({
@@ -48,9 +49,7 @@ export interface AccountBalanceGroup {
 }
 
 export interface AccountBalance {
-  id: string
-  name: string
-  deleted: boolean
+  account: AccountReference
   balances: Amount[]
 }
 

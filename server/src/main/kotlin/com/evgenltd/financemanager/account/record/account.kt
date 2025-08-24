@@ -26,6 +26,7 @@ data class AccountReferenceRecord(
     val name: String,
     val deleted: Boolean,
     val type: AccountType,
+    val reviseDate: LocalDate?,
 )
 
 data class AccountBalanceFilter(
@@ -39,8 +40,6 @@ data class AccountBalanceGroupRecord(
 )
 
 data class AccountBalanceRecord(
-    val id: UUID,
-    val name: String,
-    val deleted: Boolean,
+    val account: AccountReferenceRecord,
     val balances: List<Amount>,
 )

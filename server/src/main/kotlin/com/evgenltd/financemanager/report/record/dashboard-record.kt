@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.report.record
 
-import com.evgenltd.financemanager.account.record.AccountReferenceRecord
+import com.evgenltd.financemanager.account.record.AccountBalanceRecord
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.record.OperationRecord
@@ -12,11 +12,6 @@ data class DashboardRecord(
     val groupBalances: List<GroupBalanceRecord>,
     val topExpenses: List<TopExpenseRecord>,
     val incomeExpense: List<IncomeExpenseRecord>,
-)
-
-data class AccountBalanceRecord(
-    val account: AccountReferenceRecord,
-    val amounts: List<Amount>,
 )
 
 data class GroupBalanceRecord(

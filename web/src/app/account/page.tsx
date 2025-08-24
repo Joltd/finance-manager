@@ -53,14 +53,12 @@ export default function Page() {
           <div key={group.id || 'empty'} className="flex flex-col gap-4">
             <TextLabel variant="title">{group.name || <EmptyLabel>No group</EmptyLabel>}</TextLabel>
             <div className="flex flex-wrap gap-4">
-              {group.accounts?.map((account) => (
+              {group.accounts?.map((it) => (
                 <AccountBalanceCard
-                  key={account.id}
-                  id={account.id}
-                  name={account.name}
-                  deleted={account.deleted}
-                  balances={account.balances}
-                  onClick={() => accountSheet.openWith(account.id)}
+                  key={it.account.id}
+                  account={it.account}
+                  balances={it.balances}
+                  onClick={() => accountSheet.openWith(it.account.id)}
                 />
               ))}
             </div>

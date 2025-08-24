@@ -154,23 +154,17 @@ export const operations: Operation[] = [
 ]
 
 const balance1: AccountBalance = {
-  id: '1',
-  name: 'Cash',
-  deleted: false,
+  account: cashAccount as any,
   balances: [amount(60000, 'RUB'), amount(2000, 'USD')],
 }
 
 const balance2: AccountBalance = {
-  id: '2',
-  name: 'Credit Card',
-  deleted: false,
+  account: creditCardAccount as any,
   balances: [amount(5000, 'USD'), amount(3000, 'EUR')],
 }
 
 const balance3: AccountBalance = {
-  id: '3',
-  name: 'Bank Account',
-  deleted: true,
+  account: bankAccount as any,
   balances: [amount(120000, 'RUB'), amount(4500, 'USD')],
 }
 

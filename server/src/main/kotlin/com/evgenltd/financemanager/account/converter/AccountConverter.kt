@@ -31,6 +31,7 @@ class AccountConverter(
         name = entity.name,
         deleted = entity.deleted,
         type = entity.type,
+        reviseDate = entity.reviseDate,
     )
 
     fun toEntity(record: AccountRecord): Account = Account(

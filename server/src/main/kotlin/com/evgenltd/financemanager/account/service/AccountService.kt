@@ -54,17 +54,15 @@ class AccountService(
                     name = group?.name,
                     accounts = accounts.map {
                         AccountBalanceRecord(
-                            id = it.id!!,
-                            name = it.name,
-                            deleted = it.deleted,
+                            account = accountConverter.toReference(it),
                             balances = balances[it] ?: emptyList(),
                         )
                     }.filter { !filter.hideZeroBalances || it.balances.isNotEmpty() }
-                        .sortedBy { it.name }
+                        .sortedBy { it.account.name }
                 )
             }
             .filter { it.accounts.isNotEmpty() }
-            .sortedBy { it.name ?: "z" }
+            .sortedWith(compareBy({ if (it.id == null) 1 else 0 }, { it.name }))
     }
 
     fun byId(id: UUID): AccountRecord = accountRepository.find(id).let { accountConverter.toRecord(it) }

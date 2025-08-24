@@ -16,6 +16,7 @@ import { ImportDataOperationSheet } from '@/components/import-data/import-data-o
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
+import { Pointable } from '@/components/common/pointable'
 
 export default function Page() {
   const { id } = useParams()
@@ -77,6 +78,8 @@ export default function Page() {
     }
   }, [importDataList.data])
 
+  const handleRevised = () => {}
+
   const importValid =
     !!importData.data?.totals?.length &&
     importData.data.totals.filter((it) => it.valid).length === importData.data.totals.length
@@ -93,18 +96,20 @@ export default function Page() {
                 totals={importData.data.totals}
               />
               <div className="flex-grow" />
-              <TextLabel variant="title">
-                {importData.data.account.name}
-                {importData.data.progress ? (
-                  <Spinner />
-                ) : (
-                  <ValidityIcon
-                    valid={importValid}
-                    message="Totals by import file doesn't mathced to totals in database with suggested records or actual balance is different"
-                    collapseIfEmpty
-                  />
-                )}
-              </TextLabel>
+              <Pointable disabled={!importValid} onClick={handleRevised}>
+                <TextLabel variant="title">
+                  {importData.data.account.name}
+                  {importData.data.progress ? (
+                    <Spinner />
+                  ) : (
+                    <ValidityIcon
+                      valid={importValid}
+                      message="Totals by import file doesn't mathced to totals in database with suggested records or actual balance is different"
+                      collapseIfEmpty
+                    />
+                  )}
+                </TextLabel>
+              </Pointable>
             </div>
             <ImportDataFilter />
           </div>

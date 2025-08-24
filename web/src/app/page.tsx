@@ -44,13 +44,7 @@ export default function Page() {
           </div>
           <div className="flex flex-wrap gap-4">
             {dashboard.data?.accountBalances?.map((it) => (
-              <AccountBalanceCard
-                key={it.account.id}
-                id={it.account.id}
-                name={it.account.name}
-                deleted={it.account.deleted}
-                balances={it.amounts}
-              />
+              <AccountBalanceCard key={it.account.id} account={it.account} balances={it.balances} />
             ))}
           </div>
         </div>

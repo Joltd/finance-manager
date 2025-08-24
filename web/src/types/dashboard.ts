@@ -1,4 +1,4 @@
-import { AccountReference } from '@/types/account'
+import { AccountBalance } from '@/types/account'
 import { Amount, Reference } from './common'
 import { Operation } from '@/types/operation'
 
@@ -8,11 +8,6 @@ export interface Dashboard {
   groupBalances: GroupBalance[]
   topExpenses: string[]
   incomeExpense: string[]
-}
-
-export interface AccountBalance {
-  account: AccountReference
-  amounts: Amount[]
 }
 
 export interface GroupBalance {

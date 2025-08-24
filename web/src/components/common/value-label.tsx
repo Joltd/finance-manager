@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export interface ValueLabelProps {
   value: number
@@ -7,21 +7,23 @@ export interface ValueLabelProps {
 
 export function ValueLabel({ value, shorten }: ValueLabelProps) {
   if (!shorten || value < 100000) {
-    return <div>{value}</div>
+    return <div>{formatter.format(value)}</div>
   }
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div>{formatter.format(value)}</div>
+        <div>{shortFormatter.format(value)}</div>
       </TooltipTrigger>
       <TooltipContent>
-        <div>{value}</div>
+        <div>{formatter.format(value)}</div>
       </TooltipContent>
     </Tooltip>
   )
 }
 
-const formatter = new Intl.NumberFormat('en', {
+const formatter = new Intl.NumberFormat(undefined)
+
+const shortFormatter = new Intl.NumberFormat(undefined, {
   notation: 'compact',
   compactDisplay: 'short',
   maximumFractionDigits: 2,

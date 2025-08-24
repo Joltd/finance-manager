@@ -17,7 +17,7 @@ export function DateInput({ placeholder, value, onChange }: DateInputProps) {
     <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" className="justify-start px-3 py-1">
-          {value || placeholder || 'Select date'}
+          {value || placeholder}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start">

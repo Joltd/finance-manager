@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input'
 import { AccountGroupInput } from '@/components/account/account-group-input'
 import { referenceSchema } from '@/types/common'
 import { Checkbox } from '@/components/ui/checkbox'
+import { DateInput } from '@/components/common/date-input'
 
 interface AccountSheetStoreState extends OpenStoreState {
   id?: string
@@ -47,8 +48,7 @@ const formSchema = z.object({
   deleted: z.boolean(),
   group: referenceSchema.optional(),
   parser: z.string().optional(),
-  // reviseDate: z.string().date().optional(),
-  // noRevise: z.boolean(),
+  reviseDate: z.string().date().optional(),
 })
 
 export function AccountSheet() {
@@ -71,6 +71,7 @@ export function AccountSheet() {
       deleted: false,
       group: undefined,
       parser: '',
+      reviseDate: undefined,
     },
   })
 
@@ -80,6 +81,7 @@ export function AccountSheet() {
     form.setValue('deleted', data.deleted)
     form.setValue('group', data.group)
     form.setValue('parser', data.parser)
+    form.setValue('reviseDate', data.reviseDate)
   }, [])
 
   useEffect(() => {
@@ -181,44 +183,18 @@ export function AccountSheet() {
                 )}
               />
 
-              {/*<FormField*/}
-              {/*  name="deleted"*/}
-              {/*  render={({ field }) => (*/}
-              {/*    <FormItem>*/}
-              {/*      <FormLabel>Deleted</FormLabel>*/}
-              {/*      <FormControl>*/}
-              {/*        <Checkbox />*/}
-              {/*      </FormControl>*/}
-              {/*      <FormMessage />*/}
-              {/*    </FormItem>*/}
-              {/*  )}*/}
-              {/*/>*/}
-
-              {/*<FormField*/}
-              {/*  name="reviseDate"*/}
-              {/*  render={({ field }) => (*/}
-              {/*    <FormItem>*/}
-              {/*      <FormLabel>Revise date</FormLabel>*/}
-              {/*      <FormControl>*/}
-
-              {/*      </FormControl>*/}
-              {/*      <FormMessage />*/}
-              {/*    </FormItem>*/}
-              {/*  )}*/}
-              {/*/>*/}
-
-              {/*<FormField*/}
-              {/*  name="noRevise"*/}
-              {/*  render={({ field }) => (*/}
-              {/*    <FormItem>*/}
-              {/*      <FormLabel>No revise</FormLabel>*/}
-              {/*      <FormControl>*/}
-              {/*        <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked)} />*/}
-              {/*      </FormControl>*/}
-              {/*      <FormMessage />*/}
-              {/*    </FormItem>*/}
-              {/*  )}*/}
-              {/*/>*/}
+              <FormField
+                name="reviseDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Revise date</FormLabel>
+                    <FormControl>
+                      <DateInput {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </FormBody>
 
             <SheetFooter>
