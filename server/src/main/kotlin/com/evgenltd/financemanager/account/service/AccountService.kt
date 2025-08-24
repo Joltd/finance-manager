@@ -56,6 +56,7 @@ class AccountService(
                         AccountBalanceRecord(
                             id = it.id!!,
                             name = it.name,
+                            deleted = it.deleted,
                             balances = balances[it] ?: emptyList(),
                         )
                     }.filter { !filter.hideZeroBalances || it.balances.isNotEmpty() }

@@ -32,7 +32,7 @@ export default function Page() {
   useEffect(() => {
     accountBalance.setQueryParams({ hideZeroBalances: true })
     accountBalance.fetch()
-    return subscribeSse(accountEvents.balance, {}, () => accountBalance.fetch())
+    return subscribeSse(accountEvents.root, {}, () => accountBalance.fetch())
   }, [])
 
   const handleToggleZeroBalances = () => {
@@ -50,7 +50,7 @@ export default function Page() {
     <DataSection store={accountBalance}>
       <div className="relative flex flex-col gap-12 p-6 overflow-y-auto">
         {accountBalance.data?.map((group) => (
-          <div key={group.id} className="flex flex-col gap-4">
+          <div key={group.id || 'empty'} className="flex flex-col gap-4">
             <TextLabel variant="title">{group.name || <EmptyLabel>No group</EmptyLabel>}</TextLabel>
             <div className="flex flex-wrap gap-4">
               {group.accounts?.map((account) => (
@@ -58,6 +58,7 @@ export default function Page() {
                   key={account.id}
                   id={account.id}
                   name={account.name}
+                  deleted={account.deleted}
                   balances={account.balances}
                   onClick={() => accountSheet.openWith(account.id)}
                 />

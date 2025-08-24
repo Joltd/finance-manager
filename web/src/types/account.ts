@@ -48,6 +48,7 @@ export interface AccountBalanceGroup {
 export interface AccountBalance {
   id: string
   name: string
+  deleted: boolean
   balances: Amount[]
 }
 

@@ -5,23 +5,31 @@ import { EmptyLabel } from '@/components/common/empty-label'
 import { Shorten } from '@/components/common/shorten'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export interface AccountBalanceCardProps {
   id: string
   name: string
+  deleted: boolean
   balances: Amount[]
   onClick?: () => void
 }
 
 const maxItems = 3
 
-export function AccountBalanceCard({ id, name, balances, onClick }: AccountBalanceCardProps) {
+export function AccountBalanceCard({
+  id,
+  name,
+  deleted,
+  balances,
+  onClick,
+}: AccountBalanceCardProps) {
   const visibleItems = balances.length > maxItems ? maxItems - 1 : maxItems
 
   return (
     <Card className="w-60" onClick={onClick}>
       <CardHeader>
-        <CardTitle className="truncate">
+        <CardTitle className={cn('truncate', deleted && 'line-through')}>
           <Shorten text={name} />
         </CardTitle>
       </CardHeader>

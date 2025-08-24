@@ -44,23 +44,22 @@ export function AskTextDialog() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      value: config?.value || '',
+      value: '',
     },
   })
 
   useEffect(() => {
     if (config?.value) {
-      form.reset({ value: config.value })
+      form.setValue('value', config.value)
     }
   }, [config])
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     close()
-    form.reset()
     resolve(data.value)
   }
 
-  const handleOpenChange = (opened: boolean) => {
+  const onOpenChange = (opened: boolean) => {
     if (!opened) {
       close()
       form.reset()
@@ -68,7 +67,7 @@ export function AskTextDialog() {
   }
 
   return (
-    <Dialog open={opened} onOpenChange={handleOpenChange}>
+    <Dialog open={opened} onOpenChange={onOpenChange}>
       <DialogContent aria-describedby="">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

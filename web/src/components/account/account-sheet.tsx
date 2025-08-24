@@ -9,7 +9,7 @@ import { accountUrls } from '@/api/account'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAccountStore } from '@/store/account'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import {
   Form,
   FormBody,
@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AccountGroupInput } from '@/components/account/account-group-input'
 import { referenceSchema } from '@/types/common'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface AccountSheetStoreState extends OpenStoreState {
   id?: string
@@ -43,9 +44,9 @@ type AccountFormData = z.infer<typeof formSchema>
 const formSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string(),
+  deleted: z.boolean(),
   group: referenceSchema.optional(),
   parser: z.string().optional(),
-  // deleted: z.boolean(),
   // reviseDate: z.string().date().optional(),
   // noRevise: z.boolean(),
 })
@@ -70,23 +71,32 @@ export function AccountSheet() {
   const form = useForm<AccountFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: undefined,
       name: '',
+      deleted: false,
+      group: undefined,
       parser: '',
-      // deleted: false,
-      // noRevise: true,
     },
   })
 
+  const setData = useCallback((data: AccountFormData) => {
+    form.setValue('id', data.id)
+    form.setValue('name', data.name)
+    form.setValue('deleted', data.deleted)
+    form.setValue('group', data.group)
+    form.setValue('parser', data.parser)
+  }, [])
+
   useEffect(() => {
+    accountStore.setPathParams({ id })
     if (id) {
-      accountStore.setPathParams({ id })
       accountStore.fetch()
     }
   }, [id])
 
   useEffect(() => {
     if (accountStore.data) {
-      form.reset(accountStore.data)
+      setData(accountStore.data as any)
     }
   }, [accountStore.data])
 
@@ -100,8 +110,8 @@ export function AccountSheet() {
   }
 
   const onOpenChange = (value: boolean) => {
-    setOpened(value)
     if (!value) {
+      close()
       form.reset()
       accountRequest.reset()
       accountStore.reset()
@@ -125,6 +135,20 @@ export function AccountSheet() {
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="deleted"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Deleted</FormLabel>
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

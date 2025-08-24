@@ -66,6 +66,7 @@ export function ReferenceInput<T>({
 
   const handleClear = () => {
     onChange?.(undefined)
+    setOpen(false)
   }
 
   const onOpenChange = (value: boolean) => {

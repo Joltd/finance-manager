@@ -50,12 +50,7 @@ export function ImportDataOperationSheet({
   relatedAccount,
   disabled,
 }: ImportDataOperationSheetProps) {
-  const { opened, setOpened, close, entry } = useImportDataOperationSheetStore(
-    'opened',
-    'setOpened',
-    'close',
-    'entry',
-  )
+  const { opened, close, entry } = useImportDataOperationSheetStore('opened', 'close', 'entry')
   const { form, setData, clear } = useOperationForm()
   const operationRequest = useRequest(operationUrls.root, { noErrorToast: true })
   const operationLinkRequest = useRequest(importDataUrls.entryIdLink, { noErrorToast: true })

@@ -35,13 +35,16 @@ export const useImportDataNewDialogStore = <K extends keyof OpenStoreState>(...f
   useStoreSelect<OpenStoreState, K>(importDataNewDialogStore, ...fields)
 
 export function ImportDataNewDialog() {
-  const { opened, setOpened, close } = useImportDataNewDialogStore('opened', 'setOpened', 'close')
+  const { opened, close } = useImportDataNewDialogStore('opened', 'close')
   const importDataList = useImportDataListStore('fetch')
   const { loading, submit, reset } = useRequest(importDataUrls.begin, { multipart: true })
   const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      account: undefined,
+      file: undefined,
+    },
   })
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
@@ -49,24 +52,22 @@ export function ImportDataNewDialog() {
     formData.append('data', jsonAsBlob({ account: data.account.id }))
     formData.append('file', data.file[0])
     submit(formData).then((result) => {
-      form.reset()
-      reset()
       close()
       router.push(`/import-data/${result}`)
       importDataList.fetch()
     })
   }
 
-  const handleOpenChange = (opened: boolean) => {
-    if (!opened) {
+  const onOpenChange = (value: boolean) => {
+    if (!value) {
+      close()
       form.reset()
       reset()
     }
-    setOpened(opened)
   }
 
   return (
-    <Dialog open={opened} onOpenChange={handleOpenChange}>
+    <Dialog open={opened} onOpenChange={onOpenChange}>
       <DialogContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

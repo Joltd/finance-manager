@@ -41,5 +41,6 @@ data class AccountBalanceGroupRecord(
 data class AccountBalanceRecord(
     val id: UUID,
     val name: String,
+    val deleted: Boolean,
     val balances: List<Amount>,
 )
