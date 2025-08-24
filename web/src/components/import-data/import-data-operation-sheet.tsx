@@ -73,16 +73,20 @@ export function ImportDataOperationSheet({
     } else {
       operationRequest.submit(data)
     }
-    close()
+    closeSheet()
   }
 
   const onOpenChange = (value: boolean) => {
     if (!value) {
-      close()
-      clear()
-      operationRequest.reset()
-      operationLinkRequest.reset()
+      closeSheet()
     }
+  }
+
+  const closeSheet = () => {
+    close()
+    clear()
+    operationRequest.reset()
+    operationLinkRequest.reset()
   }
 
   return (

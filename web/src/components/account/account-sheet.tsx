@@ -61,12 +61,7 @@ export function AccountSheet() {
     'fetch',
     'reset',
   )
-  const { opened, setOpened, id, close } = useAccountSheetStore(
-    'opened',
-    'setOpened',
-    'id',
-    'close',
-  )
+  const { opened, id, close } = useAccountSheetStore('opened', 'setOpened', 'id', 'close')
 
   const form = useForm<AccountFormData>({
     resolver: zodResolver(formSchema),
@@ -106,16 +101,20 @@ export function AccountSheet() {
         ...data,
         type: AccountType.ACCOUNT,
       })
-      .then(() => close())
+      .then(() => closeSheet())
   }
 
   const onOpenChange = (value: boolean) => {
     if (!value) {
-      close()
-      form.reset()
-      accountRequest.reset()
-      accountStore.reset()
+      closeSheet()
     }
+  }
+
+  const closeSheet = () => {
+    close()
+    form.reset()
+    accountRequest.reset()
+    accountStore.reset()
   }
 
   return (

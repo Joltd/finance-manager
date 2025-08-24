@@ -56,15 +56,19 @@ export function OperationSheet() {
   }, [operation.data])
 
   const onSubmit = (data: OperationFormData) => {
-    submit(data).then(() => close())
+    submit(data).then(() => closeSheet())
   }
 
   const onOpenChange = (value: boolean) => {
     if (!value) {
-      close()
-      clear()
-      reset()
+      closeSheet()
     }
+  }
+
+  const closeSheet = () => {
+    close()
+    clear()
+    reset()
   }
 
   return (
