@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.importexport.entity
 
-import com.evgenltd.financemanager.common.entity.Embedding
+import com.evgenltd.financemanager.ai.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.account.entity.Account

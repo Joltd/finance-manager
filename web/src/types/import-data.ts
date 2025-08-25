@@ -1,6 +1,6 @@
 import { Operation, OperationType } from '@/types/operation'
 import { Account } from '@/types/account'
-import { Amount, RangeValue } from '@/types/common'
+import { Amount, Embedding, RangeValue } from '@/types/common'
 
 export interface ImportData {
   id: string
@@ -46,6 +46,7 @@ export interface ImportDataOperation {
   accountTo?: Account
   description?: string
   raw: string[]
+  hint?: Embedding
   selected: boolean
   distance?: number
   rating?: SuggestionRating

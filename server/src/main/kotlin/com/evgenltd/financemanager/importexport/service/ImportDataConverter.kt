@@ -17,6 +17,7 @@ import com.evgenltd.financemanager.importexport.record.ImportDataTotalRecord
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.account.converter.AccountConverter
+import com.evgenltd.financemanager.ai.converter.EmbeddingConverter
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.emptyAmount
 import org.springframework.stereotype.Service
@@ -27,6 +28,7 @@ import java.time.LocalDate
 class ImportDataConverter(
     private val accountConverter: AccountConverter,
     private val operationConverter: OperationConverter,
+    private val embeddingConverter: EmbeddingConverter,
 ) {
 
     fun toReference(entity: ImportData): Reference = Reference(
@@ -57,6 +59,7 @@ class ImportDataConverter(
         accountTo = operation.accountTo?.let { accountConverter.toRecord(it) },
         description = operation.description,
         raw = operation.raw,
+        hint = operation.hint?.let { embeddingConverter.toRecord(it) },
         selected = operation.selected,
         distance = operation.score,
         rating = suggestionRating(operation.score)

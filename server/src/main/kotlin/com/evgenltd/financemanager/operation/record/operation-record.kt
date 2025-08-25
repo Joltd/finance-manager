@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.operation.record
 
 import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.ai.record.EmbeddingRecord
 import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -32,6 +33,7 @@ data class OperationRecord(
     val accountTo: AccountRecord,
     val description: String?,
     val raw: List<String> = emptyList(),
+    val hint: EmbeddingRecord? = null,
 )
 
 data class OperationEvent(

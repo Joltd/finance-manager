@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.account.entity.AccountGroup
 import com.evgenltd.financemanager.account.record.AccountGroupRecord
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.repository.AccountGroupRepository
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.like
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
+@SkipLogging
 class AccountGroupService(
     private val accountGroupRepository: AccountGroupRepository,
     private val accountGroupConverter: AccountGroupConverter,

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
+@SkipLogging
 class ImportDataService(
     private val accountRepository: AccountRepository,
     private val operationRepository: OperationRepository,

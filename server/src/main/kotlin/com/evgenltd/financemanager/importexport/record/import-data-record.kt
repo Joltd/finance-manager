@@ -7,6 +7,7 @@ import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.ai.record.EmbeddingRecord
 import java.time.LocalDate
 import java.util.*
 
@@ -75,6 +76,7 @@ data class ImportDataOperationRecord(
     val accountTo: AccountRecord?,
     val description: String?,
     val raw: List<String> = emptyList(),
+    val hint: EmbeddingRecord? = null,
     val selected: Boolean,
     val distance: Double?,
     val rating: SuggestionRating? = null,

@@ -2,7 +2,7 @@ import { FormBody, FormControl, FormField, FormItem, FormLabel } from '@/compone
 import { z } from 'zod'
 import { OperationType } from '@/types/operation'
 import { accountReferenceShema, AccountType } from '@/types/account'
-import { amountShema } from '@/types/common'
+import { amountShema, embeddingSchema } from '@/types/common'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
@@ -19,6 +19,7 @@ import { AmountInput } from '@/components/common/amount-input'
 import React, { useCallback, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { EmbeddingLabel } from '@/components/common/embedding-label'
 
 export interface OperationFormProps {
   form: UseFormReturn<OperationFormData>
@@ -38,6 +39,7 @@ const formSchema = z.object({
   amountTo: amountShema,
   description: z.string(),
   raw: z.array(z.string()),
+  hint: embeddingSchema.optional(),
 })
 
 export const useOperationForm = () => {
@@ -53,6 +55,7 @@ export const useOperationForm = () => {
       amountTo: undefined,
       description: '',
       raw: [],
+      hint: undefined,
     },
   })
 
@@ -68,6 +71,7 @@ export const useOperationForm = () => {
     form.setValue('amountTo', data.amountTo)
     form.setValue('description', data.description)
     form.setValue('raw', data.raw)
+    form.setValue('hint', data.hint)
   }, [])
 
   const type = form.watch('type')
@@ -230,6 +234,21 @@ export function OperationForm({ form, error, className }: OperationFormProps) {
                   value={field.value?.join('\n') || ''}
                   className="whitespace-pre max-h-40"
                 />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      )}
+
+      {!!form.getValues().hint && (
+        <FormField
+          control={form.control}
+          name="hint"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Hint</FormLabel>
+              <FormControl>
+                <EmbeddingLabel embedding={field.value} />
               </FormControl>
             </FormItem>
           )}

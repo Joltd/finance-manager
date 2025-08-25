@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.entity.controller
 
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.entity.record.EntityListRequest
 import com.evgenltd.financemanager.entity.record.EntityListPage
 import com.evgenltd.financemanager.entity.record.EntityRecord
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
+@SkipLogging
 class EntityController(
     private val entityService: EntityService
 ) {

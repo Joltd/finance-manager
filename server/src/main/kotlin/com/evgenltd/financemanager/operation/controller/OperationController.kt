@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.operation.controller
 
 import com.evgenltd.financemanager.common.component.DataResponse
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationGroupRecord
 import com.evgenltd.financemanager.operation.record.OperationRecord
@@ -15,6 +16,7 @@ import java.util.*
 
 @RestController
 @DataResponse
+@SkipLogging
 class OperationController(
     private val operationService: OperationService
 ) {

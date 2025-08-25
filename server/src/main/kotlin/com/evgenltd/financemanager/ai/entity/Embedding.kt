@@ -1,4 +1,4 @@
-package com.evgenltd.financemanager.common.entity
+package com.evgenltd.financemanager.ai.entity
 
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode

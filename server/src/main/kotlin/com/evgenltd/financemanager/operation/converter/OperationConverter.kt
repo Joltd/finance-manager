@@ -5,13 +5,15 @@ import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.account.converter.AccountConverter
+import com.evgenltd.financemanager.ai.converter.EmbeddingConverter
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class OperationConverter(
     private val operationRepository: OperationRepository,
-    private val accountConverter: AccountConverter
+    private val accountConverter: AccountConverter,
+    private val embeddingConverter: EmbeddingConverter,
 ) {
 
     fun toRecord(id: UUID): OperationRecord = toRecord(operationRepository.find(id))
@@ -26,6 +28,7 @@ class OperationConverter(
         accountTo = entity.accountTo.let { accountConverter.toRecord(it) },
         description = entity.description,
         raw = entity.raw,
+        hint = entity.hint?.let { embeddingConverter.toRecord(it) },
     )
 
     fun toEntity(record: OperationRecord, existed: Operation? = null): Operation = Operation(
@@ -39,7 +42,6 @@ class OperationConverter(
         description = record.description,
         raw = existed?.raw ?: emptyList(),
         hint = existed?.hint,
-        full = existed?.full,
     )
 
     fun copy(entity: Operation): Operation = toEntity(toRecord(entity))

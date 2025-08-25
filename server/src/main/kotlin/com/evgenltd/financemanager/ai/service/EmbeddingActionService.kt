@@ -1,8 +1,7 @@
-package com.evgenltd.financemanager.common.service
+package com.evgenltd.financemanager.ai.service
 
-import com.evgenltd.financemanager.ai.service.AiService
-import com.evgenltd.financemanager.common.entity.Embedding
-import com.evgenltd.financemanager.common.repository.EmbeddingRepository
+import com.evgenltd.financemanager.ai.entity.Embedding
+import com.evgenltd.financemanager.ai.repository.EmbeddingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional

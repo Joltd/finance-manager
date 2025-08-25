@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.operation.entity
 
-import com.evgenltd.financemanager.common.entity.Embedding
+import com.evgenltd.financemanager.ai.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.account.entity.Account
 import jakarta.persistence.*
@@ -53,13 +53,8 @@ class Operation(
     @JoinColumn(name = "hint_id")
     var hint: Embedding? = null,
 
-    @ManyToOne
-    @JoinColumn(name = "full_id")
-    var full: Embedding? = null,
-
     @OneToMany(mappedBy = "operation", cascade = [CascadeType.REMOVE], orphanRemoval = true)
-    var transactions: MutableList<Transaction> = mutableListOf(),
-
+    var transactions: MutableList<Transaction> = mutableListOf()
 ) {
 
     override fun equals(other: Any?): Boolean {

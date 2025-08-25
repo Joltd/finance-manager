@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.entity.service
 
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.record.SortDirection
 import com.evgenltd.financemanager.entity.converter.EntityConverter
 import com.evgenltd.financemanager.entity.record.*
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
+@SkipLogging
 class EntityService(
     private val entityManager: EntityManager,
     private val entityConverter: EntityConverter,

@@ -17,12 +17,12 @@ import java.util.*
 
 @RestController
 @DataResponse
+@SkipLogging
 class AccountGroupController(
     private val accountGroupService: AccountGroupService,
     private val accountGroupEventService: AccountGroupEventService,
 ) {
 
-    @SkipLogging
     @GetMapping("/account-group/reference")
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,

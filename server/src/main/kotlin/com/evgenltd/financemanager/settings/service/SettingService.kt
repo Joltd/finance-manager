@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.exchangerate.service.provider.Provider
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.service.AccountService
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.record.SettingRecord
 import com.evgenltd.financemanager.settings.repository.SettingRepository
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
+@SkipLogging
 class SettingService(
     private val settingRepository: SettingRepository,
     private val accountService: AccountService,

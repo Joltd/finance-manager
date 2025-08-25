@@ -20,19 +20,18 @@ import java.util.*
 
 @RestController
 @DataResponse
+@SkipLogging
 class AccountController(
     private val accountService: AccountService,
     private val accountEventService: AccountEventService,
 ) {
 
-    @SkipLogging
     @GetMapping("/account/reference")
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,
         @RequestParam("type", required = false) type: AccountType?,
     ): List<AccountReferenceRecord> = accountService.listReference(mask, type)
 
-    @SkipLogging
     @GetMapping("/account")
     fun list(@RequestParam("type", required = false) type: AccountType?): List<AccountRecord> = accountService.list(type)
 

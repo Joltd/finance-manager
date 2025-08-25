@@ -26,7 +26,7 @@ import com.evgenltd.financemanager.operation.service.signedAmount
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.repository.between
-import com.evgenltd.financemanager.common.service.EmbeddingActionService
+import com.evgenltd.financemanager.ai.service.EmbeddingActionService
 import com.evgenltd.financemanager.importexport.record.OperationKey
 import com.evgenltd.financemanager.importexport.record.TotalEntry
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -263,18 +263,19 @@ class ImportDataActionService(
         entry.operation = operation
 
         entry.parsed()?.let {
-            if (operation.raw.isEmpty()) {
-                operation.raw = it.raw
-            }
-            if (operation.hint == null) {
-                operation.hint = it.hint
-            }
+            operation.raw = it.raw
+            operation.hint = it.hint
         }
     }
 
+    @Transactional
     fun unlinkOperation(id: UUID, entryIds: List<UUID>): List<LocalDate> =
         importDataEntryRepository.findAllById(entryIds)
-            .onEach { it.operation = null }
+            .onEach {
+                it.operation?.raw = emptyList()
+                it.operation?.hint = null
+                it.operation = null
+            }
             .map { it.date }
             .distinct()
 

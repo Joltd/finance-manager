@@ -16,11 +16,11 @@ import java.util.*
 
 @RestController
 @DataResponse
+@SkipLogging
 class CurrencyController(
     private val currencyService: CurrencyService
 ) {
 
-    @SkipLogging
     @GetMapping("/currency/reference")
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,

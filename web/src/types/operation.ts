@@ -1,5 +1,5 @@
 import { Account } from '@/types/account'
-import { Amount } from '@/types/common'
+import { Amount, Embedding } from '@/types/common'
 
 export enum OperationType {
   EXPENSE = 'EXPENSE',
@@ -23,4 +23,5 @@ export interface Operation {
   accountTo: Account
   description?: string
   raw: string[]
+  hint?: Embedding
 }

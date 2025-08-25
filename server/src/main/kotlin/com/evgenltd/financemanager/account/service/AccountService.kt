@@ -16,6 +16,7 @@ import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.repository.BalanceRepository
+import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
+@SkipLogging
 class AccountService(
     private val accountRepository: AccountRepository,
     private val accountConverter: AccountConverter,

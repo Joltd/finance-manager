@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.operation.service
 
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.account
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.between
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
+@SkipLogging
 class OperationService(
     private val operationRepository: OperationRepository,
     private val operationConverter: OperationConverter,

@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.account.entity.Currency
 import com.evgenltd.financemanager.account.record.CurrencyRecord
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.repository.CurrencyRepository
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.like
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
+@SkipLogging
 class CurrencyService(
     private val currencyRepository: CurrencyRepository,
     private val currencyConverter: CurrencyConverter,
