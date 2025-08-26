@@ -6,7 +6,6 @@ import com.evgenltd.financemanager.account.record.AccountBalanceFilter
 import com.evgenltd.financemanager.account.record.AccountBalanceGroupRecord
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.account.record.AccountReferenceRecord
-import com.evgenltd.financemanager.account.service.AccountEventService
 import com.evgenltd.financemanager.account.service.AccountService
 import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -23,7 +22,6 @@ import java.util.*
 @SkipLogging
 class AccountController(
     private val accountService: AccountService,
-    private val accountEventService: AccountEventService,
 ) {
 
     @GetMapping("/account/reference")
@@ -42,9 +40,9 @@ class AccountController(
     fun byId(@PathVariable("id") id: UUID): AccountRecord = accountService.byId(id)
 
     @PostMapping("/account")
-    fun update(@RequestBody record: AccountRecord): AccountRecord = accountService.update(record).also { accountEventService.account() }
+    fun update(@RequestBody record: AccountRecord): AccountRecord = accountService.update(record)
 
     @DeleteMapping("/account/{id}")
-    fun delete(@PathVariable("id") id: UUID) = accountService.delete(id).also { accountEventService.account() }
+    fun delete(@PathVariable("id") id: UUID) = accountService.delete(id)
 
 }

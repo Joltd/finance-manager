@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
+import java.io.IOException
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Service
@@ -27,7 +28,9 @@ class SseService : Loggable() {
         }
         emitter.onError {
             emitters.remove(emitter)
-            log.warn("Emitter error", it)
+            if (it !is IOException) {
+                log.warn("Emitter error", it)
+            }
         }
         emitters.add(emitter)
     }
@@ -50,6 +53,10 @@ class SseService : Loggable() {
 
             try {
                 emitter.send(emitterEvent)
+            } catch (e: IOException) {
+                log.error("Unable to send SSE event")
+                emitters.remove(emitter)
+                continue
             } catch (e: Exception) {
                 log.error("Unable to send SSE event", e)
                 emitters.remove(emitter)

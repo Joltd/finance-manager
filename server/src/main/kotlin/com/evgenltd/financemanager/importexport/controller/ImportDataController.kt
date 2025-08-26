@@ -27,6 +27,7 @@ import java.util.*
 
 @RestController
 @DataResponse
+@SkipLogging
 class ImportDataController(
     private val importDataService: ImportDataService,
     private val importDataProcessService: ImportDataProcessService,
@@ -41,11 +42,9 @@ class ImportDataController(
     fun list(): List<Reference> = importDataService.list()
 
     @GetMapping("/import-data/{id}")
-    @SkipLogging
     fun get(@PathVariable id: UUID): ImportDataRecord = importDataService.get(id)
 
     @GetMapping("/import-data/{id}/entry")
-    @SkipLogging
     fun entryList(@PathVariable id: UUID, request: EntryFilter): List<ImportDataEntryGroupRecord> =
         importDataService.entryList(id, request)
 

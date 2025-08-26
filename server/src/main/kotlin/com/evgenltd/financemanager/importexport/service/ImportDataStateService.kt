@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.service
 
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import org.slf4j.Logger
@@ -16,6 +17,7 @@ class ImportDataStateService(
     private val log: Logger = LoggerFactory.getLogger(ImportDataStateService::class.java)
 
     @Transactional
+    @SkipLogging
     fun findAndLock(id: UUID): ImportData? {
         val importData = importDataRepository.findAndLock(id)
         if (importData == null) {
@@ -33,6 +35,7 @@ class ImportDataStateService(
     }
 
     @Transactional
+    @SkipLogging
     fun findAndUnlock(id: UUID) {
         val importData = importDataRepository.findAndLock(id)
         if (importData == null) {

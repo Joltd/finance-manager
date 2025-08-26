@@ -12,7 +12,6 @@ import com.evgenltd.financemanager.common.service.NotificationEventService
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.core.annotation.Order
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionalEventListener
@@ -115,7 +114,6 @@ class ImportDataProcessService(
     }
 
     @TransactionalEventListener
-    @Order(20)
     @Async
     fun operationChanged(event: OperationEvent) {
         event.entries

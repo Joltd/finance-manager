@@ -17,6 +17,7 @@ import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationGroupRecord
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
+import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Pageable
@@ -27,6 +28,7 @@ import java.util.*
 @Service
 @SkipLogging
 class OperationService(
+    private val entityManager: EntityManager,
     private val operationRepository: OperationRepository,
     private val operationConverter: OperationConverter,
     private val operationEventService: OperationEventService,
@@ -58,17 +60,24 @@ class OperationService(
 
     @Transactional
     fun update(record: OperationRecord): OperationRecord {
-        val existed = record.id?.let { operationRepository.findByIdOrNull(it) }
-        val entity = operationConverter.toEntity(record, existed)
-        val saved = operationRepository.save(entity)
-        notifyChanged(existed, saved)
-        return operationConverter.toRecord(saved)
+        val old = record.id
+            ?.let { operationRepository.findByIdOrNull(it) }
+            ?.also { entityManager.detach(it) }
+        val new = record.id
+            ?.let { operationRepository.findByIdOrNull(it) }
+            .let { operationConverter.fillEntity(it, record) }
+            .let { operationRepository.save(it) }
+
+        notifyChanged(old, new)
+
+        return operationConverter.toRecord(new)
     }
 
     @Transactional
     fun delete(id: UUID) {
         val operation = operationRepository.find(id)
         operationRepository.delete(operation)
+        entityManager.detach(operation)
         notifyChanged(operation, null)
     }
 
@@ -76,15 +85,20 @@ class OperationService(
     fun delete(ids: List<UUID>) {
         operationRepository.findAllById(ids)
             .onEach { operationRepository.delete(it) }
-            .map { OperationEventEntry(old = operationConverter.copy(it)) }
+            .onEach { entityManager.detach(it) }
+            .map { OperationEventEntry(old = it) }
             .let { OperationEvent(it) }
             .let { notifyChanged(it)}
     }
 
     private fun notifyChanged(old: Operation?, new: Operation?) {
+        if (!isTransactionDataChanged(old, new)) {
+            return
+        }
+
         val entry = OperationEventEntry(
-            old?.let { operationConverter.copy(it) },
-            new?.let { operationConverter.copy(it) },
+            old?.also { entityManager.detach(it) },
+            new?.also { entityManager.detach(it) },
         )
         notifyChanged(OperationEvent(listOf(entry)))
     }

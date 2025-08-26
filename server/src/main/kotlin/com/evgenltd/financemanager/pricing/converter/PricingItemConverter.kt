@@ -15,6 +15,7 @@ class PricingItemConverter {
         defaultQuantity = entity.defaultQuantity,
     )
 
+    @Deprecated("rewrite as fillEntity")
     fun toEntity(record: PricingItemRecord): PricingItem = PricingItem(
         id = record.id,
         name = record.name,

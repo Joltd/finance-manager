@@ -12,6 +12,7 @@ import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.like
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Sort
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -35,11 +36,11 @@ class AccountGroupService(
     fun byId(id: UUID): AccountGroupRecord = accountGroupRepository.find(id).let { accountGroupConverter.toRecord(it) }
 
     @Transactional
-    fun update(record: AccountGroupRecord): AccountGroupRecord {
-        val entity = accountGroupConverter.toEntity(record)
-        val saved = accountGroupRepository.save(entity)
-        return accountGroupConverter.toRecord(saved)
-    }
+    fun update(record: AccountGroupRecord): AccountGroupRecord = record.id
+        ?.let { accountGroupRepository.findByIdOrNull(it) }
+        .let { accountGroupConverter.fillEntity(it, record) }
+        .let { accountGroupRepository.save(it) }
+        .let { accountGroupConverter.toRecord(it) }
 
     fun delete(id: UUID) {
         try {

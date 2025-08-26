@@ -50,6 +50,7 @@ class EntityConverter(
         )
     }
 
+    @Deprecated("rewrite as fillEntity")
     fun toEntity(type: EntityType<*>): EntityRecord {
         val fields = type.javaType.kotlin.declaredMemberProperties.associateBy { it.name }
         return EntityRecord(

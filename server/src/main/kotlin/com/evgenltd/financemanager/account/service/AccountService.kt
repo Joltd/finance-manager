@@ -29,6 +29,7 @@ import java.util.*
 class AccountService(
     private val accountRepository: AccountRepository,
     private val accountConverter: AccountConverter,
+    private val accountEventService: AccountEventService,
     private val balanceRepository: BalanceRepository,
 ) {
 
@@ -72,11 +73,12 @@ class AccountService(
     fun byIdOrNull(id: UUID): Account? = accountRepository.findByIdOrNull(id)
 
     @Transactional
-    fun update(record: AccountRecord): AccountRecord {
-        val entity = accountConverter.toEntity(record)
-        val saved = accountRepository.save(entity)
-        return accountConverter.toRecord(saved)
-    }
+    fun update(record: AccountRecord): AccountRecord = record.id
+        ?.let { accountRepository.findByIdOrNull(it) }
+        .let { accountConverter.fillEntity(it, record) }
+        .let { accountRepository.save(it) }
+        .let { accountConverter.toRecord(it) }
+        .also { accountEventService.account() }
 
     fun delete(id: UUID) {
         try {
@@ -87,6 +89,7 @@ class AccountService(
             account.deleted = true
             accountRepository.save(account)
         }
+        accountEventService.account()
     }
 
 }

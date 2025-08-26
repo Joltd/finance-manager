@@ -14,7 +14,6 @@ class TransactionService(
 ) {
 
     @EventListener
-    @Order(1)
     fun operationChanged(event: OperationEvent) {
         for (entry in event.entries) {
             val operation = entry.new ?: continue

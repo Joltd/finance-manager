@@ -8,7 +8,7 @@ import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.account.repository.TurnoverRepository
 import jakarta.annotation.PostConstruct
-import org.springframework.core.annotation.Order
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionalEventListener
 import java.time.LocalDate
@@ -40,7 +40,7 @@ class BalanceProcessService(
     }
 
     @TransactionalEventListener
-    @Order(10)
+    @Async
     fun operationChanged(event: OperationEvent) {
         event.entries
             .asSequence()
@@ -52,7 +52,7 @@ class BalanceProcessService(
                     TransactionKey(it.date, it.accountTo, it.amountTo.currency),
                 )
             }
-//            .filter { it.account.type == AccountType.ACCOUNT }
+            .filter { it.account.type == AccountType.ACCOUNT }
             .distinct()
             .toList()
             .onEach {

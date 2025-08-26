@@ -27,7 +27,10 @@ class AccountGroupConverter(
         deleted = entity.deleted,
     )
 
-    fun toEntity(record: AccountGroupRecord): AccountGroup = AccountGroup(
+    fun fillEntity(entity: AccountGroup?, record: AccountGroupRecord): AccountGroup = entity?.also {
+        it.name = record.name
+        it.deleted = record.deleted
+    } ?: AccountGroup(
         id = record.id,
         name = record.name,
         deleted = record.deleted,

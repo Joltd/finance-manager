@@ -49,9 +49,7 @@ export function AskTextDialog() {
   })
 
   useEffect(() => {
-    if (config?.value) {
-      form.setValue('value', config.value)
-    }
+    form.setValue('value', config?.value || '')
   }, [config])
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {

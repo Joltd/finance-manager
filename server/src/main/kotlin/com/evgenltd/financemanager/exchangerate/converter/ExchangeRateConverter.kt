@@ -16,6 +16,7 @@ class ExchangeRateConverter {
 //        value = entity.value
 //    )
 //
+//    @Deprecated("rewrite as fillEntity")
 //    fun toEntity(record: ExchangeRateRecord): ExchangeRate = ExchangeRate(
 //        id = record.id,
 //        date = record.date.with(DayOfWeek.MONDAY),

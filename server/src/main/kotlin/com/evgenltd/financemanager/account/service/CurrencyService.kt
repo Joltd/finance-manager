@@ -12,6 +12,7 @@ import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.like
 import jakarta.annotation.PostConstruct
 import org.springframework.data.domain.Sort
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -50,7 +51,11 @@ class CurrencyService(
 
     fun byId(id: UUID): CurrencyRecord = currencyRepository.find(id).let { currencyConverter.toRecord(it) }
 
-    fun update(record: CurrencyRecord) = currencyRepository.save(currencyConverter.toEntity(record))
+    fun update(record: CurrencyRecord) = record.id
+        ?.let { currencyRepository.findByIdOrNull(it) }
+        .let { currencyConverter.fillEntity(it, record) }
+        .let { currencyRepository.save(it) }
+        .let { currencyConverter.toRecord(it) }
         .also { currencyEventService.currency() }
 
     fun delete(id: UUID) = currencyRepository.deleteById(id)

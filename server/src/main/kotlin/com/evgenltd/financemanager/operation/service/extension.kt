@@ -13,3 +13,11 @@ fun Transaction.signedAmount(): Amount = if (type == TransactionType.OUT) -amoun
 
 fun byAccount(account: Account): Specification<Operation> =
     (Operation::accountFrom eq account) or (Operation::accountTo eq account)
+
+fun isTransactionDataChanged(old: Operation?, new: Operation?): Boolean =
+    old?.date != new?.date ||
+            old?.type != new?.type ||
+            old?.amountFrom != new?.amountFrom ||
+            old?.accountFrom != new?.accountFrom ||
+            old?.amountTo != new?.amountTo ||
+            old?.accountTo != new?.accountTo
