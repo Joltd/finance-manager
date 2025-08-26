@@ -336,12 +336,20 @@ class ImportDataActionService(
             .mapNotNull { it.operation?.id }
             .toSet()
 
+        val linkedOperationDates = entries.filter { it.operation != null }
+            .associate { it.operation?.id!! to it.date }
+
         val actualDates = dates ?: entries.map { it.date }.distinct()
         ((Transaction::account eq importData.account) and (Transaction::date contains actualDates))
             .let { transactionRepository.findAll(it) }
             .filter { it.operation.id !in importData.hiddenOperations }
             .filter { it.operation.id !in hiddenEntries }
-            .map { TotalEntry(it.date, it.signedAmount()) }
+            .map {
+                TotalEntry(
+                    date = linkedOperationDates[it.operation.id] ?: it.date,
+                    amount = it.signedAmount()
+                )
+            }
             .calculateTotal(importData, ImportDataTotalType.OPERATION)
     }
 
