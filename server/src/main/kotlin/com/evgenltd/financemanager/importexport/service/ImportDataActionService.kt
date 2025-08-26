@@ -250,9 +250,9 @@ class ImportDataActionService(
 
         val operation = operationRepository.find(operationId)
 
-        if (entry.date != operation.date) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation date does not match entry date")
-        }
+//        if (entry.date != operation.date) {
+//            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation date does not match entry date")
+//        }
 
         linkOperation(entry, operation)
 
