@@ -3,7 +3,8 @@ import { AmountLabel } from '@/components/common/amount-label'
 import { TriangleAlert } from 'lucide-react'
 import { ImportDataEntryGroup, ImportDataTotal } from '@/types/import-data'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { plus } from '@/types/common'
+
+import { plus } from '@/types/common/amount'
 
 export interface ImportDataGroupHeaderProps {
   group: ImportDataEntryGroup

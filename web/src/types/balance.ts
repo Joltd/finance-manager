@@ -1,5 +1,6 @@
 import { Account } from '@/types/account'
-import { Amount } from '@/types/common'
+
+import { Amount } from '@/types/common/amount'
 
 export interface Balance {
   account: Account

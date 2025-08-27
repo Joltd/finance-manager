@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { subscribeSse } from '@/lib/notification'
 import { BellIcon, CircleAlertIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
-import { Notification, NotificationType } from '@/types/common'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import { toast } from 'sonner'
+import { Notification, NotificationType } from '@/types/common/notification'
 
 export interface NotificationListProps {}
 

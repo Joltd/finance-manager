@@ -1,5 +1,5 @@
-import { Amount } from '@/types/common'
 import z from 'zod'
+import { Amount } from '@/types/common/amount'
 
 export enum AccountType {
   ACCOUNT = 'ACCOUNT',

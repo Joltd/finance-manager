@@ -1,6 +1,8 @@
 import { Operation, OperationType } from '@/types/operation'
 import { Account } from '@/types/account'
-import { Amount, Embedding, RangeValue } from '@/types/common'
+import { Amount } from '@/types/common/amount'
+import { Embedding } from '@/types/common/embedding'
+import { RangeValue } from '@/types/common'
 
 export interface ImportData {
   id: string

@@ -1,26 +1,25 @@
-import React, { MouseEvent } from 'react'
+import React from 'react'
 import { cn } from '@/lib/utils'
 
-export interface PointableProps {
+export interface PointableProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: boolean
   disabled?: boolean
-  onClick?: (event: MouseEvent) => void
-  className?: string
-  children: React.ReactNode
 }
 
-export function Pointable({ selected, disabled, onClick, className, children }: PointableProps) {
-  return (
+export const Pointable = React.forwardRef<HTMLDivElement, PointableProps>(
+  ({ selected, disabled, className, ...props }: PointableProps, ref) => (
     <div
-      onClick={!disabled ? onClick : undefined}
+      ref={ref}
+      onClick={!disabled ? props.onClick : undefined}
       className={cn(
         'select-none',
         !disabled && 'hover:bg-muted hover:rounded-sm ',
         selected && 'outline-2 outline-dotted outline-accent-foreground rounded-sm',
         className,
       )}
+      {...props}
     >
-      {children}
+      {props.children}
     </div>
-  )
-}
+  ),
+)

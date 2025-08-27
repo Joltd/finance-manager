@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
+import { Action } from '@/types/common/action'
 
 const ID = 'action-bar'
 
@@ -40,15 +41,15 @@ export function ActionBarContainer() {
 export interface ActionBarButtonProps {
   hint: string
   icon: React.ReactNode
-  disabled?: boolean
-  onClick: () => void
+  available: boolean
+  perform: () => void
 }
 
-export function ActionBarButton({ hint, icon, disabled, onClick }: ActionBarButtonProps) {
+export function ActionBarButton({ hint, icon, available, perform }: ActionBarButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" disabled={disabled} onClick={onClick}>
+        <Button variant="ghost" disabled={!available} onClick={perform}>
           {icon}
         </Button>
       </TooltipTrigger>

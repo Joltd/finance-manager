@@ -1,8 +1,8 @@
 'use client'
 
 import { Input } from '@/components/ui/input'
-import { Amount } from '@/types/common'
 import { CurrencyInput } from '@/components/common/currency-input'
+import { Amount } from '@/types/common/amount'
 
 export interface AmountInputProps {
   amount?: Amount

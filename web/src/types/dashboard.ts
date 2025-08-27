@@ -1,6 +1,7 @@
 import { AccountBalance } from '@/types/account'
-import { Amount, Reference } from './common'
 import { Operation } from '@/types/operation'
+import { Amount } from '@/types/common/amount'
+import { Reference } from '@/types/common/reference'
 
 export interface Dashboard {
   accountBalances: AccountBalance[]

@@ -1,8 +1,8 @@
-import { Amount } from '@/types/common'
 import { OperationType } from '@/types/operation'
 import { AmountLabel } from '@/components/common/amount-label'
 import { MoveRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Amount } from '@/types/common/amount'
 
 export interface OperationAmountLabelProps {
   type: OperationType

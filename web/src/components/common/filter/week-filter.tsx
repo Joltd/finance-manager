@@ -4,10 +4,10 @@ import { ChevronFirstIcon, ChevronLastIcon, ChevronLeftIcon, ChevronRightIcon } 
 import { add, format, isWithinInterval } from 'date-fns'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import { RangeValue } from '@/types/common'
 import { asDateRangeValue, asMonday, asUtc, asWeek, formatWeek } from '@/lib/date'
 import { useState } from 'react'
-import { FilterPrimitiveProps } from '@/types/filter'
+import { FilterPrimitiveProps } from '@/types/common/filter'
+import { RangeValue } from '@/types/common'
 
 export interface WeekFilterProps extends FilterPrimitiveProps {
   from?: string

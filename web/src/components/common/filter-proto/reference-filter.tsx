@@ -7,11 +7,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Reference } from '@/types/common'
 import { useEffect, useState } from 'react'
 import { FilterPrimitive } from '@/components/common/filter-proto/filter'
 import { trim } from '@/lib/utils'
 import { FilterOperator, FilterOperatorVariant } from '@/types/entity'
+import { Reference } from '@/types/common/reference'
 
 export interface ReferenceFilterProps<T> extends FilterPrimitive<T[]> {
   references?: Reference[]

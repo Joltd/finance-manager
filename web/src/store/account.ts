@@ -6,9 +6,9 @@ import {
   AccountReference,
   Currency,
 } from '@/types/account'
-import { Reference } from '@/types/common'
 import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
 import { useStoreSelect } from '@/hooks/use-store-select'
+import { Reference } from '@/types/common/reference'
 
 const accountListStore = createFetchStore<Account[]>(accountUrls.root)
 

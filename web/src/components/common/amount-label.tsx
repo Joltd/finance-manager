@@ -1,7 +1,8 @@
 import { CurrencyLabel } from '@/components/common/currency-label'
 import { cn } from '@/lib/utils'
 import { ValueLabel } from '@/components/common/value-label'
-import { Amount } from '@/types/common'
+
+import { Amount } from '@/types/common/amount'
 
 export interface AmountLabelProps {
   amount?: Amount

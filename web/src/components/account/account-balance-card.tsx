@@ -1,4 +1,3 @@
-import { Amount } from '@/types/common'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AmountLabel } from '@/components/common/amount-label'
 import { EmptyLabel } from '@/components/common/empty-label'
@@ -9,6 +8,7 @@ import { cn, formatDate } from '@/lib/utils'
 import { AccountReference } from '@/types/account'
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { differenceInDays, parseISO } from 'date-fns'
+import { Amount } from '@/types/common/amount'
 
 export interface AccountBalanceCardProps {
   account: AccountReference

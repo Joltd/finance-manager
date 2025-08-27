@@ -1,5 +1,6 @@
 import { Account } from '@/types/account'
-import { Amount, Embedding } from '@/types/common'
+import { Amount } from '@/types/common/amount'
+import { Embedding } from '@/types/common/embedding'
 
 export enum OperationType {
   EXPENSE = 'EXPENSE',

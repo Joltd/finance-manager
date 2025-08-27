@@ -7,7 +7,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { ListFilterPlusIcon, XIcon } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
-import { FilterPrimitiveProps } from '@/types/filter'
+import { FilterPrimitiveProps } from '@/types/common/filter'
 import { cn } from '@/lib/utils'
 import { produce, WritableDraft } from 'immer'
 

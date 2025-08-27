@@ -22,9 +22,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AccountGroupInput } from '@/components/account/account-group-input'
-import { referenceSchema } from '@/types/common'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DateInput } from '@/components/common/date-input'
+import { referenceSchema } from '@/types/common/reference'
 
 interface AccountSheetStoreState extends OpenStoreState {
   id?: string

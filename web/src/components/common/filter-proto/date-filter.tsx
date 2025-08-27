@@ -17,10 +17,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Calendar } from '@/components/ui/calendar'
-import { RangeValue } from '@/types/common'
 import { DateRange } from 'react-day-picker'
 import { add, addDays, Duration, startOfToday } from 'date-fns'
 import { prepareRange } from '@/lib/utils'
+import { RangeValue } from '@/types/common'
 
 export interface DateFilterProps extends FilterPrimitive<RangeValue<string | undefined>> {}
 

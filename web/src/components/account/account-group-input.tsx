@@ -3,7 +3,8 @@ import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountUrls } from '@/api/account'
 import { useAccountGroupReferenceStore } from '@/store/account'
-import { Reference } from '@/types/common'
+
+import { Reference } from '@/types/common/reference'
 
 export interface AccountGroupInputProps {
   value?: Reference

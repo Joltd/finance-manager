@@ -1,10 +1,11 @@
 import { importDataUrls } from '@/api/import-data'
-import { Reference } from '@/types/common'
 import { ImportData, ImportDataEntry, ImportDataEntryGroup } from '@/types/import-data'
 import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { createSelectionStore, SelectionStoreState } from '@/store/common/selection'
 import { Operation } from '@/types/operation'
+import { Reference } from '@/types/common/reference'
+import { createStore } from 'zustand/index'
 
 const importDataListStore = createFetchStore<Reference[]>(importDataUrls.root)
 
@@ -48,3 +49,22 @@ export const useImportDataEntrySelectionStore = <
 >(
   ...fields: K[]
 ) => useStoreSelect(importDataEntrySelectionStore, ...fields)
+
+//
+
+export interface ImportDataLockStore {
+  locked: boolean
+  lock: () => void
+  unlock: () => void
+}
+
+const importDataLockStore = createStore<ImportDataLockStore>((set, get) => {
+  return {
+    locked: false,
+    lock: () => set({ locked: true }),
+    unlock: () => set({ locked: false }),
+  }
+})
+
+export const useImportDataLockStore = <K extends keyof ImportDataLockStore>(...fields: K[]) =>
+  useStoreSelect(importDataLockStore, ...fields)

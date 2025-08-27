@@ -2,7 +2,6 @@ import { FormBody, FormControl, FormField, FormItem, FormLabel } from '@/compone
 import { z } from 'zod'
 import { OperationType } from '@/types/operation'
 import { accountReferenceShema, AccountType } from '@/types/account'
-import { amountShema, embeddingSchema } from '@/types/common'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
@@ -20,6 +19,8 @@ import React, { useCallback, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { EmbeddingLabel } from '@/components/common/embedding-label'
+import { amountShema } from '@/types/common/amount'
+import { embeddingSchema } from '@/types/common/embedding'
 
 export interface OperationFormProps {
   form: UseFormReturn<OperationFormData>

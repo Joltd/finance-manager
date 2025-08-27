@@ -1,4 +1,4 @@
-import { FilterPrimitiveProps } from '@/types/filter'
+import { FilterPrimitiveProps } from '@/types/common/filter'
 import { ReferenceInput } from '@/components/common/reference-input'
 import { useAccountReferenceStore } from '@/store/account'
 import { AccountLabel } from '@/components/common/account-label'

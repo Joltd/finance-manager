@@ -1,5 +1,4 @@
 import { add, format, Interval, startOfWeek, sub } from 'date-fns'
-import { RangeValue } from '@/types/common'
 
 export function asDate(date: Date | string): Date {
   return typeof date === 'string' ? new Date(date) : date

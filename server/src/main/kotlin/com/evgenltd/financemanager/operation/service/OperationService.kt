@@ -67,6 +67,7 @@ class OperationService(
             ?.let { operationRepository.findByIdOrNull(it) }
             .let { operationConverter.fillEntity(it, record) }
             .let { operationRepository.save(it) }
+            .also { entityManager.detach(it) }
 
         notifyChanged(old, new)
 
@@ -77,6 +78,7 @@ class OperationService(
     fun delete(id: UUID) {
         val operation = operationRepository.find(id)
         operationRepository.delete(operation)
+        entityManager.flush()
         entityManager.detach(operation)
         notifyChanged(operation, null)
     }
@@ -85,6 +87,7 @@ class OperationService(
     fun delete(ids: List<UUID>) {
         operationRepository.findAllById(ids)
             .onEach { operationRepository.delete(it) }
+            .also { entityManager.flush() }
             .onEach { entityManager.detach(it) }
             .map { OperationEventEntry(old = it) }
             .let { OperationEvent(it) }
@@ -96,10 +99,7 @@ class OperationService(
             return
         }
 
-        val entry = OperationEventEntry(
-            old?.also { entityManager.detach(it) },
-            new?.also { entityManager.detach(it) },
-        )
+        val entry = OperationEventEntry(old, new)
         notifyChanged(OperationEvent(listOf(entry)))
     }
 

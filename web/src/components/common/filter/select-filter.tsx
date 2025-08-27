@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { FilterPrimitiveProps } from '@/types/filter'
+import { FilterPrimitiveProps } from '@/types/common/filter'
 
 export interface SelectFilterProps extends FilterPrimitiveProps {
   name: string

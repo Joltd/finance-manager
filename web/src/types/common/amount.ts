@@ -1,20 +1,5 @@
 import z from 'zod'
 
-export interface Reference {
-  id: string
-  name: string
-}
-
-export const referenceSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(3),
-})
-
-export interface RangeValue<T> {
-  from?: T
-  to?: T
-}
-
 export interface Amount {
   value: number
   currency: string
@@ -50,24 +35,3 @@ export function minus(left?: Amount, right?: Amount): Amount | undefined {
     currency: (left?.currency || right?.currency)!!,
   }
 }
-
-export enum NotificationType {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-}
-
-export interface Notification {
-  type: NotificationType
-  message: string
-}
-
-export interface Embedding {
-  id: string
-  input?: string
-}
-
-export const embeddingSchema = z.object({
-  id: z.string().uuid(),
-  input: z.string().optional(),
-})

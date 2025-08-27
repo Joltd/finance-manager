@@ -1,7 +1,6 @@
 import { AmountLabel } from '@/components/common/amount-label'
 import { Fragment, useEffect } from 'react'
 import { EditIcon } from 'lucide-react'
-import { amount, Amount, minus, plus } from '@/types/common'
 import { cn } from '@/lib/utils'
 import { ImportDataTotal } from '@/types/import-data'
 import { useRequest } from '@/hooks/use-request'
@@ -11,6 +10,7 @@ import { useBalanceStore } from '@/store/balance'
 import { Account } from '@/types/account'
 import { Spinner } from '@/components/ui/spinner'
 import { ErrorLabel } from '@/components/common/error-label'
+import { Amount, amount, minus, plus } from '@/types/common/amount'
 
 export interface ImportDataTotalsProps {
   importDataId: string

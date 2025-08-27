@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { cva } from 'class-variance-authority'
 import { Account } from '@/types/account'
 
-import { Amount } from '@/types/common'
+import { Amount } from '@/types/common/amount'
 
 export interface OperationLabelProps {
   date?: string

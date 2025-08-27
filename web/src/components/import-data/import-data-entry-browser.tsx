@@ -16,6 +16,8 @@ import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
 import { ImportDataGroupHeader } from '@/components/import-data/import-data-group'
 import { subscribeGlobal } from '@/lib/global-event'
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { useLinkAction } from '@/components/import-data/actions'
 
 export interface ImportDataOperationBrowserProps {}
 
@@ -38,6 +40,8 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
   )
   const entrySelection = useImportDataEntrySelectionStore('selected', 'has', 'select', 'clear')
 
+  const linkAction = useLinkAction()
+
   useEffect(() => {
     return subscribeGlobal('click', (event: MouseEvent) => {
       if (!event.ctrlKey) {
@@ -53,45 +57,58 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
     }
   }, [importDataEntryList.queryParams])
 
+  const handleDrag = (args: any) => {
+    const operation = args.active.id
+    const entry = args.collisions?.[0]?.id
+
+    if (!operation || !entry) {
+      return
+    }
+
+    linkAction.perform(operation, entry)
+  }
+
   return (
     <DataSection store={importDataEntryList}>
       <div ref={ref} className="flex flex-col relative overflow-y-auto m-6 mb-12 gap-12">
-        {importDataEntryList.data?.map((group) => (
-          <div key={group.date} className="flex flex-col gap-6">
-            <TextLabel variant="title">
-              <ValidityIcon valid={group.valid} message="Some totals doesn't matched" />
-              <DateLabel date={group.date} />
-            </TextLabel>
-            <ImportDataGroupHeader group={group} />
-            <div className="flex flex-col px-0.5">
-              {group.entries.map((entry) =>
-                entry.id ? (
-                  <ImportDataEntryBrowserRow
-                    key={entry.id}
-                    entry={entry}
-                    linked={entry.linked}
-                    operation={entry.operation}
-                    parsed={entry.parsed}
-                    suggestions={entry.suggestions}
-                    relatedAccount={importData.data!!.account}
-                    visible={entry.parsedVisible}
-                    selected={entrySelection.has(entry)}
-                    disabled={importData.data?.progress}
-                  />
-                ) : entry.operation ? (
-                  <ImportDataEntryBrowserOperationRow
-                    key={entry.operation.id}
-                    operation={entry.operation}
-                    relatedAccount={importData.data!!.account}
-                    visible={entry.operationVisible}
-                    selected={operationSelection.has(entry.operation)}
-                    disabled={importData.data?.progress}
-                  />
-                ) : null,
-              )}
+        <DndContext onDragEnd={handleDrag}>
+          {importDataEntryList.data?.map((group) => (
+            <div key={group.date} className="flex flex-col gap-6">
+              <TextLabel variant="title">
+                <ValidityIcon valid={group.valid} message="Some totals doesn't matched" />
+                <DateLabel date={group.date} />
+              </TextLabel>
+              <ImportDataGroupHeader group={group} />
+              <div className="flex flex-col px-0.5">
+                {group.entries.map((entry) =>
+                  entry.id ? (
+                    <ImportDataEntryBrowserRow
+                      key={entry.id}
+                      entry={entry}
+                      linked={entry.linked}
+                      operation={entry.operation}
+                      parsed={entry.parsed}
+                      suggestions={entry.suggestions}
+                      relatedAccount={importData.data!!.account}
+                      visible={entry.parsedVisible}
+                      selected={entrySelection.has(entry)}
+                      disabled={importData.data?.progress}
+                    />
+                  ) : entry.operation ? (
+                    <ImportDataEntryBrowserOperationRow
+                      key={entry.operation.id}
+                      operation={entry.operation}
+                      relatedAccount={importData.data!!.account}
+                      visible={entry.operationVisible}
+                      selected={operationSelection.has(entry.operation)}
+                      disabled={importData.data?.progress}
+                    />
+                  ) : null,
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </DndContext>
 
         <ImportDataActionBar />
       </div>

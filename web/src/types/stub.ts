@@ -1,6 +1,7 @@
 import { Account, AccountBalance, AccountType } from '@/types/account'
 import { Operation, OperationType } from '@/types/operation'
-import { amount } from '@/types/common'
+
+import { amount } from '@/types/common/amount'
 
 export const cashAccount: Account = {
   id: '1',
