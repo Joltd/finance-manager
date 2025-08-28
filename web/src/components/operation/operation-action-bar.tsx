@@ -6,12 +6,7 @@ import { operationUrls } from '@/api/operation'
 
 export function OperationActionBar() {
   const deleteOperations = useRequest(operationUrls.root, { method: 'DELETE' })
-  const operationSelection = useOperationSelectionStore(
-    'selected',
-    'items',
-    'has',
-    'clear',
-  )
+  const operationSelection = useOperationSelectionStore('selected', 'items', 'has', 'clear')
 
   const handleDelete = () => {
     if (operationSelection.selected.size === 0) {
@@ -31,8 +26,8 @@ export function OperationActionBar() {
       <ActionBarButton
         hint="Delete operations"
         icon={<TrashIcon />}
-        disabled={deleteDisabled}
-        onClick={handleDelete}
+        available={!deleteDisabled}
+        perform={handleDelete}
       />
     </ActionBar>
   )
