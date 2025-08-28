@@ -1,4 +1,4 @@
-import z from 'zod/index'
+import z from 'zod'
 
 export interface Reference {
   id: string
