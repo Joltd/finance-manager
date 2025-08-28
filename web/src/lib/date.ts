@@ -1,3 +1,4 @@
+import { RangeValue } from '@/types/common'
 import { add, format, Interval, startOfWeek, sub } from 'date-fns'
 
 export function asDate(date: Date | string): Date {
