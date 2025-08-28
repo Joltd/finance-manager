@@ -2,7 +2,6 @@ package com.evgenltd.financemanager.account.service
 
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.operation.record.OperationEvent
-import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.repository.BalanceRepository
@@ -12,6 +11,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionalEventListener
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class BalanceProcessService(
@@ -48,18 +48,18 @@ class BalanceProcessService(
             .filterNotNull()
             .flatMap {
                 listOf(
-                    TransactionKey(it.date, it.accountFrom, it.amountFrom.currency),
-                    TransactionKey(it.date, it.accountTo, it.amountTo.currency),
+                    TransactionKey(it.date, it.accountFrom.id!!, it.accountFrom.type, it.amountFrom.currency),
+                    TransactionKey(it.date, it.accountTo.id!!, it.accountTo.type, it.amountTo.currency),
                 )
             }
-            .filter { it.account.type == AccountType.ACCOUNT }
+            .filter { it.accountType == AccountType.ACCOUNT }
             .distinct()
             .toList()
             .onEach {
-                balanceActionService.updateBalance(it.account.id!!, it.currency, it.date)
+                balanceActionService.updateBalance(it.accountId, it.currency, it.date)
             }
     }
 
-    private data class TransactionKey(val date: LocalDate, val account: Account, val currency: String)
+    private data class TransactionKey(val date: LocalDate, val accountId: UUID, val accountType: AccountType, val currency: String)
 
 }

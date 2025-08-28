@@ -41,6 +41,6 @@ data class OperationEvent(
 ) : ApplicationEvent(entries)
 
 data class OperationEventEntry(
-    val old: Operation? = null,
-    val new: Operation? = null,
+    val old: OperationRecord? = null,
+    val new: OperationRecord? = null,
 )

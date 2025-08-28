@@ -30,7 +30,7 @@ export function AccountBalanceCard({ account, balances, onClick }: AccountBalanc
         <CardTitle className={cn('flex items-center truncate', account.deleted && 'line-through')}>
           <Shorten text={account.name} />
           <div className="grow" />
-          {reviseDate && <ValidityIcon valid={isRevised} message={formatDate(reviseDate)} />}
+          <ValidityIcon valid={isRevised} keepMessage message={formatDate(reviseDate)} />
         </CardTitle>
       </CardHeader>
       <CardContent>

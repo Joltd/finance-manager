@@ -1,8 +1,10 @@
 package com.evgenltd.financemanager.operation.service
 
+import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.entity.TransactionType
 import com.evgenltd.financemanager.operation.record.OperationEvent
+import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order
@@ -11,14 +13,18 @@ import org.springframework.stereotype.Service
 @Service
 class TransactionService(
     private val transactionRepository: TransactionRepository,
+    private val operationRepository: OperationRepository,
 ) {
 
     @EventListener
     fun operationChanged(event: OperationEvent) {
         for (entry in event.entries) {
-            val operation = entry.new ?: continue
+            entry.old
+                ?.let { transactionRepository.deleteByOperationId(it.id!!) }
 
-            transactionRepository.deleteByOperation(operation)
+            val operation = entry.new
+                ?.let { operationRepository.find(it.id!!) }
+                ?: continue
 
             Transaction(
                 type = TransactionType.OUT,

@@ -9,6 +9,7 @@ export interface ImportData {
   account: Account
   dateRange?: RangeValue<string>
   progress: boolean
+  valid: boolean
   totals: ImportDataTotal[]
 }
 

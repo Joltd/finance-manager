@@ -1,0 +1,1 @@
+alter table import_data add column valid boolean not null default false;

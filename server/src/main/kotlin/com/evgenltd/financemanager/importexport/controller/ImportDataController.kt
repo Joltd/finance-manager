@@ -13,6 +13,7 @@ import com.evgenltd.financemanager.importexport.service.ImportDataProcessService
 import com.evgenltd.financemanager.importexport.service.ImportDataService
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.importexport.record.ImportDataFinishRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataUnlinkRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -60,6 +61,11 @@ class ImportDataController(
         importDataProcessService.saveActualBalance(id, balance)
     }
 
+    @PostMapping("/import-data/{id}/finish")
+    fun finish(@PathVariable id: UUID, @RequestBody request: ImportDataFinishRequest) {
+        importDataProcessService.finish(id, request.revise)
+    }
+
     @PostMapping("/import-data/{id}/entry/link")
     fun linkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataLinkRequest) {
         importDataProcessService.linkOperation(id, request.entryId, request.operationId)
@@ -77,8 +83,8 @@ class ImportDataController(
     fun entryVisibility(@PathVariable id: UUID, @RequestBody request: ImportDataEntryVisibilityRequest) {
         importDataProcessService.entryVisibility(id, request.operations, request.entries, request.visible)
     }
-    
+
     @DeleteMapping("/import-data/{id}")
-    fun delete(@PathVariable id: UUID) = importDataService.delete(id)
+    fun delete(@PathVariable id: UUID) = importDataProcessService.delete(id)
 
 }

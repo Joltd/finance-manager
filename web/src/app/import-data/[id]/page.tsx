@@ -17,6 +17,7 @@ import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
 import { Pointable } from '@/components/common/pointable'
+import { ImportDataInfo } from '@/components/import-data/import-data-info'
 
 export default function Page() {
   const { id } = useParams()
@@ -78,12 +79,6 @@ export default function Page() {
     }
   }, [importDataList.data])
 
-  const handleRevised = () => {}
-
-  const importValid =
-    !!importData.data?.totals?.length &&
-    importData.data.totals.filter((it) => it.valid).length === importData.data.totals.length
-
   return (
     <DataSection store={importData}>
       {importData.data && (
@@ -96,20 +91,7 @@ export default function Page() {
                 totals={importData.data.totals}
               />
               <div className="flex-grow" />
-              <Pointable disabled={!importValid} onClick={handleRevised}>
-                <TextLabel variant="title">
-                  {importData.data.account.name}
-                  {importData.data.progress ? (
-                    <Spinner />
-                  ) : (
-                    <ValidityIcon
-                      valid={importValid}
-                      message="Totals by import file doesn't mathced to totals in database with suggested records or actual balance is different"
-                      collapseIfEmpty
-                    />
-                  )}
-                </TextLabel>
-              </Pointable>
+              <ImportDataInfo />
             </div>
             <ImportDataFilter />
           </div>

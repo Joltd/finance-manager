@@ -4,10 +4,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 export interface ValidityIconProps {
   valid?: boolean | null
   message?: string
+  keepMessage?: boolean
   collapseIfEmpty?: boolean
 }
 
-export function ValidityIcon({ valid, message, collapseIfEmpty }: ValidityIconProps) {
+export function ValidityIcon({ valid, message, keepMessage, collapseIfEmpty }: ValidityIconProps) {
   if (valid === null || valid === undefined) {
     return !collapseIfEmpty && <div className="shrink-0 w-6" />
   }
@@ -21,7 +22,7 @@ export function ValidityIcon({ valid, message, collapseIfEmpty }: ValidityIconPr
           <TriangleAlert className="shrink-0 text-yellow-500" />
         )}
       </TooltipTrigger>
-      {message && <TooltipContent>{message}</TooltipContent>}
+      {message && (!valid || keepMessage) && <TooltipContent>{message}</TooltipContent>}
     </Tooltip>
   )
 }

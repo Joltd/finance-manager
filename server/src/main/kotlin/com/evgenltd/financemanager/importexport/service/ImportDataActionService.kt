@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.contains
 import com.evgenltd.financemanager.common.repository.eq
@@ -24,9 +25,13 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.operation.service.signedAmount
 import com.evgenltd.financemanager.account.repository.AccountRepository
+import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
+import com.evgenltd.financemanager.common.repository.isNotNull
+import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.common.util.isZero
 import com.evgenltd.financemanager.importexport.record.OperationKey
 import com.evgenltd.financemanager.importexport.record.TotalEntry
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -46,10 +51,12 @@ class ImportDataActionService(
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataOperationRepository: ImportDataOperationRepository,
     private val importDataTotalRepository: ImportDataTotalRepository,
+    private val importDataConverter: ImportDataConverter,
     private val embeddingActionService: EmbeddingActionService,
     private val operationRepository: OperationRepository,
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
+    private val balanceRepository: BalanceRepository,
 ) : Loggable() {
 
     @Transactional
@@ -239,6 +246,15 @@ class ImportDataActionService(
     }
 
     @Transactional
+    fun finish(id: UUID, revise: Boolean) {
+        val importData = importDataRepository.find(id)
+        if (revise) {
+            importData.account.reviseDate = LocalDate.now()
+        }
+        importDataRepository.delete(importData)
+    }
+
+    @Transactional
     fun linkOperation(id: UUID, entryId: UUID, operationId: UUID): List<LocalDate> {
         val importData = importDataRepository.find(id)
         val entry = importDataEntryRepository.find(entryId)
@@ -256,6 +272,8 @@ class ImportDataActionService(
 
         linkOperation(entry, operation)
 
+        importData.hiddenOperations.removeIf { it == operationId }
+
         return listOf(operation.date, entry.date)
     }
 
@@ -271,12 +289,14 @@ class ImportDataActionService(
     @Transactional
     fun unlinkOperation(id: UUID, entryIds: List<UUID>): List<LocalDate> =
         importDataEntryRepository.findAllById(entryIds)
-            .onEach {
+            .flatMap {
+                val operationDate = it.operation?.date
                 it.operation?.raw = emptyList()
                 it.operation?.hint = null
                 it.operation = null
+                listOf(operationDate, it.date)
             }
-            .map { it.date }
+            .mapNotNull { it }
             .distinct()
 
     @Transactional
@@ -315,42 +335,31 @@ class ImportDataActionService(
         }
 
         val entries = ((ImportDataEntry::importData eq importData) and
-                (ImportDataEntry::date contains dates))
+                (ImportDataEntry::date contains dates) and
+                (ImportDataEntry::visible eq true))
             .let { importDataEntryRepository.findAll(it) }
 
-        entries
-            .filter { it.visible }
-            .mapNotNull { it.parsed() }
+        entries.calculateParsedTotals(importData)
+
+        entries.calculateSuggestedTotals(importData)
+
+        entries.calculateOperationTotals(importData, dates)
+
+        validateImport(importData)
+    }
+
+    private fun List<ImportDataEntry>.calculateParsedTotals(importData: ImportData) {
+        mapNotNull { it.parsed() }
             .toTotalEntries(importData.account)
             .calculateTotal(importData, ImportDataTotalType.PARSED)
+    }
 
-        entries
-            .filter { it.visible }
-            .filter { it.operation == null }
+    private fun List<ImportDataEntry>.calculateSuggestedTotals(importData: ImportData) {
+        filter { it.operation == null }
             .flatMap { it.suggested() }
             .filter { it.selected }
             .toTotalEntries(importData.account)
             .calculateTotal(importData, ImportDataTotalType.SUGGESTED)
-
-        val hiddenEntries = entries.filter { !it.visible }
-            .mapNotNull { it.operation?.id }
-            .toSet()
-
-        val linkedOperationDates = entries.filter { it.operation != null }
-            .associate { it.operation?.id!! to it.date }
-
-        val actualDates = dates ?: entries.map { it.date }.distinct()
-        ((Transaction::account eq importData.account) and (Transaction::date contains actualDates))
-            .let { transactionRepository.findAll(it) }
-            .filter { it.operation.id !in importData.hiddenOperations }
-            .filter { it.operation.id !in hiddenEntries }
-            .map {
-                TotalEntry(
-                    date = linkedOperationDates[it.operation.id] ?: it.date,
-                    amount = it.signedAmount()
-                )
-            }
-            .calculateTotal(importData, ImportDataTotalType.OPERATION)
     }
 
     private fun List<ImportDataOperation>.toTotalEntries(account: Account): List<TotalEntry> = groupBy { it.date }
@@ -364,6 +373,38 @@ class ImportDataActionService(
                     )
                 }
         }
+
+    private fun List<ImportDataEntry>.calculateOperationTotals(importData: ImportData, dates: List<LocalDate>? = null) {
+        val entryDates = map { it.date }.distinct()
+        val actualDates = dates?.filter { it in entryDates } ?: entryDates
+
+        val linkedOperationIndex = ((ImportDataEntry::importData eq importData) and (ImportDataEntry::operation.isNotNull()))
+            .let { importDataEntryRepository.findAll(it) }
+            .associateBy { it.operation?.id }
+
+        val freeTransactions = ((Transaction::account eq importData.account) and (Transaction::date contains actualDates))
+            .let { transactionRepository.findAll(it) }
+            .filter { it.operation.id !in linkedOperationIndex.keys }
+            .filter { it.operation.id !in importData.hiddenOperations }
+            .map {
+                TotalEntry(date = it.date, amount = it.signedAmount())
+            }
+
+        val linkedTransactions = asSequence()
+            .mapNotNull { it.operation }
+            .flatMap { it.transactions }
+            .filter { it.account == importData.account }
+            .filter { it.operation.id !in importData.hiddenOperations }
+            .map {
+                TotalEntry(
+                    date = linkedOperationIndex[it.operation.id]?.date ?: it.date,
+                    amount = it.signedAmount()
+                )
+            }.toList()
+
+        (freeTransactions + linkedTransactions)
+            .calculateTotal(importData, ImportDataTotalType.OPERATION)
+    }
 
     private fun List<TotalEntry>.calculateTotal(importData: ImportData, type: ImportDataTotalType) {
         groupingBy { it.date to it.amount.currency }
@@ -388,6 +429,42 @@ class ImportDataActionService(
                 )
             }
             .let { importDataTotalRepository.saveAll(it) }
+    }
+
+    private fun validateImport(importData: ImportData) {
+        val totals = importDataTotalRepository.findAll((ImportDataTotal::importData eq importData))
+
+        val validByDate = totals.filter { it.date != null }
+            .groupBy { it.date!! }
+            .mapValues { (date, totals) -> importDataConverter.toEntryGroupRecord(date, totals) }
+            .values
+            .all { it.valid == true }
+
+        val commonTotals = totals.filter { it.date == null }
+
+        val commonOperationTotals = balanceRepository.findAll((Balance::account eq importData.account))
+            .map { ImportDataTotalType.OPERATION to it.amount }
+
+        val commonSuggestedTotals = commonTotals.filter { it.type === ImportDataTotalType.SUGGESTED }
+            .map { it.type to it.amount }
+
+        val commonActualTotals = commonTotals.filter { it.type === ImportDataTotalType.ACTUAL }
+            .map { it.type to it.amount }
+
+        val validByActual = (commonOperationTotals + commonSuggestedTotals + commonActualTotals)
+            .groupingBy { (_, amount) -> amount.currency }
+            .aggregate { currency, accumulator: Amount?, element, _ ->
+                when (element.first) {
+                    ImportDataTotalType.OPERATION -> element.second + accumulator
+                    ImportDataTotalType.SUGGESTED -> element.second + accumulator
+                    ImportDataTotalType.ACTUAL -> -element.second + accumulator
+                    ImportDataTotalType.PARSED -> emptyAmount(currency) + accumulator
+                }
+            }
+            .all { (_, amount) -> amount.isZero() } || commonActualTotals.isEmpty()
+
+        importData.valid = validByDate && validByActual
+        importDataRepository.save(importData)
     }
 
 }

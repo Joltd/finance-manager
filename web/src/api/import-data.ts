@@ -7,6 +7,7 @@ export const importDataUrls = {
   operation: '/import-data/operation',
   begin: '/import-data/begin',
   actualBalance: '/import-data/:id/actual-balance',
+  finish: '/import-data/:id/finish',
   entryLink: '/import-data/:id/entry/link',
   entryIdLink: '/import-data/:id/entry/:entryId/link',
   entryUnlink: '/import-data/:id/entry/unlink',
@@ -15,6 +16,7 @@ export const importDataUrls = {
 }
 
 export const importDataEvents = {
+  root: '/import-data',
   id: '/import-data/:id',
   entry: '/import-data/:id/entry',
 }

@@ -46,6 +46,7 @@ class ImportDataConverter(
             )
         },
         progress = importData.progress,
+        valid = importData.valid,
         totals = toRecords(totals)
     )
 

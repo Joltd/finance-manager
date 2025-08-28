@@ -11,6 +11,8 @@ import java.util.*
 class ImportDataEventService(
     private val importDataService: ImportDataService,
 ) {
+    @SseEventMapping("/import-data")
+    fun importData() {}
 
     @SseEventMapping("/import-data/{id}")
     fun importData(id: UUID): Patch {

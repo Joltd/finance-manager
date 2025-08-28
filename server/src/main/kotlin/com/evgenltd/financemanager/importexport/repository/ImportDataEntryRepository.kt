@@ -22,4 +22,7 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>, JpaSp
 
     fun findByIdInAndVisible(ids: List<UUID>, visible: Boolean): List<ImportDataEntry>
 
+    @Query("select ide.operation.id from ImportDataEntry ide where ide.importData = :importData and ide.operation != null")
+    fun findLinkedOperations(importData: ImportData): List<UUID>
+
 }

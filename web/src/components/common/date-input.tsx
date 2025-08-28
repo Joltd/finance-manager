@@ -23,6 +23,7 @@ export function DateInput({ placeholder, value, onChange }: DateInputProps) {
       <PopoverContent align="start">
         <Calendar
           mode="single"
+          defaultMonth={parseDate(value)}
           selected={parseDate(value)}
           onSelect={(date) => {
             onChange?.(formatDate(date))

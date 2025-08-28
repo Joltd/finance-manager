@@ -5,15 +5,16 @@ import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.record.OperationEvent
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationService
-import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.common.record.NotificationType
+import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.service.NotificationEventService
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionalEventListener
 import java.io.InputStream
 import java.time.LocalDate
@@ -66,6 +67,16 @@ class ImportDataProcessService(
     fun saveActualBalance(id: UUID, balance: Amount) {
         importDataActionService.saveActualBalance(id, balance)
         importDataEventService.importData(id)
+    }
+
+    fun finish(id: UUID, revise: Boolean) {
+        importDataActionService.finish(id, revise)
+        importDataEventService.importData()
+    }
+
+    fun delete(id: UUID) {
+        importDataRepository.deleteById(id)
+        importDataEventService.importData()
     }
 
     @Async
@@ -122,15 +133,15 @@ class ImportDataProcessService(
             .filterNotNull()
             .flatMap {
                 listOf(
-                    TransactionKey(it.date, it.accountFrom),
-                    TransactionKey(it.date, it.accountTo),
+                    TransactionKey(it.date, it.accountFrom.id!!, it.accountFrom.type),
+                    TransactionKey(it.date, it.accountTo.id!!, it.accountTo.type),
                 )
             }
-            .filter { it.account.type == AccountType.ACCOUNT }
+            .filter { it.accountType == AccountType.ACCOUNT }
             .distinct()
-            .groupBy { it.account }
+            .groupBy { it.accountId }
             .flatMap { (account, keys) ->
-                importDataRepository.findByAccount(account)
+                importDataRepository.findByAccountId(account)
                     .map { importData -> importData to keys.map { key -> key.date } }
             }
             .onEach { (importData, affectedDates) ->
@@ -159,6 +170,6 @@ class ImportDataProcessService(
         }
     }
 
-    private data class TransactionKey(val date: LocalDate, val account: Account)
+    private data class TransactionKey(val date: LocalDate, val accountId: UUID, val accountType: AccountType)
 
 }

@@ -16,6 +16,6 @@ interface ImportDataRepository : JpaRepository<ImportData,UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     fun findAndLock(id: UUID): ImportData?
 
-    fun findByAccount(account: Account): List<ImportData>
+    fun findByAccountId(accountId: UUID): List<ImportData>
 
 }

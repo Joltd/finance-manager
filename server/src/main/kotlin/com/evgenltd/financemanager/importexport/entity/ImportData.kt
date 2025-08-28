@@ -31,6 +31,8 @@ class ImportData(
 
     var progress: Boolean = false,
 
+    var valid: Boolean = false,
+
     @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var entries: MutableList<ImportDataEntry> = mutableListOf(),
 

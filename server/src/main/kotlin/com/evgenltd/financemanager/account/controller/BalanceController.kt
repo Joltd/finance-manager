@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.account.record.BalanceRecord
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.service.BalanceActionService
 import com.evgenltd.financemanager.account.service.BalanceService
+import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -14,6 +15,7 @@ import java.util.UUID
 
 @RestController
 @DataResponse
+@SkipLogging
 class BalanceController(
     private val balanceService: BalanceService,
     private val balanceActionService: BalanceActionService,
