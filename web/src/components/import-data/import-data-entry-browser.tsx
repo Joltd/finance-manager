@@ -9,6 +9,7 @@ import {
   useImportDataOperationSelectionStore,
   useImportDataEntrySelectionStore,
   useImportDataStore,
+  useImportDataLockStore,
 } from '@/store/import-data'
 import { ImportDataActionBar } from '@/components/import-data/import-data-action-bar'
 import { ValidityIcon } from '@/components/common/validity-icon'
@@ -40,6 +41,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
   )
   const entrySelection = useImportDataEntrySelectionStore('selected', 'has', 'select', 'clear')
 
+  const lockStore = useImportDataLockStore()
   const linkAction = useLinkAction()
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                       relatedAccount={importData.data!!.account}
                       visible={entry.parsedVisible}
                       selected={entrySelection.has(entry)}
-                      disabled={importData.data?.progress}
+                      disabled={lockStore.locked}
                     />
                   ) : entry.operation ? (
                     <ImportDataEntryBrowserOperationRow
@@ -101,7 +103,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                       relatedAccount={importData.data!!.account}
                       visible={entry.operationVisible}
                       selected={operationSelection.has(entry.operation)}
-                      disabled={importData.data?.progress}
+                      disabled={lockStore.locked}
                     />
                   ) : null,
                 )}

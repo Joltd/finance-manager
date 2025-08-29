@@ -7,7 +7,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { TextLabel } from '@/components/common/text-label'
-import { useImportDataStore } from '@/store/import-data'
+import { useImportDataLockStore, useImportDataStore } from '@/store/import-data'
 import { Pointable } from '@/components/common/pointable'
 import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
@@ -16,10 +16,12 @@ export interface ImportDataInfoProps {}
 
 export function ImportDataInfo({}: ImportDataInfoProps) {
   const importData = useImportDataStore('data')
+  const lockStore = useImportDataLockStore()
   const { submit, loading, error } = useRequest(importDataUrls.finish) // todo handle error
 
   const handleFinish = (revise = false) => {
-    submit({ revise }, { id: importData.data?.id })
+    lockStore.lock()
+    submit({ revise }, { id: importData.data?.id }).finally(() => lockStore.unlock())
   }
 
   return (
@@ -28,7 +30,7 @@ export function ImportDataInfo({}: ImportDataInfoProps) {
         <Pointable className="py-2">
           <TextLabel variant="title">
             {importData.data?.account?.name}
-            {!importData.data?.progress && !loading ? (
+            {!importData.data?.progress && !lockStore.locked ? (
               <ValidityIcon
                 valid={importData.data?.valid}
                 message="Totals by import file doesn't mathced to totals in database with suggested records or actual balance is different"
