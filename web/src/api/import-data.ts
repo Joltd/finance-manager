@@ -2,9 +2,6 @@ export const importDataUrls = {
   root: '/import-data',
   id: '/import-data/:id',
   entry: '/import-data/:id/entry',
-  suggestion: '/import-data/:id/entry/:entryId/suggestion',
-  account: '/import-data/account',
-  operation: '/import-data/operation',
   begin: '/import-data/begin',
   actualBalance: '/import-data/:id/actual-balance',
   finish: '/import-data/:id/finish',
@@ -12,7 +9,7 @@ export const importDataUrls = {
   entryIdLink: '/import-data/:id/entry/:entryId/link',
   entryUnlink: '/import-data/:id/entry/unlink',
   entryVisibility: '/import-data/:id/entry/visibility',
-  entryApprove: '/import-data/:id/entry/:entryId/approve',
+  entryApprove: '/import-data/:id/entry/approve',
 }
 
 export const importDataEvents = {

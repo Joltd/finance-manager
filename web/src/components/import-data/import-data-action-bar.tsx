@@ -4,6 +4,7 @@ import {
 } from '@/store/import-data'
 import { ActionBar, ActionBarButton } from '@/components/common/action-bar'
 import {
+  useApproveAction,
   useDeleteAction,
   useHideAction,
   useLinkAction,
@@ -16,13 +17,14 @@ export function ImportDataActionBar() {
   const hideAction = useHideAction()
   const linkAction = useLinkAction()
   const unlinkAction = useUnlinkAction()
+  const approveAction = useApproveAction()
   const deleteAction = useDeleteAction()
 
   const operationSelection = useImportDataOperationSelectionStore('selected')
   const entrySelection = useImportDataEntrySelectionStore('selected')
 
   const visible = !!operationSelection.selected.size || !!entrySelection.selected.size
-  const actions = [showAction, hideAction, linkAction, unlinkAction, deleteAction]
+  const actions = [showAction, hideAction, linkAction, unlinkAction, approveAction, deleteAction]
 
   return (
     <ActionBar open={visible}>

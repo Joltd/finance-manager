@@ -20,6 +20,7 @@ import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.ai.converter.EmbeddingConverter
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.operation.record.OperationRecord
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -115,5 +116,18 @@ class ImportDataConverter(
             operation = operationConverter.toRecord(operation),
             operationVisible = operation.id !in importData.hiddenOperations
         )
+
+    fun toOperationRecord(operation: ImportDataOperation): Operation = Operation(
+        id = null,
+        date = operation.date,
+        type = operation.type,
+        amountFrom = operation.amountFrom,
+        accountFrom = operation.accountFrom!!,
+        amountTo = operation.amountTo,
+        accountTo = operation.accountTo!!,
+        description = operation.description,
+        raw = operation.raw,
+        hint = operation.hint,
+    )
 
 }

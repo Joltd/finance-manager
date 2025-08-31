@@ -49,22 +49,3 @@ export const useImportDataEntrySelectionStore = <
 >(
   ...fields: K[]
 ) => useStoreSelect(importDataEntrySelectionStore, ...fields)
-
-//
-
-export interface ImportDataLockStore {
-  locked: boolean
-  lock: () => void
-  unlock: () => void
-}
-
-const importDataLockStore = createStore<ImportDataLockStore>((set, get) => {
-  return {
-    locked: false,
-    lock: () => set({ locked: true }),
-    unlock: () => set({ locked: false }),
-  }
-})
-
-export const useImportDataLockStore = <K extends keyof ImportDataLockStore>(...fields: K[]) =>
-  useStoreSelect(importDataLockStore, ...fields)

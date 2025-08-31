@@ -159,9 +159,7 @@ export function OperationForm({ form, error, className }: OperationFormProps) {
         name="accountFrom"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>
-              {type === OperationType.INCOME ? 'Income' : 'From'} {field.value?.id}
-            </FormLabel>
+            <FormLabel>{type === OperationType.INCOME ? 'Income' : 'From'}</FormLabel>
             <FormControl>
               <AccountInput type={accountFromType} value={field.value} onChange={field.onChange} />
             </FormControl>

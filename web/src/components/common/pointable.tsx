@@ -13,7 +13,7 @@ export const Pointable = React.forwardRef<HTMLDivElement, PointableProps>(
       onClick={!disabled ? props.onClick : undefined}
       className={cn(
         'select-none',
-        !disabled && 'hover:bg-muted hover:rounded-sm ',
+        !disabled && 'hover:bg-accent dark:hover:bg-accent/50 hover:rounded-sm ',
         selected && 'outline-2 outline-dotted outline-accent-foreground rounded-sm',
         className,
       )}

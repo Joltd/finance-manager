@@ -16,10 +16,10 @@ interface ImportDataTotalRepository : JpaRepository<ImportDataTotal, UUID>, JpaS
 
     fun findByImportDataAndDateIsNullAndType(importData: ImportData, type: ImportDataTotalType): List<ImportDataTotal>
 
-    fun deleteByImportData(importData: ImportData)
+    fun deleteByImportDataAndTypeIn(importData: ImportData, types: List<ImportDataTotalType>)
 
-    fun deleteByImportDataAndDateIn(importData: ImportData, dates: List<LocalDate>)
+    fun deleteByImportDataAndDateInAndTypeIn(importData: ImportData, dates: List<LocalDate>, types: List<ImportDataTotalType>)
 
-    fun deleteByImportDataAndDateIsNull(importData: ImportData)
+    fun deleteByImportDataAndDateIsNullAndTypeIn(importData: ImportData, types: List<ImportDataTotalType>)
 
 }

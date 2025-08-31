@@ -92,9 +92,15 @@ class ImportDataProcessService(
     }
 
     @Async
+    @Transactional
     fun linkOperation(id: UUID, entryId: UUID, operation: OperationRecord) {
-        val result = operationService.update(operation) // recalculation by operation events
-        importDataActionService.linkOperation(id, entryId, result.id!!)
+        try {
+            val result = operationService.update(operation) // recalculation by operation events
+            importDataActionService.linkOperation(id, entryId, result.id!!)
+        } catch (e: Exception) {
+            log.error("Unable to link operation", e)
+            notificationEventService.notification(e.message ?: "Unable to link operation", NotificationType.ERROR)
+        }
     }
 
     @Async
@@ -121,6 +127,20 @@ class ImportDataProcessService(
         } catch (e: Exception) {
             log.error("Unable to change entry visibility", e)
             notificationEventService.notification(e.message ?: "Unable to change entry visibility", NotificationType.ERROR)
+        }
+    }
+
+    @Async
+    @Transactional
+    fun approveSuggestion(id: UUID, entryIds: List<UUID>) {
+        try {
+            val result = importDataActionService.approveSuggestion(id, entryIds)  // recalculation by operation events
+            for ((entryId, operationId) in result) {
+                importDataActionService.linkOperation(id, entryId, operationId)
+            }
+        } catch (e: Exception) {
+            log.error("Unable to approve suggestion", e)
+            notificationEventService.notification(e.message ?: "Unable to approve suggestion", NotificationType.ERROR)
         }
     }
 

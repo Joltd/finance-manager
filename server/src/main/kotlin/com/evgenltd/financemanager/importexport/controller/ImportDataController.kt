@@ -13,6 +13,7 @@ import com.evgenltd.financemanager.importexport.service.ImportDataProcessService
 import com.evgenltd.financemanager.importexport.service.ImportDataService
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryApproveSuggestionRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataFinishRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataUnlinkRequest
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -82,6 +83,11 @@ class ImportDataController(
     @PostMapping("/import-data/{id}/entry/visibility")
     fun entryVisibility(@PathVariable id: UUID, @RequestBody request: ImportDataEntryVisibilityRequest) {
         importDataProcessService.entryVisibility(id, request.operations, request.entries, request.visible)
+    }
+
+    @PostMapping("/import-data/{id}/entry/approve")
+    fun approveSuggestion(@PathVariable id: UUID, @RequestBody request: ImportDataEntryApproveSuggestionRequest) {
+        importDataProcessService.approveSuggestion(id, request.entryIds)
     }
 
     @DeleteMapping("/import-data/{id}")

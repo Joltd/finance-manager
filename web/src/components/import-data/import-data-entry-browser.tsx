@@ -9,7 +9,6 @@ import {
   useImportDataOperationSelectionStore,
   useImportDataEntrySelectionStore,
   useImportDataStore,
-  useImportDataLockStore,
 } from '@/store/import-data'
 import { ImportDataActionBar } from '@/components/import-data/import-data-action-bar'
 import { ValidityIcon } from '@/components/common/validity-icon'
@@ -17,7 +16,7 @@ import { TextLabel } from '@/components/common/text-label'
 import { DataSection } from '@/components/common/data-section'
 import { ImportDataGroupHeader } from '@/components/import-data/import-data-group'
 import { subscribeGlobal } from '@/lib/global-event'
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import { useLinkAction } from '@/components/import-data/actions'
 
 export interface ImportDataOperationBrowserProps {}
@@ -31,8 +30,6 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
     'data',
     'queryParams',
   )
-  const ref = useRef<HTMLDivElement>(null)
-
   const operationSelection = useImportDataOperationSelectionStore(
     'selected',
     'has',
@@ -40,8 +37,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
     'clear',
   )
   const entrySelection = useImportDataEntrySelectionStore('selected', 'has', 'select', 'clear')
-
-  const lockStore = useImportDataLockStore()
+  const ref = useRef<HTMLDivElement>(null)
   const linkAction = useLinkAction()
 
   useEffect(() => {
@@ -54,14 +50,14 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
   }, [])
 
   useEffect(() => {
-    if (ref.current && !!importDataEntryList.queryParams?.length) {
+    if (ref.current) {
       ref.current.scrollTo({ behavior: 'smooth', top: 0 })
     }
   }, [importDataEntryList.queryParams])
 
-  const handleDrag = (args: any) => {
-    const operation = args.active.id
-    const entry = args.collisions?.[0]?.id
+  const handleDrag = (event: DragEndEvent) => {
+    const operation = event.active.id
+    const entry = event.collisions?.[0]?.id
 
     if (!operation || !entry) {
       return
@@ -72,7 +68,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
 
   return (
     <DataSection store={importDataEntryList}>
-      <div ref={ref} className="flex flex-col relative overflow-y-auto m-6 mb-12 gap-12">
+      <div ref={ref} className="flex flex-col overflow-y-auto m-6 mb-12 gap-12">
         <DndContext onDragEnd={handleDrag}>
           {importDataEntryList.data?.map((group) => (
             <div key={group.date} className="flex flex-col gap-6">
@@ -94,7 +90,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                       relatedAccount={importData.data!!.account}
                       visible={entry.parsedVisible}
                       selected={entrySelection.has(entry)}
-                      disabled={lockStore.locked}
+                      disabled={importData.data?.progress}
                     />
                   ) : entry.operation ? (
                     <ImportDataEntryBrowserOperationRow
@@ -103,7 +99,7 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                       relatedAccount={importData.data!!.account}
                       visible={entry.operationVisible}
                       selected={operationSelection.has(entry.operation)}
-                      disabled={lockStore.locked}
+                      disabled={importData.data?.progress}
                     />
                   ) : null,
                 )}

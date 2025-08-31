@@ -30,11 +30,13 @@ import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
 import com.evgenltd.financemanager.common.repository.isNotNull
+import com.evgenltd.financemanager.common.repository.isNull
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.isZero
 import com.evgenltd.financemanager.importexport.record.OperationKey
 import com.evgenltd.financemanager.importexport.record.TotalEntry
 import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.operation.service.byAccount
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -53,6 +55,7 @@ class ImportDataActionService(
     private val importDataTotalRepository: ImportDataTotalRepository,
     private val importDataConverter: ImportDataConverter,
     private val embeddingActionService: EmbeddingActionService,
+    private val operationService: OperationService,
     private val operationRepository: OperationRepository,
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
@@ -324,15 +327,28 @@ class ImportDataActionService(
     }
 
     @Transactional
+    fun approveSuggestion(id: UUID, entryIds: List<UUID>): List<Pair<UUID, UUID>> {
+        importDataRepository.find(id)
+        return importDataEntryRepository.findAllById(entryIds)
+            .mapNotNull { entry ->
+                entry.suggested()
+                    .firstOrNull { it.selected }
+                    ?.let { entry.id!! to it }
+            }
+            .let { entryOperation ->
+                entryOperation.map { importDataConverter.toOperationRecord(it.second) }
+                    .let { operationService.saveInternal(it) }
+                    .let {
+                        entryOperation.map { (entryId, _) -> entryId }.zip(it)
+                    }
+            }
+    }
+
+    @Transactional
     fun calculateTotal(id: UUID, dates: List<LocalDate>? = null) {
         val importData = importDataRepository.find(id)
 
-        if (dates == null) {
-            importDataTotalRepository.deleteByImportData(importData)
-        } else {
-            importDataTotalRepository.deleteByImportDataAndDateIn(importData, dates)
-            importDataTotalRepository.deleteByImportDataAndDateIsNull(importData)
-        }
+        cleanupTotals(importData, dates)
 
         val entries = ((ImportDataEntry::importData eq importData) and
                 (ImportDataEntry::date contains dates) and
@@ -346,6 +362,16 @@ class ImportDataActionService(
         entries.calculateOperationTotals(importData, dates)
 
         validateImport(importData)
+    }
+
+    private fun cleanupTotals(importData: ImportData, dates: List<LocalDate>?) {
+        val typesToCleanup = listOf(ImportDataTotalType.PARSED, ImportDataTotalType.OPERATION, ImportDataTotalType.SUGGESTED)
+        if (dates == null) {
+            importDataTotalRepository.deleteByImportDataAndTypeIn(importData, typesToCleanup)
+        } else {
+            importDataTotalRepository.deleteByImportDataAndDateInAndTypeIn(importData, dates, typesToCleanup)
+            importDataTotalRepository.deleteByImportDataAndDateIsNullAndTypeIn(importData, typesToCleanup)
+        }
     }
 
     private fun List<ImportDataEntry>.calculateParsedTotals(importData: ImportData) {
@@ -418,6 +444,9 @@ class ImportDataActionService(
                 )
             }
             .let { importDataTotalRepository.saveAll(it) }
+
+        ((ImportDataTotal::importData eq importData) and ImportDataTotal::date.isNotNull() and (ImportDataTotal::type eq type))
+            .let { importDataTotalRepository.findAll(it) }
             .groupingBy { it.amount.currency }
             .aggregate { _, accumulator: Amount?, element, _ -> element.amount + accumulator }
             .map {

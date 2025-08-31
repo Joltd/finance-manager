@@ -2,7 +2,7 @@ import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { Account } from '@/types/account'
 import { cn } from '@/lib/utils'
 import { ImportDataOperationLabel } from '@/components/import-data/import-data-operation-label'
-import { GripVerticalIcon, Link2Icon, LinkIcon, UnlinkIcon } from 'lucide-react'
+import { CheckIcon, GripVerticalIcon, LinkIcon, UnlinkIcon } from 'lucide-react'
 import { Pointable } from '@/components/common/pointable'
 import { FC, memo, MouseEvent } from 'react'
 import {
@@ -13,8 +13,10 @@ import { Operation } from '@/types/operation'
 import { useImportDataOperationSheetStore } from '@/components/import-data/import-data-operation-sheet'
 import { RatingIcon } from '@/components/common/rating-icon'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
+import { useApproveAction, useUnlinkAction } from '@/components/import-data/actions'
+import { EmbeddingLabel } from '@/components/common/embedding-label'
 import { Button } from '@/components/ui/button'
-import { useUnlinkAction } from '@/components/import-data/actions'
+import { hoveredIconClass, hoverGroup, mainIconClass } from '@/components/common/hoverable-icon'
 
 const rowStyle = 'grid items-center grid-cols-[minmax(0,_1fr)_64px_minmax(0,_1fr)] my-1'
 
@@ -49,6 +51,7 @@ export const ImportDataEntryBrowserRow = memo(
       disabled,
     })
     const unlink = useUnlinkAction()
+    const approve = useApproveAction()
 
     const suggested = suggestions?.find((it) => it.selected)
     const actualOperation = operation || suggested
@@ -62,19 +65,22 @@ export const ImportDataEntryBrowserRow = memo(
       }
     }
 
-    const handleUnlink = (event: MouseEvent) => {
-      if (!event.ctrlKey) {
-        event.stopPropagation()
-        unlink.perform(entry.id as any)
-      }
+    const handleUnlink = () => {
+      unlink.perform(entry.id)
+    }
+
+    const handleApprove = () => {
+      approve.perform(entry.id)
     }
 
     return (
-      <Pointable className={rowStyle} selected={selected} disabled={disabled} onClick={handleClick}>
-        <div
-          ref={setNodeRef}
+      <div className={rowStyle}>
+        <Pointable
+          ref={!actualOperation ? setNodeRef : undefined}
+          disabled={disabled}
+          onClick={handleClick}
           className={cn(
-            'flex gap-2 col-start-1 truncate py-1',
+            'flex gap-2 col-start-1 truncate py-1 h-8',
             !!suggestions.length && !operation && 'text-info',
             isOver && 'outline-2 outline-dotted outline-accent-foreground rounded-sm',
           )}
@@ -88,30 +94,40 @@ export const ImportDataEntryBrowserRow = memo(
           ) : (
             <div className="text-muted">New...</div>
           )}
-          {!!suggestions.length && !operation && (
-            <>
-              <div className="grow" />
-            </>
-          )}
-        </div>
+        </Pointable>
         <div className="col-start-2 justify-self-center">
           {linked ? (
-            <LinkIcon className="text-green-500" onClick={handleUnlink} />
-          ) : // <UnlinkIcon className="text-green-500 absolute hidden hover:visible" />
-          suggested ? (
-            <RatingIcon score={suggested.distance} rating={suggested.rating} />
+            <Button variant="ghost" size="sm" onClick={handleUnlink} className={hoverGroup}>
+              <LinkIcon className={cn('text-green-500', mainIconClass)} />
+              <UnlinkIcon className={cn('text-green-500', hoveredIconClass)} />
+            </Button>
+          ) : suggested ? (
+            <Button variant="ghost" size="sm" onClick={handleApprove} className={hoverGroup}>
+              <RatingIcon
+                score={suggested.distance}
+                rating={suggested.rating}
+                className={mainIconClass}
+              />
+              <CheckIcon className={cn('text-green-500', hoveredIconClass)} />
+            </Button>
           ) : null}
         </div>
         {parsed && (
-          <div className="col-start-3 truncate py-1">
-            <ImportDataOperationLabel
-              {...parsed}
-              relatedAccount={relatedAccount}
-              className={cn('min-w-0 shrink overflow-hidden', !visible && 'line-through')}
-            />
-          </div>
+          <Pointable
+            selected={selected}
+            disabled={disabled}
+            onClick={handleClick}
+            className="col-start-3 truncate py-1"
+          >
+            <EmbeddingLabel embedding={parsed.hint} hideCopy />
+            {/*<ImportDataOperationLabel*/}
+            {/*  {...parsed}*/}
+            {/*  relatedAccount={relatedAccount}*/}
+            {/*  className={cn('min-w-0 shrink overflow-hidden', !visible && 'line-through')}*/}
+            {/*/>*/}
+          </Pointable>
         )}
-      </Pointable>
+      </div>
     )
   },
 )
@@ -170,10 +186,15 @@ export const ImportDataEntryBrowserOperationRow: FC<ImportDataEntryBrowserOperat
             relatedAccount={relatedAccount}
             className={cn('min-w-0 shrink grow overflow-hidden', !visible && 'line-through')}
           />
-          <div ref={setActivatorNodeRef} {...listeners} {...attributes}>
-            <GripVerticalIcon />
-          </div>
         </Pointable>
+        <div
+          ref={setActivatorNodeRef}
+          {...listeners}
+          {...attributes}
+          className="col-start-2 justify-self-center"
+        >
+          <GripVerticalIcon />
+        </div>
       </div>
     )
   },

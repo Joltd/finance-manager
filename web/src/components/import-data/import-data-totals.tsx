@@ -1,5 +1,5 @@
 import { AmountLabel } from '@/components/common/amount-label'
-import { Fragment, useEffect } from 'react'
+import { Fragment, useEffect, useMemo } from 'react'
 import { EditIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ImportDataTotal } from '@/types/import-data'
@@ -11,6 +11,8 @@ import { Account } from '@/types/account'
 import { Spinner } from '@/components/ui/spinner'
 import { ErrorLabel } from '@/components/common/error-label'
 import { Amount, amount, minus, plus } from '@/types/common/amount'
+import { subscribeSse } from '@/lib/notification'
+import { balanceEvents } from '@/api/balance'
 
 export interface ImportDataTotalsProps {
   importDataId: string
@@ -23,11 +25,18 @@ export function ImportDataTotals({ importDataId, account, totals = [] }: ImportD
 
   useEffect(() => {
     balance.fetch()
+
+    return subscribeSse(balanceEvents.root, {}, () => balance.fetch())
   }, [])
 
-  const getCurrentBalance = (currency: string): Amount | undefined =>
-    balance.data?.find((it) => it.account.id === account.id && it.amount.currency === currency)
-      ?.amount
+  const balances = useMemo(() => {
+    const currencies = totals?.map((it) => it.currency) || []
+    const result: Record<string, Amount> = {}
+    balance.data
+      ?.filter((it) => it.account.id === account.id && currencies.includes(it.amount.currency))
+      .forEach((it) => (result[it.amount.currency] = it.amount))
+    return result
+  }, [balance.data])
 
   return !totals?.length ? (
     <div className="text-muted">No totals</div>
@@ -46,7 +55,7 @@ export function ImportDataTotals({ importDataId, account, totals = [] }: ImportD
           key={it.currency}
           importDataId={importDataId}
           currency={it.currency}
-          operation={getCurrentBalance(it.currency)}
+          operation={balances[it.currency]}
           suggested={it.suggested}
           actual={it.actual}
         />

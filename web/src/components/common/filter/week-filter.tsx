@@ -19,7 +19,7 @@ export interface WeekFilterProps extends FilterPrimitiveProps {
 export function WeekFilter({ from, to, value, onChange }: WeekFilterProps) {
   const [opened, setOpened] = useState(false)
   const actualFrom = from ? asMonday(from) : undefined
-  const actualTo = to ? asMonday(to) : undefined
+  const actualTo = to ? add(asMonday(to), { weeks: 1 }) : undefined
 
   const selected = (date: any) => {
     return !!value?.from && isWithinInterval(asUtc(date), asWeek(value.from))

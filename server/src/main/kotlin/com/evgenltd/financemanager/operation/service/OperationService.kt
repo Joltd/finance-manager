@@ -73,6 +73,16 @@ class OperationService(
     }
 
     @Transactional
+    fun saveInternal(operations: List<Operation>): List<UUID> = operationRepository.saveAll(operations)
+        .also { saved ->
+            saved.map { operationConverter.toRecord(it) }
+                .map { OperationEventEntry(null, it) }
+                .let { OperationEvent(it) }
+                .let { notifyChanged(it) }
+        }
+        .map { it.id!! }
+
+    @Transactional
     fun delete(id: UUID) {
         operationRepository.find(id)
             .also { operationRepository.delete(it) }

@@ -8,9 +8,10 @@ import { Embedding } from '@/types/common/embedding'
 
 export interface EmbeddingLabelProps {
   embedding?: Embedding
+  hideCopy?: boolean
 }
 
-export function EmbeddingLabel({ embedding }: EmbeddingLabelProps) {
+export function EmbeddingLabel({ embedding, hideCopy }: EmbeddingLabelProps) {
   const getVector = useRequest(embeddingUrls.vector, { method: 'GET' })
 
   const handleCopyVector = () => {
@@ -27,9 +28,17 @@ export function EmbeddingLabel({ embedding }: EmbeddingLabelProps) {
     <div className="flex items-center gap-2 truncate">
       {embedding?.input ? <Shorten text={embedding?.input} /> : <div>No input</div>}
       <div className="grow" />
-      <Button type="button" variant="ghost" size="sm" onClick={handleCopyVector}>
-        <CopyIcon />
-      </Button>
+      {!hideCopy && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleCopyVector}
+          className="size-6"
+        >
+          <CopyIcon />
+        </Button>
+      )}
     </div>
   )
 }

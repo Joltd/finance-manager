@@ -32,7 +32,7 @@ export function ImportDataGroupRow({ total }: ImportDataGroupTotalProps) {
       <div>
         <Tooltip>
           <TooltipTrigger>
-            <AmountLabel amount={operationAndSuggested} />
+            <AmountLabel amount={operationAndSuggested} className="ml-4" />
           </TooltipTrigger>
           {operationAndSuggested && (
             <TooltipContent className="grid grid-cols-2 gap-2">
@@ -65,7 +65,7 @@ export function ImportDataGroupRow({ total }: ImportDataGroupTotalProps) {
       ) : (
         <div />
       )}
-      <AmountLabel amount={total.parsed} className="ml-6" />
+      <AmountLabel amount={total.parsed} />
     </div>
   )
 }

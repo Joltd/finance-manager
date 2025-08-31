@@ -16,21 +16,35 @@ export interface ActionBarProps {
 
 export function ActionBar({ open, className, children }: ActionBarProps) {
   const [container, setContainer] = useState<HTMLElement | null>(null)
+  const [available, setAvailable] = useState(false)
+  const [show, setShow] = useState(false)
 
   useEffect(() => {
     setContainer(document.getElementById(ID))
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      setAvailable(true)
+      setTimeout(() => setShow(true), 0)
+    } else {
+      setShow(false)
+      setTimeout(() => setAvailable(false), 500)
+    }
+  }, [open])
+
   return (
-    <Portal
-      container={container}
-      className={cn(
-        'absolute bottom-4 left-1/2 translate-x-[-50%] z-50 duration-300',
-        open ? 'translate-y-0' : 'translate-y-[200%]',
-      )}
-    >
-      <div className={cn('flex bg-sidebar gap-2 p-2 rounded-md ', className)}>{children}</div>
-    </Portal>
+    available && (
+      <Portal
+        container={container}
+        className={cn(
+          'absolute bottom-4 left-1/2 translate-x-[-50%] translate-y-[200%] z-50 duration-300',
+          show && 'translate-y-0',
+        )}
+      >
+        <div className={cn('flex bg-sidebar gap-2 p-2 rounded-md ', className)}>{children}</div>
+      </Portal>
+    )
   )
 }
 
@@ -49,7 +63,7 @@ export function ActionBarButton({ hint, icon, available, perform }: ActionBarBut
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" disabled={!available} onClick={perform}>
+        <Button variant="ghost" disabled={!available} onClick={() => perform()}>
           {icon}
         </Button>
       </TooltipTrigger>

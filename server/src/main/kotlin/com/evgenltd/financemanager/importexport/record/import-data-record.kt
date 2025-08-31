@@ -99,6 +99,10 @@ enum class SuggestionRating {
     POOR,
 }
 
+data class ImportDataEntryApproveSuggestionRequest(
+    val entryIds: List<UUID>,
+)
+
 data class ImportDataParsedEntry(
     val rawEntries: List<String> = emptyList(),
     val date: LocalDate,

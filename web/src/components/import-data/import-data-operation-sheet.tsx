@@ -1,4 +1,11 @@
-import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
 import {
   OperationForm,
@@ -136,13 +143,15 @@ export function ImportDataOperationSheet({
               />
             </div>
             <SheetFooter>
+              <SheetClose asChild>
+                <Button variant="secondary">Cancel</Button>
+              </SheetClose>
               <Button
                 type="submit"
                 disabled={disabled || operationRequest.loading || operationLinkRequest.loading}
               >
                 Save
               </Button>
-              <Button variant="secondary">Cancel</Button>
             </SheetFooter>
           </form>
         </Form>
