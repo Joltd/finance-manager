@@ -14,7 +14,7 @@ export function DataSection<T>({ store, children }: DataSection<T>) {
   return store.loading && !store.dataFetched ? (
     <Spinner className="m-6" />
   ) : store.error ? (
-    <Alert variant="destructive" className="m-6">
+    <Alert variant="destructive">
       <AlertCircleIcon />
       <AlertTitle>{store.error}</AlertTitle>
     </Alert>

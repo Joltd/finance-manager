@@ -28,6 +28,12 @@ import { cn } from '@/lib/utils'
 import { NotificationList } from '@/components/common/notification-list'
 import { SettingDialog } from '@/components/setting/setting-dialog'
 import { subscribeSse } from '@/lib/notification'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function AppSidebar() {
   const { data, fetch } = useImportDataListStore('data', 'fetch') // todo support loadig, error
@@ -75,6 +81,21 @@ export function AppSidebar() {
                   <a href={`/reference`}>Reference</a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton>Reports</SidebarMenuButton>
+                  </SidebarMenuItem>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem>
+                    <a href={'/report/top-flow'}>Top flow</a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <a href={'/report/expense-income'}>Expense income</a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

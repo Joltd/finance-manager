@@ -51,37 +51,29 @@ export function trim(value?: string, maxLength: number = 50): string | undefined
   return value
 }
 
-export function formatDate(date?: Date): string | undefined {
-  return date ? format(date, 'yyyy-MM-dd') : undefined
-}
-
-export function parseDate(date?: string): Date | undefined {
-  return date ? parse(date, 'yyyy-MM-dd', new Date()) : new Date()
-}
-
-export function prepareRange(from?: Date, to?: Date): RangeValue<string | undefined> {
-  if (!from || !to) {
-    return {
-      from: formatDate(from),
-      to: formatDate(to),
-    }
-  }
-
-  let actualFrom = from
-  let actualTo = to
-
-  if (isAfter(to, from)) {
-    // ignore
-  } else if (isAfter(from, to)) {
-    actualFrom = to
-    actualTo = from
-  } else {
-    actualFrom = from
-    actualTo = addDays(from, 1)
-  }
-
-  return {
-    from: formatDate(actualFrom),
-    to: formatDate(actualTo),
-  }
-}
+// export function prepareRange(from?: Date, to?: Date): RangeValue<string | undefined> {
+//   if (!from || !to) {
+//     return {
+//       from: formatDate(from),
+//       to: formatDate(to),
+//     }
+//   }
+//
+//   let actualFrom = from
+//   let actualTo = to
+//
+//   if (isAfter(to, from)) {
+//     // ignore
+//   } else if (isAfter(from, to)) {
+//     actualFrom = to
+//     actualTo = from
+//   } else {
+//     actualFrom = from
+//     actualTo = addDays(from, 1)
+//   }
+//
+//   return {
+//     from: formatDate(actualFrom),
+//     to: formatDate(actualTo),
+//   }
+// }

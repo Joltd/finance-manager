@@ -2,7 +2,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { useState } from 'react'
-import { formatDate, parseDate } from '@/lib/utils'
+import { formatDate, parseDate } from '@/lib/date'
 
 export interface DateInputProps {
   placeholder?: string

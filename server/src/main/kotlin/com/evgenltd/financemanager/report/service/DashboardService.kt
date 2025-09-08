@@ -100,8 +100,7 @@ class DashboardService(
     }
 
     private fun groupBalances(targetCurrency: String, balances: List<Balance>): List<GroupBalanceRecord> {
-        val rates = exchangeRateService.actualRates()
-        val rateIndex = ExchangeRateIndex(targetCurrency, rates)
+        val rateIndex = exchangeRateService.actualRateIndex(targetCurrency)
 
         val groupBalances = balances.map {
             it.account to rateIndex.toTarget(it.amount)

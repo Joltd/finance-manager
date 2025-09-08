@@ -5,6 +5,8 @@ import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.repository.contains
+import com.evgenltd.financemanager.common.service.withMonday
+import com.evgenltd.financemanager.common.service.withNextMonday
 import com.evgenltd.financemanager.common.util.*
 import com.evgenltd.financemanager.exchangerate.converter.ExchangeRateConverter
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRateHistory
@@ -15,9 +17,11 @@ import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepositor
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 
 @Service
 class ExchangeRateService(
@@ -49,8 +53,9 @@ class ExchangeRateService(
         return ExchangeRateHistoryIndex(targetCurrency, rates)
     }
 
-    fun historyRates(range: Range<LocalDate>, currencies: List<String>): Map<LocalDate, Map<String, BigDecimal>> =
-        ((ExchangeRateHistory::date between range) and (ExchangeRateHistory::currency contains currencies))
+    fun historyRates(range: Range<LocalDate>, currencies: List<String>): Map<LocalDate, Map<String, BigDecimal>> {
+        val actualRange = Range(range.from?.withMonday(), range.to?.withNextMonday())
+        return ((ExchangeRateHistory::date between actualRange) and (ExchangeRateHistory::currency contains currencies))
             .let { exchangeRateHistoryRepository.findAll(it) }
             .groupBy { it.date }
             .map { (date, rates) ->
@@ -58,8 +63,8 @@ class ExchangeRateService(
             }
             .associate { it }
             .also { index ->
-                generateSequence(range.from) { it.plusDays(1) }
-                    .takeWhile { it < range.to }
+                generateSequence(actualRange.from) { it.plusWeeks(1) }
+                    .takeWhile { it < actualRange.to }
                     .toList()
                     .onEach { date ->
                         val currencyWithoutRates = currencies - (index[date]?.keys ?: emptySet()).toSet()
@@ -68,6 +73,7 @@ class ExchangeRateService(
                         }
                     }
             }
+    }
 
 //    fun commonRates(currencies: List<String>) {
 //        ((ExchangeRate::date between (LocalDate.now().minusDays(DELTA_DAY) until LocalDate.now())) and

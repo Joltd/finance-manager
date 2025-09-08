@@ -1,3 +1,4 @@
+'use client'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,6 +75,8 @@ export function Filter({ value, onChange, className, children }: FilterProps) {
     })
   }
 
+  const withDefinitions = !!definitions.filter((it) => !it.alwaysVisible).length
+
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       {definitions
@@ -88,6 +91,7 @@ export function Filter({ value, onChange, className, children }: FilterProps) {
             {React.cloneElement(it.component as any, {
               value: value?.[it.name],
               onChange: (value: any) => handleFilterChange(it.name, value),
+              className: it.alwaysVisible ? 'rounded-l-none' : 'rounded-none',
             })}
             {!it.alwaysVisible && (
               <Button
@@ -101,22 +105,24 @@ export function Filter({ value, onChange, className, children }: FilterProps) {
             )}
           </div>
         ))}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="sm" variant="outline">
-            <ListFilterPlusIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {definitions
-            .filter((it) => !it.alwaysVisible)
-            .map((it) => (
-              <DropdownMenuItem key={it.name} onClick={() => handleShow(it)}>
-                {it.label}
-              </DropdownMenuItem>
-            ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {withDefinitions && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline">
+              <ListFilterPlusIcon />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {definitions
+              .filter((it) => !it.alwaysVisible)
+              .map((it) => (
+                <DropdownMenuItem key={it.name} onClick={() => handleShow(it)}>
+                  {it.label}
+                </DropdownMenuItem>
+              ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   )
 }

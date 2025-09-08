@@ -96,6 +96,14 @@ infix fun <E> KProperty1<E, Account?>.account(id: UUID?): Specification<E> = val
     }
 }
 
+infix fun <E> KProperty1<E, Account?>.accounts(accounts: List<UUID>?): Specification<E> = valueNonNull(accounts) {
+    Specification<E> { root, _, builder ->
+        builder.`in`(root.get<Account>(name).get<UUID>(Account::id.name)).also { expression ->
+            it.onEach { expression.value(it) }
+        }
+    }
+}
+
 infix fun <E> KProperty1<E, Account?>.accountTypes(types: List<AccountType>?): Specification<E> = valueNonNull(types) {
     Specification<E> { root, _, builder ->
         builder.`in`(root.get<Account>(name).get<AccountType>(Account::type.name)).also { expression ->

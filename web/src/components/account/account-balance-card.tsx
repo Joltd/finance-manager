@@ -4,11 +4,12 @@ import { EmptyLabel } from '@/components/common/empty-label'
 import { Shorten } from '@/components/common/shorten'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Button } from '@/components/ui/button'
-import { cn, formatDate } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { AccountReference } from '@/types/account'
 import { ValidityIcon } from '@/components/common/validity-icon'
 import { differenceInDays, parseISO } from 'date-fns'
 import { Amount } from '@/types/common/amount'
+import { formatDate } from '@/lib/date'
 
 export interface AccountBalanceCardProps {
   account: AccountReference

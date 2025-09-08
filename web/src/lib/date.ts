@@ -1,13 +1,22 @@
 import { RangeValue } from '@/types/common'
-import { add, format, Interval, startOfWeek, sub } from 'date-fns'
+import { add, DateArg, format, Interval, parse, startOfMonth, startOfWeek, sub } from 'date-fns'
+import { minus } from '@/types/common/amount'
 
-export function asDate(date: Date | string): Date {
-  return typeof date === 'string' ? new Date(date) : date
+export function asDate(date?: Date | string): Date {
+  return date === undefined ? new Date() : typeof date === 'string' ? new Date(date) : date
 }
 
-export function asUtc(date: Date | string): Date {
+export function asUtc(date?: Date | string): Date {
   const actualDate = asDate(date)
   return new Date(Date.UTC(actualDate.getFullYear(), actualDate.getMonth(), actualDate.getDate()))
+}
+
+export function formatDate(date?: DateArg<Date>): string | undefined {
+  return date ? format(date, 'yyyy-MM-dd') : undefined
+}
+
+export function parseDate(date?: string): Date | undefined {
+  return date ? parse(date, 'yyyy-MM-dd', new Date()) : new Date()
 }
 
 export function asMonday(date: Date | string) {
@@ -21,11 +30,29 @@ export function asWeek(day: Date | string): Interval {
   return { start, end }
 }
 
+export function currentAndPreviousMonths(count: number): Interval {
+  const date = asUtc()
+  const end = add(startOfMonth(date), { months: 1 })
+  const start = sub(end, { months: count })
+  return {
+    start,
+    end,
+  }
+}
+
 export function asDateRangeValue(interval: Interval): RangeValue<string> {
   return {
-    from: format(interval.start, 'yyyy-MM-dd'),
-    to: format(interval.end, 'yyyy-MM-dd'),
+    from: formatDate(interval.start),
+    to: formatDate(interval.end),
   }
+}
+
+export function formatRange(range?: RangeValue<string>): string {
+  if (!range?.from || !range?.to) {
+    return 'Invalid range'
+  }
+
+  return `${formatDate(range.from)} - ${formatDate(range.to)}`
 }
 
 export function formatWeek(week?: RangeValue<string>): string {
@@ -33,5 +60,5 @@ export function formatWeek(week?: RangeValue<string>): string {
     return 'Invalid week'
   }
 
-  return `${format(week.from, 'yyyy-MM-dd')} - ${format(sub(week.to, { days: 1 }), 'yyyy-MM-dd')}`
+  return `${formatDate(week.from)} - ${formatDate(sub(week.to, { days: 1 }))}`
 }

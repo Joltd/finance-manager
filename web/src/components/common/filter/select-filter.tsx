@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { FilterPrimitiveProps } from '@/types/common/filter'
+import { cn } from '@/lib/utils'
 
 export interface SelectFilterProps extends FilterPrimitiveProps {
   name: string
@@ -14,9 +15,10 @@ export interface SelectFilterProps extends FilterPrimitiveProps {
   value?: any
   onChange?: (value: any) => void
   children?: React.ReactNode
+  className?: string
 }
 
-export function SelectFilter({ value, onChange, children }: SelectFilterProps) {
+export function SelectFilter({ value, onChange, children, className }: SelectFilterProps) {
   const definitions = useMemo(() => {
     return React.Children.toArray(children)
       .filter((it) => React.isValidElement(it))
@@ -32,7 +34,7 @@ export function SelectFilter({ value, onChange, children }: SelectFilterProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" variant="outline" className="rounded-none">
+        <Button size="sm" variant="outline" className={className}>
           {definitions.find((it) => it.value === value)?.label || 'Invalid value'}
         </Button>
       </DropdownMenuTrigger>
