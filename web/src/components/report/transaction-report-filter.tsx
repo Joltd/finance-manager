@@ -1,3 +1,4 @@
+'use client'
 import { Filter } from '@/components/common/filter/filter'
 import { AccountType } from '@/types/account'
 import { SelectFilter, SelectFilterOption } from '@/components/common/filter/select-filter'
