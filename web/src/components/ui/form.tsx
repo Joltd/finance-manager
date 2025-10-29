@@ -15,7 +15,7 @@ import {
 
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
-import { ErrorLabel } from '@/components/common/error-label'
+import { ErrorLabel } from '@/components/common/typography/error-label'
 
 const Form = FormProvider
 

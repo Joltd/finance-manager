@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.operation.record.OperationFilter
 import com.evgenltd.financemanager.operation.record.OperationGroupRecord
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationService
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -21,19 +22,24 @@ class OperationController(
     private val operationService: OperationService
 ) {
 
-    @GetMapping("/operation")
+    @GetMapping("/api/v1/operation")
+    @PreAuthorize("hasRole('USER')")
     fun list(filter: OperationFilter): List<OperationGroupRecord> = operationService.list(filter)
 
-    @GetMapping("/operation/{id}")
+    @GetMapping("/api/v1/operation/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun byId(@PathVariable("id") id: UUID): OperationRecord = operationService.byId(id)
 
-    @PostMapping("/operation")
+    @PostMapping("/api/v1/operation")
+    @PreAuthorize("hasRole('USER')")
     fun update(@RequestBody record: OperationRecord) = operationService.update(record)
 
-    @DeleteMapping("/operation/{id}")
+    @DeleteMapping("/api/v1/operation/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun delete(@PathVariable("id") id: UUID) = operationService.delete(id)
 
-    @DeleteMapping("/operation")
+    @DeleteMapping("/api/v1/operation")
+    @PreAuthorize("hasRole('USER')")
     fun delete(@RequestBody ids: List<UUID>) = ids.forEach { delete(it) }
 
 }

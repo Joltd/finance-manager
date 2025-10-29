@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import org.hibernate.annotations.TenantId
 import java.util.*
 
 @Entity
@@ -15,6 +16,9 @@ class AccountGroup(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
+
+    @TenantId
+    var tenant: UUID? = null,
 
     var name: String,
 

@@ -24,23 +24,6 @@ class CurrencyService(
     private val currencyEventService: CurrencyEventService,
 ) {
 
-    @PostConstruct
-    fun postConstruct() {
-        if (currencyRepository.count() > 0L) {
-            return
-        }
-
-        currencyRepository.save(Currency(name = "USD", crypto = false, position = 0))
-        currencyRepository.save(Currency(name = "EUR", crypto = false, position = 3))
-        currencyRepository.save(Currency(name = "KZT", crypto = false, position = 10))
-        currencyRepository.save(Currency(name = "TRY", crypto = false, position = 10))
-        currencyRepository.save(Currency(name = "RSD", crypto = false, position = 10))
-        currencyRepository.save(Currency(name = "GEL", crypto = false, position = 1))
-        currencyRepository.save(Currency(name = "RUB", crypto = false, position = 10))
-        currencyRepository.save(Currency(name = "USDT", crypto = true, position = 2))
-        currencyRepository.save(Currency(name = "TRX", crypto = true, position = 10))
-    }
-
     fun listReference(mask: String? = null, id: UUID? = null): List<Reference> =
         ((Currency::name like mask) and  (Currency::id eq id))
             .let { currencyRepository.findAll(it, Sort.by(Currency::position.name, Currency::name.name)) }

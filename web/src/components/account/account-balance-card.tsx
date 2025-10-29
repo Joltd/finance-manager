@@ -1,15 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AmountLabel } from '@/components/common/amount-label'
-import { EmptyLabel } from '@/components/common/empty-label'
-import { Shorten } from '@/components/common/shorten'
+import { AmountLabel } from '@/components/common/typography/amount-label'
+import { Shorten } from '@/components/common/typography/shorten'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { AccountReference } from '@/types/account'
-import { ValidityIcon } from '@/components/common/validity-icon'
+import { ValidityIcon } from '@/components/common/icon/validity-icon'
 import { differenceInDays, parseISO } from 'date-fns'
 import { Amount } from '@/types/common/amount'
 import { formatDate } from '@/lib/date'
+import { DataPlaceholder } from '@/components/common/data-placeholder'
 
 export interface AccountBalanceCardProps {
   account: AccountReference
@@ -35,29 +35,25 @@ export function AccountBalanceCard({ account, balances, onClick }: AccountBalanc
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {!balances.length ? (
-          <EmptyLabel />
-        ) : (
-          <>
-            {balances.slice(0, visibleItems).map((amount) => (
-              <AmountLabel key={amount.currency} amount={amount} />
-            ))}
-            {balances.length > visibleItems && (
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Button variant="link" className="p-0 w-full justify-start">
-                    More...
-                  </Button>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-60 p-6" sideOffset={-40}>
-                  {balances.slice(visibleItems).map((amount) => (
-                    <AmountLabel key={amount.currency} amount={amount} />
-                  ))}
-                </HoverCardContent>
-              </HoverCard>
-            )}
-          </>
-        )}
+        <DataPlaceholder dataFetched data={balances}>
+          {balances.slice(0, visibleItems).map((amount) => (
+            <AmountLabel key={amount.currency} amount={amount} />
+          ))}
+          {balances.length > visibleItems && (
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="link" className="p-0 w-full justify-start">
+                  More...
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-60 p-6" sideOffset={-40}>
+                {balances.slice(visibleItems).map((amount) => (
+                  <AmountLabel key={amount.currency} amount={amount} />
+                ))}
+              </HoverCardContent>
+            </HoverCard>
+          )}
+        </DataPlaceholder>
       </CardContent>
     </Card>
   )

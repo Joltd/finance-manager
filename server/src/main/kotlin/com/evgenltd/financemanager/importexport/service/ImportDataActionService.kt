@@ -31,6 +31,7 @@ import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
 import com.evgenltd.financemanager.common.repository.isNotNull
 import com.evgenltd.financemanager.common.repository.isNull
+import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.isZero
 import com.evgenltd.financemanager.importexport.record.OperationKey
@@ -264,7 +265,7 @@ class ImportDataActionService(
 
         val alreadyLinked = importDataEntryRepository.existsByImportDataAndOperationId(importData, operationId)
         if (alreadyLinked) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation already linked to another entry")
+            throw badRequestException("Operation already linked to another entry")
         }
 
         val operation = operationRepository.find(operationId)

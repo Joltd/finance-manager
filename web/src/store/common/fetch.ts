@@ -7,8 +7,8 @@ import { produce } from 'immer'
 export interface FetchStoreState<T> {
   loading: boolean
   dataFetched: boolean
-  error: string | null
-  data: T | null
+  error?: string
+  data?: T
   pathParams?: Record<string, any>
   setPathParams: (pathParams: Record<string, any>) => void
   updatePathParams: (pathParams: Record<string, any>) => void
@@ -23,7 +23,7 @@ export interface FetchStoreState<T> {
 export const createFetchStore = <T>(path: string) =>
   createStore<FetchStoreState<T>>((set, get) => {
     const fetch = async () => {
-      set({ error: null, loading: !get().dataFetched })
+      set({ error: undefined, loading: !get().dataFetched })
       try {
         const preparedPath = fillPathParams(path, get().pathParams)
 
@@ -31,13 +31,13 @@ export const createFetchStore = <T>(path: string) =>
           params: get().queryParams,
         })
 
-        if (response.status !== 200) {
-          set({ error: 'Something wrong' })
-        } else if (!response.data.success) {
-          set({ error: response.data.error })
+        if (response.status !== 200 || !response.data.success) {
+          set({ error: response.data.error || 'Something wrong' })
         } else {
           set({ dataFetched: true, data: response.data.body })
         }
+      } catch (error: any) {
+        set({ error: error.response.data.error || 'Something wrong' })
       } finally {
         if (get().loading) {
           set({ loading: false })
@@ -56,11 +56,23 @@ export const createFetchStore = <T>(path: string) =>
       }
     }
 
+    const reset = () =>
+      set({
+        loading: false,
+        dataFetched: false,
+        error: undefined,
+        data: undefined,
+        pathParams: {},
+        queryParams: {},
+      })
+
+    fetchStoreResetCallbacks.push(reset)
+
     return {
       loading: false,
       dataFetched: false,
-      error: null,
-      data: null,
+      error: undefined,
+      data: undefined,
       pathParams: {},
       setPathParams: (pathParams: Record<string, any>) => set({ pathParams }),
       updatePathParams: (pathParams: Record<string, any>) =>
@@ -71,15 +83,15 @@ export const createFetchStore = <T>(path: string) =>
       updateQueryParams: (queryParams: Record<string, any>) =>
         set({ queryParams: { ...get().queryParams, ...flatten(queryParams) } }),
       fetch,
-      reset: () =>
-        set({
-          loading: false,
-          dataFetched: false,
-          error: null,
-          data: null,
-          pathParams: {},
-          queryParams: {},
-        }),
+      reset,
       applyPatch,
     }
   })
+
+const fetchStoreResetCallbacks: (() => void)[] = []
+
+export const resetFetchStores = () => {
+  for (const reset of fetchStoreResetCallbacks) {
+    reset()
+  }
+}

@@ -17,21 +17,15 @@ import { createStore } from 'zustand'
 import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { Form } from '@/components/ui/form'
 import { ImportDataOperationLabel } from '@/components/import-data/import-data-operation-label'
-import { Account } from '@/types/account'
 import { Pointable } from '@/components/common/pointable'
 import { openStoreSlice, OpenStoreState } from '@/store/common/open'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { useRequest } from '@/hooks/use-request'
 import { operationUrls } from '@/api/operation'
 import { importDataUrls } from '@/api/import-data'
-import { useEffect, useState } from 'react'
-import { RatingIcon } from '@/components/common/rating-icon'
-
-export interface ImportDataOperationSheetProps {
-  importDataId: string
-  relatedAccount: Account
-  disabled: boolean
-}
+import { useEffect } from 'react'
+import { RatingIcon } from '@/components/common/icon/rating-icon'
+import { useImportDataStore } from '@/store/import-data'
 
 export interface ImportDataOperationSheetStoreState extends OpenStoreState {
   entry?: ImportDataEntry
@@ -52,11 +46,8 @@ export const useImportDataOperationSheetStore = <
   ...fields: K[]
 ) => useStoreSelect<ImportDataOperationSheetStoreState, K>(importDataOperationSheetStore, ...fields)
 
-export function ImportDataOperationSheet({
-  importDataId,
-  relatedAccount,
-  disabled,
-}: ImportDataOperationSheetProps) {
+export function ImportDataOperationSheet() {
+  const importData = useImportDataStore('data')
   const { opened, close, entry } = useImportDataOperationSheetStore('opened', 'close', 'entry')
   const { form, setData, clear } = useOperationForm()
   const operationRequest = useRequest(operationUrls.root, { noErrorToast: true })
@@ -76,7 +67,7 @@ export function ImportDataOperationSheet({
 
   const onSubmit = (data: OperationFormData) => {
     if (!!entry?.id) {
-      operationLinkRequest.submit(data, { id: importDataId, entryId: entry?.id })
+      operationLinkRequest.submit(data, { id: importData.data?.id, entryId: entry?.id })
     } else {
       operationRequest.submit(data)
     }
@@ -118,7 +109,7 @@ export function ImportDataOperationSheet({
                         key={index}
                         className="flex gap-2"
                         selected={it.selected}
-                        disabled={disabled}
+                        disabled={importData.data?.progress}
                         onClick={() => handleSelectSuggestion(it)}
                       >
                         <RatingIcon rating={it.rating} score={it.distance} />
@@ -128,7 +119,7 @@ export function ImportDataOperationSheet({
                           amountFrom={it.amountFrom}
                           accountTo={it.accountTo}
                           amountTo={it.amountTo}
-                          relatedAccount={relatedAccount}
+                          relatedAccount={importData.data?.account}
                           amountFieldTight
                         />
                       </Pointable>
@@ -148,7 +139,11 @@ export function ImportDataOperationSheet({
               </SheetClose>
               <Button
                 type="submit"
-                disabled={disabled || operationRequest.loading || operationLinkRequest.loading}
+                disabled={
+                  importData.data?.progress ||
+                  operationRequest.loading ||
+                  operationLinkRequest.loading
+                }
               >
                 Save
               </Button>

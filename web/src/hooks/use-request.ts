@@ -13,11 +13,12 @@ export const useRequest = (path: string, options?: RequestOptions) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const onError = (error: string) => {
+  const handleError = (error: string) => {
     if (!options?.noErrorToast) {
       toast(error) // todo link to notification list
     }
     setError(error)
+    return Promise.reject(error)
   }
 
   const submit = async (data: Record<string, any>, pathParams?: Record<string, any>) => {
@@ -31,21 +32,16 @@ export const useRequest = (path: string, options?: RequestOptions) => {
         data: data,
         headers: options?.multipart ? { 'Content-Type': 'multipart/form-data' } : undefined,
       })
-      if (response.status !== 200) {
-        onError('Something wrong')
-      } else if (!response.data.success) {
-        onError(response.data.error)
+      if (response.status !== 200 || !response.data.success) {
+        return handleError(response.data.error || 'Something wrong')
       } else {
         return response.data.body
       }
-    } catch (e: any) {
-      onError(e?.message || 'Something wrong')
-      throw e
+    } catch (error: any) {
+      return handleError(error.response.data.error || 'Something wrong')
     } finally {
       setLoading(false)
     }
-
-    throw new Error(error)
   }
 
   const reset = () => {

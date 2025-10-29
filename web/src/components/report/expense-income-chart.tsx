@@ -3,7 +3,7 @@ import { Bar, BarChart, XAxis } from 'recharts'
 import { ExpenseIncomeEntry } from '@/types/report'
 import { format } from 'date-fns'
 import * as React from 'react'
-import { AmountLabel } from '@/components/common/amount-label'
+import { AmountLabel } from '@/components/common/typography/amount-label'
 
 export interface ExpenseIncomeChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: ExpenseIncomeEntry[]

@@ -11,7 +11,7 @@ class ExchangeRateProviderResolver(
 ) : Loggable() {
 
     fun resolveFiat(): ExchangeRateProvider? {
-        val provider = settingService.fiatExchangeRateProvider()
+        val provider = settingService.loadSystem().fiatExchangeRateProvider
         return providers.firstOrNull { it.name == provider }
             .also {
                 if (it == null) {
@@ -21,7 +21,7 @@ class ExchangeRateProviderResolver(
     }
 
     fun resolveCrypto(): ExchangeRateProvider? {
-        val provider = settingService.cryptoExchangeRateProvider()
+        val provider = settingService.loadSystem().cryptoExchangeRateProvider
         return providers.firstOrNull { it.name == provider }
             .also {
                 if (it == null) {

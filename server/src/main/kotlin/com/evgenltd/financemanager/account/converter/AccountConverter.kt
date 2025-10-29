@@ -36,6 +36,8 @@ class AccountConverter(
         reviseDate = entity.reviseDate,
     )
 
+    fun toEntity(record: AccountReferenceRecord): Account = accountRepository.find(record.id)
+
     fun fillEntity(entity: Account?, record: AccountRecord): Account = entity?.also {
         it.name = record.name
         it.type = record.type

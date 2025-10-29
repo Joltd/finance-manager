@@ -1,4 +1,4 @@
-import { CurrencyInput } from '@/components/common/currency-input'
+import { CurrencyInput } from '@/components/common/input/currency-input'
 import { FilterPrimitiveProps } from '@/types/common/filter'
 
 export interface CurrencyFilterProps extends FilterPrimitiveProps {}

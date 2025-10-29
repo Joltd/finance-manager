@@ -10,7 +10,6 @@ import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.repository.isNotZero
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
-import com.evgenltd.financemanager.exchangerate.record.ExchangeRateIndex
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.report.record.DashboardRecord
@@ -30,7 +29,10 @@ class DashboardService(
 
     fun load(): DashboardRecord {
 
-        val targetCurrency = settingService.operationDefaultCurrency() ?: BASE_CURRENCY
+        val targetCurrency = settingService.load()
+            .operationDefaultCurrency
+            ?.name
+            ?: BASE_CURRENCY
 
         val balances = balanceRepository.findAll(Balance::amount.isNotZero())
         
@@ -118,8 +120,9 @@ class DashboardService(
 
         val otherGroupBalance = groupBalances.drop(4)
             .map { it.second }
-            .reduce { acc, amount -> acc + amount }
-            .let { listOf(GroupBalanceRecord(null, it)) }
+            .reduceOrNull { acc, amount -> acc + amount }
+            ?.let { listOf(GroupBalanceRecord(null, it)) }
+            ?: emptyList()
 
         return topGroupBalances + otherGroupBalance
     }

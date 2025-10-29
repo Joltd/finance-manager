@@ -1,4 +1,4 @@
-import { ReferenceInput } from '@/components/common/reference-input'
+import { ReferenceInput } from '@/components/common/input/reference-input'
 import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountUrls } from '@/api/account'

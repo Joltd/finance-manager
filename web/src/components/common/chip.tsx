@@ -2,7 +2,7 @@ import * as React from 'react'
 import { XIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { Shorten } from '@/components/common/shorten'
+import { Shorten } from '@/components/common/typography/shorten'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 

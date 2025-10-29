@@ -3,8 +3,8 @@ import { Bar, BarChart, LabelList, XAxis } from 'recharts'
 import { TopFlowEntry } from '@/types/report'
 import { format } from 'date-fns'
 import * as React from 'react'
-import { AccountLabel } from '@/components/common/account-label'
-import { AmountLabel } from '@/components/common/amount-label'
+import { AccountLabel } from '@/components/common/typography/account-label'
+import { AmountLabel } from '@/components/common/typography/amount-label'
 
 export interface TopFlowChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: TopFlowEntry[]

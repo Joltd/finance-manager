@@ -16,6 +16,7 @@ import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryApproveSuggestionRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataFinishRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataUnlinkRequest
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -35,62 +36,75 @@ class ImportDataController(
     private val importDataProcessService: ImportDataProcessService,
 ) {
 
-    @PostMapping("/import-data/{id}/manage")
+    @PostMapping("/api/v1/import-data/{id}/manage")
+    @PreAuthorize("hasRole('USER')")
     fun importDataManage(@PathVariable id: UUID, @RequestParam progress: Boolean) {
         importDataProcessService.importDataManage(id, progress)
     }
 
-    @GetMapping("/import-data")
+    @GetMapping("/api/v1/import-data")
+    @PreAuthorize("hasRole('USER')")
     fun list(): List<Reference> = importDataService.list()
 
-    @GetMapping("/import-data/{id}")
+    @GetMapping("/api/v1/import-data/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun get(@PathVariable id: UUID): ImportDataRecord = importDataService.get(id)
 
-    @GetMapping("/import-data/{id}/entry")
+    @GetMapping("/api/v1/import-data/{id}/entry")
+    @PreAuthorize("hasRole('USER')")
     fun entryList(@PathVariable id: UUID, request: EntryFilter): List<ImportDataEntryGroupRecord> =
         importDataService.entryList(id, request)
 
-    @PostMapping("/import-data/begin")
+    @PostMapping("/api/v1/import-data/begin")
+    @PreAuthorize("hasRole('USER')")
     fun beginNewImport(@RequestPart("data") request: ImportDataCreateRequest, @RequestPart("file") file: MultipartFile): UUID {
         val importData = importDataService.save(request)
         importDataProcessService.beginNewImport(importData.id!!, file.inputStream)
         return importData.id!!
     }
 
-    @PostMapping("/import-data/{id}/actual-balance")
+    @PostMapping("/api/v1/import-data/{id}/actual-balance")
+    @PreAuthorize("hasRole('USER')")
     fun saveActualBalance(@PathVariable id: UUID, @RequestBody balance: Amount) {
         importDataProcessService.saveActualBalance(id, balance)
     }
 
-    @PostMapping("/import-data/{id}/finish")
+    @PostMapping("/api/v1/import-data/{id}/finish")
+    @PreAuthorize("hasRole('USER')")
     fun finish(@PathVariable id: UUID, @RequestBody request: ImportDataFinishRequest) {
         importDataProcessService.finish(id, request.revise)
     }
 
-    @PostMapping("/import-data/{id}/entry/link")
+    @PostMapping("/api/v1/import-data/{id}/entry/link")
+    @PreAuthorize("hasRole('USER')")
     fun linkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataLinkRequest) {
         importDataProcessService.linkOperation(id, request.entryId, request.operationId)
     }
 
-    @PostMapping("/import-data/{id}/entry/{entryId}/link")
+    @PostMapping("/api/v1/import-data/{id}/entry/{entryId}/link")
+    @PreAuthorize("hasRole('USER')")
     fun linkOperation(@PathVariable id: UUID, @PathVariable entryId: UUID, @RequestBody request: OperationRecord) {
         importDataProcessService.linkOperation(id, entryId, request)
     }
 
-    @PostMapping("/import-data/{id}/entry/unlink")
+    @PostMapping("/api/v1/import-data/{id}/entry/unlink")
+    @PreAuthorize("hasRole('USER')")
     fun unlinkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataUnlinkRequest) = importDataProcessService.unlinkOperation(id, request.entryIds)
 
-    @PostMapping("/import-data/{id}/entry/visibility")
+    @PostMapping("/api/v1/import-data/{id}/entry/visibility")
+    @PreAuthorize("hasRole('USER')")
     fun entryVisibility(@PathVariable id: UUID, @RequestBody request: ImportDataEntryVisibilityRequest) {
         importDataProcessService.entryVisibility(id, request.operations, request.entries, request.visible)
     }
 
-    @PostMapping("/import-data/{id}/entry/approve")
+    @PostMapping("/api/v1/import-data/{id}/entry/approve")
+    @PreAuthorize("hasRole('USER')")
     fun approveSuggestion(@PathVariable id: UUID, @RequestBody request: ImportDataEntryApproveSuggestionRequest) {
         importDataProcessService.approveSuggestion(id, request.entryIds)
     }
 
-    @DeleteMapping("/import-data/{id}")
+    @DeleteMapping("/api/v1/import-data/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun delete(@PathVariable id: UUID) = importDataProcessService.delete(id)
 
 }

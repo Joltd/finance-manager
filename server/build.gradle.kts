@@ -27,6 +27,9 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core:11.10.3")
     runtimeOnly("org.flywaydb:flyway-database-postgresql:11.10.3")

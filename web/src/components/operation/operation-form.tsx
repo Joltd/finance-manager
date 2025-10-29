@@ -12,13 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { DateInput } from '@/components/common/date-input'
-import { AccountInput } from '@/components/common/account-input'
-import { AmountInput } from '@/components/common/amount-input'
+import { DateInput } from '@/components/common/input/date-input'
+import { AccountInput } from '@/components/common/input/account-input'
+import { AmountInput } from '@/components/common/input/amount-input'
 import React, { useCallback, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { EmbeddingLabel } from '@/components/common/embedding-label'
+import { EmbeddingLabel } from '@/components/common/typography/embedding-label'
 import { amountShema } from '@/types/common/amount'
 import { embeddingSchema } from '@/types/common/embedding'
 

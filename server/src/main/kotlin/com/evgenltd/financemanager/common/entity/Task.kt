@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.common.entity
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -11,7 +10,6 @@ import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.Instant
 import java.util.*
-
 
 @Entity
 @Table(name = "tasks")

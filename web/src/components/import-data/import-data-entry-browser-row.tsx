@@ -11,10 +11,10 @@ import {
 } from '@/store/import-data'
 import { Operation } from '@/types/operation'
 import { useImportDataOperationSheetStore } from '@/components/import-data/import-data-operation-sheet'
-import { RatingIcon } from '@/components/common/rating-icon'
+import { RatingIcon } from '@/components/common/icon/rating-icon'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { useApproveAction, useUnlinkAction } from '@/components/import-data/actions'
-import { EmbeddingLabel } from '@/components/common/embedding-label'
+import { EmbeddingLabel } from '@/components/common/typography/embedding-label'
 import { Button } from '@/components/ui/button'
 import { hoveredIconClass, hoverGroup, mainIconClass } from '@/components/common/hoverable-icon'
 

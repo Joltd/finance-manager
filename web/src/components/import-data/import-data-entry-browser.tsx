@@ -1,4 +1,4 @@
-import { DateLabel } from '@/components/common/date-label'
+import { DateLabel } from '@/components/common/typography/date-label'
 import { useEffect, useRef, MouseEvent } from 'react'
 import {
   ImportDataEntryBrowserOperationRow,
@@ -11,13 +11,14 @@ import {
   useImportDataStore,
 } from '@/store/import-data'
 import { ImportDataActionBar } from '@/components/import-data/import-data-action-bar'
-import { ValidityIcon } from '@/components/common/validity-icon'
-import { TextLabel } from '@/components/common/text-label'
-import { DataSection } from '@/components/common/data-section'
+import { ValidityIcon } from '@/components/common/icon/validity-icon'
 import { ImportDataGroupHeader } from '@/components/import-data/import-data-group'
 import { subscribeGlobal } from '@/lib/global-event'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import { useLinkAction } from '@/components/import-data/actions'
+import { DataPlaceholder } from '@/components/common/data-placeholder'
+import { Stack } from '@/components/common/layout/stack'
+import { Group } from '@/components/common/layout/group'
 
 export interface ImportDataOperationBrowserProps {}
 
@@ -67,17 +68,20 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
   }
 
   return (
-    <DataSection store={importDataEntryList}>
-      <div ref={ref} className="flex flex-col overflow-y-auto m-6 mb-12 gap-12">
+    <DataPlaceholder {...importDataEntryList}>
+      <Stack ref={ref} scrollable>
         <DndContext onDragEnd={handleDrag}>
           {importDataEntryList.data?.map((group) => (
-            <div key={group.date} className="flex flex-col gap-6">
-              <TextLabel variant="title">
-                <ValidityIcon valid={group.valid} message="Some totals doesn't matched" />
-                <DateLabel date={group.date} />
-              </TextLabel>
+            <Group
+              text={
+                <>
+                  <ValidityIcon valid={group.valid} message="Some totals doesn't matched" />
+                  <DateLabel date={group.date} />
+                </>
+              }
+            >
               <ImportDataGroupHeader group={group} />
-              <div className="flex flex-col px-0.5">
+              <Stack>
                 {group.entries.map((entry) =>
                   entry.id ? (
                     <ImportDataEntryBrowserRow
@@ -103,13 +107,13 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
                     />
                   ) : null,
                 )}
-              </div>
-            </div>
+              </Stack>
+            </Group>
           ))}
         </DndContext>
 
         <ImportDataActionBar />
-      </div>
-    </DataSection>
+      </Stack>
+    </DataPlaceholder>
   )
 }

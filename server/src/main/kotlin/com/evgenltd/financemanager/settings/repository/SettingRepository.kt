@@ -7,7 +7,5 @@ import java.util.*
 
 @Repository
 interface SettingRepository : JpaRepository<Setting, UUID> {
-
-    fun findByName(name: String): Setting?
-
+    fun findByTenantIsNull(): List<Setting>
 }

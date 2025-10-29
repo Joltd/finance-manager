@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.account.entity
 
 import com.evgenltd.financemanager.common.util.Amount
 import jakarta.persistence.*
+import org.hibernate.annotations.TenantId
 import java.time.LocalDate
 import java.util.*
 
@@ -12,6 +13,9 @@ class Turnover(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
+
+    @TenantId
+    var tenant: UUID? = null,
 
     var date: LocalDate,
 

@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.service
 
+import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.importexport.service.parser.ImportParser
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
@@ -10,6 +11,6 @@ class ImportDataParserResolver(
 ) {
 
     fun resolve(parser: String?): ImportParser = parsers.firstOrNull { it.name == parser }
-        ?: throw IllegalArgumentException("Parser $parser not found")
+        ?: throw badRequestException("Parser $parser not found")
 
 }

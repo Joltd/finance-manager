@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.service.BalanceActionService
 import com.evgenltd.financemanager.account.service.BalanceService
 import com.evgenltd.financemanager.common.component.SkipLogging
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -22,12 +23,14 @@ class BalanceController(
     private val accountRepository: AccountRepository,
 ) {
 
-    @PostMapping("/test")
+    @PostMapping("/api/v1/test")
+    @PreAuthorize("hasRole('USER')")
     fun test(@RequestParam accountId: UUID, @RequestParam currency: String, @RequestParam date: LocalDate) {
         balanceActionService.updateBalance(accountId, currency, date)
     }
 
-    @GetMapping("/balance")
+    @GetMapping("/api/v1/balance")
+    @PreAuthorize("hasRole('USER')")
     fun list(): List<BalanceRecord> = balanceService.list()
 
 }

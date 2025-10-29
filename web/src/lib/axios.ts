@@ -1,16 +1,25 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_HOST,
+  baseURL: '/api/v1',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-api.interceptors.response.use((response) => {
-  response.data = nullToUndefined(response.data)
-  return response
-})
+api.interceptors.response.use(
+  (response) => {
+    response.data = nullToUndefined(response.data)
+    return response
+  },
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  },
+)
 
 function nullToUndefined(data: any): any {
   if (Array.isArray(data)) {

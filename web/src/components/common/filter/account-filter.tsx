@@ -1,7 +1,7 @@
 import { FilterPrimitiveProps } from '@/types/common/filter'
-import { ReferenceInput } from '@/components/common/reference-input'
+import { ReferenceInput } from '@/components/common/input/reference-input'
 import { useAccountReferenceStore } from '@/store/account'
-import { AccountLabel } from '@/components/common/account-label'
+import { AccountLabel } from '@/components/common/typography/account-label'
 import { AccountType } from '@/types/account'
 
 export interface AccountFilterProps extends FilterPrimitiveProps {

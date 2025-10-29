@@ -1,8 +1,8 @@
 import { OperationType } from '@/types/operation'
 import { Account } from '@/types/account'
-import { OperationTypeIcon } from '@/components/common/operation-type-icon'
-import { OperationAmountLabel } from '@/components/common/operation-amount-label'
-import { AccountLabel } from '@/components/common/account-label'
+import { OperationTypeIcon } from '@/components/common/icon/operation-type-icon'
+import { OperationAmountLabel } from '@/components/common/typography/operation-amount-label'
+import { AccountLabel } from '@/components/common/typography/account-label'
 import { cn } from '@/lib/utils'
 import { Amount } from '@/types/common/amount'
 import React from 'react'
@@ -13,7 +13,7 @@ export interface ImportDataOperationLabelProps extends React.HTMLAttributes<HTML
   amountFrom: Amount
   amountTo: Amount
   accountTo?: Account
-  relatedAccount: Account
+  relatedAccount?: Account
   className?: string
   amountFieldTight?: boolean
 }
@@ -36,9 +36,9 @@ export const ImportDataOperationLabel = React.forwardRef<
     ref,
   ) => {
     let account
-    if (relatedAccount.id !== accountFrom?.id) {
+    if (relatedAccount?.id !== accountFrom?.id) {
       account = accountFrom
-    } else if (relatedAccount.id !== accountTo?.id) {
+    } else if (relatedAccount?.id !== accountTo?.id) {
       account = accountTo
     }
 

@@ -2,7 +2,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Bar, BarChart, LabelList, XAxis } from 'recharts'
 import { format } from 'date-fns'
 import * as React from 'react'
-import { AmountLabel } from '@/components/common/amount-label'
+import { AmountLabel } from '@/components/common/typography/amount-label'
 import { CategoryEntry } from '@/types/report'
 
 export interface CategoryChartProps extends React.HTMLAttributes<HTMLDivElement> {

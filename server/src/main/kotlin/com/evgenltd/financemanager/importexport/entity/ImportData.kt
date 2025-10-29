@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.annotations.TenantId
 import org.hibernate.type.SqlTypes
 import java.util.*
 
@@ -21,6 +22,9 @@ class ImportData(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
+
+    @TenantId
+    var tenant: UUID? = null,
 
     @ManyToOne
     @JoinColumn(name = "account_id")

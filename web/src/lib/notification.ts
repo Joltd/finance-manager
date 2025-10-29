@@ -1,9 +1,6 @@
 import { fillPathParams } from '@/lib/utils'
 
-const source =
-  typeof window !== 'undefined'
-    ? new EventSource(process.env.NEXT_PUBLIC_BACKEND_HOST + '/sse')
-    : undefined
+const source = typeof window !== 'undefined' ? new EventSource('/api/v1/sse') : undefined
 const listeners: Record<string, any> = {}
 
 export const subscribeSse = <T>(

@@ -15,29 +15,8 @@ import java.util.UUID
 
 @Service
 class BalanceProcessService(
-    private val balanceRepository: BalanceRepository,
     private val balanceActionService: BalanceActionService,
-    private val turnoverRepository: TurnoverRepository,
 ) : Loggable() {
-
-    @PostConstruct
-    fun init() {
-        if (balanceRepository.count() > 0L) {
-            return
-        }
-
-        turnoverRepository.findByAccountType(AccountType.ACCOUNT)
-            .sliceLast()
-            .map {
-                Balance(
-                    id = null,
-                    account = it.value.account,
-                    amount = it.value.cumulativeAmount,
-                    date = LocalDate.now(),
-                )
-            }
-            .let { balanceRepository.saveAll(it) }
-    }
 
     @TransactionalEventListener
     @Async

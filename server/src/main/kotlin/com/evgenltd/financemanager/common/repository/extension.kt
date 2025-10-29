@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.common.util.badRequestException
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -13,7 +14,7 @@ import java.util.UUID
 import kotlin.reflect.KProperty1
 
 inline fun <reified T,ID> CrudRepository<T, ID>.find(id: ID): T = findByIdOrNull(id)
-    ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "${T::class.java.simpleName} [$id] not found")
+    ?: throw badRequestException("${T::class.java.simpleName} [$id] not found")
 
 fun <T> emptySpecification(): Specification<T> = Specification { _, _, _ -> null }
 

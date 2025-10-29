@@ -8,4 +8,7 @@ import java.util.*
 
 @Repository
 interface CurrencyRepository : JpaRepository<Currency, UUID>, JpaSpecificationExecutor<Currency> {
+
+    fun findByName(name: String): Currency
+
 }

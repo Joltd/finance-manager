@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.TenantId
 import java.util.*
 
 @Entity
@@ -14,9 +15,12 @@ class Setting(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
+    @TenantId
+    var tenant: UUID? = null,
+
     var name: String,
 
-    var value: String?
+    var value: String? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

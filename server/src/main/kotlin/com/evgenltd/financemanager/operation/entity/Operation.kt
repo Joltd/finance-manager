@@ -5,6 +5,7 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.account.entity.Account
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.annotations.TenantId
 import org.hibernate.type.SqlTypes
 import java.time.LocalDate
 import java.util.*
@@ -16,6 +17,9 @@ class Operation(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
+
+    @TenantId
+    var tenant: UUID? = null,
 
     var date: LocalDate,
 

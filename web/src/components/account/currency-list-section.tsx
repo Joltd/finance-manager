@@ -1,6 +1,4 @@
 'use client'
-import { TextLabel } from '@/components/common/text-label'
-import { DataSection } from '@/components/common/data-section'
 import { Chip } from '@/components/common/chip'
 import { useCurrencyListStore } from '@/store/account'
 import { useEffect } from 'react'
@@ -9,7 +7,6 @@ import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
 import { subscribeSse } from '@/lib/notification'
-import { Button } from '@/components/ui/button'
 import { PlusIcon } from 'lucide-react'
 import {
   DropdownMenu,
@@ -17,6 +14,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Section } from '@/components/common/layout/section'
+import { ResponsiveButton } from '@/components/common/responsive-button'
+import { DataPlaceholder } from '@/components/common/data-placeholder'
+import { Flow } from '@/components/common/layout/flow'
 
 export function CurrencyListSection() {
   const currencyList = useCurrencyListStore(
@@ -50,26 +51,22 @@ export function CurrencyListSection() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
-        <TextLabel variant="title" className="grow">
-          Currencies
-        </TextLabel>
+    <Section
+      text="Currencies"
+      actions={
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>
-              <PlusIcon />
-              Add currency
-            </Button>
+            <ResponsiveButton size="sm" label="Add account" icon={<PlusIcon />} />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => handleNew(false)}>Fiat</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleNew(true)}>Crypto</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-      <DataSection store={currencyList}>
-        <div className="flex flex-wrap gap-2">
+      }
+    >
+      <Flow>
+        <DataPlaceholder {...currencyList}>
           {currencyList.data?.map((it) => (
             <Chip
               key={it.id}
@@ -78,8 +75,8 @@ export function CurrencyListSection() {
               onDismiss={() => handleDelete(it)}
             />
           ))}
-        </div>
-      </DataSection>
-    </div>
+        </DataPlaceholder>
+      </Flow>
+    </Section>
   )
 }

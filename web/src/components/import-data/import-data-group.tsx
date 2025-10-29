@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { AmountLabel } from '@/components/common/amount-label'
+import { AmountLabel } from '@/components/common/typography/amount-label'
 import { TriangleAlert } from 'lucide-react'
 import { ImportDataEntryGroup, ImportDataTotal } from '@/types/import-data'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'

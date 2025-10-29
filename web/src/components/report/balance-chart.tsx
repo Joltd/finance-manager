@@ -1,6 +1,6 @@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Label, Pie, PieChart } from 'recharts'
-import { AmountLabel } from '@/components/common/amount-label'
+import { AmountLabel } from '@/components/common/typography/amount-label'
 import { BalanceEntry } from '@/types/report'
 import { useMemo } from 'react'
 import * as React from 'react'

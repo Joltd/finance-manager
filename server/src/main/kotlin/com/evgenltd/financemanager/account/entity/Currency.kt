@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.TenantId
 import java.util.*
 
 @Entity
@@ -14,6 +15,9 @@ class Currency(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
+
+    @TenantId
+    var tenant: UUID? = null,
 
     var name: String,
 

@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finance_manager
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        multi_tenancy: DISCRIMINATOR
+        tenant_identifier_resolver: com.evgenltd.financemanager.user.component.TenantResolver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  flyway:
+    out-of-order: true
+
+security:
+  secret: ${SECURITY_SECRET}
+  access-token-expiration-minutes: 15
+  refresh-token-expiration-minutes: 10080 # 7 days

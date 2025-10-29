@@ -1,6 +1,4 @@
 'use client'
-import { TextLabel } from '@/components/common/text-label'
-import { DataSection } from '@/components/common/data-section'
 import { Chip } from '@/components/common/chip'
 import { useAccountGroupListStore } from '@/store/account'
 import { useEffect } from 'react'
@@ -8,10 +6,13 @@ import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
 import { subscribeSse } from '@/lib/notification'
-import { Button } from '@/components/ui/button'
 import { ArchiveRestoreIcon, PlusIcon } from 'lucide-react'
-import { Account, AccountGroup } from '@/types/account'
+import { AccountGroup } from '@/types/account'
 import { cn } from '@/lib/utils'
+import { Section } from '@/components/common/layout/section'
+import { ResponsiveButton } from '@/components/common/responsive-button'
+import { DataPlaceholder } from '@/components/common/data-placeholder'
+import { Flow } from '@/components/common/layout/flow'
 
 export function AccountGroupListSection() {
   const accountGroupList = useAccountGroupListStore(
@@ -49,18 +50,19 @@ export function AccountGroupListSection() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex">
-        <TextLabel variant="title" className="grow">
-          Account groups
-        </TextLabel>
-        <Button onClick={handleNew}>
-          <PlusIcon />
-          Add account group
-        </Button>
-      </div>
-      <DataSection store={accountGroupList}>
-        <div className="flex flex-wrap gap-2">
+    <Section
+      text="Account groups"
+      actions={
+        <ResponsiveButton
+          size="sm"
+          label="Add account group"
+          icon={<PlusIcon />}
+          onClick={handleNew}
+        />
+      }
+    >
+      <Flow>
+        <DataPlaceholder {...accountGroupList}>
           {accountGroupList.data?.map((it) => (
             <Chip
               key={it.id}
@@ -71,8 +73,8 @@ export function AccountGroupListSection() {
               className={cn(it.deleted && 'line-through text-muted')}
             />
           ))}
-        </div>
-      </DataSection>
-    </div>
+        </DataPlaceholder>
+      </Flow>
+    </Section>
   )
 }

@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.account.service.AccountGroupEventService
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.service.AccountGroupService
 import com.evgenltd.financemanager.common.component.SkipLogging
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,23 +24,28 @@ class AccountGroupController(
     private val accountGroupEventService: AccountGroupEventService,
 ) {
 
-    @GetMapping("/account-group/reference")
+    @GetMapping("/api/v1/account-group/reference")
+    @PreAuthorize("hasRole('USER')")
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,
         @RequestParam("id", required = false) id: UUID?,
     ): List<Reference> = accountGroupService.listReference(mask, id)
 
-    @GetMapping("/account-group")
+    @GetMapping("/api/v1/account-group")
+    @PreAuthorize("hasRole('USER')")
     fun list(): List<AccountGroupRecord> = accountGroupService.list()
 
-    @GetMapping("/account-group/{id}")
+    @GetMapping("/api/v1/account-group/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun byId(@PathVariable("id") id: UUID): AccountGroupRecord = accountGroupService.byId(id)
 
-    @PostMapping("/account-group")
+    @PostMapping("/api/v1/account-group")
+    @PreAuthorize("hasRole('USER')")
     fun update(@RequestBody record: AccountGroupRecord): AccountGroupRecord = accountGroupService.update(record)
         .also { accountGroupEventService.accountGroup() }
 
-    @DeleteMapping("/account-group/{id}")
+    @DeleteMapping("/api/v1/account-group/{id}")
+    @PreAuthorize("hasRole('USER')")
     fun delete(@PathVariable("id") id: UUID) = accountGroupService.delete(id)
         .also { accountGroupEventService.accountGroup() }
 

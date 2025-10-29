@@ -1,6 +1,4 @@
 'use client'
-import { TextLabel } from '@/components/common/text-label'
-import { DataSection } from '@/components/common/data-section'
 import { Chip } from '@/components/common/chip'
 import { useAccountListStore } from '@/store/account'
 import { useEffect } from 'react'
@@ -9,9 +7,12 @@ import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
 import { subscribeSse } from '@/lib/notification'
-import { Button } from '@/components/ui/button'
 import { ArchiveRestoreIcon, CheckIcon, PlusIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Section } from '@/components/common/layout/section'
+import { ResponsiveButton } from '@/components/common/responsive-button'
+import { DataPlaceholder } from '@/components/common/data-placeholder'
+import { Flow } from '@/components/common/layout/flow'
 
 interface AccountListSectionProps {
   title: string
@@ -56,18 +57,14 @@ export function AccountListSection({ title, accountType }: AccountListSectionPro
   const filteredAccounts = accountList.data?.filter((it) => it.type === accountType) || []
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex">
-        <TextLabel variant="title" className="grow">
-          {title}
-        </TextLabel>
-        <Button onClick={handleNew}>
-          <PlusIcon />
-          Add account
-        </Button>
-      </div>
-      <DataSection store={accountList}>
-        <div className="flex flex-wrap gap-2">
+    <Section
+      text={title}
+      actions={
+        <ResponsiveButton size="sm" label="Add account" icon={<PlusIcon />} onClick={handleNew} />
+      }
+    >
+      <Flow>
+        <DataPlaceholder {...accountList}>
           {filteredAccounts.map((it) => (
             <Chip
               key={it.id}
@@ -78,8 +75,8 @@ export function AccountListSection({ title, accountType }: AccountListSectionPro
               className={cn(it.deleted && 'line-through text-muted')}
             />
           ))}
-        </div>
-      </DataSection>
-    </div>
+        </DataPlaceholder>
+      </Flow>
+    </Section>
   )
 }

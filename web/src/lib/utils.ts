@@ -51,6 +51,14 @@ export function trim(value?: string, maxLength: number = 50): string | undefined
   return value
 }
 
+export function firstLetters(value: string) {
+  return value
+    .split(' ')
+    .map((it) => it?.[0]?.toUpperCase())
+    .slice(0, 2)
+    .join('')
+}
+
 // export function prepareRange(from?: Date, to?: Date): RangeValue<string | undefined> {
 //   if (!from || !to) {
 //     return {
