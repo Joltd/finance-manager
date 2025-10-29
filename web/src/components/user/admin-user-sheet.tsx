@@ -122,7 +122,7 @@ export function AdminUserSheet() {
           <SheetTitle>User</SheetTitle>
         </SheetHeader>
         <form id="admin-user-form" onSubmit={form.handleSubmit(onSubmit)} className="p-4">
-          <FieldSet>
+          <FieldSet disabled={!adminUserStore.dataFetched || request.loading}>
             {request.error && (
               <FieldDescription className="text-red-400">{request.error}</FieldDescription>
             )}
@@ -191,7 +191,11 @@ export function AdminUserSheet() {
           <SheetClose asChild>
             <Button variant="secondary">Cancel</Button>
           </SheetClose>
-          <Button type="submit" form="admin-user-form" disabled={request.loading}>
+          <Button
+            type="submit"
+            form="admin-user-form"
+            disabled={!adminUserStore.dataFetched || request.loading}
+          >
             {request.loading && <Spinner />}
             Save
           </Button>

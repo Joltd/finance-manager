@@ -1,5 +1,4 @@
 'use client'
-import { AdminUserBrowser } from '@/components/user/admin-user-browser'
 import { useAdminUserListStore } from '@/store/user'
 import { AdminUserSheet, useAdminUserSheetStore } from '@/components/user/admin-user-sheet'
 import { useEffect } from 'react'
@@ -10,6 +9,8 @@ import { DataPlaceholder } from '@/components/common/data-placeholder'
 import { Stack } from '@/components/common/layout/stack'
 import { Pointable } from '@/components/common/pointable'
 import { Layout } from '@/components/common/layout/layout'
+import { Typography } from '@/components/common/typography/typography'
+import { Filler } from '@/components/common/layout/filler'
 
 export default function Page() {
   const adminUserListStore = useAdminUserListStore(
@@ -41,10 +42,11 @@ export default function Page() {
           <Stack>
             {adminUserListStore.data?.map((user) => (
               <Pointable key={user.id} onClick={() => adminUserSheet.openWith(user.id)}>
-                <Stack orientation="horizontal">
-                  <div className="flex-1/3">{user.login}</div>
-                  <div className="flex-1/3">{user.name}</div>
-                  <div className="flex-1/3">{user.tenant}</div>
+                <Stack orientation="horizontal" center>
+                  <Typography>{user.name}</Typography>
+                  <Typography variant="muted">({user.login})</Typography>
+                  <Filler />
+                  <Typography variant="muted">{user.tenant}</Typography>
                 </Stack>
               </Pointable>
             ))}

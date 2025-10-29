@@ -14,7 +14,7 @@ const variants = cva('flex', {
       horizontal: 'flex-row',
     },
     center: {
-      true: 'items-center justify-center',
+      true: '',
     },
     gap: {
       2: 'gap-2',
@@ -25,6 +25,18 @@ const variants = cva('flex', {
       true: 'overflow-y-auto',
     },
   },
+  compoundVariants: [
+    {
+      orientation: 'vertical',
+      center: true,
+      class: 'justify-center',
+    },
+    {
+      orientation: 'horizontal',
+      center: true,
+      class: 'items-center',
+    },
+  ],
   defaultVariants: {
     orientation: 'vertical',
     center: false,
