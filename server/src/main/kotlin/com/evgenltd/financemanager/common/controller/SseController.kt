@@ -14,7 +14,7 @@ class SseController(
 ) {
 
     @GetMapping("/api/v1/sse")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("isAuthenticated()")
     fun sse(): SseEmitter = sseService.subscribe()
 
 }

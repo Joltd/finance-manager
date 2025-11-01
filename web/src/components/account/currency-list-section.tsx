@@ -6,7 +6,6 @@ import { Currency } from '@/types/account'
 import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
-import { subscribeSse } from '@/lib/notification'
 import { PlusIcon } from 'lucide-react'
 import {
   DropdownMenu,
@@ -18,6 +17,7 @@ import { Section } from '@/components/common/layout/section'
 import { ResponsiveButton } from '@/components/common/responsive-button'
 import { DataPlaceholder } from '@/components/common/data-placeholder'
 import { Flow } from '@/components/common/layout/flow'
+import { Sse } from '@/components/sse'
 
 export function CurrencyListSection() {
   const currencyList = useCurrencyListStore(
@@ -33,7 +33,6 @@ export function CurrencyListSection() {
 
   useEffect(() => {
     currencyList.fetch()
-    return subscribeSse(accountEvents.currency, {}, () => currencyList.fetch())
   }, [])
 
   const handleNew = async (crypto: boolean) => {
@@ -65,6 +64,7 @@ export function CurrencyListSection() {
         </DropdownMenu>
       }
     >
+      <Sse eventName={accountEvents.currency} listener={currencyList.fetch} />
       <Flow>
         <DataPlaceholder {...currencyList}>
           {currencyList.data?.map((it) => (

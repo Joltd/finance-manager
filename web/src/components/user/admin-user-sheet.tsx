@@ -51,8 +51,8 @@ type AdminUserFormData = z.infer<typeof formSchema>
 const formSchema = z.object({
   id: z.string().uuid().optional(),
   tenant: z.string().optional(),
-  name: z.string(),
-  login: z.string(),
+  name: z.string().nonempty(),
+  login: z.string().nonempty(),
   password: z.string().optional(),
   deleted: z.boolean(),
 })
@@ -84,8 +84,8 @@ export function AdminUserSheet() {
   }, [])
 
   useEffect(() => {
-    adminUserStore.setPathParams({ id })
     if (id) {
+      adminUserStore.setPathParams({ id })
       adminUserStore.fetch()
     }
   }, [id])
@@ -97,10 +97,7 @@ export function AdminUserSheet() {
   }, [adminUserStore.data])
 
   const onSubmit = (data: AdminUserFormData) => {
-    request.submit(data).then(() => {
-      adminUserStore.fetch()
-      closeSheet()
-    })
+    request.submit(data).then(() => closeSheet())
   }
 
   const onOpenChange = (value: boolean) => {
@@ -121,8 +118,12 @@ export function AdminUserSheet() {
         <SheetHeader>
           <SheetTitle>User</SheetTitle>
         </SheetHeader>
-        <form id="admin-user-form" onSubmit={form.handleSubmit(onSubmit)} className="p-4">
-          <FieldSet disabled={!adminUserStore.dataFetched || request.loading}>
+        <form
+          id="admin-user-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="p-4 overflow-auto"
+        >
+          <FieldSet disabled={(!!id && !adminUserStore.dataFetched) || request.loading}>
             {request.error && (
               <FieldDescription className="text-red-400">{request.error}</FieldDescription>
             )}
@@ -194,7 +195,7 @@ export function AdminUserSheet() {
           <Button
             type="submit"
             form="admin-user-form"
-            disabled={!adminUserStore.dataFetched || request.loading}
+            disabled={(!!id && !adminUserStore.dataFetched) || request.loading}
           >
             {request.loading && <Spinner />}
             Save

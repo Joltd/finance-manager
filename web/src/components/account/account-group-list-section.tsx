@@ -5,7 +5,6 @@ import { useEffect } from 'react'
 import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
-import { subscribeSse } from '@/lib/notification'
 import { ArchiveRestoreIcon, PlusIcon } from 'lucide-react'
 import { AccountGroup } from '@/types/account'
 import { cn } from '@/lib/utils'
@@ -13,6 +12,7 @@ import { Section } from '@/components/common/layout/section'
 import { ResponsiveButton } from '@/components/common/responsive-button'
 import { DataPlaceholder } from '@/components/common/data-placeholder'
 import { Flow } from '@/components/common/layout/flow'
+import { Sse } from '@/components/sse'
 
 export function AccountGroupListSection() {
   const accountGroupList = useAccountGroupListStore(
@@ -28,7 +28,6 @@ export function AccountGroupListSection() {
 
   useEffect(() => {
     accountGroupList.fetch()
-    return subscribeSse(accountEvents.group, {}, () => accountGroupList.fetch())
   }, [])
 
   const handleNew = async () => {
@@ -61,6 +60,7 @@ export function AccountGroupListSection() {
         />
       }
     >
+      <Sse eventName={accountEvents.group} listener={accountGroupList.fetch} />
       <Flow>
         <DataPlaceholder {...accountGroupList}>
           {accountGroupList.data?.map((it) => (

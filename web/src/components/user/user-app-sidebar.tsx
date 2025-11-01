@@ -20,8 +20,8 @@ import { useImportDataListStore } from '@/store/import-data'
 import { useRequest } from '@/hooks/use-request'
 import { importDataEvents, importDataUrls } from '@/api/import-data'
 import { useEffect } from 'react'
-import { subscribeSse } from '@/lib/notification'
 import Link from 'next/link'
+import { Sse } from '@/components/sse'
 
 export function UserAppSidebar() {
   const { data, fetch } = useImportDataListStore('data', 'fetch') // todo support loadig, error
@@ -30,7 +30,6 @@ export function UserAppSidebar() {
 
   useEffect(() => {
     fetch()
-    return subscribeSse(importDataEvents.root, {}, () => fetch())
   }, [])
 
   const handleNewImport = () => {
@@ -44,6 +43,7 @@ export function UserAppSidebar() {
 
   return (
     <AppSidebar>
+      <Sse eventName={importDataEvents.root} listener={fetch} />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>

@@ -1,7 +1,6 @@
 import { useOperationListStore, useOperationSelectionStore } from '@/store/operation'
 import { useOperationSheetStore } from '@/components/operation/operation-sheet'
 import React, { useEffect, MouseEvent } from 'react'
-import { subscribeSse } from '@/lib/notification'
 import { operationEvents } from '@/api/operation'
 import { DateLabel } from '@/components/common/typography/date-label'
 import { Pointable } from '@/components/common/pointable'
@@ -10,6 +9,7 @@ import { Operation } from '@/types/operation'
 import { DataPlaceholder } from '@/components/common/data-placeholder'
 import { Group } from '@/components/common/layout/group'
 import { Stack } from '@/components/common/layout/stack'
+import { Sse } from '@/components/sse'
 
 export function OperationBrowser() {
   const operationList = useOperationListStore(
@@ -26,7 +26,6 @@ export function OperationBrowser() {
 
   useEffect(() => {
     operationList.fetch()
-    return subscribeSse(operationEvents.root, {}, () => operationList.fetch())
   }, [])
 
   const handleClick = (event: MouseEvent, operation: Operation) => {
@@ -47,6 +46,7 @@ export function OperationBrowser() {
 
   return (
     <DataPlaceholder {...operationList}>
+      <Sse eventName={operationEvents.root} listener={operationList.fetch} />
       <Stack gap={6} scrollable onClick={handleClickOutside}>
         {operationList.data?.map((group) => (
           <Group key={group.date} text={<DateLabel variant="h4" date={group.date} />}>

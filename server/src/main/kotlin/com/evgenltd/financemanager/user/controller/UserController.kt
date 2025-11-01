@@ -42,7 +42,7 @@ class UserController(
 ) : Loggable() {
 
     @GetMapping("/api/v1/user")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     fun user(): UserRecord = currentUser()
         ?.let { userService.byIdOrNull(it) }
         ?: throw unauthorizedException()

@@ -12,7 +12,6 @@ import { Spinner } from '@/components/ui/spinner'
 import { ErrorLabel } from '@/components/common/typography/error-label'
 import { useBalanceStore } from '@/store/balance'
 import { useEffect, useMemo } from 'react'
-import { subscribeSse } from '@/lib/notification'
 import { balanceEvents } from '@/api/balance'
 import {
   DropdownMenu,
@@ -23,6 +22,7 @@ import {
 import { Pointable } from '@/components/common/pointable'
 import { ValidityIcon } from '@/components/common/icon/validity-icon'
 import { Typography } from '@/components/common/typography/typography'
+import { Sse } from '@/components/sse'
 
 export interface ImportDataHeaderProps {}
 
@@ -37,8 +37,6 @@ export function ImportDataHeader(props: ImportDataHeaderProps) {
 
   useEffect(() => {
     balance.fetch()
-
-    return subscribeSse(balanceEvents.root, {}, () => balance.fetch())
   }, [])
 
   const balances = useMemo(() => {
@@ -55,6 +53,7 @@ export function ImportDataHeader(props: ImportDataHeaderProps) {
 
   return (
     <Stack orientation="horizontal" gap={4}>
+      <Sse eventName={balanceEvents.root} listener={balance.fetch} />
       <DataPlaceholder dataFetched data={importData.data?.totals}>
         <div
           className={cn(

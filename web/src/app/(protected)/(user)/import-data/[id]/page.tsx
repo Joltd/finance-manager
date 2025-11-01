@@ -8,13 +8,13 @@ import { useParams, useRouter } from 'next/navigation'
 import { importDataEvents } from '@/api/import-data'
 import { useEffect } from 'react'
 import { ImportDataEntryBrowser } from '@/components/import-data/import-data-entry-browser'
-import { subscribeSse } from '@/lib/notification'
 import { ImportDataOperationSheet } from '@/components/import-data/import-data-operation-sheet'
 import { DataPlaceholder } from '@/components/common/data-placeholder'
 import { Layout } from '@/components/common/layout/layout'
 import { Stack } from '@/components/common/layout/stack'
 import { ImportDataHeader } from '@/components/import-data/import-data-header'
 import { ImportDataFilter } from '@/components/import-data/import-data-filter'
+import { Sse } from '@/components/sse'
 
 export default function Page() {
   const { id } = useParams()
@@ -44,25 +44,6 @@ export default function Page() {
     importData.updatePathParams({ id })
     importData.fetch()
     importDataEntryList.updatePathParams({ id })
-
-    const clearImportDataSubscription = subscribeSse(
-      importDataEvents.id,
-      { id },
-      importData.applyPatch,
-    )
-    const clearImportDataEntryListSubscription = subscribeSse<string[]>(
-      importDataEvents.entry,
-      { id },
-      (dates) => {
-        // todo check dates
-        importDataEntryList.fetch()
-      },
-    )
-
-    return () => {
-      clearImportDataSubscription()
-      clearImportDataEntryListSubscription()
-    }
   }, [])
 
   useEffect(() => {
@@ -78,6 +59,17 @@ export default function Page() {
 
   return (
     <Layout>
+      {id && (
+        <Sse eventName={importDataEvents.id} params={{ id }} listener={importData.applyPatch} />
+      )}
+      {/*todo check dates*/}
+      {id && (
+        <Sse
+          eventName={importDataEvents.entry}
+          params={{ id }}
+          listener={importDataEntryList.fetch}
+        />
+      )}
       <DataPlaceholder {...importData}>
         {importData.data && (
           <Stack gap={6}>

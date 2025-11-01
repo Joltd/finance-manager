@@ -4,7 +4,6 @@ import { ListFilterPlusIcon, PlusIcon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { AccountBalanceCard } from '@/components/account/account-balance-card'
 import { useAccountSheetStore } from '@/components/account/account-sheet'
-import { subscribeSse } from '@/lib/notification'
 import { accountEvents } from '@/api/account'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +20,7 @@ import { Flow } from '@/components/common/layout/flow'
 import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
+import { Sse } from '@/components/sse'
 
 export default function Page() {
   const accountBalance = useAccountBalanceStore(
@@ -37,7 +37,6 @@ export default function Page() {
   useEffect(() => {
     accountBalance.setQueryParams({ hideZeroBalances: true })
     accountBalance.fetch()
-    return subscribeSse(accountEvents.root, {}, () => accountBalance.fetch())
   }, [])
 
   const handleToggleZeroBalances = () => {
@@ -53,6 +52,7 @@ export default function Page() {
 
   return (
     <Layout scrollable>
+      <Sse eventName={accountEvents.root} listener={accountBalance.fetch} />
       <SectionHeader
         text="Account"
         actions={

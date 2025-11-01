@@ -9,4 +9,5 @@ interface UserRepository : JpaRepository<User, UUID>, JpaSpecificationExecutor<U
 
     fun findByLoginAndDeletedIsFalse(login: String): User?
 
+
 }

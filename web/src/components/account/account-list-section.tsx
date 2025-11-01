@@ -6,13 +6,13 @@ import { Account, AccountType } from '@/types/account'
 import { askText } from '@/components/common/ask-text-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { accountEvents, accountUrls } from '@/api/account'
-import { subscribeSse } from '@/lib/notification'
-import { ArchiveRestoreIcon, CheckIcon, PlusIcon } from 'lucide-react'
+import { ArchiveRestoreIcon, PlusIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Section } from '@/components/common/layout/section'
 import { ResponsiveButton } from '@/components/common/responsive-button'
 import { DataPlaceholder } from '@/components/common/data-placeholder'
 import { Flow } from '@/components/common/layout/flow'
+import { Sse } from '@/components/sse'
 
 interface AccountListSectionProps {
   title: string
@@ -33,7 +33,6 @@ export function AccountListSection({ title, accountType }: AccountListSectionPro
 
   useEffect(() => {
     accountList.fetch()
-    return subscribeSse(accountEvents.root, {}, () => accountList.fetch())
   }, [])
 
   const handleNew = async () => {
@@ -63,6 +62,7 @@ export function AccountListSection({ title, accountType }: AccountListSectionPro
         <ResponsiveButton size="sm" label="Add account" icon={<PlusIcon />} onClick={handleNew} />
       }
     >
+      <Sse eventName={accountEvents.root} listener={accountList.fetch} />
       <Flow>
         <DataPlaceholder {...accountList}>
           {filteredAccounts.map((it) => (

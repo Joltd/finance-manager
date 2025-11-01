@@ -2,10 +2,12 @@ package com.evgenltd.financemanager.user.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.unauthorizedException
 import com.evgenltd.financemanager.settings.service.SettingService
 import com.evgenltd.financemanager.user.converter.UserConverter
+import com.evgenltd.financemanager.user.entity.User
 import com.evgenltd.financemanager.user.record.AdminUserRecord
 import com.evgenltd.financemanager.user.record.ApplicationUser
 import com.evgenltd.financemanager.user.record.UserRecord
@@ -26,7 +28,7 @@ class UserService(
     private val userConverter: UserConverter,
     private val settingService: SettingService,
     private val passwordEncoder: PasswordEncoder,
-) : UserDetailsService {
+) : UserDetailsService, Loggable() {
 
     fun adminList(): List<AdminUserRecord> = userRepository.findAll()
         .map { userConverter.toAdminRecord(it)}
@@ -42,13 +44,30 @@ class UserService(
 
     @Transactional
     fun adminUpdate(record: AdminUserRecord) {
-        val user = userRepository.find(record.id)
-        user.tenant = record.tenant
-        user.name = record.name
-        user.login = record.login
-        user.deleted = record.deleted
+        if (record.name.isBlank()) {
+            throw badRequestException("Name is blank")
+        }
 
-        if (record.password != null) {
+        if (record.login.isBlank()) {
+            throw badRequestException("Login is blank")
+        }
+
+        val user = record.id
+            ?.let { userRepository.findByIdOrNull(it) }
+            ?.also {
+                it.tenant = record.tenant
+                it.name = record.name
+                it.login = record.login
+                it.deleted = record.deleted
+            }
+            ?: User(
+                tenant = record.tenant ?: UUID.randomUUID(),
+                name = record.name,
+                login = record.login,
+                deleted = record.deleted
+            )
+
+        if (!record.password.isNullOrBlank()) {
             if (record.password.length < 8) {
                 throw badRequestException("Password must be 8 characters long")
             }

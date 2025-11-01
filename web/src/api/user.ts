@@ -4,3 +4,8 @@ export const userUrls = {
   adminUser: '/admin/user',
   adminUserId: '/admin/user/:id',
 }
+
+export const userEvents = {
+  root: '/user',
+  admin: '/admin/user',
+}
