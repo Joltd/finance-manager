@@ -6,12 +6,13 @@ import {
   Sidebar,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar'
-import { cn, firstLetters } from '@/lib/utils'
-import { homes } from '@/app/(protected)/routes'
+import { firstLetters } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -19,11 +20,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOutIcon, SettingsIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { LogOutIcon, SettingsIcon, XIcon } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useUserSheetStore } from '@/components/user/user-sheet'
 import { UserRole } from '@/types/user'
 import { resetFetchStores } from '@/store/common/fetch'
+import Link from 'next/link'
+import { Typography } from '@/components/common/typography/typography'
+import { useHome } from '@/hooks/use-home'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 const ID = 'app-sidebar'
 
@@ -36,10 +41,19 @@ export function AppSidebar({ children }: AppSidebarProps) {
   const user = useUserStore('data')
   const userSheet = useUserSheetStore('open')
   const router = useRouter()
+  const { home } = useHome()
+  const { open, openMobile, setOpenMobile } = useSidebar()
+  const pathname = usePathname()
 
   useEffect(() => {
     setContainer(document.getElementById(ID))
   }, [])
+
+  useEffect(() => {
+    if (openMobile) {
+      setOpenMobile(false)
+    }
+  }, [pathname])
 
   const handleSettings = () => {
     userSheet.open()
@@ -54,41 +68,46 @@ export function AppSidebar({ children }: AppSidebarProps) {
   return (
     <Portal container={container}>
       <Sidebar collapsible="icon">
-        <SidebarHeader className="flex-row items-center">
-          <SidebarTrigger />
-          <a
-            href={user.data?.role ? homes[user.data?.role] : '#'}
-            className={cn('text-lg text-nowrap overflow-hidden')}
-          >
-            Finance manager
-          </a>
+        <SidebarHeader>
+          <div className="flex flex-row items-center">
+            <SidebarTrigger />
+            {open && (
+              <Link href={home}>
+                <Typography variant="h4" as="span" className="whitespace-nowrap">
+                  Finance manager
+                </Typography>
+              </Link>
+            )}
+          </div>
         </SidebarHeader>
         {children}
         <SidebarFooter>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Avatar>
-                    <AvatarFallback>{firstLetters(user.data?.name || 'User')}</AvatarFallback>
-                  </Avatar>
-                  {user.data?.name}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {user.data?.role === UserRole.USER && (
-                <DropdownMenuItem onClick={handleSettings}>
-                  <SettingsIcon />
-                  Settings
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOutIcon />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton>
+                    <Avatar className="ml-[-8px]">
+                      <AvatarFallback>{firstLetters(user.data?.name || 'User')}</AvatarFallback>
+                    </Avatar>
+                    <span>{user.data?.name}</span>
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {user.data?.role === UserRole.USER && (
+                    <DropdownMenuItem onClick={handleSettings}>
+                      <SettingsIcon />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOutIcon />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
     </Portal>

@@ -2,7 +2,9 @@ import React, { RefAttributes } from 'react'
 import { cn } from '@/lib/utils'
 import { Typography } from '@/components/common/typography/typography'
 
-export interface SectionProps extends React.HTMLAttributes<HTMLDivElement>, RefAttributes<HTMLDivElement> {
+export interface SectionProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    RefAttributes<HTMLDivElement> {
   text?: string | React.ReactNode
   description?: string | React.ReactNode
   actions?: React.ReactNode
@@ -17,7 +19,7 @@ export function Section({
   ...props
 }: SectionProps) {
   return (
-    <section className={cn('flex flex-col gap-6 w-full', className)} {...props}>
+    <section className={cn('flex flex-col md:gap-6 gap-4 w-full', className)} {...props}>
       <SectionHeader text={text} description={description} actions={actions} />
       {children}
     </section>

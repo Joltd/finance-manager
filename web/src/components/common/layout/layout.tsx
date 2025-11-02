@@ -7,7 +7,7 @@ export interface LayoutProps
     VariantProps<typeof variants>,
     RefAttributes<HTMLDivElement> {}
 
-const variants = cva('flex flex-col gap-12 p-6 overflow-y-hidden', {
+const variants = cva('flex flex-col md:gap-12 md:p-6 gap-6 p-4 overflow-y-hidden', {
   variants: {
     scrollable: {
       true: 'overflow-y-auto',

@@ -3,7 +3,7 @@ import { useAccountBalanceStore } from '@/store/account'
 import { ListFilterPlusIcon, PlusIcon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { AccountBalanceCard } from '@/components/account/account-balance-card'
-import { useAccountSheetStore } from '@/components/account/account-sheet'
+import { AccountSheet, useAccountSheetStore } from '@/components/account/account-sheet'
 import { accountEvents } from '@/api/account'
 import { Button } from '@/components/ui/button'
 import {
@@ -98,6 +98,7 @@ export default function Page() {
             </Group>
           ))}
         </Stack>
+        <AccountSheet />
       </DataPlaceholder>
     </Layout>
   )

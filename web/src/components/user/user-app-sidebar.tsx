@@ -10,8 +10,9 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
-import { PlusIcon, XIcon } from 'lucide-react'
+import { BookTextIcon, HandCoinsIcon, PlusIcon, WalletIcon, XIcon } from 'lucide-react'
 import {
   ImportDataNewDialog,
   useImportDataNewDialogStore,
@@ -24,43 +25,52 @@ import Link from 'next/link'
 import { Sse } from '@/components/sse'
 
 export function UserAppSidebar() {
-  const { data, fetch } = useImportDataListStore('data', 'fetch') // todo support loadig, error
-  const { open } = useImportDataNewDialogStore('open')
-  const { submit } = useRequest(importDataUrls.id, { method: 'DELETE' })
+  const importDataList = useImportDataListStore('data', 'fetch') // todo support loadig, error
+  const importDataNewDialog = useImportDataNewDialogStore('open')
+  const importDataDelete = useRequest(importDataUrls.id, { method: 'DELETE' })
+  const { open } = useSidebar()
 
   useEffect(() => {
-    fetch()
+    importDataList.fetch()
   }, [])
 
   const handleNewImport = () => {
-    open()
+    importDataNewDialog.open()
   }
 
   const handleDelete = async (id: string) => {
-    await submit({}, { id })
-    fetch()
+    await importDataDelete.submit({}, { id })
   }
 
   return (
     <AppSidebar>
-      <Sse eventName={importDataEvents.root} listener={fetch} />
+      <Sse eventName={importDataEvents.root} listener={importDataList.fetch} />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/account">Account</Link>
+                  <Link href="/account">
+                    <WalletIcon />
+                    <span>Account</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/operation">Operation</Link>
+                  <Link href="/operation">
+                    <HandCoinsIcon />
+                    <span>Operation</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href="/reference">Reference</Link>
+                  <Link href="/reference">
+                    <BookTextIcon />
+                    <span>Reference</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {/*<DropdownMenu>*/}
@@ -81,23 +91,26 @@ export function UserAppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
+        <SidebarGroup className="overflow-x-hidden hidden md:flex">
           <SidebarGroupLabel>Import</SidebarGroupLabel>
           <SidebarGroupAction onClick={handleNewImport}>
             <PlusIcon />
           </SidebarGroupAction>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data?.map((it) => (
-                <SidebarMenuItem key={it.id}>
-                  <SidebarMenuButton asChild>
-                    <Link href={`/import-data/${it.id}`}>{it.name}</Link>
-                  </SidebarMenuButton>
-                  <SidebarMenuAction showOnHover onClick={() => handleDelete(it.id)}>
-                    <XIcon />
-                  </SidebarMenuAction>
-                </SidebarMenuItem>
-              ))}
+              {open &&
+                importDataList.data?.map((it) => (
+                  <SidebarMenuItem key={it.id}>
+                    <SidebarMenuButton asChild>
+                      <Link href={`/import-data/${it.id}`}>
+                        <span>{it.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                    <SidebarMenuAction showOnHover onClick={() => handleDelete(it.id)}>
+                      <XIcon />
+                    </SidebarMenuAction>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
           <ImportDataNewDialog />

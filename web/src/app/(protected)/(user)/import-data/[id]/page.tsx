@@ -15,10 +15,13 @@ import { Stack } from '@/components/common/layout/stack'
 import { ImportDataHeader } from '@/components/import-data/import-data-header'
 import { ImportDataFilter } from '@/components/import-data/import-data-filter'
 import { Sse } from '@/components/sse'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { useHome } from '@/hooks/use-home'
 
 export default function Page() {
   const { id } = useParams()
-  const router = useRouter()
+  const isMobile = useIsMobile()
+  const { redirect } = useHome()
 
   const importDataList = useImportDataListStore('data')
   const importData = useImportDataStore(
@@ -37,6 +40,11 @@ export default function Page() {
   )
 
   useEffect(() => {
+    if (isMobile) {
+      redirect()
+      return
+    }
+
     if (!id) {
       return
     }
@@ -53,7 +61,7 @@ export default function Page() {
 
     const importDataExists = importDataList.data?.find((it) => it.id === id)
     if (!importDataExists) {
-      router.push('/')
+      redirect()
     }
   }, [importDataList.data])
 

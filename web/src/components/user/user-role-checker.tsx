@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useUserStore } from '@/store/user'
 import { UserRole } from '@/types/user'
-import { useRouter } from 'next/navigation'
-import { homes } from '@/app/(protected)/routes'
+import { useHome } from '@/hooks/use-home'
 
 export interface UserRoleCheckerProps {
   role: UserRole
@@ -12,12 +11,11 @@ export interface UserRoleCheckerProps {
 
 export function UserRoleChecker({ role, children }: UserRoleCheckerProps) {
   const { data } = useUserStore('data')
-  const router = useRouter()
+  const { redirect } = useHome()
 
   useEffect(() => {
     if (!!data?.role && data?.role !== role) {
-      const home = homes[data?.role]
-      router.push(home)
+      redirect()
     }
   }, [data?.role])
 

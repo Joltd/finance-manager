@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button'
 import { useRequest } from '@/hooks/use-request'
 import { userUrls } from '@/api/user'
 import { Spinner } from '@/components/ui/spinner'
-import { useRouter } from 'next/navigation'
+import { useHome } from '@/hooks/use-home'
+import { useUserStore } from '@/store/user'
 
 type LoginFormData = z.infer<typeof formSchema>
 
@@ -28,13 +29,14 @@ export default function Page() {
       password: '',
     },
   })
-  const router = useRouter()
+  const userStore = useUserStore('data', 'fetch')
+  const { redirect } = useHome()
 
-  const onSubmit = (data: LoginFormData) => {
-    submit(data).then(() => {
-      reset()
-      router.push('/')
-    })
+  const onSubmit = async (data: LoginFormData) => {
+    await submit(data)
+    reset()
+    await userStore.fetch()
+    redirect()
   }
 
   return (
