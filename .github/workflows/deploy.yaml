@@ -61,16 +61,16 @@ jobs:
 
       - name: Prepare Docker Compose
         run: |
-          sed -e 's/3.0.0-SNAPSHOT|${{ env.PROJECT_VERSION }}|' \
-          -e 's/localhost:5432|${{ secrets.DB_HOST }}|' \
-          -e 's/root_user|${{ secrets.DB_USER }}|' \
-          -e 's/root_password|${{ secrets.DB_PASSWORD }}|' \
-          -e 's/security_secret|${{ secrets.SECURITY_SECRET }}|' \
-          -e 's/free_currency_api_key|${{ secrets.FREE_CURRENCY_API_KEY }}|' \
-          -e 's/open_exchange_app_id|${{ secrets.OPEN_EXCHANGE_APP_ID }}|' \
-          -e 's/exchange_rate_api_key|${{ secrets.EXCHANGE_RATE_API_KEY }}|' \
-          -e 's/coin_gecko_api_key|${{ secrets.COIN_GECKO_API_KEY }}|' \
-          -e 's/open_ai_api_key|${{ secrets.OPEN_AI_API_KEY }}|' \
+          sed -e 's|3.0.0-SNAPSHOT|${{ env.PROJECT_VERSION }}|' \
+          -e 's|localhost:5432|${{ secrets.DB_HOST }}|' \
+          -e 's|root_user|${{ secrets.DB_USER }}|' \
+          -e 's|root_password|${{ secrets.DB_PASSWORD }}|' \
+          -e 's|security_secret|${{ secrets.SECURITY_SECRET }}|' \
+          -e 's|free_currency_api_key|${{ secrets.FREE_CURRENCY_API_KEY }}|' \
+          -e 's|open_exchange_app_id|${{ secrets.OPEN_EXCHANGE_APP_ID }}|' \
+          -e 's|exchange_rate_api_key|${{ secrets.EXCHANGE_RATE_API_KEY }}|' \
+          -e 's|coin_gecko_api_key|${{ secrets.COIN_GECKO_API_KEY }}|' \
+          -e 's|open_ai_api_key|${{ secrets.OPEN_AI_API_KEY }}|' \
           -i docker-compose.yml
 
       - name: Send Docker Compose file
