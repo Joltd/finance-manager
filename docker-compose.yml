@@ -20,3 +20,5 @@ services:
     image: joltd/finance-manager:web-3.0.0-SNAPSHOT
     ports:
       - "9300:3000"
+    environment:
+      BACKEND_HOST: http://server:8080
