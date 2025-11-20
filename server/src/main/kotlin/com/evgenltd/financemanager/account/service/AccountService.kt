@@ -35,10 +35,10 @@ class AccountService(
 
     fun listReference(mask: String?, type: AccountType?): List<AccountReferenceRecord> {
         val filter = (Account::type eq type) and (Account::name like mask)
-        val pageable = PageRequest.of(0, 20, Sort.by(Account::name.name))
+        val pageable = PageRequest.of(0, 5, Sort.by(Account::name.name))
         return accountRepository.findAll(filter, pageable)
             .content
-            .map { accountConverter.toReference(it) }
+            .map { accountConverter.toAccountReference(it) }
     }
 
     fun list(type: AccountType?): List<AccountRecord> = accountRepository.findAll((Account::type eq type), Sort.by(Account::name.name))
@@ -57,7 +57,7 @@ class AccountService(
                     name = group?.name,
                     accounts = accounts.map {
                         AccountBalanceRecord(
-                            account = accountConverter.toReference(it),
+                            account = accountConverter.toAccountReference(it),
                             balances = balances[it] ?: emptyList(),
                         )
                     }.filter { !filter.hideZeroBalances || it.balances.isNotEmpty() }

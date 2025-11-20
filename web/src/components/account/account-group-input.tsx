@@ -19,6 +19,7 @@ export function AccountGroupInput({ value, onChange }: AccountGroupInputProps) {
     'fetch',
     'data',
     'error',
+    'reset',
   )
   const group = useRequest(accountUrls.group)
 
@@ -36,8 +37,9 @@ export function AccountGroupInput({ value, onChange }: AccountGroupInputProps) {
 
   return (
     <ReferenceInput
+      mode="single"
       value={value}
-      onChange={onChange}
+      onValueChange={onChange}
       getId={(it) => it.id}
       fetchStore={groupList}
       onNew={handleNew}

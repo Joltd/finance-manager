@@ -1,24 +1,36 @@
 import { Amount } from '@/types/common/amount'
-import { AccountReference } from '@/types/account'
+import { AccountReference, AccountType } from '@/types/account'
 import { Reference } from '@/types/common/reference'
 
-export interface TopFlowEntry {
-  date: string
-  category1: TopFlowCategoryEntry
-  category2: TopFlowCategoryEntry
-  category3: TopFlowCategoryEntry
-  other: TopFlowCategoryEntry
+export interface TopFlowReportData {
+  groups: TopFlowGroup[]
 }
 
-export interface TopFlowCategoryEntry {
+export interface TopFlowGroup {
+  date: string
+  amount: Amount
+  entries: TopFlowEntry[]
+  otherEntries: TopFlowEntry[]
+}
+
+export interface TopFlowEntry {
+  other: boolean
   account?: AccountReference
   amount: Amount
 }
 
-export interface ExpenseIncomeEntry {
+export interface IncomeExpenseReportData {
+  groups: IncomeExpenseGroup[]
+}
+
+export interface IncomeExpenseGroup {
   date: string
-  expense: Amount
-  income: Amount
+  entries: IncomeExpenseEntry[]
+}
+
+export interface IncomeExpenseEntry {
+  type: AccountType
+  amount: Amount
 }
 
 export interface CategoryEntry {
@@ -28,5 +40,22 @@ export interface CategoryEntry {
 
 export interface BalanceEntry {
   group?: Reference
+  amount: Amount
+}
+
+export interface BalanceChartData {
+  groups: BalanceGroupEntry[]
+  otherGroups: BalanceGroupEntry[]
+}
+
+export interface BalanceGroupEntry {
+  other?: boolean
+  group?: Reference
+  amount: Amount
+  entries: BalanceAccountEntry[]
+}
+
+export interface BalanceAccountEntry {
+  account: Reference
   amount: Amount
 }

@@ -1,10 +1,10 @@
-import { Filter } from '@/components/common/filter/filter'
-import { WeekFilter } from '@/components/common/filter/week-filter'
 import { useEffect, useState } from 'react'
 import { useOperationListStore } from '@/store/operation'
-import { SelectFilter, SelectFilterOption } from '@/components/common/filter/select-filter'
 import { OperationType } from '@/types/operation'
 import { asDateRangeValue, asWeek } from '@/lib/date'
+import { Filter } from '@/components/common/filter/filter'
+import { WeekFilter } from '@/components/common/filter/date-filter'
+import { SelectFilter, SelectFilterOption } from '@/components/common/filter/select-filter'
 import { AccountFilter } from '@/components/common/filter/account-filter'
 import { CurrencyFilter } from '@/components/common/filter/currency-filter'
 
@@ -24,16 +24,16 @@ export function OperationFilter() {
   }, [value])
 
   return (
-    <Filter value={value} onChange={setValue} className="bg-accent p-4 rounded-sm">
-      <WeekFilter name="date" alwaysVisible />
-      <SelectFilter name="type" label="Type" defaultValue={OperationType.EXPENSE}>
-        <SelectFilterOption value={OperationType.EXCHANGE} label="is exchange" />
-        <SelectFilterOption value={OperationType.TRANSFER} label="is transfer" />
-        <SelectFilterOption value={OperationType.EXPENSE} label="is expense" />
-        <SelectFilterOption value={OperationType.INCOME} label="is income" />
+    <Filter value={value} onChange={setValue}>
+      <WeekFilter id="date" alwaysVisible />
+      <SelectFilter id="type" label="Type" defaultValue={OperationType.EXPENSE}>
+        <SelectFilterOption id={OperationType.EXCHANGE} label="is exchange" />
+        <SelectFilterOption id={OperationType.TRANSFER} label="is transfer" />
+        <SelectFilterOption id={OperationType.EXPENSE} label="is expense" />
+        <SelectFilterOption id={OperationType.INCOME} label="is income" />
       </SelectFilter>
-      <AccountFilter name="account" label="Account" />
-      <CurrencyFilter name="currency" label="Currency" />
+      <AccountFilter id="account" label="Account" />
+      <CurrencyFilter id="currency" label="Currency" />
     </Filter>
   )
 }

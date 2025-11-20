@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.repository.accountTypes
 import com.evgenltd.financemanager.common.repository.accounts
+import com.evgenltd.financemanager.common.repository.accountsNot
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.repository.currency
@@ -13,16 +14,25 @@ import com.evgenltd.financemanager.common.service.validHalfYear
 import com.evgenltd.financemanager.common.service.withMonday
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.common.util.isNotZero
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
+import com.evgenltd.financemanager.exchangerate.record.ExchangeRateHistoryIndex
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
-import com.evgenltd.financemanager.report.record.TopFlowCategoryEntryRecord
+import com.evgenltd.financemanager.report.record.IncomeExpenseEntryRecord
+import com.evgenltd.financemanager.report.record.IncomeExpenseFilter
+import com.evgenltd.financemanager.report.record.IncomeExpenseGroupRecord
+import com.evgenltd.financemanager.report.record.IncomeExpenseReportRecord
 import com.evgenltd.financemanager.report.record.TopFlowEntryRecord
+import com.evgenltd.financemanager.report.record.TopFlowGroupRecord
 import com.evgenltd.financemanager.report.record.TopFlowFilter
+import com.evgenltd.financemanager.report.record.TopFlowReportRecord
 import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 @Service
 class ReportService(
@@ -32,22 +42,25 @@ class ReportService(
     private val accountConverter: AccountConverter,
 ) {
 
-    fun topFlowChart(filter: TopFlowFilter): List<TopFlowEntryRecord> {
+    fun topFlowReport(filter: TopFlowFilter): TopFlowReportRecord {
 
         if (filter.type == AccountType.ACCOUNT) {
             throw IllegalArgumentException("Account type doesn't supported")
         }
 
-        val targetCurrency = settingService.operationDefaultCurrency() ?: BASE_CURRENCY
+        val targetCurrency = settingService.load()
+            .operationDefaultCurrency
+            ?.name
+            ?: BASE_CURRENCY
 
         val transactions = ((Transaction::date between filter.date.validHalfYear()) and
                 (Transaction::account accountTypes filter.type?.let { listOf(it) }) and
-                (Transaction::amount currency filter.currency) and
-                (Transaction::account accounts filter.categories))
+                (Transaction::account accountsNot filter.exclude) and
+                (Transaction::account accounts filter.include))
             .let { transactionRepository.findAll(it) }
 
         if (transactions.isEmpty()) {
-            return emptyList()
+            return TopFlowReportRecord()
         }
 
         val currencies = transactions.map { it.amount.currency }.distinct()
@@ -58,42 +71,137 @@ class ReportService(
 
         val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
 
-        return transactions.map {
-            TopFlowAggregation(
-                date = it.date.withDayOfMonth(1),
-                account = it.account,
-                amount = rateIndex.toTarget(it.date.withMonday(), it.amount)
-            )
-        }.groupBy { it.date }
-            .map { (date, transactions) ->
-                val sortedTransactions = transactions.groupingBy { it.account }
-                    .aggregate { _, accumulator: Amount?, element, _ -> element.amount + accumulator }
-                    .map { (account, amount) -> account to amount }
-                    .sortedByDescending { (_, amount) -> amount }
-                    .map { (account, amount) -> TopFlowCategoryEntryRecord(accountConverter.toReference(account), amount) }
-
-                val categories = sortedTransactions.take(3)
-                val other = sortedTransactions.drop(3)
-                    .map { (_, amount) -> amount }
-                    .reduceOrNull { acc, amount -> acc + amount }
-                    .let { TopFlowCategoryEntryRecord(amount = it ?: emptyAmount(targetCurrency)) }
-
-                TopFlowEntryRecord(
-                    date = date,
-                    category1 = categories.getOrDefault(0, targetCurrency),
-                    category2 = categories.getOrDefault(1, targetCurrency),
-                    category3 = categories.getOrDefault(2, targetCurrency),
-                    other = other,
-                )
-            }
+        val result = topFlowData(transactions, rateIndex, targetCurrency)
+        return TopFlowReportRecord(result)
     }
 
-    private fun List<TopFlowCategoryEntryRecord>.getOrDefault(index: Int, targetCurrency: String): TopFlowCategoryEntryRecord = getOrNull(index)
-        ?: TopFlowCategoryEntryRecord(amount = emptyAmount(targetCurrency))
+    fun topFlowData(transactions: List<Transaction>, rateIndex: ExchangeRateHistoryIndex, targetCurrency: String, groupLimit: Int = 5): List<TopFlowGroupRecord> =
+        transactions
+            .asSequence()
+            .filter { it.account.type == AccountType.EXPENSE }
+            .map {
+                TopFlowAggregation(
+                    date = it.date.withDayOfMonth(1),
+                    account = it.account,
+                    amount = rateIndex.toTarget(it.date.withMonday(), it.amount)
+                )
+            }
+            .groupingBy { TopFlowKey(it.date, it.account) }
+            .aggregate { _, accumulator: TopFlowAggregation?, element, _ ->
+                TopFlowAggregation(
+                    date = accumulator?.date ?: element.date,
+                    account = accumulator?.account ?: element.account,
+                    amount = element.amount + accumulator?.amount,
+                )
+            }
+            .asSequence()
+            .filter { (_, value) -> value.amount.isNotZero() }
+            .groupBy { (key, _) -> key.date }
+            .map { (date , entries) ->
+                val allEntries = entries.map { (_, value) ->
+                    TopFlowEntryRecord(
+                        account = accountConverter.toReference(value.account),
+                        amount = value.amount,
+                    )
+                }.sortedByDescending { it.amount }
+
+                val otherEntries = allEntries.drop(groupLimit)
+                    .map { it.amount }
+                    .reduceOrNull { acc, amount -> acc + amount }
+                    ?.let { listOf(TopFlowEntryRecord(other = true, amount = it)) }
+                    ?: emptyList()
+
+                TopFlowGroupRecord(
+                    date = date,
+                    amount = allEntries.map { it.amount }
+                        .reduceOrNull { acc, amount -> acc + amount }
+                        ?: emptyAmount(targetCurrency),
+                    entries = allEntries.take(groupLimit) + otherEntries,
+                    otherEntries = allEntries.drop(groupLimit),
+                )
+            }
+            .sortedBy { it.date }
+
+    fun incomeExpenseReport(filter: IncomeExpenseFilter): IncomeExpenseReportRecord {
+        val targetCurrency = settingService.load()
+            .operationDefaultCurrency
+            ?.name
+            ?: BASE_CURRENCY
+
+        val transactions = ((Transaction::date between filter.date.validHalfYear()) and
+                (Transaction::account accountTypes listOf(AccountType.INCOME, AccountType.EXPENSE)))
+            .let { transactionRepository.findAll(it) }
+
+        if (transactions.isEmpty()) {
+            return IncomeExpenseReportRecord()
+        }
+
+        val currencies = transactions.map { it.amount.currency }.distinct()
+        val actualRange = Range(
+            transactions.minOf { it.date },
+            transactions.maxOf { it.date }
+        )
+
+        val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
+
+        val result = incomeExpenseData(transactions, rateIndex)
+        return IncomeExpenseReportRecord(result)
+    }
+
+    fun incomeExpenseData(transactions: List<Transaction>, rateIndex: ExchangeRateHistoryIndex): List<IncomeExpenseGroupRecord> =
+        transactions
+            .asSequence()
+            .filter { it.account.type in listOf(AccountType.INCOME, AccountType.EXPENSE) }
+            .map {
+                IncomeExpenseAggregation(
+                    date = it.date.withDayOfMonth(1),
+                    type = it.account.type,
+                    amount = rateIndex.toTarget(it.date.withMonday(), it.amount)
+                )
+            }
+            .groupingBy { IncomeExpenseKey(it.date, it.type) }
+            .aggregate { _, accumulator: IncomeExpenseAggregation?, element, _ ->
+                IncomeExpenseAggregation(
+                    date = accumulator?.date ?: element.date,
+                    type = accumulator?.type ?: element.type,
+                    amount = element.amount + accumulator?.amount,
+                )
+            }
+            .asSequence()
+            .filter { (_, value) -> value.amount.isNotZero() }
+            .groupBy { (key, _) -> key.date }
+            .map { (date, entries) ->
+                IncomeExpenseGroupRecord(
+                    date = date,
+                    entries = entries.map { (_, value) ->
+                        IncomeExpenseEntryRecord(
+                            type = value.type,
+                            amount = value.amount,
+                        )
+                    }.sortedByDescending { it.amount }
+                )
+            }
+            .sortedBy { it.date }
+
+    private data class TopFlowKey(
+        val date: LocalDate,
+        val account: Account,
+    )
 
     private data class TopFlowAggregation(
         val date: LocalDate,
         val account: Account,
+        val amount: Amount,
+    )
+
+    private data class IncomeExpenseKey(
+        val date: LocalDate,
+        val type: AccountType,
+    )
+
+    private data class IncomeExpenseAggregation(
+        val date: LocalDate,
+        val type: AccountType,
         val amount: Amount,
     )
 

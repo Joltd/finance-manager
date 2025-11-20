@@ -4,7 +4,8 @@ import { cva, VariantProps } from 'class-variance-authority'
 
 export interface FlowProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof variants>, RefAttributes<HTMLDivElement> {}
+    VariantProps<typeof variants>,
+    RefAttributes<HTMLDivElement> {}
 
 const variants = cva('flex flex-wrap', {
   variants: {
@@ -12,16 +13,22 @@ const variants = cva('flex flex-wrap', {
       2: 'gap-2',
       4: 'gap-4',
     },
+    scrollable: {
+      true: 'overflow-y-auto',
+    },
   },
   defaultVariants: {
     gap: 2,
+    scrollable: false,
   },
 })
 
-export function Flow({ gap, className, children, ...props }: FlowProps) {
+export function Flow({ gap, scrollable, className, children, ...props }: FlowProps) {
   return (
-    <div className={cn(variants({ gap }), className)} {...props}>
-      {children}
-    </div>
+    !!React.Children.toArray(children).length && (
+      <div className={cn(variants({ gap, scrollable }), className)} {...props}>
+        {children}
+      </div>
+    )
   )
 }

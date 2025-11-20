@@ -4,9 +4,10 @@ import { Typography, TypographyProps } from '@/components/common/typography/typo
 
 export interface DateLabelProps extends TypographyProps {
   date: string
+  pattern?: string
 }
 
-export function DateLabel({ date, ...props }: DateLabelProps) {
+export function DateLabel({ date, pattern, ...props }: DateLabelProps) {
   const actualDate = parseISO(date)
-  return <Typography {...props}>{format(actualDate, 'd MMMM yyyy')}</Typography>
+  return <Typography {...props}>{format(actualDate, pattern || 'd MMMM yyyy')}</Typography>
 }

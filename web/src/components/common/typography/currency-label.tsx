@@ -3,7 +3,7 @@ export interface CurrencyLabelProps {
 }
 
 export function CurrencyLabel({ currency }: CurrencyLabelProps) {
-  return (
-    <div className="text-muted-foreground">{currency}</div>
-  )
+  return <div className="text-muted-foreground">{currency}</div>
 }
+
+export function CurrencyLabelNew({ currency }: CurrencyLabelProps) {}

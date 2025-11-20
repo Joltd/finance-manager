@@ -23,12 +23,6 @@ class BalanceController(
     private val accountRepository: AccountRepository,
 ) {
 
-    @PostMapping("/api/v1/test")
-    @PreAuthorize("hasRole('USER')")
-    fun test(@RequestParam accountId: UUID, @RequestParam currency: String, @RequestParam date: LocalDate) {
-        balanceActionService.updateBalance(accountId, currency, date)
-    }
-
     @GetMapping("/api/v1/balance")
     @PreAuthorize("hasRole('USER')")
     fun list(): List<BalanceRecord> = balanceService.list()

@@ -18,7 +18,7 @@ class BalanceConverter(
     )
 
     fun toCommonRecord(balance: Balance): BalanceCommonRecord = BalanceCommonRecord(
-        account = accountConverter.toReference(balance.account),
+        account = accountConverter.toAccountReference(balance.account),
         amount = balance.amount,
         commonAmount = balance.amount,
     )

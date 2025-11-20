@@ -17,9 +17,11 @@ const variants = cva('flex', {
       true: '',
     },
     gap: {
+      0: 'gap-0',
       2: 'gap-2',
       4: 'gap-4',
       6: 'gap-6',
+      8: 'gap-8',
     },
     scrollable: {
       true: 'overflow-y-auto',
@@ -45,10 +47,20 @@ const variants = cva('flex', {
   },
 })
 
-export function Stack({ orientation, center, gap, scrollable, className, children }: StackProps) {
+export function Stack({
+  orientation,
+  center,
+  gap,
+  scrollable,
+  className,
+  children,
+  ...props
+}: StackProps) {
   return (
-    <div className={cn(variants({ orientation, center, gap, scrollable }), className)}>
-      {children}
-    </div>
+    !!React.Children.toArray(children).length && (
+      <div className={cn(variants({ orientation, center, gap, scrollable }), className)} {...props}>
+        {children}
+      </div>
+    )
   )
 }

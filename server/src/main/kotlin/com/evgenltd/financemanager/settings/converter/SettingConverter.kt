@@ -15,8 +15,8 @@ class SettingConverter(
     fun toRecord(settings: Settings): SettingsRecord = SettingsRecord(
         version = settings.version,
         operationDefaultCurrency = settings.operationDefaultCurrency?.name,
-        operationDefaultAccount = settings.operationDefaultAccount?.let { accountConverter.toReference(it) },
-        operationCashAccount = settings.operationCashAccount?.let { accountConverter.toReference(it) },
+        operationDefaultAccount = settings.operationDefaultAccount?.let { accountConverter.toAccountReference(it) },
+        operationCashAccount = settings.operationCashAccount?.let { accountConverter.toAccountReference(it) },
     )
 
     fun toEntity(settingsRecord: SettingsRecord): Settings = Settings(

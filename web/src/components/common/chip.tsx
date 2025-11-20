@@ -7,16 +7,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
 export interface ChipProps extends React.HTMLAttributes<HTMLDivElement> {
-  text: string
+  text?: string
   onDismiss?: () => void
   icon?: React.ReactNode
 }
 
-export function Chip({ text, onDismiss, icon, ...props }: ChipProps) {
+export function Chip({ text, onDismiss, icon, children, ...props }: ChipProps) {
   return (
     <Badge variant="outline" className={cn('p-0', props.className)} {...props}>
       <div className="pl-3 max-w-30">
-        <Shorten text={text} />
+        {text && <Shorten text={text} />}
+        {children}
       </div>
       {onDismiss && (
         <Button

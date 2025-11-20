@@ -1,14 +1,26 @@
-import { FilterPrimitiveProps } from '@/types/common/filter'
+import {
+  FilterButton,
+  FilterButtonProps,
+  useFilterContext,
+} from '@/components/common/filter/filter'
+import { AccountLabel } from '@/components/common/typography/account-label'
 import { ReferenceInput } from '@/components/common/input/reference-input'
 import { useAccountReferenceStore } from '@/store/account'
-import { AccountLabel } from '@/components/common/typography/account-label'
-import { AccountType } from '@/types/account'
+import { AccountReference, AccountType } from '@/types/account'
 
-export interface AccountFilterProps extends FilterPrimitiveProps {
+export interface AccountFilterProps extends FilterButtonProps {
   type?: AccountType
+  multiple?: boolean
 }
 
-export function AccountFilter({ type, value, onChange }: AccountFilterProps) {
+export function AccountFilter({
+  type,
+  multiple,
+  id,
+  label = 'Account',
+  ...props
+}: AccountFilterProps) {
+  const { value, updateValue } = useFilterContext()
   const accountList = useAccountReferenceStore(
     'data',
     'dataFetched',
@@ -16,19 +28,25 @@ export function AccountFilter({ type, value, onChange }: AccountFilterProps) {
     'error',
     'updateQueryParams',
     'fetch',
+    'reset',
   )
 
   return (
-    <ReferenceInput
-      getId={(account) => account.id}
-      fetchStore={accountList}
-      renderItem={(account) => <AccountLabel account={account} />}
-      value={value}
-      onChange={onChange}
-      queryParams={{ type }}
-      placeholder="choose..."
-      size="sm"
-      className="rounded-none"
-    />
+    <FilterButton id={id} label={label} {...props}>
+      <ReferenceInput
+        mode={multiple ? 'multiple' : 'single'}
+        getId={(account) => account.id}
+        fetchStore={accountList}
+        renderItem={(account) => <AccountLabel account={account} />}
+        value={value?.[id]}
+        onValueChange={(value: AccountReference | AccountReference[] | undefined) =>
+          updateValue(id, value)
+        }
+        queryParams={{ type }}
+        placeholder="choose..."
+        size="sm"
+        className="rounded-none"
+      />
+    </FilterButton>
   )
 }

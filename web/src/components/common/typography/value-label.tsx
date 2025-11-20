@@ -28,3 +28,7 @@ const shortFormatter = new Intl.NumberFormat(undefined, {
   compactDisplay: 'short',
   maximumFractionDigits: 2,
 })
+
+export function ValueLabelNew({ value, shorten }: ValueLabelProps) {
+  return !shorten || value < 100000 ? formatter.format(value) : shortFormatter.format(value)
+}

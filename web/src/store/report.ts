@@ -2,7 +2,7 @@ import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { reportUrls } from '@/api/report'
 import { Dashboard } from '@/types/dashboard'
-import { ExpenseIncomeEntry, TopFlowEntry } from '@/types/report'
+import { IncomeExpenseReportData, TopFlowReportData } from '@/types/report'
 
 const dashboardStore = createFetchStore<Dashboard>(reportUrls.dashboard)
 
@@ -10,13 +10,17 @@ export const useDashboardStore = <K extends keyof FetchStoreState<Dashboard>>(..
   useStoreSelect<FetchStoreState<Dashboard>, K>(dashboardStore, ...fields)
 
 // Reports
-const topFlowStore = createFetchStore<TopFlowEntry[]>(reportUrls.topFlow)
+const topFlowStore = createFetchStore<TopFlowReportData>(reportUrls.topFlow, 'POST')
 
-export const useTopFlowStore = <K extends keyof FetchStoreState<TopFlowEntry[]>>(...fields: K[]) =>
-  useStoreSelect<FetchStoreState<TopFlowEntry[]>, K>(topFlowStore, ...fields)
-
-const expenseIncomeStore = createFetchStore<ExpenseIncomeEntry[]>(reportUrls.expenseIncome)
-
-export const useExpenseIncomeStore = <K extends keyof FetchStoreState<ExpenseIncomeEntry[]>>(
+export const useTopFlowStore = <K extends keyof FetchStoreState<TopFlowReportData>>(
   ...fields: K[]
-) => useStoreSelect<FetchStoreState<ExpenseIncomeEntry[]>, K>(expenseIncomeStore, ...fields)
+) => useStoreSelect<FetchStoreState<TopFlowReportData>, K>(topFlowStore, ...fields)
+
+const incomeExpenseStore = createFetchStore<IncomeExpenseReportData>(
+  reportUrls.incomeExpense,
+  'POST',
+)
+
+export const useIncomeExpenseStore = <K extends keyof FetchStoreState<IncomeExpenseReportData>>(
+  ...fields: K[]
+) => useStoreSelect<FetchStoreState<IncomeExpenseReportData>, K>(incomeExpenseStore, ...fields)

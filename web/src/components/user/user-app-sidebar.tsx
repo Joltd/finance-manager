@@ -12,7 +12,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { BookTextIcon, HandCoinsIcon, PlusIcon, WalletIcon, XIcon } from 'lucide-react'
+import {
+  BookTextIcon,
+  HandCoinsIcon,
+  ListChecksIcon,
+  PlusIcon,
+  ScrollTextIcon,
+  WalletIcon,
+  XIcon,
+} from 'lucide-react'
 import {
   ImportDataNewDialog,
   useImportDataNewDialogStore,
@@ -73,21 +81,29 @@ export function UserAppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {/*<DropdownMenu>*/}
-              {/*  <DropdownMenuTrigger asChild>*/}
-              {/*    <SidebarMenuItem>*/}
-              {/*      <SidebarMenuButton>Reports</SidebarMenuButton>*/}
-              {/*    </SidebarMenuItem>*/}
-              {/*  </DropdownMenuTrigger>*/}
-              {/*  <DropdownMenuContent align="start">*/}
-              {/*    <DropdownMenuItem>*/}
-              {/*      <a href={'/report/top-flow'}>Top flow</a>*/}
-              {/*    </DropdownMenuItem>*/}
-              {/*    <DropdownMenuItem>*/}
-              {/*      <a href={'/report/expense-income'}>Expense income</a>*/}
-              {/*    </DropdownMenuItem>*/}
-              {/*  </DropdownMenuContent>*/}
-              {/*</DropdownMenu>*/}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Report</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href={`/report/income-expense`}>
+                    <ListChecksIcon />
+                    <span>Income vs expense</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href={`/report/top-flow`}>
+                    <ScrollTextIcon />
+                    <span>Top flow</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

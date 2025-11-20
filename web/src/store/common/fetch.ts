@@ -3,6 +3,7 @@ import { fillPathParams, flatten } from '@/lib/utils'
 import api from '@/lib/axios'
 import { patch, Patch } from '@/lib/patch'
 import { produce } from 'immer'
+import { AxiosRequestConfig } from 'axios'
 
 export interface FetchStoreState<T> {
   loading: boolean
@@ -15,21 +16,32 @@ export interface FetchStoreState<T> {
   queryParams?: Record<string, any>
   setQueryParams: (queryParams: Record<string, any>) => void
   updateQueryParams: (queryParams: Record<string, any>) => void
+  payload?: Record<string, any>
+  setPayload: (payload: Record<string, any>) => void
+  updatePayload: (payload: Record<string, any>) => void
   fetch: () => Promise<void>
   reset: () => void
   applyPatch: (patches: Patch[]) => void
 }
 
-export const createFetchStore = <T>(path: string) =>
+export const createFetchStore = <T>(path: string, method: string = 'GET') =>
   createStore<FetchStoreState<T>>((set, get) => {
     const fetch = async () => {
       set({ error: undefined, loading: !get().dataFetched })
       try {
         const preparedPath = fillPathParams(path, get().pathParams)
 
-        const response = await api.get(preparedPath, {
+        const request: AxiosRequestConfig = {
+          method,
+          url: preparedPath,
           params: get().queryParams,
-        })
+        }
+
+        if (method !== 'GET') {
+          request.data = get().payload
+        }
+
+        const response = await api.request(request)
 
         if (response.status !== 200 || !response.data.success) {
           set({ error: response.data.error || 'Something wrong' })
@@ -82,6 +94,10 @@ export const createFetchStore = <T>(path: string) =>
         set({ queryParams: flatten(queryParams) }),
       updateQueryParams: (queryParams: Record<string, any>) =>
         set({ queryParams: { ...get().queryParams, ...flatten(queryParams) } }),
+      payload: {},
+      setPayload: (payload: Record<string, any>) => set({ payload }),
+      updatePayload: (payload: Record<string, any>) =>
+        set({ payload: { ...get().payload, ...payload } }),
       fetch,
       reset,
       applyPatch,

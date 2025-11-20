@@ -10,7 +10,7 @@ export interface GroupProps
 
 export function Group({ text, className, children, ...props }: GroupProps) {
   return (
-    <div className={cn('flex flex-col md:gap-4 gap-3 w-full', className)} {...props}>
+    <div className={cn('flex flex-col md:gap-2 gap-2 w-full', className)} {...props}>
       {text && (typeof text === 'string' ? <Typography variant="h4">{text}</Typography> : text)}
       {children}
     </div>

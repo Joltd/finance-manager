@@ -20,6 +20,7 @@ export function AccountInput({ type = AccountType.ACCOUNT, value, onChange }: Ac
     'error',
     'updateQueryParams',
     'fetch',
+    'reset',
   )
   const account = useRequest(accountUrls.root)
 
@@ -37,8 +38,9 @@ export function AccountInput({ type = AccountType.ACCOUNT, value, onChange }: Ac
 
   return (
     <ReferenceInput
+      mode="single"
       value={value}
-      onChange={onChange}
+      onValueChange={onChange}
       getId={(it) => it.id}
       fetchStore={accountList}
       queryParams={{ type }}

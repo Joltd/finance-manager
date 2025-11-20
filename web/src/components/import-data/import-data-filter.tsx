@@ -1,10 +1,10 @@
-import { Filter } from '@/components/common/filter/filter'
-import { WeekFilter } from '@/components/common/filter/week-filter'
 import { useEffect, useState } from 'react'
-import { SelectFilter, SelectFilterOption } from '@/components/common/filter/select-filter'
 import { asDateRangeValue, asWeek } from '@/lib/date'
 import { useImportDataEntryListStore, useImportDataStore } from '@/store/import-data'
 import { produce } from 'immer'
+import { Filter } from '@/components/common/filter/filter'
+import { WeekFilter } from '@/components/common/filter/date-filter'
+import { SelectFilter, SelectFilterOption } from '@/components/common/filter/select-filter'
 
 export interface ImportDataOperationFilterProps {}
 
@@ -36,28 +36,28 @@ export function ImportDataFilter({}: ImportDataOperationFilterProps) {
   }, [value])
 
   return (
-    <Filter value={value} onChange={setValue} className="bg-accent p-4 rounded-sm">
+    <Filter value={value} onChange={setValue}>
       <WeekFilter
-        name="date"
+        id="date"
         alwaysVisible
         from={importData.data?.dateRange?.from}
         to={importData.data?.dateRange?.to}
       />
-      <SelectFilter name="linkage" label="Linkage" defaultValue={true}>
-        <SelectFilterOption value={true} label="established" />
-        <SelectFilterOption value={false} label="not established" />
+      <SelectFilter id="linkage" label="Linkage" defaultValue={true}>
+        <SelectFilterOption id={true} label="established" />
+        <SelectFilterOption id={false} label="not established" />
       </SelectFilter>
-      <SelectFilter name="entryVisible" label="Entry" defaultValue={true}>
-        <SelectFilterOption value={false} label="hidden" />
-        <SelectFilterOption value={true} label="visible" />
+      <SelectFilter id="entryVisible" label="Entry" defaultValue={true}>
+        <SelectFilterOption id={false} label="hidden" />
+        <SelectFilterOption id={true} label="visible" />
       </SelectFilter>
-      <SelectFilter name="operationVisible" label="Operation" defaultValue={true}>
-        <SelectFilterOption value={false} label="hidden" />
-        <SelectFilterOption value={true} label="visible" />
+      <SelectFilter id="operationVisible" label="Operation" defaultValue={true}>
+        <SelectFilterOption id={false} label="hidden" />
+        <SelectFilterOption id={true} label="visible" />
       </SelectFilter>
-      <SelectFilter name="totalValid" label="Total" defaultValue={false}>
-        <SelectFilterOption value={false} label="is invalid" />
-        <SelectFilterOption value={true} label="is valid" />
+      <SelectFilter id="totalValid" label="Total" defaultValue={false}>
+        <SelectFilterOption id={false} label="is invalid" />
+        <SelectFilterOption id={true} label="is valid" />
       </SelectFilter>
     </Filter>
   )

@@ -35,3 +35,27 @@ export function minus(left?: Amount, right?: Amount): Amount | undefined {
     currency: (left?.currency || right?.currency)!!,
   }
 }
+
+export function max(left?: Amount, right?: Amount): Amount | undefined {
+  if (!left && !right) {
+    return
+  }
+
+  if ((left?.value || 0) > (right?.value || 0)) {
+    return left
+  } else {
+    return right
+  }
+}
+
+export function min(left?: Amount, right?: Amount): Amount | undefined {
+  if (!left && !right) {
+    return
+  }
+
+  if ((left?.value || 0) < (right?.value || 0)) {
+    return left
+  } else {
+    return right
+  }
+}

@@ -1,8 +1,10 @@
 import { CurrencyLabel } from '@/components/common/typography/currency-label'
 import { cn } from '@/lib/utils'
-import { ValueLabel } from '@/components/common/typography/value-label'
+import { ValueLabel, ValueLabelNew } from '@/components/common/typography/value-label'
 
 import { Amount } from '@/types/common/amount'
+import { Typography, TypographyProps } from '@/components/common/typography/typography'
+import React from 'react'
 
 export interface AmountLabelProps {
   amount?: Amount
@@ -22,5 +24,23 @@ export function AmountLabel({ amount, shorten, className }: AmountLabelProps) {
         </>
       )}
     </div>
+  )
+}
+
+export interface AmountLabelNewProps extends TypographyProps {
+  amount?: Amount
+  shorten?: boolean
+}
+
+export function AmountLabelNew({ amount, shorten, ...props }: AmountLabelNewProps) {
+  const Component = props.as === 'tspan' ? 'tspan' : 'span'
+  return (
+    amount && (
+      <Typography {...props}>
+        <ValueLabelNew value={amount.value / 10000} shorten={shorten} />
+        &nbsp;
+        <Component className="text-muted-foreground">{amount?.currency}</Component>
+      </Typography>
+    )
   )
 }

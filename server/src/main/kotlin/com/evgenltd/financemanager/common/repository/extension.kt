@@ -91,24 +91,34 @@ fun <E> KProperty1<E, Amount?>.isNotZero(): Specification<E> = Specification<E> 
 
 // account
 
-infix fun <E> KProperty1<E, Account?>.account(id: UUID?): Specification<E> = valueNonNull(id) {
+infix fun <E> KProperty1<E, Account?>.account(id: UUID?): Specification<E> = valueNonNull(id) { value ->
     Specification<E> { root, _, builder ->
-        builder.equal(root.get<Account>(name).get<String>(Account::id.name), it)
+        root.get<Account>(name)
+            .get<String>(Account::id.name)
+            .let { builder.equal(it, value) }
     }
 }
 
-infix fun <E> KProperty1<E, Account?>.accounts(accounts: List<UUID>?): Specification<E> = valueNonNull(accounts) {
-    Specification<E> { root, _, builder ->
-        builder.`in`(root.get<Account>(name).get<UUID>(Account::id.name)).also { expression ->
-            it.onEach { expression.value(it) }
-        }
+infix fun <E> KProperty1<E, Account?>.accounts(accounts: List<UUID>?): Specification<E> = valueNonNull(accounts) { value ->
+    Specification<E> { root, _, _ ->
+        root.get<Account>(name)
+            .get<UUID>(Account::id.name)
+            .`in`(value)
     }
 }
 
-infix fun <E> KProperty1<E, Account?>.accountTypes(types: List<AccountType>?): Specification<E> = valueNonNull(types) {
+infix fun <E> KProperty1<E, Account?>.accountsNot(accounts: List<UUID>?): Specification<E> = valueNonNull(accounts) { value ->
     Specification<E> { root, _, builder ->
-        builder.`in`(root.get<Account>(name).get<AccountType>(Account::type.name)).also { expression ->
-            it.onEach { expression.value(it) }
-        }
+        root.get<Account>(name).get<UUID>(Account::id.name)
+            .`in`(value)
+            .let { builder.not(it) }
+    }
+}
+
+infix fun <E> KProperty1<E, Account?>.accountTypes(types: List<AccountType>?): Specification<E> = valueNonNull(types) { value ->
+    Specification<E> { root, _, _ ->
+        root.get<Account>(name)
+            .get<AccountType>(Account::type.name)
+            .`in`(types)
     }
 }
