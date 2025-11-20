@@ -65,6 +65,7 @@ jobs:
           -e 's/localhost:5432/${{ secrets.DB_HOST }}/' \
           -e 's/root_user/${{ secrets.DB_USER }}/' \
           -e 's/root_password/${{ secrets.DB_PASSWORD }}/' \
+          -e 's/security_secret/${{ secrets.SECURITY_SECRET }}/' \
           -e 's/free_currency_api_key/${{ secrets.FREE_CURRENCY_API_KEY }}/' \
           -e 's/open_exchange_app_id/${{ secrets.OPEN_EXCHANGE_APP_ID }}/' \
           -e 's/exchange_rate_api_key/${{ secrets.EXCHANGE_RATE_API_KEY }}/' \

@@ -4,13 +4,12 @@ services:
 
   server:
     image: joltd/finance-manager:server-3.0.0-SNAPSHOT
-    ports:
-      - "9500:8080"
     environment:
       APP_VERSION: 3.0.0-SNAPSHOT
       DB_HOST: localhost:5432
       DB_USER: root_user
       DB_PASSWORD: root_password
+      SECURITY_SECRET: security_secret
       FREE_CURRENCY_API_KEY: free_currency_api_key
       OPEN_EXCHANGE_APP_ID: open_exchange_app_id
       EXCHANGE_RATE_API_KEY: exchange_rate_api_key
