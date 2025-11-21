@@ -19,7 +19,7 @@ class TaskSchedulerService(
     private val taskProcessService: TaskProcessService,
 ) {
 
-//    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 1000)
     fun process() {
         val tasks = taskRepository.findForExecution()
         for (task in tasks) {
@@ -27,7 +27,7 @@ class TaskSchedulerService(
         }
     }
 
-//    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 1000)
     fun cleanup() {
         val outdated = Instant.now().minus(5, ChronoUnit.MINUTES)
         ((Task::progress eq true) and (Task::startedAt lt outdated))
