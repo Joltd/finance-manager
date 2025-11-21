@@ -15,6 +15,7 @@ import com.evgenltd.financemanager.common.component.Task
 import com.evgenltd.financemanager.common.component.TaskKey
 import com.evgenltd.financemanager.common.component.TaskVersion
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.user.component.withRootTenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -31,7 +32,7 @@ class BalanceActionService(
 
     @Task
     @Transactional
-    fun updateBalance(@TaskKey accountId: UUID, @TaskKey currency: String, @TaskVersion(reversed = true) date: LocalDate) {
+    fun updateBalance(@TaskKey accountId: UUID, @TaskKey currency: String, @TaskVersion(reversed = true) date: LocalDate) = withRootTenant {
         val account = accountRepository.find(accountId)
 
         val cumulativeAmount = updateTurnover(account, currency, date)
