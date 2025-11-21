@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.common.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.user.component.withRootTenant
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.util.*
@@ -16,7 +17,9 @@ class TaskProcessService(
     fun execute(id: UUID) {
         taskActionService.lock(id) ?: return
         try {
-            taskActionService.execute(id)
+            withRootTenant {
+                taskActionService.execute(id)
+            }
         } catch (e: Exception) {
             log.error("Unable to execute task $id", e)
         } finally {

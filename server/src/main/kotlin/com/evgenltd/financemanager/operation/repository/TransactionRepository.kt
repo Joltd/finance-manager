@@ -17,12 +17,6 @@ interface TransactionRepository : JpaRepository<Transaction, UUID>, JpaSpecifica
 
     fun findByAccountAndAmountCurrencyAndDateGreaterThanEqual(account: Account, currency: String, date: LocalDate): List<Transaction>
 
-//    @Query("""
-//        select t from Transaction t
-//        where
-//            t.account = :account
-//            and t.date in :dates
-//    """)
-//    fun findForImportCalculation(importData: ImportData, account: Account, dates: Collection<LocalDate>): List<Transaction>
+
 
 }

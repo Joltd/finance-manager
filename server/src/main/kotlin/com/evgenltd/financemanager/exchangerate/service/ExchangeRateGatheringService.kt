@@ -26,7 +26,7 @@ class ExchangeRateGatheringService(
         val rates = exchangeRateRepository.findAll()
         val rateIndex = rates.associateBy { it.currency }
 
-        val currencies = withRootTenant { currencyRepository.findAll().distinctBy { it.name } }
+        val currencies = currencyRepository.findAll().distinctBy { it.name }
         val outdated = currencies
             .outdated(rates)
         val supported = currencies.map { it.name }
@@ -61,7 +61,7 @@ class ExchangeRateGatheringService(
 
     @Task
     fun updateHistory(@TaskKey date: LocalDate, currencies: List<String> = emptyList()) {
-        val allCurrencies = withRootTenant { currencyRepository.findAll().distinctBy { it.name } }
+        val allCurrencies = currencyRepository.findAll().distinctBy { it.name }
         val updateCurrencies = allCurrencies.filter { currencies.isEmpty() || it.name in currencies }
         val supported = allCurrencies.map { it.name }
 

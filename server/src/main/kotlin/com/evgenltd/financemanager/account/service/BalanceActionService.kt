@@ -34,14 +34,12 @@ class BalanceActionService(
     @Task
     @Transactional
     fun updateBalance(@TaskKey accountId: UUID, @TaskKey currency: String, @TaskVersion(reversed = true) date: LocalDate) {
-        val account = withRootTenant { accountRepository.find(accountId) }
+        val account = accountRepository.find(accountId)
 
-        withTenant(account.tenant) {
-            val cumulativeAmount = updateTurnover(account, currency, date)
+        val cumulativeAmount = updateTurnover(account, currency, date)
 
-            if (account.type == AccountType.ACCOUNT) {
-                updateBalance(account, currency, date, cumulativeAmount)
-            }
+        if (account.type == AccountType.ACCOUNT) {
+            updateBalance(account, currency, date, cumulativeAmount)
         }
     }
 
@@ -65,6 +63,7 @@ class BalanceActionService(
                 cumulativeAmount += it.value
                 Turnover(
                     id = null,
+                    tenant = account.tenant,
                     date = it.key,
                     account = account,
                     amount = it.value,
@@ -78,6 +77,7 @@ class BalanceActionService(
 
     private fun updateBalance(account: Account, currency: String, date: LocalDate, amount: Amount) {
         val balance = balanceRepository.findByAccountAndAmountCurrency(account, currency) ?: Balance(
+            tenant = account.tenant,
             account = account,
             amount = Amount(0, currency),
             date = date,
