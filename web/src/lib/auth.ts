@@ -92,17 +92,17 @@ export async function refreshRequest(
 
 export async function regularRequest(request: NextRequest, accessToken?: string) {
   const target = `${process.env.BACKEND_HOST}${request.nextUrl.pathname}?${request.nextUrl.searchParams}`
-  const init: RequestInit = {
+
+  const headers = new Headers(request.headers)
+  if (!!accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`)
+  }
+
+  const init: any = {
     method: request.method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...request.headers,
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body:
-      request.method === 'GET' || request.method === 'HEAD'
-        ? undefined
-        : await request.arrayBuffer(),
+    headers,
+    body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
+    duplex: 'half',
   }
   return await fetch(target, init)
 }

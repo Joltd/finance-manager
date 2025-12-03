@@ -1,20 +1,23 @@
 package com.evgenltd.financemanager.common.component
 
 import com.evgenltd.financemanager.common.record.SseEvent
+import com.evgenltd.financemanager.common.service.SseService
+import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.user.component.ROOT_TENANT
+import com.evgenltd.financemanager.user.component.currentTenant
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.AfterReturning
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Pointcut
 import org.aspectj.lang.reflect.MethodSignature
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import org.springframework.web.util.UriComponentsBuilder
 
 @Aspect
 @Component
 class SseEventAspect(
-    private val publisher: ApplicationEventPublisher,
-) {
+    private val sseService: SseService,
+) : Loggable()  {
 
     @Pointcut("@annotation(com.evgenltd.financemanager.common.component.SseEventMapping)")
     fun pointcut() {}
@@ -41,11 +44,12 @@ class SseEventAspect(
             else -> result
         }
 
-        val event = SseEvent(
-            name = channel,
-            data = data
-        )
+        val tenant = currentTenant()
+        if (tenant == null || tenant == ROOT_TENANT) {
+            log.warn("Event {} sent without user tenant, actual {}", channel, tenant)
+            return
+        }
 
-        publisher.publishEvent(event)
+        sseService.processEvent(tenant, channel, data)
     }
 }

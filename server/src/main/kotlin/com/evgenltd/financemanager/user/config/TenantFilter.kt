@@ -19,7 +19,8 @@ class TenantFilter : OncePerRequestFilter() {
             .authentication
             ?.principal as? Jwt
 
-        val tenant = principal?.getClaimAsString(SecurityConfig.TENANT)
+        val tenant = principal
+            ?.getClaimAsString(SecurityConfig.TENANT)
             ?.let { UUID.fromString(it) }
 
         withTenant(tenant) {

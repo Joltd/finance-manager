@@ -1,3 +1,3 @@
 export const embeddingUrls = {
-  vector: '/embedding/:id/vector',
+  vector: '/api/v1/embedding/:id/vector',
 }

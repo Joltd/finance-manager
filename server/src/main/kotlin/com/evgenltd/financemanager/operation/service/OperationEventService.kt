@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 @Service
 class OperationEventService {
 
-    @SseEventMapping("/operation")
+    @SseEventMapping("/api/v1/operation")
     fun operation() {}
 
 }

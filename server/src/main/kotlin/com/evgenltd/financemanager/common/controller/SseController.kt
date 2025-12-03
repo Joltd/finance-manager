@@ -13,8 +13,8 @@ class SseController(
     private val sseService: SseService,
 ) {
 
-    @GetMapping("/api/v1/sse")
+    @GetMapping("/sse")
     @PreAuthorize("isAuthenticated()")
-    fun sse(): SseEmitter = sseService.subscribe()
+    fun sse(): SseEmitter? = sseService.subscribe()
 
 }

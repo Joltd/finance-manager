@@ -8,6 +8,7 @@ export const useHome = () => {
   const router = useRouter()
 
   const home = useMemo(() => {
+    console.log(userStore.data?.role)
     return userStore.data?.role === UserRole.USER
       ? '/'
       : userStore.data?.role === UserRole.ADMIN

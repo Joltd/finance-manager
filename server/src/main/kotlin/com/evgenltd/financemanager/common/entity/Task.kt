@@ -18,6 +18,8 @@ class Task {
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null
 
+    lateinit var tenant: UUID
+
     lateinit var bean: String
 
     lateinit var method: String

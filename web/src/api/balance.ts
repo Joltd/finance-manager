@@ -1,7 +1,7 @@
 export const balanceUrls = {
-  root: '/balance',
+  root: '/api/v1/balance',
 }
 
 export const balanceEvents = {
-  root: '/balance',
+  root: '/api/v1/balance',
 }

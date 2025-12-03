@@ -1,8 +1,8 @@
 export const operationUrls = {
-  root: '/operation',
-  id: '/operation/:id',
+  root: '/api/v1/operation',
+  id: '/api/v1/operation/:id',
 }
 
 export const operationEvents = {
-  root: '/operation',
+  root: '/api/v1/operation',
 }

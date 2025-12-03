@@ -11,19 +11,19 @@ import java.util.*
 class ImportDataEventService(
     private val importDataService: ImportDataService,
 ) {
-    @SseEventMapping("/import-data")
+    @SseEventMapping("/api/v1/import-data")
     fun importData() {}
 
-    @SseEventMapping("/import-data/{id}")
+    @SseEventMapping("/api/v1/import-data/{id}")
     fun importData(id: UUID): Patch {
         val importData = importDataService.get(id)
         return patch(importData)
     }
 
-    @SseEventMapping("/import-data/{id}")
+    @SseEventMapping("/api/v1/import-data/{id}")
     fun importDataProgress(id: UUID, progress: Boolean): Patch = patch(progress, "/progress")
 
-    @SseEventMapping("/import-data/{id}/entry")
+    @SseEventMapping("/api/v1/import-data/{id}/entry")
     fun importDataEntry(id: UUID, dates: List<LocalDate>): List<LocalDate> = dates
 
 }

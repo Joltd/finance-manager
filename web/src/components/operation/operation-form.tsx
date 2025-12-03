@@ -60,7 +60,15 @@ export const useOperationForm = () => {
     },
   })
 
-  const clear = useCallback(() => form.reset(), [])
+  const clear = useCallback(() => {
+    form.reset()
+    form.resetField('id')
+    form.resetField('accountFrom')
+    form.resetField('amountFrom')
+    form.resetField('accountTo')
+    form.resetField('amountTo')
+    form.resetField('hint')
+  }, [])
 
   const setData = useCallback((data: OperationFormData) => {
     form.setValue('id', data.id)

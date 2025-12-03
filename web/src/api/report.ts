@@ -1,9 +1,9 @@
 export const reportUrls = {
-  dashboard: '/dashboard',
-  topFlow: '/report/top-flow',
-  incomeExpense: '/report/income-expense',
+  dashboard: '/api/v1/dashboard',
+  topFlow: '/api/v1/report/top-flow',
+  incomeExpense: '/api/v1/report/income-expense',
 }
 
 export const reportEvents = {
-  root: '/dashboard',
+  root: '/api/v1/dashboard',
 }

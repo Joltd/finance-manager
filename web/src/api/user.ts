@@ -1,11 +1,11 @@
 export const userUrls = {
-  login: '/user/auth',
-  user: '/user',
-  adminUser: '/admin/user',
-  adminUserId: '/admin/user/:id',
+  login: '/api/v1/user/auth',
+  user: '/api/v1/user',
+  adminUser: '/api/v1/admin/user',
+  adminUserId: '/api/v1/admin/user/:id',
 }
 
 export const userEvents = {
-  root: '/user',
-  admin: '/admin/user',
+  root: '/api/v1/user',
+  admin: '/api/v1/admin/user',
 }

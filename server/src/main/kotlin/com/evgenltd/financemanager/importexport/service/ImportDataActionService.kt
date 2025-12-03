@@ -30,19 +30,17 @@ import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
 import com.evgenltd.financemanager.common.repository.isNotNull
-import com.evgenltd.financemanager.common.repository.isNull
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.isZero
 import com.evgenltd.financemanager.importexport.record.OperationKey
 import com.evgenltd.financemanager.importexport.record.TotalEntry
 import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.operation.service.OperationProcessService
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.operation.service.byAccount
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.server.ResponseStatusException
 import java.io.InputStream
 import java.time.LocalDate
 import java.util.*
@@ -56,7 +54,7 @@ class ImportDataActionService(
     private val importDataTotalRepository: ImportDataTotalRepository,
     private val importDataConverter: ImportDataConverter,
     private val embeddingActionService: EmbeddingActionService,
-    private val operationService: OperationService,
+    private val operationProcessService: OperationProcessService,
     private val operationRepository: OperationRepository,
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
@@ -337,11 +335,9 @@ class ImportDataActionService(
                     ?.let { entry.id!! to it }
             }
             .let { entryOperation ->
-                entryOperation.map { importDataConverter.toOperationRecord(it.second) }
-                    .let { operationService.saveInternal(it) }
-                    .let {
-                        entryOperation.map { (entryId, _) -> entryId }.zip(it)
-                    }
+                val result = entryOperation.map { importDataConverter.toOperationRecord(it.second) }
+                    .let { operationProcessService.save(it) }
+                entryOperation.map { (entryId, _) -> entryId }.zip(result)
             }
     }
 
@@ -475,10 +471,10 @@ class ImportDataActionService(
         val commonOperationTotals = balanceRepository.findAll((Balance::account eq importData.account))
             .map { ImportDataTotalType.OPERATION to it.amount }
 
-        val commonSuggestedTotals = commonTotals.filter { it.type === ImportDataTotalType.SUGGESTED }
+        val commonSuggestedTotals = commonTotals.filter { it.type == ImportDataTotalType.SUGGESTED }
             .map { it.type to it.amount }
 
-        val commonActualTotals = commonTotals.filter { it.type === ImportDataTotalType.ACTUAL }
+        val commonActualTotals = commonTotals.filter { it.type == ImportDataTotalType.ACTUAL }
             .map { it.type to it.amount }
 
         val validByActual = (commonOperationTotals + commonSuggestedTotals + commonActualTotals)

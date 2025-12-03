@@ -12,8 +12,8 @@ export interface AmountInputProps {
 export function AmountInput({ amount, onChange }: AmountInputProps) {
   const handleChangeValue = (value: string) => {
     const actualValue = (+value || 0) * 10000
-    if (amount?.value !== actualValue && !!amount?.currency) {
-      onChange?.({ value: actualValue, currency: amount.currency })
+    if (amount?.value !== actualValue) {
+      onChange?.({ value: actualValue, currency: amount?.currency as any })
     }
   }
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 @Service
 class AccountGroupEventService {
 
-    @SseEventMapping("/account-group")
+    @SseEventMapping("/api/v1/account-group")
     fun accountGroup() {}
 
 }

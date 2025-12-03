@@ -12,7 +12,6 @@ import com.evgenltd.financemanager.settings.entity.SettingName
 import com.evgenltd.financemanager.settings.entity.SystemSettings
 import com.evgenltd.financemanager.settings.record.SettingsRecord
 import com.evgenltd.financemanager.settings.repository.SettingRepository
-import com.evgenltd.financemanager.user.component.withRootTenant
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityManager
 import jakarta.transaction.NotSupportedException
@@ -39,9 +38,7 @@ class SettingService(
     @Value("\${APP_VERSION}") private val version: String
 ) {
 
-    fun loadSystem(): SystemSettings = withRootTenant {
-        settingRepository.findByTenantIsNull().read()
-    }
+    fun loadSystem(): SystemSettings = settingRepository.findByTenantIsNull().read()
 
     fun load(): Settings = settingRepository.findAll().read()
 

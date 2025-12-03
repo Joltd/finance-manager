@@ -17,9 +17,7 @@ class TaskProcessService(
     fun execute(id: UUID) {
         taskActionService.lock(id) ?: return
         try {
-            withRootTenant {
-                taskActionService.execute(id)
-            }
+            taskActionService.execute(id)
         } catch (e: Exception) {
             log.error("Unable to execute task $id", e)
         } finally {

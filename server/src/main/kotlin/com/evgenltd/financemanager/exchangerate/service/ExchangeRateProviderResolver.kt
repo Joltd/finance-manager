@@ -1,9 +1,11 @@
 package com.evgenltd.financemanager.exchangerate.service
 
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.stereotype.Service
 
+@SkipLogging
 @Service
 class ExchangeRateProviderResolver(
     private val settingService: SettingService,

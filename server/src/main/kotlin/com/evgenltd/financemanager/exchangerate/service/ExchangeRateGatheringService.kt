@@ -21,7 +21,7 @@ class ExchangeRateGatheringService(
     private val exchangeRateProviderResolver: ExchangeRateProviderResolver,
 ): Loggable() {
 
-    @Task
+    @Task(root = true)
     fun updateActual() {
         val rates = exchangeRateRepository.findAll()
         val rateIndex = rates.associateBy { it.currency }
@@ -59,7 +59,7 @@ class ExchangeRateGatheringService(
             .let { exchangeRateRepository.saveAll(it) }
     }
 
-    @Task
+    @Task(root = true)
     fun updateHistory(@TaskKey date: LocalDate, currencies: List<String> = emptyList()) {
         val allCurrencies = currencyRepository.findAll().distinctBy { it.name }
         val updateCurrencies = allCurrencies.filter { currencies.isEmpty() || it.name in currencies }

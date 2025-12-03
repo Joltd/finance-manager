@@ -80,7 +80,7 @@ export default function Page() {
       )}
       <DataPlaceholder {...importData}>
         {importData.data && (
-          <Stack gap={6}>
+          <Stack gap={6} className="overflow-hidden">
             <ImportDataHeader />
             <ImportDataFilter />
             <ImportDataEntryBrowser />

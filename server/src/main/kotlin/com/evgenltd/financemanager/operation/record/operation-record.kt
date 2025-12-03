@@ -1,12 +1,11 @@
 package com.evgenltd.financemanager.operation.record
 
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.ai.record.EmbeddingRecord
 import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
-import org.springframework.context.ApplicationEvent
 import java.time.LocalDate
 import java.util.*
 
@@ -36,11 +35,25 @@ data class OperationRecord(
     val hint: EmbeddingRecord? = null,
 )
 
-data class OperationEvent(
-    val entries: List<OperationEventEntry> = emptyList(),
-) : ApplicationEvent(entries)
+data class OperationChangeRecord(
+    val old: OperationChangeStateRecord?,
+    val new: OperationChangeStateRecord?,
+)
 
-data class OperationEventEntry(
-    val old: OperationRecord? = null,
-    val new: OperationRecord? = null,
+data class OperationChangeStateRecord(
+    val id: UUID,
+    val date: LocalDate,
+    val type: OperationType,
+    val amountFrom: Amount,
+    val accountFrom: UUID,
+    val accountFromType: AccountType,
+    val amountTo: Amount,
+    val accountTo: UUID,
+    val accountToType: AccountType,
+)
+
+data class AccountBalanceChangeStateRecord(
+    val account: UUID,
+    val currency: String,
+    val date: LocalDate,
 )

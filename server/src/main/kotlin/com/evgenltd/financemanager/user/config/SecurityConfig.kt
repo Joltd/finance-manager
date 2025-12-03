@@ -21,6 +21,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
@@ -49,7 +51,7 @@ class SecurityConfig(
         .oauth2ResourceServer { resourceServer ->
             resourceServer.jwt { jwt ->
                 jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
-            }
+            }.bearerTokenResolver(bearerTokenResolver())
         }
         .addFilterAfter(TenantFilter(), BearerTokenAuthenticationFilter::class.java)
         .build()
@@ -63,6 +65,7 @@ class SecurityConfig(
         config.maxAge = 3600
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/api/**", config)
+        source.registerCorsConfiguration("/sse", config)
         source.registerCorsConfiguration("/management/**", config)
         source.registerCorsConfiguration("/v3/api-docs", config)
         source.registerCorsConfiguration("/swagger-ui/**", config)
@@ -78,6 +81,19 @@ class SecurityConfig(
             .apply {
                 setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter)
             }
+    }
+
+    private fun bearerTokenResolver(): BearerTokenResolver {
+        val uriResolver = DefaultBearerTokenResolver().also { it.setAllowUriQueryParameter(true) }
+        val defaultResolver = DefaultBearerTokenResolver()
+
+        return BearerTokenResolver {
+            if (it.requestURI.startsWith("/sse")) {
+                uriResolver.resolve(it)
+            } else {
+                defaultResolver.resolve(it)
+            }
+        }
     }
 
     @Bean

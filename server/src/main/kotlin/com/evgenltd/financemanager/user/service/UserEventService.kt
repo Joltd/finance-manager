@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service
 @Service
 class UserEventService {
 
-    @SseEventMapping("/admin/user")
+    @SseEventMapping("/api/v1/admin/user")
     fun adminUser() {}
 }

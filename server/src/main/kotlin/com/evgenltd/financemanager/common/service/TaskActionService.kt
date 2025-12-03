@@ -7,6 +7,9 @@ import com.evgenltd.financemanager.common.component.TaskVersion
 import com.evgenltd.financemanager.common.repository.TaskRepository
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.user.component.ROOT_TENANT
+import com.evgenltd.financemanager.user.component.currentTenant
+import com.evgenltd.financemanager.user.component.withTenant
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import org.aspectj.lang.JoinPoint
@@ -28,7 +31,7 @@ class TaskActionService(
     @Transactional
     fun lock(id: UUID): Int? = try {
         taskRepository.lock(id).takeIf { it > 0 }
-    } catch (ignored: Exception) {
+    } catch (_: Exception) {
         null
     }
 
@@ -40,6 +43,8 @@ class TaskActionService(
     @Transactional
     fun trySchedule(joinPoint: JoinPoint): Boolean {
         val methodSignature = joinPoint.signature as MethodSignature
+
+        val taskAnnotation = methodSignature.method.getAnnotation(Task::class.java)
 
         val bean = methodSignature.declaringTypeName
         val method = methodSignature.name
@@ -58,6 +63,12 @@ class TaskActionService(
             return false
         }
 
+        val tenant = if (taskAnnotation.root) {
+            ROOT_TENANT
+        } else {
+            currentTenant()
+        } ?: throw RuntimeException("Schedule task execution out of tenant")
+
         val version = parameters.firstOrNull { (parameter) -> parameter.isAnnotationPresent(TaskVersion::class.java) }
             ?.let { (parameter, argument) -> argument.asVersion(parameter.getAnnotation(TaskVersion::class.java)!!) }
             ?: 0
@@ -66,8 +77,8 @@ class TaskActionService(
             .associate { (parameter, argument) -> parameter.name to argument }
             .let { mapper.valueToTree<ObjectNode>(it) }
 
-        log.info("schedule(bean=$bean, method=$method, key=$key, version=$version, payload=$payload)")
-        taskRepository.upsert(bean, method, key, version, payload)
+        log.info("schedule(tenant=$tenant, bean=$bean, method=$method, key=$key, version=$version, payload=$payload)")
+        taskRepository.upsert(tenant, bean, method, key, version, payload)
         return true
     }
 
@@ -118,7 +129,9 @@ class TaskActionService(
 
         local.set(task.key)
         try {
-            method.invoke(bean, *arguments)
+            withTenant(task.tenant) {
+                method.invoke(bean, *arguments)
+            }
         } finally {
             local.remove()
         }

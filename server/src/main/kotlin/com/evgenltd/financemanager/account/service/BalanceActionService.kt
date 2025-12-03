@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.entity.Turnover
+import com.evgenltd.financemanager.account.record.BalanceUpdateEvent
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.account.repository.TurnoverRepository
@@ -15,8 +16,8 @@ import com.evgenltd.financemanager.common.component.Task
 import com.evgenltd.financemanager.common.component.TaskKey
 import com.evgenltd.financemanager.common.component.TaskVersion
 import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.user.component.withRootTenant
-import com.evgenltd.financemanager.user.component.withTenant
+import com.evgenltd.financemanager.importexport.service.ImportDataAccountBalanceListener
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -29,6 +30,7 @@ class BalanceActionService(
     private val turnoverRepository: TurnoverRepository,
     private val transactionRepository: TransactionRepository,
     private val balanceEventService: BalanceEventService,
+    private val publisher: ApplicationEventPublisher,
 ) : Loggable() {
 
     @Task
@@ -40,6 +42,7 @@ class BalanceActionService(
 
         if (account.type == AccountType.ACCOUNT) {
             updateBalance(account, currency, date, cumulativeAmount)
+            publisher.publishEvent(BalanceUpdateEvent(accountId, date))
         }
     }
 

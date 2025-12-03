@@ -3,12 +3,11 @@ package com.evgenltd.financemanager.operation.converter
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.ai.converter.EmbeddingConverter
+import com.evgenltd.financemanager.operation.record.OperationChangeStateRecord
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class OperationConverter(
@@ -46,6 +45,18 @@ class OperationConverter(
         amountTo = record.amountTo,
         accountTo = record.accountTo.id.let { accountRepository.find(it) },
         description = record.description,
+    )
+    
+    fun toChangeRecord(entity: Operation): OperationChangeStateRecord = OperationChangeStateRecord(
+        id = entity.id!!,
+        date = entity.date,
+        type = entity.type,
+        amountFrom = entity.amountFrom,
+        accountFrom = entity.accountFrom.id!!,
+        accountFromType = entity.accountFrom.type,
+        amountTo = entity.amountTo,
+        accountTo = entity.accountTo.id!!,
+        accountToType = entity.accountTo.type,
     )
 
 }

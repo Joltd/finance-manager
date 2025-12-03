@@ -69,15 +69,16 @@ export function ImportDataEntryBrowser({}: ImportDataOperationBrowserProps) {
 
   return (
     <DataPlaceholder {...importDataEntryList}>
-      <Stack ref={ref} scrollable>
+      <Stack ref={ref} gap={6} scrollable>
         <DndContext onDragEnd={handleDrag}>
           {importDataEntryList.data?.map((group) => (
             <Group
+              key={group.date}
               text={
-                <>
+                <Stack orientation="horizontal">
+                  <DateLabel variant="h4" date={group.date} />
                   <ValidityIcon valid={group.valid} message="Some totals doesn't matched" />
-                  <DateLabel date={group.date} />
-                </>
+                </Stack>
               }
             >
               <ImportDataGroupHeader group={group} />

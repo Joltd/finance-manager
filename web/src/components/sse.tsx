@@ -2,24 +2,32 @@ import { useEffect } from 'react'
 import { createStore } from 'zustand'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { fillPathParams } from '@/lib/utils'
+import { useRequest } from '@/hooks/use-request'
+import api from '@/lib/axios'
 
 interface SseStoreState {
   source?: EventSource
+  initSource: (path: string) => void
   listeners: Record<string, any>
   subscribe: (eventName: string, listener: (data: any) => void) => void
   unsubscribe: (eventName: string) => void
 }
 
 const sseStore = createStore<SseStoreState>((set, get) => {
+  const initSource = (path: string) => {
+    const source = new EventSource(path)
+    set({ source })
+  }
+
   const subscribe = (eventName: string, listener: (data: any) => void) => {
     let source = get().source
     if (!source) {
-      source = new EventSource('/api/v1/sse')
-      set({ source })
+      throw new Error('EventSource is not initialized')
     }
 
-    const actualListener = (event: MessageEvent) =>
+    const actualListener = (event: MessageEvent) => {
       listener(event.data ? JSON.parse(event.data) : undefined)
+    }
     const listeners = get().listeners
     listeners[eventName] = actualListener
     set({ listeners })
@@ -36,13 +44,14 @@ const sseStore = createStore<SseStoreState>((set, get) => {
   }
 
   return {
+    initSource,
     listeners: {},
     subscribe,
     unsubscribe,
   }
 })
 
-const useSstStore = <K extends keyof SseStoreState>(...fields: K[]) =>
+const useSseStore = <K extends keyof SseStoreState>(...fields: K[]) =>
   useStoreSelect<SseStoreState, K>(sseStore, ...fields)
 
 export interface SseProps<T> {
@@ -52,16 +61,23 @@ export interface SseProps<T> {
 }
 
 export function Sse<T>({ eventName, params, listener }: SseProps<T>) {
-  const store = useSstStore()
+  const store = useSseStore()
 
   useEffect(() => {
-    const actualEventName = fillPathParams(eventName, params)
-
     if (!listener) {
       return
     }
 
-    store.subscribe(actualEventName, listener)
+    const actualEventName = fillPathParams(eventName, params)
+
+    if (!store.source) {
+      api.get('/api/sse-endpoint').then((response) => {
+        store.initSource(response.data)
+        store.subscribe(actualEventName, listener)
+      })
+    } else {
+      store.subscribe(actualEventName, listener)
+    }
 
     return () => {
       store.unsubscribe(actualEventName)

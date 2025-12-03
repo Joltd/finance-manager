@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class NotificationEventService {
 
-    @SseEventMapping("/notification")
+    @SseEventMapping("/api/v1/notification")
     fun notification(message: String, type: NotificationType): NotificationRecord = NotificationRecord(type, message)
 
 }

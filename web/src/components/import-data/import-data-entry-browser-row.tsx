@@ -16,9 +16,9 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { useApproveAction, useUnlinkAction } from '@/components/import-data/actions'
 import { EmbeddingLabel } from '@/components/common/typography/embedding-label'
 import { Button } from '@/components/ui/button'
-import { hoveredIconClass, hoverGroup, mainIconClass } from '@/components/common/hoverable-icon'
+import { HoverIcon } from '@/components/common/icon/hover-icon'
 
-const rowStyle = 'grid items-center grid-cols-[minmax(0,_1fr)_64px_minmax(0,_1fr)] my-1'
+const rowStyle = 'grid items-center grid-cols-[minmax(0,_1fr)_64px_minmax(0,_1fr)]'
 
 export interface ImportDataEntryBrowserRowProps {
   entry: ImportDataEntry
@@ -80,7 +80,7 @@ export const ImportDataEntryBrowserRow = memo(
           disabled={disabled}
           onClick={handleClick}
           className={cn(
-            'flex gap-2 col-start-1 truncate py-1 h-8',
+            'flex gap-2 col-start-1 truncate',
             !!suggestions.length && !operation && 'text-info',
             isOver && 'outline-2 outline-dotted outline-accent-foreground rounded-sm',
           )}
@@ -97,18 +97,18 @@ export const ImportDataEntryBrowserRow = memo(
         </Pointable>
         <div className="col-start-2 justify-self-center">
           {linked ? (
-            <Button variant="ghost" size="sm" onClick={handleUnlink} className={hoverGroup}>
-              <LinkIcon className={cn('text-green-500', mainIconClass)} />
-              <UnlinkIcon className={cn('text-green-500', hoveredIconClass)} />
+            <Button variant="ghost" size="sm" onClick={handleUnlink}>
+              <HoverIcon className="text-green-500">
+                <LinkIcon />
+                <UnlinkIcon />
+              </HoverIcon>
             </Button>
           ) : suggested ? (
-            <Button variant="ghost" size="sm" onClick={handleApprove} className={hoverGroup}>
-              <RatingIcon
-                score={suggested.distance}
-                rating={suggested.rating}
-                className={mainIconClass}
-              />
-              <CheckIcon className={cn('text-green-500', hoveredIconClass)} />
+            <Button variant="ghost" size="sm" onClick={handleApprove}>
+              <HoverIcon>
+                <RatingIcon score={suggested.distance} rating={suggested.rating} />
+                <CheckIcon className="text-green-500" />
+              </HoverIcon>
             </Button>
           ) : null}
         </div>
@@ -117,7 +117,7 @@ export const ImportDataEntryBrowserRow = memo(
             selected={selected}
             disabled={disabled}
             onClick={handleClick}
-            className="col-start-3 truncate py-1"
+            className="col-start-3 truncate"
           >
             <EmbeddingLabel embedding={parsed.hint} hideCopy />
             {/*<ImportDataOperationLabel*/}
@@ -177,7 +177,7 @@ export const ImportDataEntryBrowserOperationRow: FC<ImportDataEntryBrowserOperat
           ref={setNodeRef}
           style={style}
           onClick={handleClick}
-          className={cn('flex gap-2 col-start-1 truncate py-1', isDragging && 'opacity-50')}
+          className={cn('flex gap-2 col-start-1 truncate', isDragging && 'opacity-50')}
           selected={selected}
           disabled={disabled}
         >

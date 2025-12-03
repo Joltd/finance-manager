@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 @Service
 class CurrencyEventService {
 
-    @SseEventMapping("/currency")
+    @SseEventMapping("/api/v1/currency")
     fun currency() {}
 
 }

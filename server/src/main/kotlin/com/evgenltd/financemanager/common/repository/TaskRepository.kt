@@ -13,9 +13,10 @@ interface TaskRepository : JpaRepository<Task, UUID>, JpaSpecificationExecutor<T
 
     @Modifying
     @Query("""
-        insert into tasks (id, bean, method, key, version, progress, payload, started_at)
+        insert into tasks (id, tenant, bean, method, key, version, progress, payload, started_at)
         values (
             gen_random_uuid(),
+            :tenant,
             :bean,
             :method,
             :key,
@@ -32,6 +33,7 @@ interface TaskRepository : JpaRepository<Task, UUID>, JpaSpecificationExecutor<T
     """, nativeQuery = true
     )
     fun upsert(
+        tenant: UUID,
         bean: String,
         method: String,
         key: String,

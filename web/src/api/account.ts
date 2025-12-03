@@ -1,19 +1,19 @@
 export const accountUrls = {
-  root: '/account',
-  id: '/account/:id',
-  reference: '/account/reference',
-  balance: '/account/balance',
-  group: '/account-group',
-  groupId: '/account-group/:id',
-  groupReference: '/account-group/reference',
-  currency: '/currency',
-  currencyId: '/currency/:id',
-  currencyReference: '/currency/reference',
+  root: '/api/v1/account',
+  id: '/api/v1/account/:id',
+  reference: '/api/v1/account/reference',
+  balance: '/api/v1/account/balance',
+  group: '/api/v1/account-group',
+  groupId: '/api/v1/account-group/:id',
+  groupReference: '/api/v1/account-group/reference',
+  currency: '/api/v1/currency',
+  currencyId: '/api/v1/currency/:id',
+  currencyReference: '/api/v1/currency/reference',
 }
 
 export const accountEvents = {
-  root: '/account',
-  group: '/account-group',
-  balance: '/account/balance',
-  currency: '/currency',
+  root: '/api/v1/account',
+  group: '/api/v1/account-group',
+  balance: '/api/v1/account/balance',
+  currency: '/api/v1/currency',
 }

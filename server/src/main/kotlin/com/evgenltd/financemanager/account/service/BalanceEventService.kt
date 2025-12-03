@@ -15,7 +15,7 @@ class BalanceEventService(
     private val balanceConverter: BalanceConverter,
 ) {
 
-    @SseEventMapping("/balance")
+    @SseEventMapping("/api/v1/balance")
     fun balance(id: UUID): Patch = balanceRepository.find(id)
         .let { balanceConverter.toRecord(it) }
         .let { patch(it, "/id=$id") }
