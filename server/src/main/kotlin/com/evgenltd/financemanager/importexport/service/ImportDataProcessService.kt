@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.common.component.Task
 import com.evgenltd.financemanager.common.component.TaskKey
 import com.evgenltd.financemanager.common.record.NotificationType
+import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.common.service.NotificationEventService
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.operation.service.OperationProcessService
@@ -28,6 +29,7 @@ class ImportDataProcessService(
     private val importDataEventService: ImportDataEventService,
     private val operationProcessService: OperationProcessService,
     private val notificationEventService: NotificationEventService,
+    private val fileService: FileService,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
@@ -37,10 +39,11 @@ class ImportDataProcessService(
     }
 
     @Task
-    fun beginNewImport(@TaskKey id: UUID, inputStream: InputStream) { // todo inputstream save to temp file
+    fun beginNewImport(@TaskKey id: UUID, filename: String) {
         try {
-
-            importDataActionService.parseImportData(id, inputStream)
+            fileService.load(filename) {
+                importDataActionService.parseImportData(id, it)
+            }
 
             importDataEntryRepository.findByImportDataId(id)
                 .chunked(50)

@@ -21,7 +21,7 @@ class OpenAiProvider(
     private val rest: IntegrationRestTemplate,
 ) : AiProvider {
 
-    override val name: Provider = Provider.OPEN_AI
+    override val name: AiProviders = AiProviders.OPEN_AI
 
     override fun embedding(data: List<String>): List<EmbeddingResult> {
         val request = mapOf(

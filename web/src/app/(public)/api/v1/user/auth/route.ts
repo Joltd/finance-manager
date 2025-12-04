@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authRequest, setAccessTokenCookie, setRefreshTokenCookie } from '@/lib/auth'
+import { setAccessTokenCookie, setRefreshTokenCookie } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
-  const result = await authRequest(request)
-  if (!result) {
-    return NextResponse.json({ success: false })
+  const { login, password } = await request.json()
+
+  const target = `${process.env.BACKEND_HOST}/api/v1/user/auth`
+  const init: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      login,
+      password,
+    }),
+  }
+  const response = await fetch(target, init)
+  if (!response.ok) {
+    return response
   }
 
-  const response = NextResponse.json({ success: true })
-  setAccessTokenCookie(response, result.accessToken)
-  setRefreshTokenCookie(response, result.refreshToken)
-  return response
+  const json = await response.json()
+
+  const actualResponse = NextResponse.json({ success: true })
+  setAccessTokenCookie(actualResponse, json.body.accessToken)
+  setRefreshTokenCookie(actualResponse, json.body.refreshToken)
+  return actualResponse
 }

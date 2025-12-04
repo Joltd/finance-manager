@@ -13,6 +13,7 @@ import com.evgenltd.financemanager.importexport.service.ImportDataProcessService
 import com.evgenltd.financemanager.importexport.service.ImportDataService
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryApproveSuggestionRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataFinishRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataUnlinkRequest
@@ -34,6 +35,7 @@ import java.util.*
 class ImportDataController(
     private val importDataService: ImportDataService,
     private val importDataProcessService: ImportDataProcessService,
+    private val fileService: FileService,
 ) {
 
     @PostMapping("/api/v1/import-data/{id}/manage")
@@ -58,8 +60,9 @@ class ImportDataController(
     @PostMapping("/api/v1/import-data/begin")
     @PreAuthorize("hasRole('USER')")
     fun beginNewImport(@RequestPart("data") request: ImportDataCreateRequest, @RequestPart("file") file: MultipartFile): UUID {
+        val filename = fileService.store(file)
         val importData = importDataService.save(request)
-        importDataProcessService.beginNewImport(importData.id!!, file.inputStream)
+        importDataProcessService.beginNewImport(importData.id!!, filename)
         return importData.id!!
     }
 

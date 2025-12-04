@@ -1,0 +1,1 @@
+insert into settings (id, name, value) values (gen_random_uuid(), 'ai.provider', 'OPEN_AI');

@@ -7,14 +7,7 @@ export const useHome = () => {
   const userStore = useUserStore('data')
   const router = useRouter()
 
-  const home = useMemo(() => {
-    console.log(userStore.data?.role)
-    return userStore.data?.role === UserRole.USER
-      ? '/'
-      : userStore.data?.role === UserRole.ADMIN
-        ? '/admin'
-        : '/login'
-  }, [userStore.data?.role])
+  const home = useMemo(() => getHome(userStore.data?.role), [userStore.data?.role])
 
   const redirect = () => {
     router.push(home)
@@ -23,5 +16,16 @@ export const useHome = () => {
   return {
     home,
     redirect,
+  }
+}
+
+export function getHome(role?: UserRole) {
+  switch (role) {
+    case UserRole.USER:
+      return '/'
+    case UserRole.ADMIN:
+      return '/admin'
+    default:
+      return '/login'
   }
 }

@@ -21,3 +21,5 @@ security:
   secret: ${SECURITY_SECRET}
   access-token-expiration-minutes: 15
   refresh-token-expiration-minutes: 10080 # 7 days
+
+files: /app/files

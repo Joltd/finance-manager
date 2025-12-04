@@ -4,7 +4,6 @@ import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
@@ -19,7 +18,7 @@ class OpenExchangeDataProvider(
     private val rest: IntegrationRestTemplate
 ) : ExchangeRateProvider {
 
-    override val name: Provider = Provider.OPEN_EXCHANGE
+    override val name: ExchangeRateProviders = ExchangeRateProviders.OPEN_EXCHANGE
 
     override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest.json")
 

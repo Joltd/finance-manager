@@ -6,6 +6,8 @@ services:
     image: joltd/finance-manager:server-3.0.0-SNAPSHOT
     ports:
       - "9500:8080"
+    volumes:
+      - ./files:/app/files
     environment:
       APP_VERSION: 3.0.0-SNAPSHOT
       DB_HOST: localhost:5432

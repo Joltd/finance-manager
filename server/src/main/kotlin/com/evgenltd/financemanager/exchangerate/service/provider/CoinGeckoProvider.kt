@@ -5,7 +5,6 @@ import com.evgenltd.financemanager.common.util.oppositeRate
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
-import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -24,7 +23,7 @@ class CoinGeckoProvider(
     private val rest: IntegrationRestTemplate
 ) : ExchangeRateProvider {
 
-    override val name: Provider = Provider.COIN_GECKO
+    override val name: ExchangeRateProviders = ExchangeRateProviders.COIN_GECKO
 
     override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> =
         currencyHints.mapNotNull { coin ->

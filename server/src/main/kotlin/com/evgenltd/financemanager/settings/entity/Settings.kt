@@ -2,7 +2,8 @@ package com.evgenltd.financemanager.settings.entity
 
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.Currency
-import com.evgenltd.financemanager.exchangerate.service.provider.Provider
+import com.evgenltd.financemanager.ai.service.provider.AiProviders
+import com.evgenltd.financemanager.exchangerate.service.provider.ExchangeRateProviders
 
 data class Settings(
     var version: String = "0.0.0",
@@ -17,9 +18,11 @@ data class Settings(
 data class SystemSettings(
     var version: String = "0.0.0",
     @property:SettingName("fiat.exchange.rate.provider")
-    var fiatExchangeRateProvider: Provider? = null,
+    var fiatExchangeRateProvider: ExchangeRateProviders? = null,
     @property:SettingName("crypto.exchange.rate.provider")
-    var cryptoExchangeRateProvider: Provider? = null,
+    var cryptoExchangeRateProvider: ExchangeRateProviders? = null,
+    @property:SettingName("ai.provider")
+    var aiProvider: AiProviders? = null,
 )
 
 @Target(AnnotationTarget.PROPERTY)

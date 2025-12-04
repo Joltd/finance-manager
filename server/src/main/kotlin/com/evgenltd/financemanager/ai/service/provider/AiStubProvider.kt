@@ -8,9 +8,9 @@ import java.security.MessageDigest
 import kotlin.random.Random
 
 @Service
-class StubProvider : AiProvider {
+class AiStubProvider : AiProvider {
 
-    override val name: Provider = Provider.STUB
+    override val name: AiProviders = AiProviders.STUB
 
     override fun embedding(data: List<String>): List<EmbeddingResult> = data.map { stubEmbedding(it) }
 

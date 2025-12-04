@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.ai.service.provider
 
-enum class Provider {
+enum class AiProviders {
     STUB,
     OPEN_AI,
 }

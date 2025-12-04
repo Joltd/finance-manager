@@ -4,7 +4,7 @@ import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.Currency
 import com.evgenltd.financemanager.account.repository.CurrencyRepository
 import com.evgenltd.financemanager.common.component.SkipLogging
-import com.evgenltd.financemanager.exchangerate.service.provider.Provider
+import com.evgenltd.financemanager.exchangerate.service.provider.ExchangeRateProviders
 import com.evgenltd.financemanager.settings.converter.SettingConverter
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.entity.Settings
@@ -66,10 +66,6 @@ class SettingService(
     fun operationDefaultAccount(): Account? = throw NotSupportedException()
 
     fun operationCashAccount(): Account? = throw NotSupportedException()
-
-    fun fiatExchangeRateProvider(): Provider? = throw NotSupportedException()
-
-    fun cryptoExchangeRateProvider(): Provider? = throw NotSupportedException()
 
     //
 

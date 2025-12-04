@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 import { useRequest } from '@/hooks/use-request'
 import { userUrls } from '@/api/user'
 import { Spinner } from '@/components/ui/spinner'
-import { useHome } from '@/hooks/use-home'
 import { useUserStore } from '@/store/user'
+import { useRouter } from 'next/navigation'
 
 type LoginFormData = z.infer<typeof formSchema>
 
@@ -30,13 +30,15 @@ export default function Page() {
     },
   })
   const userStore = useUserStore('data', 'fetch')
-  const { redirect } = useHome()
+  const router = useRouter()
 
   const onSubmit = async (data: LoginFormData) => {
-    await submit(data)
-    reset()
-    await userStore.fetch()
-    redirect()
+    try {
+      await submit(data)
+      reset()
+      await userStore.fetch()
+      router.push('/')
+    } catch (error) {}
   }
 
   return (
@@ -71,7 +73,7 @@ export default function Page() {
       </CardContent>
       <CardFooter>
         <Field>
-          {!!error && <FieldError errors={[{ message: error }]} />}
+          {!!error && <FieldError errors={[{ message: 'Login or password incorrect' }]} />}
           <Button type="submit" form="login-form">
             {loading && <Spinner />}
             Login

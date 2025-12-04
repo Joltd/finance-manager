@@ -13,9 +13,9 @@ import com.evgenltd.financemanager.user.record.ApplicationUser
 import com.evgenltd.financemanager.user.record.UserRecord
 import com.evgenltd.financemanager.user.repository.UserRepository
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -100,11 +100,11 @@ class UserService(
 
     override fun loadUserByUsername(username: String?): UserDetails? {
         if (username.isNullOrBlank()) {
-            throw BadCredentialsException("Username is not specified")
+            throw UsernameNotFoundException("Username is not specified")
         }
 
         val user = userRepository.findByLoginAndDeletedIsFalse(username)
-            ?: throw BadCredentialsException("User not found")
+            ?: throw UsernameNotFoundException("User not found")
 
         return ApplicationUser(
             id = user.id!!,

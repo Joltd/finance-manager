@@ -29,37 +29,6 @@ export function cleanupCookie(response: NextResponse) {
   })
 }
 
-export async function authRequest(
-  request: NextRequest,
-): Promise<{ accessToken: string; refreshToken: string } | undefined> {
-  const { login, password } = await request.json()
-
-  const target = `${process.env.BACKEND_HOST}/api/v1/user/auth`
-  const init: RequestInit = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      login,
-      password,
-    }),
-  }
-  const response = await fetch(target, init)
-  if (!response.ok) {
-    console.error(response)
-    return undefined
-  }
-
-  const json = await response.json()
-  if (!json.success) {
-    console.log(json)
-    return undefined
-  }
-
-  return json.body
-}
-
 export async function refreshRequest(
   request: NextRequest,
 ): Promise<{ accessToken: string } | undefined> {

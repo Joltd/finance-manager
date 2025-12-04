@@ -13,6 +13,7 @@ import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
 import org.springframework.security.authorization.AuthorizationDeniedException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.HandlerMethod
@@ -40,6 +41,10 @@ class ApplicationResponseHandler : ResponseBodyAdvice<Any>, Loggable() {
     @ExceptionHandler(ResponseStatusException::class)
     fun handle(exception: ResponseStatusException): ResponseEntity<Response> = ResponseEntity.status(exception.statusCode)
         .body(Response(false, null, exception.reason))
+
+    @ExceptionHandler(AuthenticationException::class)
+    fun handle(exception: AuthenticationException): ResponseEntity<Response> = ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(Response(false, null, exception.message))
 
     @ExceptionHandler(Exception::class)
     fun handle(exception: Exception, response: HttpServletResponse): ResponseEntity<Response> {

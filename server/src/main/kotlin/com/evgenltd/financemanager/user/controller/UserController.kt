@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtException
@@ -78,11 +77,11 @@ class UserController(
             jwtDecoder.decode(request.refreshToken)
         } catch (e: JwtException) {
             log.error("Invalid jwt", e)
-            throw BadCredentialsException("Invalid refresh token")
+            throw badRequestException("Invalid refresh token")
         }
 
         val user = userRepository.findByLoginAndDeletedIsFalse(jwt.subject)
-            ?: throw BadCredentialsException("User deleted or not found")
+            ?: throw badRequestException("User deleted or not found")
 
         val tenant = if (user.role == UserRole.ADMIN) {
             ROOT_TENANT

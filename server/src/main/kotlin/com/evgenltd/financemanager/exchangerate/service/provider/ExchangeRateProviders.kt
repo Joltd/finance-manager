@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
-enum class Provider {
+enum class ExchangeRateProviders {
     STUB,
     FREE_CURRENCY, // small set of pairs
     OPEN_EXCHANGE, // perfect choice
