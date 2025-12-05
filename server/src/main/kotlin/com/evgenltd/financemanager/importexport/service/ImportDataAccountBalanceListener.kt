@@ -15,7 +15,7 @@ class ImportDataAccountBalanceListener(
     fun accountBalanceChanged(event: BalanceUpdateEvent) {
         importDataRepository.findByAccountId(event.accountId)
             .onEach {
-                importDataProcessService.calculateTotal(event.accountId, event.date)
+                importDataProcessService.calculateTotal(it.id!!, event.date)
             }
     }
 
