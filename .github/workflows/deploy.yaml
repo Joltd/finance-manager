@@ -37,12 +37,6 @@ jobs:
           arguments: bootJar
           build-root-directory: ./server
 
-      - name: Build Web
-        working-directory: ./web
-        run: |
-          npm ci
-          npm run build
-
       - name: Build Docker images
         run: |
           docker build -t joltd/${{ env.PROJECT_NAME }}:server-${{ env.PROJECT_VERSION }} ./server

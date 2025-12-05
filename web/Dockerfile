@@ -1,11 +1,21 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
-COPY ./.next ./.next
-COPY ./public ./public
-COPY ./package*.json ./
-COPY ./node_modules ./node_modules
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+FROM node:18-alpine AS runner
 
 ENV NODE_ENV=production
+
+COPY --from=builder /.next ./.next
+COPY --from=builder /package*.json ./
+COPY --from=builder /public ./public
+COPY --from=builder /node_modules ./node_modules
+
 EXPOSE 3000
 
 CMD ["npm", "start"]
