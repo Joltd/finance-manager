@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:18-slim AS builder
 
 COPY package*.json ./
 RUN npm ci
@@ -7,7 +7,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:18-alpine AS runner
+FROM node:18-slim AS runner
 
 ENV NODE_ENV=production
 
