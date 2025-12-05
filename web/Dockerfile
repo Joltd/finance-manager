@@ -5,6 +5,7 @@ RUN npm ci
 
 COPY . .
 
+ENV NEXT_DISABLE_TURBOPACK=1
 RUN npm run build
 
 FROM node:18-slim AS runner
