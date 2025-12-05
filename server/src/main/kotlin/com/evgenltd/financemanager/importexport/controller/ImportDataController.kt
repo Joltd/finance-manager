@@ -80,8 +80,8 @@ class ImportDataController(
 
     @PostMapping("/api/v1/import-data/{id}/entry/link")
     @PreAuthorize("hasRole('USER')")
-    fun linkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataLinkRequest) {
-        importDataProcessService.linkOperation(id, request.entryId, request.operationId)
+    fun linkOperationById(@PathVariable id: UUID, @RequestBody request: ImportDataLinkRequest) {
+        importDataProcessService.linkOperationById(id, request.entryId, request.operationId)
     }
 
     @PostMapping("/api/v1/import-data/{id}/entry/{entryId}/link")

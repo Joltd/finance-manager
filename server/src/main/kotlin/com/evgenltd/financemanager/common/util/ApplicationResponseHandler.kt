@@ -48,6 +48,9 @@ class ApplicationResponseHandler : ResponseBodyAdvice<Any>, Loggable() {
 
     @ExceptionHandler(Exception::class)
     fun handle(exception: Exception, response: HttpServletResponse): ResponseEntity<Response> {
+        if (exception.message?.contains("Broken pipe") == true) {
+            return ResponseEntity.ok().build()
+        }
         log.error("Unhandled exception", exception)
         val status = HttpStatusCode.valueOf(response.status)
             .takeIf { it != HttpStatus.OK }

@@ -3,8 +3,6 @@ package com.evgenltd.financemanager.importexport.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.operation.service.OperationService
-import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.common.component.Task
 import com.evgenltd.financemanager.common.component.TaskKey
 import com.evgenltd.financemanager.common.record.NotificationType
@@ -16,7 +14,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.InputStream
 import java.time.LocalDate
 import java.util.*
 
@@ -82,7 +79,7 @@ class ImportDataProcessService(
     }
 
     @Task
-    fun linkOperation(@TaskKey id: UUID, entryId: UUID, operationId: UUID) {
+    fun linkOperationById(@TaskKey id: UUID, entryId: UUID, operationId: UUID) {
         try {
             runWithCalculationTotal(id) {
                 importDataActionService.linkOperation(id, entryId, operationId)
