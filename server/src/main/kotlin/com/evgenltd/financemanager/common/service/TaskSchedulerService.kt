@@ -2,10 +2,12 @@ package com.evgenltd.financemanager.common.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.entity.Task
+import com.evgenltd.financemanager.common.record.NewTaskEvent
 import com.evgenltd.financemanager.common.repository.TaskRepository
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.lt
+import org.springframework.context.event.EventListener
 import org.springframework.data.domain.Pageable
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -20,6 +22,7 @@ class TaskSchedulerService(
 ) {
 
     @Scheduled(fixedRate = 1000)
+    @EventListener(NewTaskEvent::class)
     fun process() {
         val tasks = taskRepository.findForExecution()
         for (task in tasks) {

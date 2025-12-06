@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.component.Task
 import com.evgenltd.financemanager.common.component.TaskKey
 import com.evgenltd.financemanager.common.component.TaskVersion
+import com.evgenltd.financemanager.common.record.NewTaskEvent
 import com.evgenltd.financemanager.common.repository.TaskRepository
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.Loggable
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.reflect.MethodSignature
 import org.springframework.beans.factory.ListableBeanFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -25,6 +27,7 @@ class TaskActionService(
     private val taskRepository: TaskRepository,
     private val context: ListableBeanFactory,
     private val mapper: ObjectMapper,
+    private val publisher: ApplicationEventPublisher,
 ) : Loggable() {
 
     @SkipLogging
@@ -79,6 +82,7 @@ class TaskActionService(
 
         log.info("schedule(tenant=$tenant, bean=$bean, method=$method, key=$key, version=$version, payload=$payload)")
         taskRepository.upsert(tenant, bean, method, key, version, payload)
+        publisher.publishEvent(NewTaskEvent())
         return true
     }
 
