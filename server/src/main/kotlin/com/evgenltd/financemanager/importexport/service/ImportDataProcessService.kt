@@ -78,11 +78,11 @@ class ImportDataProcessService(
         importDataEventService.importData()
     }
 
-    @Task
-    fun linkOperationById(@TaskKey id: UUID, entryId: UUID, operationId: UUID) {
+    fun linkOperationById(id: UUID, entryId: UUID, operationId: UUID) {
         try {
-            runWithCalculationTotal(id) {
-                importDataActionService.linkOperation(id, entryId, operationId)
+            withLock(id) {
+                val dates = importDataActionService.linkOperation(id, entryId, operationId)
+                calculateTotal(id, dates)
             }
         } catch (e: Exception) {
             log.error("Unable to link operation", e)
@@ -90,26 +90,27 @@ class ImportDataProcessService(
         }
     }
 
-    @Task
     @Transactional
-    fun linkOperation(@TaskKey id: UUID, entryId: UUID, operation: OperationRecord) {
+    fun linkOperation(id: UUID, entryId: UUID, operation: OperationRecord) {
         try {
-            val result = operationProcessService.update(operation) // recalculation by operation events
-            importDataActionService.linkOperation(id, entryId, result)
+            withLock(id) {
+                val result = operationProcessService.update(operation) // recalculation by operation events
+                importDataActionService.linkOperation(id, entryId, result)
+            }
         } catch (e: Exception) {
             log.error("Unable to link operation", e)
             notificationEventService.notification(e.message ?: "Unable to link operation", NotificationType.ERROR)
         }
     }
 
-    @Task
-    fun unlinkOperation(@TaskKey id: UUID, entryIds: List<UUID>) {
+    fun unlinkOperation(id: UUID, entryIds: List<UUID>) {
         if (entryIds.isEmpty()) {
             return
         }
         try {
-            runWithCalculationTotal(id) {
-                importDataActionService.unlinkOperation(id, entryIds)
+            withLock(id) {
+                val dates = importDataActionService.unlinkOperation(id, entryIds)
+                calculateTotal(id, dates)
             }
         } catch (e: Exception) {
             log.error("Unable to unlink operation", e)
@@ -117,11 +118,11 @@ class ImportDataProcessService(
         }
     }
 
-    @Task
-    fun entryVisibility(@TaskKey id: UUID, operationIds: List<UUID>, entryIds: List<UUID>, visible: Boolean) {
+    fun entryVisibility(id: UUID, operationIds: List<UUID>, entryIds: List<UUID>, visible: Boolean) {
         try {
-            runWithCalculationTotal(id) {
-                importDataActionService.entryVisible(id, operationIds, entryIds, visible)
+            withLock(id) {
+                val dates = importDataActionService.entryVisible(id, operationIds, entryIds, visible)
+                calculateTotal(id, dates)
             }
         } catch (e: Exception) {
             log.error("Unable to change entry visibility", e)
@@ -129,13 +130,14 @@ class ImportDataProcessService(
         }
     }
 
-    @Task
     @Transactional
-    fun approveSuggestion(@TaskKey id: UUID, entryIds: List<UUID>) {
+    fun approveSuggestion(id: UUID, entryIds: List<UUID>) {
         try {
-            val result = importDataActionService.approveSuggestion(id, entryIds)  // recalculation by operation events
-            for ((entryId, operationId) in result) {
-                importDataActionService.linkOperation(id, entryId, operationId)
+            withLock(id) {
+                val result = importDataActionService.approveSuggestion(id, entryIds)  // recalculation by operation events
+                for ((entryId, operationId) in result) {
+                    importDataActionService.linkOperation(id, entryId, operationId)
+                }
             }
         } catch (e: Exception) {
             log.error("Unable to approve suggestion", e)
@@ -146,24 +148,26 @@ class ImportDataProcessService(
     @Task
     @Transactional
     fun calculateTotal(@TaskKey id: UUID, date: LocalDate) {
-        runWithCalculationTotal(id) {
-            listOf(date)
+        withLock(id) {
+            calculateTotal(id, listOf(date))
         }
     }
 
-    private fun runWithCalculationTotal(id: UUID, block: () -> List<LocalDate>) {
+    private fun calculateTotal(id: UUID, affectedDates: List<LocalDate>) {
+        if (affectedDates.isEmpty()) {
+            return
+        }
+        importDataActionService.calculateTotal(id, affectedDates)
+
+        importDataEventService.importData(id)
+        importDataEventService.importDataEntry(id, affectedDates)
+    }
+
+    private fun withLock(id: UUID, block: () -> Unit) {
         importDataStateService.findAndLock(id) ?: return
         importDataEventService.importDataProgress(id, true)
         try {
-            val affectedDates = block().distinct()
-            if (affectedDates.isEmpty()) {
-                return
-            }
-
-            importDataActionService.calculateTotal(id, affectedDates)
-
-            importDataEventService.importData(id)
-            importDataEventService.importDataEntry(id, affectedDates)
+            block()
         } finally {
             importDataStateService.findAndUnlock(id)
             importDataEventService.importDataProgress(id, false)
