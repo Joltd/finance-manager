@@ -11,7 +11,7 @@ import { CheckIcon, EyeClosedIcon, EyeIcon, LinkIcon, TrashIcon, UnlinkIcon } fr
 
 const useVisibilityAction = () => {
   const importData = useImportDataStore('data')
-  const { submit } = useRequest(importDataUrls.entryVisibility)
+  const { submit, loading } = useRequest(importDataUrls.entryVisibility)
   const operationSelection = useImportDataOperationSelectionStore('selected', 'clear')
   const entrySelection = useImportDataEntrySelectionStore('selected', 'clear')
 
@@ -35,39 +35,43 @@ const useVisibilityAction = () => {
     available:
       (!importData.data?.progress && !!operationSelection.selected.size) ||
       !!entrySelection.selected.size,
+    loading,
     perform,
   }
 }
 
 export const useShowAction = (): Action => {
-  const { available, perform } = useVisibilityAction()
+  const { available, loading, perform } = useVisibilityAction()
   return {
     title: 'Show',
     hint: 'Show entries',
     icon: <EyeIcon />,
     available,
+    loading,
     perform: () => perform(true),
   }
 }
 
 export const useHideAction = (): Action => {
-  const { available, perform } = useVisibilityAction()
+  const { available, loading, perform } = useVisibilityAction()
   return {
     title: 'Hide',
     hint: 'Hide entries',
     icon: <EyeClosedIcon />,
     available,
+    loading,
     perform: () => perform(false),
   }
 }
 
 export const useLinkAction = (): Action => {
   const importData = useImportDataStore('data')
-  const { submit } = useRequest(importDataUrls.entryLink)
+  const { submit, loading } = useRequest(importDataUrls.entryLink)
   const operationSelection = useImportDataOperationSelectionStore('selected', 'items', 'clear')
   const entrySelection = useImportDataEntrySelectionStore('selected', 'items', 'clear')
 
   const perform = (operationId?: string, entryId?: string) => {
+    console.log('link action', Date.now())
     if (!importData.data || importData.data.progress) {
       return
     }
@@ -91,13 +95,14 @@ export const useLinkAction = (): Action => {
       operationSelection.selected.size === 1 &&
       entrySelection.selected.size === 1 &&
       !Object.values(entrySelection.items).find((it) => it.linked),
+    loading,
     perform,
   }
 }
 
 export const useUnlinkAction = (): Action => {
   const importData = useImportDataStore('data')
-  const { submit } = useRequest(importDataUrls.entryUnlink)
+  const { submit, loading } = useRequest(importDataUrls.entryUnlink)
   const operationSelection = useImportDataOperationSelectionStore('selected', 'items', 'clear')
   const entrySelection = useImportDataEntrySelectionStore('selected', 'items', 'clear')
 
@@ -130,13 +135,14 @@ export const useUnlinkAction = (): Action => {
       !!entrySelection.selected.size &&
       Object.values(entrySelection.items).filter((it) => it.linked).length ===
         entrySelection.selected.size,
+    loading,
     perform,
   }
 }
 
 export const useApproveAction = (): Action => {
   const importData = useImportDataStore('data')
-  const { submit } = useRequest(importDataUrls.entryApprove)
+  const { submit, loading } = useRequest(importDataUrls.entryApprove)
   const entrySelection = useImportDataEntrySelectionStore('selected', 'clear')
 
   const perform = (entryId?: string) => {
@@ -159,13 +165,14 @@ export const useApproveAction = (): Action => {
     hint: 'Approve suggestions',
     icon: <CheckIcon />,
     available: !importData.data?.progress && !!entrySelection.selected.size,
+    loading,
     perform,
   }
 }
 
 export const useDeleteAction = (): Action => {
   const importData = useImportDataStore('data')
-  const { submit } = useRequest(operationUrls.root, { method: 'DELETE' })
+  const { submit, loading } = useRequest(operationUrls.root, { method: 'DELETE' })
   const operationSelection = useImportDataOperationSelectionStore('selected', 'clear')
 
   const perform = () => {
@@ -183,6 +190,7 @@ export const useDeleteAction = (): Action => {
     hint: 'Delete operations',
     icon: <TrashIcon />,
     available: !importData.data?.progress && !!operationSelection.selected.size,
+    loading,
     perform,
   }
 }

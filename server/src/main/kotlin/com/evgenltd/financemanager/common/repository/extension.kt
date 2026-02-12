@@ -63,9 +63,20 @@ infix fun <E, F : Comparable<F>> KProperty1<E, F?>.lt(value: F?): Specification<
 
 infix fun <E, F : Comparable<F>> KProperty1<E, F?>.contains(values: Iterable<F>?): Specification<E> = valueNonNull(values) {
     Specification<E> { root, _, builder ->
-        builder.`in`(root.get<F>(name)).also { expression ->
-            it.onEach { expression.value(it) }
-        }
+        builder.`in`(root.get<F>(name))
+            .also { expression ->
+                it.onEach { expression.value(it) }
+            }
+    }
+}
+
+infix fun <E, F : Comparable<F>> KProperty1<E, F?>.containsNot(values: Iterable<F>?): Specification<E> = valueNonNull(values) {
+    Specification<E> { root, _, builder ->
+        builder.`in`(root.get<F>(name))
+            .also { expression ->
+                it.onEach { expression.value(it) }
+            }
+            .let { builder.not(it) }
     }
 }
 

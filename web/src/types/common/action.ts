@@ -5,5 +5,6 @@ export interface Action {
   hint: string
   icon: React.ReactNode
   available: boolean
+  loading: boolean
   perform: (...args: any) => void
 }

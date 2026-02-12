@@ -44,7 +44,8 @@ interface ImportDataOperationRepository : JpaRepository<ImportDataOperation, UUI
             from import_data_operations ido
             join embeddings idoe on ido.hint_id = idoe.id
             left join import_data_entries ide on ido.import_data_entry_id = ide.id
-            left join import_data idt on ide.import_data_id = idt.id
+            left join import_data_day idd on ide.import_data_day_id = idd.id
+            left join import_data idt on idd.import_data_id = idt.id
             left join operations o on (o.account_from_id = idt.account_id or o.account_to_id = idt.account_id)
                             and (o.date >= current_date - interval '6 months')
                             and o.type = ido.type

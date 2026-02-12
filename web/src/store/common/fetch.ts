@@ -63,6 +63,7 @@ export const createFetchStore = <T>(path: string, method: string = 'GET') =>
           set({ data: it.value })
         } else {
           const result = produce(get().data, (draft) => patch(draft, it.path, it.value))
+          console.log('applyPatch', result)
           set({ data: result })
         }
       }

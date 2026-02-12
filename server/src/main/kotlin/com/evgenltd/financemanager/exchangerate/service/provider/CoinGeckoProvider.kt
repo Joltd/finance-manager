@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.oppositeRate
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
@@ -16,6 +17,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@SkipLogging
 @Service
 class CoinGeckoProvider(
     @Value("\${exchange.coin-gecko.api-key}")

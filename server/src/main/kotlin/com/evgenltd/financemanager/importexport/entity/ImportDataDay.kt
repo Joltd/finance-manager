@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.importexport.entity
 
-import com.evgenltd.financemanager.operation.entity.Operation
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -11,41 +10,42 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Entity
-@Table(name = "import_data_entries")
-class ImportDataEntry(
+@Table(name = "import_data_day")
+class ImportDataDay(
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
     @ManyToOne
-    @JoinColumn(name = "import_data_day_id")
-    var importDataDay: ImportDataDay,
+    @JoinColumn(name = "import_data_id")
+    var importData: ImportData,
 
-    @ManyToOne
-    @JoinColumn(name = "operation_id")
-    var operation: Operation? = null,
+    var date: LocalDate,
 
-    @OneToMany(mappedBy = "importDataEntry", cascade = [CascadeType.REMOVE], orphanRemoval = true)
-    var operations: MutableList<ImportDataOperation> = mutableListOf(),
+    var valid: Boolean = false,
 
-    var visible: Boolean = true
+    @OneToMany(mappedBy = "importDataDay", cascade = [CascadeType.REMOVE, CascadeType.MERGE, CascadeType.PERSIST], orphanRemoval = true)
+    var totals: MutableList<ImportDataTotal> = mutableListOf(),
+
+    @OneToMany(mappedBy = "importDataDay", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    var entries: MutableList<ImportDataEntry> = mutableListOf(),
+
 ) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as ImportDataEntry
+        other as ImportDataDay
 
         return id == other.id
     }
 
     override fun hashCode(): Int = id?.hashCode() ?: 0
 
-    override fun toString(): String = "ImportDataEntry(id=$id, visible=$visible)"
+    override fun toString(): String = "ImportDataDay(id=$id, importData=$importData, date=$date, valid=$valid)"
 
 }

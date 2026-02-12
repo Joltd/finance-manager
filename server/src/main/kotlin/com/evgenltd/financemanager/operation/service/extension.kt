@@ -14,3 +14,10 @@ fun Transaction.signedAmount(): Amount = if (type == TransactionType.OUT) -amoun
 
 fun byAccount(account: Account): Specification<Operation> =
     (Operation::accountFrom eq account) or (Operation::accountTo eq account)
+
+fun List<Operation>.amountsForAccount(account: Account): List<Amount> = flatMap { operation ->
+    listOf(
+        operation.amountFrom.takeIf { operation.accountFrom == account }?.let { -it },
+        operation.amountTo.takeIf { operation.accountTo == account },
+    )
+}.filterNotNull()

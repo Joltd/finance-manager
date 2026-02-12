@@ -4,116 +4,96 @@ import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.account.converter.AccountConverter
-import com.evgenltd.financemanager.common.util.isNegative
-import com.evgenltd.financemanager.common.util.isPositive
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.dataformat.csv.CsvMapper
+import com.fasterxml.jackson.dataformat.csv.CsvSchema
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import java.util.*
 
-
 @Service
-class TbcImportParser(
-    private val accountConverter: AccountConverter,
-) : ImportParser {
+class TbcImportParser : ImportParser {
 
     override val id: UUID = UUID.fromString("4cedb5cf-d946-4702-8c78-1b0c47c225a0")
     override val name: String = "TBC"
 
-    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> =
-        stream.readCsv(skip = 1)
-            .map {
-                val amountAndType = if (it[PAID_OUT].isNotEmpty()) {
-                    fromFractionalString(it[PAID_OUT], importData.currency!!) to OperationType.EXPENSE
-                } else if (it[PAID_IN].isNotEmpty()) {
-                    fromFractionalString(it[PAID_IN], importData.currency!!) to OperationType.INCOME
-                } else {
-                    throw IllegalStateException("Unable to parse amount from row $it")
-                }
+    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
+        val currency = importData.currency ?: throw RuntimeException("Currency must be specified")
+        val account = importData.account
 
-                ImportDataParsedEntry(
-                    rawEntries = listOf(it.toString()),
-                    date = it[DATE].date("dd/MM/yyyy"),
-                    type = amountAndType.second,
-                    accountFrom = null,
-                    amountFrom = amountAndType.first,
-                    accountTo = null,
-                    amountTo = amountAndType.first,
-                    description = it[DESCRIPTION].trim(),
-                )
+        val csvMapper = CsvMapper.builder()
+            .addModule(KotlinModule.Builder().build())
+            .build()
+
+        val rows = stream.bufferedReader().use { reader ->
+            reader.readLine() // Skip the first (Georgian) header line.
+            val remaining = reader.readText()
+            if (remaining.isBlank()) {
+                return emptyList()
             }
-
-    private fun parseV1(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
-        val lines = stream.readCsv(skip = 1)
-        return lines.parseExchanges(importData) + lines.parseRegularOperations()
-    }
-
-    private fun List<CsvRow>.parseExchanges(importData: ImportData): List<ImportDataParsedEntry> {
-        val iterator = filter { it[TRANSACTION_TYPE] == EXCHANGE_OPERATION }.iterator()
-        val result = mutableListOf<ImportDataParsedEntry>()
-        while (iterator.hasNext()) {
-            val first = iterator.next()
-            val second = iterator.next()
-
-            val date = first[DATE].date("dd/MM/yyyy")
-            val description = first[DESCRIPTION].trim()
-
-            val firstAmount = fromFractionalString(first[AMOUNT], first[CURRENCY])
-            val secondAmount = fromFractionalString(second[AMOUNT], second[CURRENCY])
-            val (from, to) = if (firstAmount.value < 0 && secondAmount.value > 0) {
-                firstAmount.abs() to secondAmount
-            } else if (firstAmount.value > 0 && secondAmount.value < 0) {
-                secondAmount.abs() to firstAmount
-            } else {
-                throw IllegalStateException("Invalid exchange, from $first, to $second, date $date")
-            }
-
-            val entry = ImportDataParsedEntry(
-                rawEntries = listOf(first.toString(), second.toString()),
-                date = date,
-                type = OperationType.EXCHANGE,
-                accountFrom = importData.account,
-                amountFrom = from,
-                accountTo = importData.account,
-                amountTo = to,
-                description = description,
-            )
-            result.add(entry)
+            val cleaned = remaining.removePrefix("\uFEFF")
+            val schema = CsvSchema.emptySchema().withHeader().withColumnSeparator(',')
+            csvMapper.readerFor(Row::class.java)
+                .with(schema)
+                .readValues<Row>(cleaned)
+                .readAll()
         }
-        return result
-    }
 
-    private fun List<CsvRow>.parseRegularOperations(): List<ImportDataParsedEntry> =
-        filter { it[TRANSACTION_TYPE] != EXCHANGE_OPERATION }
-            .map {
-                val amount = fromFractionalString(it[AMOUNT], it[CURRENCY])
-                ImportDataParsedEntry(
-                    rawEntries = listOf(it.toString()),
-                    date = it[DATE].date("dd/MM/yyyy"),
-                    type = when {
-                        amount.isNegative() -> OperationType.EXPENSE
-                        amount.isPositive() -> OperationType.INCOME
-                        else -> OperationType.EXCHANGE
-                    },
-                    accountFrom = null,
-                    amountFrom = amount.abs(),
-                    accountTo = null,
-                    amountTo = amount.abs(),
-                    description = it[DESCRIPTION].trim(),
-                )
+        return rows.map { row ->
+            val paidOut = row.paidOut?.trim().orEmpty()
+            val paidIn = row.paidIn?.trim().orEmpty()
+
+            val (amount, type) = when {
+                paidOut.isNotEmpty() -> fromFractionalString(paidOut, currency) to OperationType.EXPENSE
+                paidIn.isNotEmpty() -> fromFractionalString(paidIn, currency) to OperationType.INCOME
+                else -> throw IllegalStateException("Unable to parse amount from row $row")
             }
 
-    private companion object {
-        const val TRANSACTION_TYPE = "Transaction Type"
-        const val DATE = "Date"
-        const val AMOUNT = "Amount"
-        const val PAID_OUT = "Paid Out"
-        const val PAID_IN = "Paid In"
-        const val CURRENCY = "Currency"
-        const val DESCRIPTION = "Description"
+            val (accountFrom, accountTo) = when (type) {
+                OperationType.EXPENSE -> account to null
+                OperationType.INCOME -> null to account
+                else -> null to null
+            }
 
-        const val EXCHANGE_OPERATION = "Currency exchange"
+            ImportDataParsedEntry(
+                rawEntries = listOf(row.toString()),
+                date = row.date!!.date("dd/MM/yyyy"),
+                type = type,
+                accountFrom = accountFrom,
+                amountFrom = amount,
+                accountTo = accountTo,
+                amountTo = amount,
+                description = row.description?.trim().orEmpty(),
+            )
+        }
     }
+
+    data class Row(
+        @field:JsonProperty("Date") val date: String? = null,
+        @field:JsonProperty("Description") val description: String? = null,
+        @field:JsonProperty("Additional Information") val additionalInformation: String? = null,
+        @field:JsonProperty("Paid Out") val paidOut: String? = null,
+        @field:JsonProperty("Paid In") val paidIn: String? = null,
+        @field:JsonProperty("Balance") val balance: String? = null,
+        @field:JsonProperty("Type") val type: String? = null,
+        @field:JsonProperty("Document Date") val documentDate: String? = null,
+        @field:JsonProperty("Document Number") val documentNumber: String? = null,
+        @field:JsonProperty("Partner's Account") val partnerAccount: String? = null,
+        @field:JsonProperty("Partner's Name") val partnerName: String? = null,
+        @field:JsonProperty("Partner's Tax Code") val partnerTaxCode: String? = null,
+        @field:JsonProperty("Partner's Bank Code") val partnerBankCode: String? = null,
+        @field:JsonProperty("Partner's Bank") val partnerBank: String? = null,
+        @field:JsonProperty("Intermediary Bank Code") val intermediaryBankCode: String? = null,
+        @field:JsonProperty("Intermediary Bank") val intermediaryBank: String? = null,
+        @field:JsonProperty("Charge Details") val chargeDetails: String? = null,
+        @field:JsonProperty("Taxpayer Code") val taxpayerCode: String? = null,
+        @field:JsonProperty("Taxpayer Name") val taxpayerName: String? = null,
+        @field:JsonProperty("Treasury Code") val treasuryCode: String? = null,
+        @field:JsonProperty("Op. Code") val opCode: String? = null,
+        @field:JsonProperty("Additional Description") val additionalDescription: String? = null,
+        @field:JsonProperty("Transaction ID") val transactionId: String? = null,
+    )
 
 
 }

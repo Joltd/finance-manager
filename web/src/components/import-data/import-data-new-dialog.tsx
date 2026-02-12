@@ -21,9 +21,11 @@ import { AccountInput } from '@/components/common/input/account-input'
 import { accountReferenceShema, AccountType } from '@/types/account'
 import { createOpenStore, OpenStoreState } from '@/store/common/open'
 import { useStoreSelect } from '@/hooks/use-store-select'
+import { CurrencyInput } from '@/components/common/input/currency-input'
 
 const formSchema = z.object({
   account: accountReferenceShema,
+  currency: z.string().optional(),
   file: z
     .any()
     .refine((file) => file instanceof FileList && file.length > 0, { message: 'Field required' }),
@@ -43,13 +45,17 @@ export function ImportDataNewDialog() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       account: undefined,
+      currency: undefined,
       file: undefined,
     },
   })
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     const formData = new FormData()
-    formData.append('data', jsonAsBlob({ account: data.account.id }))
+    formData.append(
+      'data',
+      jsonAsBlob({ account: data.account.id, currency: data.currency ?? null }),
+    )
     formData.append('file', data.file[0])
     importBegin.submit(formData).then((result) => {
       closeDialog()
@@ -87,6 +93,18 @@ export function ImportDataNewDialog() {
                     <FormLabel>Account</FormLabel>
                     <FormControl>
                       <AccountInput type={AccountType.ACCOUNT} {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Currency (optional)</FormLabel>
+                    <FormControl>
+                      <CurrencyInput value={field.value} onChange={field.onChange} />
                     </FormControl>
                   </FormItem>
                 )}

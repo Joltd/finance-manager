@@ -22,7 +22,7 @@ import { AccountLabel } from '@/components/common/typography/account-label'
 export default function Page() {
   const store = useTopFlowStore('loading', 'dataFetched', 'error', 'data', 'setPayload', 'fetch')
   const [value, setValue] = useState<Record<string, any>>({
-    date: currentAndPreviousMonths(5),
+    date: currentAndPreviousMonths(2),
     type: AccountType.EXPENSE,
   })
   const [showOther, setShowOther] = useState<string[]>([])

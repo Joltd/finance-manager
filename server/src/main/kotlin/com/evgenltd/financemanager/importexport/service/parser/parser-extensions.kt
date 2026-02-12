@@ -20,9 +20,9 @@ fun InputStream.readCsv(skip: Int = 0, delimiter: String = ","): List<CsvRow> {
     val lines = bufferedReader()
         .use { it.readLines() }
         .drop(skip)
-    if (lines.size < 2) {
-        return emptyList()
-    }
+//    if (lines.size < 2) {
+//        return emptyList()
+//    }
 
     val fields = lines.first()
         .split(delimiter)

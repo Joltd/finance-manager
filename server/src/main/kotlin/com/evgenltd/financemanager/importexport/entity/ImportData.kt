@@ -30,7 +30,6 @@ class ImportData(
     @JoinColumn(name = "account_id")
     var account: Account,
 
-    @Deprecated("Should be removed")
     var currency: String? = null,
 
     var progress: Boolean = false,
@@ -38,10 +37,10 @@ class ImportData(
     var valid: Boolean = false,
 
     @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)
-    var entries: MutableList<ImportDataEntry> = mutableListOf(),
+    var totals: MutableList<ImportDataTotal> = mutableListOf(),
 
     @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)
-    var totals: MutableList<ImportDataTotal> = mutableListOf(),
+    var days: MutableList<ImportDataDay> = mutableListOf(),
 
     @JdbcTypeCode(SqlTypes.JSON)
     var hiddenOperations: MutableSet<UUID> = mutableSetOf()

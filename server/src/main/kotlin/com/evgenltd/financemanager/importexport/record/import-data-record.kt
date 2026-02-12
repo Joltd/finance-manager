@@ -13,6 +13,7 @@ import java.util.*
 
 data class ImportDataCreateRequest(
     val account: UUID,
+    val currency: String?,
 )
 
 data class ImportDataLinkRequest(
@@ -39,10 +40,10 @@ data class ImportDataRecord(
 
 data class ImportDataTotalRecord(
     val currency: String,
-    val operation: Amount?,
-    val suggested: Amount?,
-    val parsed: Amount?,
-    val actual: Amount?,
+    val parsed: Amount,
+    val suggested: Amount,
+    val operation: Amount,
+    val actual: Amount,
     val valid: Boolean,
 )
 
@@ -54,9 +55,9 @@ data class EntryFilter(
     val totalValid: Boolean? = null,
 )
 
-data class ImportDataEntryGroupRecord(
+data class ImportDataDayRecord(
     val date: LocalDate,
-    val valid: Boolean? = null,
+    val valid: Boolean,
     val totals: List<ImportDataTotalRecord> = emptyList(),
     val entries: List<ImportDataEntryRecord> = emptyList(),
 )

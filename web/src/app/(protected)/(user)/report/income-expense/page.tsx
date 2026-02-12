@@ -23,7 +23,7 @@ export default function Page() {
     'fetch',
   )
   const [value, setValue] = useState<Record<string, any>>({
-    date: currentAndPreviousMonths(5),
+    date: currentAndPreviousMonths(2),
   })
 
   useEffect(() => {

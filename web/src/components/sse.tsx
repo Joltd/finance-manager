@@ -1,3 +1,4 @@
+'use client'
 import { useEffect } from 'react'
 import { createStore } from 'zustand'
 import { useStoreSelect } from '@/hooks/use-store-select'
@@ -20,6 +21,7 @@ const sseStore = createStore<SseStoreState>((set, get) => {
   }
 
   const subscribe = (eventName: string, listener: (data: any) => void) => {
+    console.log('subscribe', eventName)
     let source = get().source
     if (!source) {
       throw new Error('EventSource is not initialized')
@@ -29,6 +31,9 @@ const sseStore = createStore<SseStoreState>((set, get) => {
       listener(event.data ? JSON.parse(event.data) : undefined)
     }
     const listeners = get().listeners
+    if (listeners[eventName]) {
+      source?.removeEventListener(eventName, listeners[eventName])
+    }
     listeners[eventName] = actualListener
     set({ listeners })
 
@@ -36,6 +41,7 @@ const sseStore = createStore<SseStoreState>((set, get) => {
   }
 
   const unsubscribe = (eventName: string) => {
+    console.log('unsubscribe', eventName)
     const listeners = get().listeners
     const listener = listeners[eventName]
     get().source?.removeEventListener(eventName, listener)
@@ -51,7 +57,7 @@ const sseStore = createStore<SseStoreState>((set, get) => {
   }
 })
 
-const useSseStore = <K extends keyof SseStoreState>(...fields: K[]) =>
+export const useSseStore = <K extends keyof SseStoreState>(...fields: K[]) =>
   useStoreSelect<SseStoreState, K>(sseStore, ...fields)
 
 export interface SseProps<T> {
@@ -69,15 +75,7 @@ export function Sse<T>({ eventName, params, listener }: SseProps<T>) {
     }
 
     const actualEventName = fillPathParams(eventName, params)
-
-    if (!store.source) {
-      api.get('/api/sse-endpoint').then((response) => {
-        store.initSource(response.data)
-        store.subscribe(actualEventName, listener)
-      })
-    } else {
-      store.subscribe(actualEventName, listener)
-    }
+    store.subscribe(actualEventName, listener)
 
     return () => {
       store.unsubscribe(actualEventName)

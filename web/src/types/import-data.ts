@@ -15,16 +15,16 @@ export interface ImportData {
 
 export interface ImportDataTotal {
   currency: string
-  operation?: Amount
-  suggested?: Amount
-  parsed?: Amount
-  actual?: Amount
+  operation: Amount
+  suggested: Amount
+  parsed: Amount
+  actual: Amount
   valid: boolean
 }
 
-export interface ImportDataEntryGroup {
+export interface ImportDataDay {
   date: string
-  valid?: boolean
+  valid: boolean
   totals: ImportDataTotal[]
   entries: ImportDataEntry[]
 }

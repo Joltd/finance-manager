@@ -120,7 +120,7 @@ class ReportService(
                     otherEntries = allEntries.drop(groupLimit),
                 )
             }
-            .sortedBy { it.date }
+            .sortedByDescending { it.date }
 
     fun incomeExpenseReport(filter: IncomeExpenseFilter): IncomeExpenseReportRecord {
         val targetCurrency = settingService.load()
@@ -181,7 +181,7 @@ class ReportService(
                     }.sortedByDescending { it.amount }
                 )
             }
-            .sortedBy { it.date }
+            .sortedByDescending { it.date }
 
     private data class TopFlowKey(
         val date: LocalDate,

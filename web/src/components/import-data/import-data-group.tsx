@@ -1,13 +1,13 @@
 import { cn } from '@/lib/utils'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { TriangleAlert } from 'lucide-react'
-import { ImportDataEntryGroup, ImportDataTotal } from '@/types/import-data'
+import { ImportDataDay, ImportDataTotal } from '@/types/import-data'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import { plus } from '@/types/common/amount'
 
 export interface ImportDataGroupHeaderProps {
-  group: ImportDataEntryGroup
+  group: ImportDataDay
 }
 
 export function ImportDataGroupHeader({ group }: ImportDataGroupHeaderProps) {

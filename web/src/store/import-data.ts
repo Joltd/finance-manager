@@ -1,5 +1,5 @@
 import { importDataUrls } from '@/api/import-data'
-import { ImportData, ImportDataEntry, ImportDataEntryGroup } from '@/types/import-data'
+import { ImportData, ImportDataEntry, ImportDataDay } from '@/types/import-data'
 import { createFetchStore, FetchStoreState } from '@/store/common/fetch'
 import { useStoreSelect } from '@/hooks/use-store-select'
 import { createSelectionStore, SelectionStoreState } from '@/store/common/selection'
@@ -22,11 +22,9 @@ export const useImportDataStore = <K extends keyof FetchStoreState<ImportData>>(
 
 //
 
-const importDataEntryListStore = createFetchStore<ImportDataEntryGroup[]>(importDataUrls.entry)
+const importDataEntryListStore = createFetchStore<ImportDataDay[]>(importDataUrls.entry)
 
-export const useImportDataEntryListStore = <
-  K extends keyof FetchStoreState<ImportDataEntryGroup[]>,
->(
+export const useImportDataEntryListStore = <K extends keyof FetchStoreState<ImportDataDay[]>>(
   ...fields: K[]
 ) => useStoreSelect(importDataEntryListStore, ...fields)
 

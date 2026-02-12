@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
 import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
 
+@SkipLogging
 @Service
 class FreeCurrencyProvider(
     @Value("\${exchange.free-currency.api-key}")

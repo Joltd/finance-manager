@@ -5,7 +5,7 @@ import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.record.EntryFilter
 import com.evgenltd.financemanager.importexport.record.ImportDataCreateRequest
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryGroupRecord
+import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryVisibilityRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataLinkRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
@@ -54,7 +54,7 @@ class ImportDataController(
 
     @GetMapping("/api/v1/import-data/{id}/entry")
     @PreAuthorize("hasRole('USER')")
-    fun entryList(@PathVariable id: UUID, request: EntryFilter): List<ImportDataEntryGroupRecord> =
+    fun entryList(@PathVariable id: UUID, request: EntryFilter): List<ImportDataDayRecord> =
         importDataService.entryList(id, request)
 
     @PostMapping("/api/v1/import-data/begin")

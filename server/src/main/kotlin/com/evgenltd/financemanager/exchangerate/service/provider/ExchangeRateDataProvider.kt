@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
 
+@SkipLogging
 @Service
 class ExchangeRateDataProvider(
     @Value("\${exchange.exchange-rate.api-key}")

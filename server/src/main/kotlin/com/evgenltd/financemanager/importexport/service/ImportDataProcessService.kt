@@ -78,7 +78,8 @@ class ImportDataProcessService(
         importDataEventService.importData()
     }
 
-    fun linkOperationById(id: UUID, entryId: UUID, operationId: UUID) {
+    @Task
+    fun linkOperationById(@TaskKey id: UUID, entryId: UUID, operationId: UUID) {
         try {
             withLock(id) {
                 val dates = importDataActionService.linkOperation(id, entryId, operationId)
@@ -103,7 +104,8 @@ class ImportDataProcessService(
         }
     }
 
-    fun unlinkOperation(id: UUID, entryIds: List<UUID>) {
+    @Task
+    fun unlinkOperation(@TaskKey id: UUID, entryIds: List<UUID>) {
         if (entryIds.isEmpty()) {
             return
         }

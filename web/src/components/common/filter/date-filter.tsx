@@ -84,29 +84,30 @@ export function WeekFilter({ from, to, id, label = 'Week', ...props }: WeekFilte
     if (!from) {
       return
     }
-    const prevFrom = add(asUtc(value.from), { weeks: -1 })
+    const prevFrom = add(asMonday(from), { weeks: -1 })
     const week = asWeek(prevFrom)
     updateValue(id, asDateRangeValue(week))
   }
 
   const handleNextWeek = () => {
+    const from = value?.[id]?.from
     if (!from) {
       return
     }
-    const prevFrom = add(asUtc(value.from), { weeks: 1 })
+    const prevFrom = add(asMonday(from), { weeks: 1 })
     const week = asWeek(prevFrom)
     updateValue(id, asDateRangeValue(week))
   }
 
   const handleFirstWeek = () => {
-    if (from) {
-      handleDayClick(asUtc(from))
+    if (actualFrom) {
+      handleDayClick(asUtc(actualFrom))
     }
   }
 
   const handleLastWeek = () => {
-    if (to) {
-      handleDayClick(asUtc(to))
+    if (actualTo) {
+      handleDayClick(asUtc(actualTo))
     }
   }
 

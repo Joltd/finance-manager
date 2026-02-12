@@ -23,6 +23,7 @@ import { Pointable } from '@/components/common/pointable'
 import { ValidityIcon } from '@/components/common/icon/validity-icon'
 import { Typography } from '@/components/common/typography/typography'
 import { Sse } from '@/components/sse'
+import { useLinkAction, useUnlinkAction } from '@/components/import-data/actions'
 
 export interface ImportDataHeaderProps {}
 
@@ -30,6 +31,8 @@ export function ImportDataHeader(props: ImportDataHeaderProps) {
   const importData = useImportDataStore('data')
   const balance = useBalanceStore('data', 'fetch') // todo support loading, error, sse
   const { submit, loading, error } = useRequest(importDataUrls.finish) // todo handle error
+  const linkAction = useLinkAction()
+  const unlinkAction = useUnlinkAction()
 
   const handleFinish = (revise = false) => {
     submit({ revise }, { id: importData.data?.id })
@@ -37,6 +40,9 @@ export function ImportDataHeader(props: ImportDataHeaderProps) {
 
   useEffect(() => {
     balance.fetch()
+    requestAnimationFrame(() => {
+      console.log('requestAnimationFrame - paint')
+    })
   }, [])
 
   const balances = useMemo(() => {
@@ -50,6 +56,8 @@ export function ImportDataHeader(props: ImportDataHeaderProps) {
       .forEach((it) => (result[it.amount.currency] = it.amount))
     return result
   }, [balance.data])
+
+  console.log('importData.data?.progress', importData.data?.progress, Date.now())
 
   return (
     <Stack orientation="horizontal" gap={4}>
@@ -81,7 +89,8 @@ export function ImportDataHeader(props: ImportDataHeaderProps) {
           <Pointable>
             <Stack orientation="horizontal" center>
               <Typography variant="h2">{importData.data?.account?.name}</Typography>
-              {!importData.data?.progress ? (
+              progress? - {JSON.stringify(importData.data?.progress)}
+              {!importData.data?.progress && !linkAction.loading && !unlinkAction.loading ? (
                 <ValidityIcon
                   valid={importData.data?.valid}
                   message="Totals by import file doesn't mathced to totals in database with suggested records or actual balance is different"

@@ -1,11 +1,13 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
 
+@SkipLogging
 @Service
 class ExchangeRateStubProvider : ExchangeRateProvider {
 
