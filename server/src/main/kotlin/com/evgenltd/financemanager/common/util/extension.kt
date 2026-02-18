@@ -9,4 +9,6 @@ fun unauthorizedException(): ResponseStatusException = ResponseStatusException(H
 
 fun badRequestException(message: String? = null): ResponseStatusException = ResponseStatusException(HttpStatus.BAD_REQUEST, message)
 
+fun conflictException(message: String? = null): ResponseStatusException = ResponseStatusException(HttpStatus.CONFLICT, message)
+
 fun BigDecimal.oppositeRate(): BigDecimal = BigDecimal.ONE.divide(this, Amount.SCALE * 2, RoundingMode.HALF_UP)

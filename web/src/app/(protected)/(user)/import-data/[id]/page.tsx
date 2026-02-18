@@ -68,27 +68,27 @@ export default function Page() {
 
   return (
     <Layout>
-      {id && (
-        <Sse
-          eventName={importDataEvents.id}
-          params={{ id }}
-          listener={(patch: Patch[]) => {
-            console.log('importDataEvents.id', patch)
-            importData.applyPatch(patch)
-          }}
-        />
-      )}
-      {/*todo check dates*/}
-      {id && (
-        <Sse
-          eventName={importDataEvents.entry}
-          params={{ id }}
-          listener={() => {
-            console.log('importDataEvents.entry')
-            importDataEntryList.fetch()
-          }}
-        />
-      )}
+      {/*{id && (*/}
+      {/*  <Sse*/}
+      {/*    eventName={importDataEvents.id}*/}
+      {/*    params={{ id }}*/}
+      {/*    listener={(patch: Patch[]) => {*/}
+      {/*      console.log('importDataEvents.id', patch)*/}
+      {/*      importData.applyPatch(patch)*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*)}*/}
+      {/*/!*todo check dates*!/*/}
+      {/*{id && (*/}
+      {/*  <Sse*/}
+      {/*    eventName={importDataEvents.entry}*/}
+      {/*    params={{ id }}*/}
+      {/*    listener={() => {*/}
+      {/*      console.log('importDataEvents.entry')*/}
+      {/*      importDataEntryList.fetch()*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*)}*/}
       <DataPlaceholder {...importData}>
         {importData.data && (
           <Stack gap={6} className="overflow-hidden">

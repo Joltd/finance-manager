@@ -23,6 +23,7 @@ import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
 import com.evgenltd.financemanager.common.repository.containsNot
+import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.importexport.entity.ImportDataDay
@@ -52,7 +53,35 @@ class ImportDataActionService(
     private val operationProcessService: OperationProcessService,
     private val operationRepository: OperationRepository,
     private val accountRepository: AccountRepository,
+    private val lockService: LockService,
 ) : Loggable() {
+
+    @Transactional
+    fun startProgress(id: UUID) {
+        val importData = importDataRepository.find(id)
+        importData.progress = true
+    }
+
+    @Transactional
+    fun endProgress(id: UUID) {
+        val importData = importDataRepository.find(id)
+        importData.progress = false
+    }
+
+    fun withLock(id: UUID?, block: () -> Unit) {
+        lockService.withLockEntity(
+            entityName = ImportData::class.simpleName!!,
+            id = id!!,
+            block = block
+        )
+    }
+
+    fun withTryLock(id: UUID?, block: () -> Unit): Boolean =
+        lockService.withTryLockEntity(
+            entityName = ImportData::class.simpleName!!,
+            id = id!!,
+            block = block
+        )
 
     @Transactional
     fun parseImportData(id: UUID, stream: InputStream) {
