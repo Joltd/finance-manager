@@ -39,6 +39,10 @@ class Balance(
     var amount: Amount,
 
     var date: LocalDate,
+
+    var calculationDate: LocalDate? = null,
+
+    var calculationVersion: Int? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

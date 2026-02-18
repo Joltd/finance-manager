@@ -1,7 +1,7 @@
 package com.evgenltd.financemanager.operation.service
 
 import com.evgenltd.financemanager.account.entity.AccountType
-import com.evgenltd.financemanager.account.service.BalanceActionService
+import com.evgenltd.financemanager.account.service.BalanceProcessService
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.AccountBalanceChangeStateRecord
 import com.evgenltd.financemanager.operation.record.OperationChangeStateRecord
@@ -14,7 +14,7 @@ import java.util.UUID
 class OperationProcessService(
     private val operationService: OperationService,
     private val operationEventService: OperationEventService,
-    private val balanceActionService: BalanceActionService,
+    private val balanceProcessService: BalanceProcessService,
 ) {
 
     fun update(record: OperationRecord): UUID {
@@ -59,7 +59,7 @@ class OperationProcessService(
             .distinct()
             .toList()
             .onEach {
-                balanceActionService.updateBalance(it.account, it.currency, it.date)
+                balanceProcessService.requestCalculateBalance(it.account, it.currency, it.date)
             }
     }
 

@@ -48,7 +48,7 @@ class LockService(
         val lock = lockRegistry.obtain(key)
 
         val locked = try {
-            lock.tryLock(2, TimeUnit.SECONDS)
+            lock.tryLock()
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             throw IllegalStateException("Lock acquisition interrupted for key=$key", e)
