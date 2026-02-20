@@ -15,27 +15,28 @@ interface BalanceRepository : JpaRepository<Balance, UUID>, JpaSpecificationExec
 
     @Modifying
     @Query("""
-        insert into balances (tenant, account_id, amount_value, amount_currency, date, calculation_date, calculation_version)
-        values (:tenant, :accountId, 0, :currenct, :calculationDate, :calculationDate, 1)
-        on conflict (tenant, account_id, amount_currency) 
-        do update set 
-            calculation_date = :calculationDate, 
+        insert into balances (id, tenant, account_id, amount_value, amount_currency, date, calculation_date, calculation_version)
+        values (gen_random_uuid(), :tenant, :accountId, 0, :currency, :calculationDate, :calculationDate, 1)
+        on conflict (tenant, account_id, amount_currency)
+        do update set
+            calculation_date = :calculationDate,
             calculation_version = coalesce(balances.calculation_version, 0) + 1
         where
-            excluded.calculation_date < balances.calculation_date 
-        returning *
+            balances.calculation_date is null
+            or excluded.calculation_date < balances.calculation_date
     """, nativeQuery = true)
-    fun calculationRequest(tenant: UUID, accountId: UUID, currency: String, calculationDate: LocalDate): Balance
+    fun calculationRequest(tenant: UUID, accountId: UUID, currency: String, calculationDate: LocalDate)
 
     @Modifying
     @Query("""
         update balances
         set
-            calculation_date = null, 
+            calculation_date = null,
             calculation_version = null
-        where 
-            calculation_date = :calculationDate and
-            calculation_version = :calculationVersion and
+        where
+            id = :id
+            and calculation_date = :calculationDate
+            and calculation_version = :calculationVersion
     """, nativeQuery = true)
     fun calculationCompleted(id: UUID, calculationDate: LocalDate, calculationVersion: Int)
 

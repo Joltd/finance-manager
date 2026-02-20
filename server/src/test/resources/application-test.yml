@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finance_manager_test
+    username: postgres
+    password: postgres
+  flyway:
+    out-of-order: true
+
+# base64 of "TestSecretKeyForIntegration" + "0" * 37 = 64 bytes (required minimum for HS512)
+security:
+  secret: VGVzdFNlY3JldEtleUZvckludGVncmF0aW9uMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMA==
+  access-token-expiration-minutes: 60
+  refresh-token-expiration-minutes: 10080
+
+exchange:
+  free-currency:
+    api-key: dummy
+  open-exchange:
+    app-id: dummy
+  exchange-rate:
+    api-key: dummy
+  coin-gecko:
+    api-key: dummy
+
+ai:
+  open-ai:
+    api-key: dummy
+
+APP_VERSION: test
