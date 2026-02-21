@@ -3,7 +3,6 @@ package com.evgenltd.financemanager.common.service
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.conflictException
-import com.evgenltd.financemanager.user.component.logger
 import org.springframework.integration.support.locks.LockRegistry
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -55,7 +54,7 @@ class LockService(
         }
 
         if (!locked) {
-            logger.warn("Lock already acquired for key=$key")
+            log.warn("Lock already acquired for key=$key")
             return false
         }
 

@@ -30,7 +30,7 @@ class FileService(
         }
     }
 
-    @Scheduled(cron = "0 */5 * * * *")
+//    @Scheduled(cron = "0 */5 * * * *")
     fun cleanup() {
         Files.list(Paths.get(path))
             .filter {

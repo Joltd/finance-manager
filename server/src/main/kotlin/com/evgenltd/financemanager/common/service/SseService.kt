@@ -49,7 +49,7 @@ class SseService : Loggable() {
         return emitter
     }
 
-    @Scheduled(fixedRate = 10_000)
+//    @Scheduled(fixedRate = 10_000)
     fun heartbeat() {
         emitters.onEach { (key, emitter) ->
             sendEvent(key, emitter, "heartbeat", Unit)

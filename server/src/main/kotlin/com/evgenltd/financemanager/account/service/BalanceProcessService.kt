@@ -49,7 +49,7 @@ class BalanceProcessService(
         }
     }
 
-    @Scheduled(cron = "*/10 * * * * *")
+//    @Scheduled(cron = "*/10 * * * * *")
     fun requestCalculateBalance() {
         balanceActionService.getBalancesForCalculation()
             .onEach {

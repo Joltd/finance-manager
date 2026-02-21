@@ -1,39 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="MDC_PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level [%X{requestId:--}] [%X{tenant:--}] [%X{user:--}] %logger{36} - %msg%n"/>
+    <property name="PATTERN"
+          value="%clr(%d{HH:mm:ss.SSS}){faint} %clr([%thread]){faint} %clr(%-5level) %clr([%X{requestId:--}]){yellow} %clr([%X{tenant:--}]){magenta} %clr([%X{user:--}]){green} %clr(%logger{36}){cyan} %clr(-){faint} %msg%n%wEx"/>
 
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-    <appender name="CONSOLE-MDC" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./logs/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/app-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
         <encoder>
-            <pattern>${MDC_PATTERN}</pattern>
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN}</pattern>
         </encoder>
     </appender>
 
     <springProfile name="prod">
-        <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>./logs/app.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>./logs/app-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-                <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                    <maxFileSize>10MB</maxFileSize>
-                </timeBasedFileNamingAndTriggeringPolicy>
-                <maxHistory>30</maxHistory>
-            </rollingPolicy>
-            <encoder>
-                <pattern>${MDC_PATTERN}</pattern>
-            </encoder>
-        </appender>
-
         <root level="INFO">
-            <appender-ref ref="CONSOLE-MDC"/>
+            <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE-ROLLING"/>
         </root>
     </springProfile>
 
-    <springProfile name="!prod">
+    <springProfile name="dev">
         <root level="INFO">
-            <appender-ref ref="CONSOLE-MDC"/>
+            <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
 </configuration>

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface OperationRepository : JpaRepository<Operation,UUID>, JpaSpecificationExecutor<Operation> {
+interface OperationRepository : JpaRepository<Operation, UUID>, JpaSpecificationExecutor<Operation> {
 
     fun findAllByOrderByDateDesc(page: Pageable): List<Operation>
 

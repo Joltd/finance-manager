@@ -30,7 +30,7 @@ class OperationController(
 
     @GetMapping("/api/v1/operation/{id}")
     @PreAuthorize("hasRole('USER')")
-    fun byId(@PathVariable("id") id: UUID): OperationRecord = operationService.byId(id)
+    fun byId(@PathVariable id: UUID): OperationRecord = operationService.byId(id)
 
     @PostMapping("/api/v1/operation")
     @PreAuthorize("hasRole('USER')")
@@ -40,7 +40,7 @@ class OperationController(
 
     @DeleteMapping("/api/v1/operation/{id}")
     @PreAuthorize("hasRole('USER')")
-    fun delete(@PathVariable("id") id: UUID) = operationProcessService.delete(id)
+    fun delete(@PathVariable id: UUID) = operationProcessService.delete(id)
 
     @DeleteMapping("/api/v1/operation")
     @PreAuthorize("hasRole('USER')")

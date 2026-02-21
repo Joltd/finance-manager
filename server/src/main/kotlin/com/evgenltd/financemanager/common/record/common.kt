@@ -16,6 +16,11 @@ enum class SortDirection {
     DESC
 }
 
+enum class DateDirection {
+    BACKWARD,
+    FORWARD,
+}
+
 data class EntityPageRequest<T>(
     val page: Int = 0,
     val size: Int = 50,
