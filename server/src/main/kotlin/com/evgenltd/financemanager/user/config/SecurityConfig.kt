@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.user.config
 
+import com.evgenltd.financemanager.user.config.MdcFilter
 import com.nimbusds.jose.jwk.source.ImmutableSecret
 import com.nimbusds.jose.util.Base64
 import org.springframework.context.annotation.Bean
@@ -54,6 +55,7 @@ class SecurityConfig(
             }.bearerTokenResolver(bearerTokenResolver())
         }
         .addFilterAfter(TenantFilter(), BearerTokenAuthenticationFilter::class.java)
+        .addFilterAfter(MdcFilter(), TenantFilter::class.java)
         .build()
 
     private fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {

@@ -12,10 +12,6 @@ import java.util.UUID
 @Repository
 interface ImportDataRepository : JpaRepository<ImportData,UUID> {
 
-    @Query("select a from ImportData a where a.id = :id")
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    fun findAndLock(id: UUID): ImportData?
-
     fun findByAccountId(accountId: UUID): List<ImportData>
 
 }

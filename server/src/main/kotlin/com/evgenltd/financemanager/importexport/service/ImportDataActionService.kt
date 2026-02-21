@@ -277,7 +277,10 @@ class ImportDataActionService(
             ?.let { it.actual = balance }
             ?: let {
                 emptyTotal(balance.currency)
-                    .also { it.actual = balance }
+                    .also {
+                        it.actual = balance
+                        it.importData = importData
+                    }
                     .let { importDataTotalRepository.save(it) }
             }
     }
@@ -391,13 +394,13 @@ class ImportDataActionService(
 
         val days = importData.days
 
-        val actualDates = days.map { it.date }
         val linkedOperations = days.asSequence()
             .flatMap { it.entries }
             .mapNotNull { it.operation }
             .mapNotNull { it.id }
             .toList()
 
+        val actualDates = dates ?: days.map { it.date }
         val freeOperations = ((Operation::date contains actualDates) and
                 byAccount(importData.account) and
                 (Operation::id containsNot linkedOperations) and
@@ -424,7 +427,7 @@ class ImportDataActionService(
         }
 
         val validByDays = importData.days.all { it.valid }
-        val validByActual = importData.totals.all { it.operation + it.suggested + it.parsed == it.actual }
+        val validByActual = importData.totals.all { it.operation + it.suggested + it.parsed == it.actual } // current balance + suggested totals == actual
         importData.valid = validByDays && validByActual
     }
 

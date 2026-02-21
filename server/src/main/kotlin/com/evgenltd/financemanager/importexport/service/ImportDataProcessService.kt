@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.importexport.service
 
+import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.record.OperationRecord
@@ -7,10 +8,13 @@ import com.evgenltd.financemanager.common.record.NotificationType
 import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.service.NotificationEventService
+import com.evgenltd.financemanager.importexport.record.ImportDataCalculateTotalEvent
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.operation.service.OperationProcessService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,11 +26,11 @@ class ImportDataProcessService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataActionService: ImportDataActionService,
-    private val importDataStateService: ImportDataStateService,
     private val importDataEventService: ImportDataEventService,
     private val operationProcessService: OperationProcessService,
     private val notificationEventService: NotificationEventService,
     private val fileService: FileService,
+    private val publisher: ApplicationEventPublisher,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
@@ -83,7 +87,7 @@ class ImportDataProcessService(
     fun linkOperationById(id: UUID, entryId: UUID, operationId: UUID) {
         importDataActionService.withLock(id) {
             val dates = importDataActionService.linkOperation(id, entryId, operationId)
-//            calculateTotal(id, dates) // need async
+            publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
         }
     }
 
@@ -100,7 +104,7 @@ class ImportDataProcessService(
         }
         importDataActionService.withLock(id) {
             val dates = importDataActionService.unlinkOperation(id, entryIds)
-//            calculateTotal(id, dates)
+            publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
         }
     }
 
@@ -110,7 +114,7 @@ class ImportDataProcessService(
         }
         importDataActionService.withLock(id) {
             val dates = importDataActionService.entryVisible(id, operationIds, entryIds, visible)
-//            calculateTotal(id, dates)
+            publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
         }
     }
 
@@ -124,30 +128,25 @@ class ImportDataProcessService(
             }
         }
     }
-//
-//    @Task
-//    @Transactional
-//    fun calculateTotal(@TaskKey id: UUID, date: LocalDate) {
-//        withLock(id) {
-//            calculateTotal(id, listOf(date))
-//        }
-//    }
-//
-//    @Transactional
-//    fun calculateTotalByBalanceUpdate(id: UUID, date: LocalDate) {
-//        withLock(id) {
-//            calculateTotal(id, listOf(date))
-//        }
-//    }
 
-    private fun calculateTotal(id: UUID, affectedDates: List<LocalDate>) {
-        if (affectedDates.isEmpty()) {
-            return
+    @EventListener
+    @Async
+    fun calculateTotal(event: ImportDataCalculateTotalEvent) {
+        calculateTotal(event.id, event.dates)
+    }
+
+    @EventListener
+    fun balanceCalculationCompleted(event: BalanceCalculationCompleted) {
+        importDataRepository.findByAccountId(event.accountId)
+            .onEach {
+                publisher.publishEvent(ImportDataCalculateTotalEvent(it.id!!))
+            }
+    }
+
+    private fun calculateTotal(id: UUID, dates: List<LocalDate>?) {
+        importDataActionService.withLock(id) {
+            importDataActionService.calculateTotal(id, dates)
         }
-        importDataActionService.calculateTotal(id, affectedDates)
-
-        importDataEventService.importData(id)
-        importDataEventService.importDataEntry(id, affectedDates)
     }
 
 }

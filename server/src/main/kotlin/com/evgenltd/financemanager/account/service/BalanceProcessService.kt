@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.account.record.BalanceCalculationRequest
 import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.user.component.currentTenant
+import com.evgenltd.financemanager.user.component.withRootTenant
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async

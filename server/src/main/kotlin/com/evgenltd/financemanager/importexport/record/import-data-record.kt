@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.ai.record.EmbeddingRecord
+import org.springframework.context.ApplicationEvent
 import java.time.LocalDate
 import java.util.*
 
@@ -135,7 +136,7 @@ data class OperationKey(
     val accountTo: UUID
 )
 
-data class TotalEntry(
-    val date: LocalDate,
-    val amount: Amount,
-)
+data class ImportDataCalculateTotalEvent(
+    val id: UUID,
+    val dates: List<LocalDate>? = null,
+) : ApplicationEvent(id)

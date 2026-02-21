@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <property name="MDC_PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level [%X{requestId:--}] [%X{tenant:--}] [%X{user:--}] %logger{36} - %msg%n"/>
+
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <appender name="CONSOLE-MDC" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${MDC_PATTERN}</pattern>
+        </encoder>
+    </appender>
 
     <springProfile name="prod">
         <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -13,13 +21,19 @@
                 <maxHistory>30</maxHistory>
             </rollingPolicy>
             <encoder>
-                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                <pattern>${MDC_PATTERN}</pattern>
             </encoder>
         </appender>
 
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE-MDC"/>
             <appender-ref ref="FILE-ROLLING"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="!prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE-MDC"/>
         </root>
     </springProfile>
 </configuration>
