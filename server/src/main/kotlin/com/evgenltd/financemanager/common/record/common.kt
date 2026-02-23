@@ -16,7 +16,7 @@ enum class SortDirection {
     DESC
 }
 
-enum class DateDirection {
+enum class SeekDirection {
     BACKWARD,
     FORWARD,
 }

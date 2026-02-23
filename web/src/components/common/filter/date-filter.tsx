@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 import {
   asDateRangeValue,
@@ -7,6 +7,7 @@ import {
   asUtc,
   asVisualMonthRange,
   asWeek,
+  formatDate,
   formatMonthRange,
   formatWeek,
 } from '@/lib/date'
@@ -16,7 +17,8 @@ import { MonthCalendar } from '@/components/common/calendar'
 import {
   FilterButton,
   FilterButtonProps,
-  useFilterContext,
+  useFilterActionsContext,
+  useFilterStateContext,
 } from '@/components/common/filter/filter'
 import { add, format, isWithinInterval } from 'date-fns'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -27,8 +29,20 @@ export interface MonthRangeFilterProps extends FilterButtonProps {}
 
 export function MonthRangeFilter({ id, label = 'Months', ...props }: MonthRangeFilterProps) {
   const [opened, setOpened] = useState(false)
-  const { value, updateValue } = useFilterContext()
+  const { value } = useFilterStateContext()
+  const { updateValue } = useFilterActionsContext()
   const [local, setLocal] = useState<DateRange | undefined>(asVisualMonthRange(value[id]))
+
+  useEffect(() => {
+    setLocal(asVisualMonthRange(value[id]))
+  }, [value[id]])
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setLocal(asVisualMonthRange(value[id]))
+    }
+    setOpened(next)
+  }
 
   const handleApplyValue = () => {
     const result = asModelMonthRange(local)
@@ -40,7 +54,7 @@ export function MonthRangeFilter({ id, label = 'Months', ...props }: MonthRangeF
 
   return (
     <FilterButton id={id} label={label} {...props}>
-      <Popover modal open={opened} onOpenChange={setOpened}>
+      <Popover modal open={opened} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button size="sm" variant="outline">
             {formatMonthRange(value[id])}
@@ -57,13 +71,61 @@ export function MonthRangeFilter({ id, label = 'Months', ...props }: MonthRangeF
   )
 }
 
+export interface DateFilterProps extends FilterButtonProps {}
+
+export function DateFilter({ id, label = 'Date', ...props }: DateFilterProps) {
+  const [opened, setOpened] = useState(false)
+  const { value } = useFilterStateContext()
+  const { updateValue } = useFilterActionsContext()
+  const [local, setLocal] = useState<Date | undefined>(value[id] ? asUtc(value[id]) : undefined)
+
+  // Синхронизируем local с внешним value[id] (например, при сбросе фильтров снаружи)
+  useEffect(() => {
+    setLocal(value[id] ? asUtc(value[id]) : undefined)
+  }, [value[id]])
+
+  const handleOpenChange = (next: boolean) => {
+    // При закрытии без Apply сбрасываем несохранённый выбор
+    if (!next) {
+      setLocal(value[id] ? asUtc(value[id]) : undefined)
+    }
+    setOpened(next)
+  }
+
+  const handleApply = () => {
+    if (local) {
+      updateValue(id, formatDate(local))
+    }
+    setOpened(false)
+  }
+
+  return (
+    <FilterButton id={id} label={label} {...props}>
+      <Popover modal open={opened} onOpenChange={handleOpenChange}>
+        <PopoverTrigger asChild>
+          <Button size="sm" variant="outline">
+            {value[id] ? formatDate(asUtc(value[id])) : '—'}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col items-start w-auto gap-2">
+          <Calendar mode="single" selected={local} onSelect={setLocal} defaultMonth={local} />
+          <Button variant="link" className="p-0" onClick={handleApply}>
+            Apply
+          </Button>
+        </PopoverContent>
+      </Popover>
+    </FilterButton>
+  )
+}
+
 export interface WeekFilterProps extends FilterButtonProps {
   from?: string
   to?: string
 }
 
 export function WeekFilter({ from, to, id, label = 'Week', ...props }: WeekFilterProps) {
-  const { value, updateValue } = useFilterContext()
+  const { value } = useFilterStateContext()
+  const { updateValue } = useFilterActionsContext()
   const [opened, setOpened] = useState(false)
   const actualFrom = from ? asMonday(from) : undefined
   const actualTo = to ? add(asMonday(to), { weeks: 1 }) : undefined

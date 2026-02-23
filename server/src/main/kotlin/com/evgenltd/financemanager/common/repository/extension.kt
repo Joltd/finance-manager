@@ -49,6 +49,12 @@ infix fun <E> KProperty1<E, String>.like(value: String?): Specification<E> = val
     }
 }
 
+infix fun <E, F : Comparable<F>> KProperty1<E, F?>.gt(value: F?): Specification<E> = valueNonNull(value) {
+    Specification<E> { root, _, builder ->
+        builder.greaterThan(root.get(name), it)
+    }
+}
+
 infix fun <E, F : Comparable<F>> KProperty1<E, F?>.gte(value: F?): Specification<E> = valueNonNull(value) {
     Specification<E> { root, _, builder ->
         builder.greaterThanOrEqualTo(root.get(name), it)

@@ -1,7 +1,16 @@
 import { Flow } from '@/components/common/layout/flow'
 import { ListFilterPlusIcon, XIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,25 +27,41 @@ interface FilterDefinition {
   defaultValue?: any
 }
 
-interface FilterContextValue {
+interface FilterStateContextValue {
   filters: FilterDefinition[]
+  value: Record<string, any>
+}
+
+interface FilterActionsContextValue {
   register: (id: string, label: string, visible?: boolean, defaultValue?: any) => void
   unregister: (id: string) => void
   show: (id: string) => void
   hide: (id: string) => void
-  value: Record<string, any>
   updateValue: (id: string, value: any) => void
   deleteValue: (id: string) => void
 }
 
-const FilterContext = createContext<FilterContextValue | null>(null)
+const FilterStateContext = createContext<FilterStateContextValue | null>(null)
+const FilterActionsContext = createContext<FilterActionsContextValue | null>(null)
 
-export function useFilterContext() {
-  const context = useContext(FilterContext)
+export function useFilterStateContext() {
+  const context = useContext(FilterStateContext)
   if (!context) {
-    throw new Error('useFilterContext must be used within a Filter component')
+    throw new Error('useFilterStateContext must be used within a Filter component')
   }
   return context
+}
+
+export function useFilterActionsContext() {
+  const context = useContext(FilterActionsContext)
+  if (!context) {
+    throw new Error('useFilterActionsContext must be used within a Filter component')
+  }
+  return context
+}
+
+export function useFilterContext() {
+  return { ...useFilterStateContext(), ...useFilterActionsContext() }
 }
 
 export interface FilterProps {
@@ -48,11 +73,25 @@ export interface FilterProps {
 export function Filter({ value, onChange, children }: FilterProps) {
   const [filters, setFilters] = useState<FilterDefinition[]>([])
 
+  const valueRef = useRef(value)
+  const onChangeRef = useRef(onChange)
+  useLayoutEffect(() => {
+    valueRef.current = value
+    onChangeRef.current = onChange
+  })
+
   const register = useCallback(
     (id: string, label: string, visible?: boolean, defaultValue?: any) => {
       setFilters((previous) =>
         produce(previous, (draft) => {
-          draft.push({ id, label, visible: !!visible, defaultValue })
+          const existing = draft.find((it) => it.id === id)
+          if (existing) {
+            existing.label = label
+            existing.visible = !!visible
+            existing.defaultValue = defaultValue
+          } else {
+            draft.push({ id, label, visible: !!visible, defaultValue })
+          }
         }),
       )
     },
@@ -63,85 +102,87 @@ export function Filter({ value, onChange, children }: FilterProps) {
     setFilters((previous) => previous.filter((it) => it.id !== id))
   }, [])
 
-  const show = useCallback((id: string) => {
-    setFilters((previous) =>
-      produce(previous, (draft) => {
-        draft
-          .filter((it) => it.id === id)
-          .forEach((it) => {
-            it.visible = true
-            if (it.defaultValue) {
-              updateValue(id, it.defaultValue)
-            }
-          })
-      }),
-    )
+  const updateValue = useCallback((id: string, v: any) => {
+    const result = produce(valueRef.current || {}, (draft) => {
+      draft[id] = v
+    })
+    onChangeRef.current?.(result)
   }, [])
 
-  const hide = useCallback((id: string) => {
-    setFilters((previous) =>
-      produce(previous, (draft) => {
-        draft.filter((it) => it.id === id).forEach((it) => (it.visible = false))
-      }),
-    )
-    deleteValue(id)
+  const deleteValue = useCallback((id: string) => {
+    const result = produce(valueRef.current || {}, (draft) => {
+      delete draft[id]
+    })
+    onChangeRef.current?.(result)
   }, [])
 
-  const updateValue = useCallback(
-    (id: string, v: any) => {
-      const result = produce(value || {}, (draft) => {
-        draft[id] = v
-      })
-      onChange?.(result)
-    },
-    [value],
-  )
-
-  const deleteValue = useCallback(
+  const show = useCallback(
     (id: string) => {
-      const result = produce(value || {}, (draft) => {
-        delete draft[id]
-      })
-      onChange?.(result)
+      let defaultValue = undefined
+      setFilters((previous) =>
+        produce(previous, (draft) => {
+          const target = draft.find((it) => it.id === id)
+          if (target) {
+            target.visible = true
+            defaultValue = target.defaultValue
+          }
+        }),
+      )
+      if (defaultValue !== undefined) {
+        updateValue(id, defaultValue)
+      }
     },
-    [value],
+    [updateValue],
   )
 
-  const context: FilterContextValue = {
-    filters,
-    register,
-    unregister,
-    show,
-    hide,
-    value: value || {},
-    updateValue,
-    deleteValue,
-  }
+  const hide = useCallback(
+    (id: string) => {
+      setFilters((previous) =>
+        produce(previous, (draft) => {
+          draft.filter((it) => it.id === id).forEach((it) => (it.visible = false))
+        }),
+      )
+      deleteValue(id)
+    },
+    [deleteValue],
+  )
+
+  const stateContext = useMemo<FilterStateContextValue>(
+    () => ({ filters, value: value || {} }),
+    [filters, value],
+  )
+
+  const actionsContext = useMemo<FilterActionsContextValue>(
+    () => ({ register, unregister, show, hide, updateValue, deleteValue }),
+    [register, unregister, show, hide, updateValue, deleteValue],
+  )
 
   return (
-    <FilterContext.Provider value={context}>
-      <Flow className="bg-accent p-4 rounded-sm">
-        {children}
-        {!!filters.filter((it) => !it.visible).length && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline">
-                <ListFilterPlusIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {filters
-                .filter((it) => !it.visible)
-                .map((it) => (
-                  <DropdownMenuItem key={it.id} onSelect={() => show(it.id)}>
-                    {it.label}
-                  </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </Flow>
-    </FilterContext.Provider>
+    <FilterActionsContext.Provider value={actionsContext}>
+      <FilterStateContext.Provider value={stateContext}>
+        <Flow className="bg-accent p-4 rounded-sm">
+          {children}
+          {filters.some((it) => !it.visible) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <ListFilterPlusIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {filters
+                  .filter((it) => !it.visible)
+                  .map((it) => (
+                    <DropdownMenuItem key={it.id} onSelect={() => show(it.id)}>
+                      {it.label}
+                    </DropdownMenuItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </Flow>
+      </FilterStateContext.Provider>
+    </FilterActionsContext.Provider>
   )
 }
 
@@ -160,26 +201,31 @@ export function FilterButton({
   defaultValue,
   children,
 }: FilterButtonProps) {
-  const { filters, register, unregister, hide } = useFilterContext()
+  const { register, unregister, hide } = useFilterActionsContext()
+  const { filters } = useFilterStateContext()
 
   useEffect(() => {
     register(id, label, alwaysVisible, defaultValue)
     return () => unregister(id)
-  }, [])
+  }, [id, label, alwaysVisible, defaultValue, register, unregister])
+
+  const isVisible = filters.some((it) => it.id === id && it.visible)
+
+  if (!isVisible) {
+    return null
+  }
 
   return (
-    !!filters.filter((it) => it.id === id && it.visible).length && (
-      <ButtonGroup>
-        <Button variant="outline" size="sm">
-          {label}
+    <ButtonGroup>
+      <Button variant="outline" size="sm">
+        {label}
+      </Button>
+      {children}
+      {!alwaysVisible && (
+        <Button variant="outline" size="sm" onClick={() => hide(id)}>
+          <XIcon />
         </Button>
-        {children}
-        {!alwaysVisible && (
-          <Button variant="outline" size="sm" onClick={() => hide(id)}>
-            <XIcon />
-          </Button>
-        )}
-      </ButtonGroup>
-    )
+      )}
+    </ButtonGroup>
   )
 }

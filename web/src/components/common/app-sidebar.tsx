@@ -24,11 +24,10 @@ import { LogOutIcon, SettingsIcon, XIcon } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useUserSheetStore } from '@/components/user/user-sheet'
 import { UserRole } from '@/types/user'
-import { resetFetchStores } from '@/store/common/fetch'
 import Link from 'next/link'
 import { Typography } from '@/components/common/typography/typography'
 import { useHome } from '@/hooks/use-home'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useLifecycleStore } from '@/store/common/lifecycle'
 
 const ID = 'app-sidebar'
 
@@ -40,6 +39,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
   const [container, setContainer] = useState<HTMLElement | null>(null)
   const user = useUserStore('data')
   const userSheet = useUserSheetStore('open')
+  const { cleanup } = useLifecycleStore()
   const router = useRouter()
   const { home } = useHome()
   const { open, openMobile, setOpenMobile } = useSidebar()
@@ -61,7 +61,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
 
   const handleLogout = async () => {
     await fetch('/api/logout')
-    resetFetchStores()
+    cleanup()
     router.push('/login')
   }
 

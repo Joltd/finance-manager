@@ -1,11 +1,10 @@
-import React, { RefAttributes } from 'react'
+import React, { forwardRef, RefAttributes } from 'react'
 import { cva, VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 export interface StackProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof variants>,
-    RefAttributes<HTMLDivElement> {}
+    VariantProps<typeof variants> {}
 
 const variants = cva('flex', {
   variants: {
@@ -47,20 +46,15 @@ const variants = cva('flex', {
   },
 })
 
-export function Stack({
-  orientation,
-  center,
-  gap,
-  scrollable,
-  className,
-  children,
-  ...props
-}: StackProps) {
-  return (
+export const Stack = forwardRef<HTMLDivElement, StackProps>(
+  ({ orientation, center, gap, scrollable, className, children, ...props }, ref) =>
     !!React.Children.toArray(children).length && (
-      <div className={cn(variants({ orientation, center, gap, scrollable }), className)} {...props}>
+      <div
+        ref={ref}
+        className={cn(variants({ orientation, center, gap, scrollable }), className)}
+        {...props}
+      >
         {children}
       </div>
-    )
-  )
-}
+    ),
+)

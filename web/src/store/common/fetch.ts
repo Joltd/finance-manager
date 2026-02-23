@@ -4,6 +4,7 @@ import api from '@/lib/axios'
 import { patch, Patch } from '@/lib/patch'
 import { produce } from 'immer'
 import { AxiosRequestConfig } from 'axios'
+import { lifecycleStore } from '@/store/common/lifecycle'
 
 export interface FetchStoreState<T> {
   loading: boolean
@@ -79,7 +80,7 @@ export const createFetchStore = <T>(path: string, method: string = 'GET') =>
         queryParams: {},
       })
 
-    fetchStoreResetCallbacks.push(reset)
+    lifecycleStore.getState().register(get())
 
     return {
       loading: false,
@@ -104,11 +105,3 @@ export const createFetchStore = <T>(path: string, method: string = 'GET') =>
       applyPatch,
     }
   })
-
-const fetchStoreResetCallbacks: (() => void)[] = []
-
-export const resetFetchStores = () => {
-  for (const reset of fetchStoreResetCallbacks) {
-    reset()
-  }
-}

@@ -19,7 +19,9 @@ export function flatten(
   for (const key of Object.keys(data)) {
     const value = data[key]
     const newKey = prefix ? `${prefix}.${key}` : key
-    if (!!value && typeof value === 'object' && !Array.isArray(value)) {
+    const isObject =
+      !!value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype
+    if (isObject) {
       flatten(value, newKey, res)
     } else {
       res[newKey] = value

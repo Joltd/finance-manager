@@ -7,6 +7,7 @@ import { UserAuthentication } from '@/components/user/user-authentication'
 import { UserSheet } from '@/components/user/user-sheet'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
+import { AskDateDialog } from '@/components/common/ask-date-dialog'
 
 export default function RootLayout({
   children,
@@ -27,6 +28,7 @@ export default function RootLayout({
           <UserSheet />
         </main>
         <AskTextDialog />
+        <AskDateDialog />
       </SidebarProvider>
     </UserAuthentication>
   )
