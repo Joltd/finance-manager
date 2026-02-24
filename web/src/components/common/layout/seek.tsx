@@ -1,26 +1,35 @@
 import { Stack, StackProps } from '@/components/common/layout/stack'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/common/typography/typography'
+import { AlertCircleIcon } from 'lucide-react'
+import { Alert, AlertTitle } from '@/components/ui/alert'
+import { EmptyState } from '@/components/common/empty-state'
 
-export interface SeekProps extends StackProps {
+export interface SeekProps<D> extends StackProps {
+  loading: boolean
   dataFetched: boolean
+  error?: string
   forwardNoData: boolean
   backwardNoData: boolean
+  data?: D[]
   seekForward: () => Promise<void>
   seekBackward: () => Promise<void>
 }
 
-export function Seek({
+export function Seek<D>({
+  loading,
   dataFetched,
+  error,
   forwardNoData,
   backwardNoData,
+  data,
   seekForward,
   seekBackward,
   children,
   ...props
-}: SeekProps) {
+}: SeekProps<D>) {
   const ref = useRef<HTMLDivElement>(null)
 
   const handleSeekForward = useCallback(async () => {
@@ -42,11 +51,20 @@ export function Seek({
     await seekBackward()
   }, [])
 
-  return (
+  return loading && !dataFetched ? (
+    <Spinner />
+  ) : error ? (
+    <Alert variant="destructive">
+      <AlertCircleIcon />
+      <AlertTitle>{error}</AlertTitle>
+    </Alert>
+  ) : !data || (Array.isArray(data) && !data.length) ? (
+    <EmptyState className="grow" />
+  ) : (
     <Stack ref={ref} {...props}>
-      {dataFetched && <SeekHandle noData={forwardNoData} onSeek={handleSeekForward} />}
+      <SeekHandle noData={forwardNoData} onSeek={handleSeekForward} />
       {children}
-      {dataFetched && <SeekHandle noData={backwardNoData} onSeek={handleSeekBackward} />}
+      <SeekHandle noData={backwardNoData} onSeek={handleSeekBackward} />
     </Stack>
   )
 }
@@ -108,7 +126,11 @@ export function SeekHandle({ noData, onSeek, className, ...props }: SeekHandlePr
         <Spinner className="size-5" />
       ) : noData ? (
         <Typography variant="muted">End of data</Typography>
-      ) : null}
+      ) : (
+        <div>
+          NoData - {noData ? 'true' : 'false'}, loading - {loading ? 'true' : 'false'}
+        </div>
+      )}
     </div>
   )
 }

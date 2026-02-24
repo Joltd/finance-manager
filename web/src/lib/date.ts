@@ -103,6 +103,16 @@ export function formatWeek(week?: RangeValue<string>): string {
   return `${formatDate(week.from)} - ${formatDate(sub(week.to, { days: 1 }))}`
 }
 
+export function formatDateRange(range?: RangeValue<string>): string {
+  if (!range?.from) {
+    return 'Invalid range'
+  }
+  if (!range.to || range.from === range.to) {
+    return formatDate(asUtc(range.from)) ?? 'Invalid range'
+  }
+  return `${formatDate(asUtc(range.from))} - ${formatDate(asUtc(range.to))}`
+}
+
 export function formatMonthRange(range?: RangeValue<string>): string {
   const visualRange = asVisualMonthRange(range)
   const from = visualRange?.from

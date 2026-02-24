@@ -19,15 +19,6 @@ export function OperationBrowser() {
     'data',
     'seekBackward',
     'seekForward',
-    'queryParams',
-    'setQueryParams',
-  )
-  const operationSeekList = useOperationListStore(
-    'dataFetched',
-    'forwardNoData',
-    'backwardNoData',
-    'seekBackward',
-    'seekForward',
   )
   const operationSheet = useOperationSheetStore('openWith')
   const operationSelection = useOperationSelectionStore('selected', 'select', 'has', 'clear')
@@ -56,7 +47,7 @@ export function OperationBrowser() {
   return (
     // <DataPlaceholder {...operationList}>
     //   <Sse eventName={operationEvents.root} listener={operationList.fetch} />
-    <Seek {...operationSeekList} gap={6} scrollable onClick={handleClickOutside}>
+    <Seek {...operationList} gap={6} scrollable onClick={handleClickOutside}>
       {operationList.data?.map((group) => (
         <Group key={group.date} text={<DateLabel variant="h4" date={group.date} />}>
           <Stack>

@@ -27,9 +27,10 @@ export interface SeekStoreState<P, D> {
   seekForward: () => Promise<void>
   seekBackward: () => Promise<void>
   reset: () => void
+  resetData: () => void
 }
 
-const MAX_ITEMS = 10
+const MAX_ITEMS = 20
 
 export const createSeekStore = <P, D>(
   startPointer: P,
@@ -39,7 +40,7 @@ export const createSeekStore = <P, D>(
 ) =>
   createStore<SeekStoreState<P, D>>((set, get) => {
     const seekForward = async () => {
-      if (get().loading || get().forwardNoData) {
+      if (get().forwardNoData) {
         return
       }
 
@@ -57,7 +58,7 @@ export const createSeekStore = <P, D>(
     }
 
     const seekBackward = async () => {
-      if (get().loading || get().backwardNoData) {
+      if (get().backwardNoData) {
         return
       }
 
@@ -77,7 +78,7 @@ export const createSeekStore = <P, D>(
     }
 
     const seek = async (pointer: P, direction: SeekDirection) => {
-      set({ error: undefined, loading: true })
+      set({ error: undefined, loading: !get().dataFetched })
       try {
         const request: AxiosRequestConfig = {
           method,
@@ -120,6 +121,15 @@ export const createSeekStore = <P, D>(
         queryParams: {},
       })
 
+    const resetData = () => {
+      set({
+        dataFetched: false,
+        forwardNoData: false,
+        backwardNoData: false,
+        data: undefined,
+      })
+    }
+
     lifecycleStore.getState().register(get())
 
     return {
@@ -143,5 +153,6 @@ export const createSeekStore = <P, D>(
       seekForward,
       seekBackward,
       reset,
+      resetData,
     }
   })

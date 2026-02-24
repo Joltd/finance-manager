@@ -8,6 +8,7 @@ import {
   asVisualMonthRange,
   asWeek,
   formatDate,
+  formatDateRange,
   formatMonthRange,
   formatWeek,
 } from '@/lib/date'
@@ -109,6 +110,64 @@ export function DateFilter({ id, label = 'Date', ...props }: DateFilterProps) {
         </PopoverTrigger>
         <PopoverContent className="flex flex-col items-start w-auto gap-2">
           <Calendar mode="single" selected={local} onSelect={setLocal} defaultMonth={local} />
+          <Button variant="link" className="p-0" onClick={handleApply}>
+            Apply
+          </Button>
+        </PopoverContent>
+      </Popover>
+    </FilterButton>
+  )
+}
+
+export interface DateRangeFilterProps extends FilterButtonProps {}
+
+export function DateRangeFilter({ id, label = 'Date Range', ...props }: DateRangeFilterProps) {
+  const [opened, setOpened] = useState(false)
+  const { value } = useFilterStateContext()
+  const { updateValue } = useFilterActionsContext()
+  const [local, setLocal] = useState<DateRange | undefined>(() =>
+    value[id]?.from
+      ? { from: asUtc(value[id].from), to: value[id].to ? asUtc(value[id].to) : undefined }
+      : undefined,
+  )
+
+  useEffect(() => {
+    setLocal(
+      value[id]?.from
+        ? { from: asUtc(value[id].from), to: value[id].to ? asUtc(value[id].to) : undefined }
+        : undefined,
+    )
+  }, [value[id]])
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setLocal(
+        value[id]?.from
+          ? { from: asUtc(value[id].from), to: value[id].to ? asUtc(value[id].to) : undefined }
+          : undefined,
+      )
+    }
+    setOpened(next)
+  }
+
+  const handleApply = () => {
+    if (local?.from) {
+      const end = local.to ?? local.from
+      updateValue(id, asDateRangeValue({ start: local.from, end }))
+    }
+    setOpened(false)
+  }
+
+  return (
+    <FilterButton id={id} label={label} {...props}>
+      <Popover modal open={opened} onOpenChange={handleOpenChange}>
+        <PopoverTrigger asChild>
+          <Button size="sm" variant="outline">
+            {formatDateRange(value[id])}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col items-start w-auto gap-2">
+          <Calendar mode="range" selected={local} onSelect={setLocal} defaultMonth={local?.from} />
           <Button variant="link" className="p-0" onClick={handleApply}>
             Apply
           </Button>
