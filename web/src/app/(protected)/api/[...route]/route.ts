@@ -9,7 +9,7 @@ import {
 } from '@/lib/auth'
 
 function loginRedirect(req: NextRequest): NextResponse {
-  const redirectUrl = encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)
+  const redirectUrl = encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search) // todo rewrite it
   return NextResponse.redirect(new URL(`/login?redirectUrl=${redirectUrl}`, req.nextUrl.origin))
 }
 
@@ -17,7 +17,7 @@ function isAuthFailure(status: number): boolean {
   return status === 401 || status === 403
 }
 
-async function protectedProxy(req: NextRequest): Promise<NextResponse> {
+async function protectedRequest(req: NextRequest): Promise<NextResponse> {
   const body = req.method !== 'GET' && req.method !== 'HEAD' ? await req.arrayBuffer() : undefined
   const accessToken = req.cookies.get(ACCESS_TOKEN_COOKIE)?.value
 
@@ -51,8 +51,8 @@ async function protectedProxy(req: NextRequest): Promise<NextResponse> {
   return res
 }
 
-export const GET = protectedProxy
-export const POST = protectedProxy
-export const PUT = protectedProxy
-export const PATCH = protectedProxy
-export const DELETE = protectedProxy
+export const GET = protectedRequest
+export const POST = protectedRequest
+export const PUT = protectedRequest
+export const PATCH = protectedRequest
+export const DELETE = protectedRequest
