@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.ai.record.EmbeddingRecord
+import com.evgenltd.financemanager.common.record.SeekDirection
 import org.springframework.context.ApplicationEvent
 import java.time.LocalDate
 import java.util.*
@@ -49,11 +50,13 @@ data class ImportDataTotalRecord(
 )
 
 data class EntryFilter(
-    val date: DateRange? = null,
-    val linkage: Boolean? = null,
-    val entryVisible: Boolean? = null,
-    val operationVisible: Boolean? = null,
-    val totalValid: Boolean? = null,
+    val pointer: LocalDate,
+    val direction: SeekDirection,
+//    val date: DateRange? = null,
+//    val linkage: Boolean? = null,
+//    val entryVisible: Boolean? = null,
+//    val operationVisible: Boolean? = null,
+//    val totalValid: Boolean? = null,
 )
 
 data class ImportDataDayRecord(

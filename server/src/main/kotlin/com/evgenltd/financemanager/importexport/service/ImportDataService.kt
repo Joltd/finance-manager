@@ -2,7 +2,6 @@ package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.importexport.entity.ImportData
@@ -16,14 +15,18 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.byAccount
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.repository.AccountRepository
+import com.evgenltd.financemanager.common.record.SeekDirection
 import com.evgenltd.financemanager.common.repository.contains
 import com.evgenltd.financemanager.common.repository.containsNot
-import com.evgenltd.financemanager.common.repository.emptySpecification
-import com.evgenltd.financemanager.common.service.validWeek
+import com.evgenltd.financemanager.common.repository.gt
+import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.importexport.entity.ImportDataDay
 import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
-import jakarta.transaction.Transactional
+import com.evgenltd.financemanager.operation.service.OperationService
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -34,13 +37,13 @@ class ImportDataService(
     private val importDataRepository: ImportDataRepository,
     private val importDataConverter: ImportDataConverter,
     private val importDataDayRepository: ImportDataDayRepository,
+    private val operationService: OperationService,
 ) {
 
     @SkipLogging
     fun list(): List<Reference> = importDataRepository.findAll()
         .map { importDataConverter.toReference(it) }
 
-    @Transactional
     @SkipLogging
     fun get(id: UUID): ImportDataRecord {
         val importData = importDataRepository.find(id)
@@ -52,11 +55,16 @@ class ImportDataService(
     fun entryList(id: UUID, request: EntryFilter): List<ImportDataDayRecord> {
         val importData = importDataRepository.find(id)
 
-        val dateRange = request.date.validWeek()
+        val pointer = request.pointer
+        val direction = request.direction
+        val dates = findNearDates(pointer, direction, importData)
+
+        if (dates.isEmpty()) {
+            return emptyList()
+        }
 
         val days = ((ImportDataDay::importData eq importData) and
-                (ImportDataDay::date between dateRange) and
-                (ImportDataDay::valid eq request.totalValid))
+                (ImportDataDay::date contains dates))
             .let { importDataDayRepository.findAll(it) }
 
         val linkedOperations = days.flatMap { it.entries }
@@ -67,7 +75,6 @@ class ImportDataService(
 
         val freeOperations = ((Operation::date contains actualDates) and
                 byAccount(importData.account) and
-                (request.operationVisible?.let { Operation::id containsNot importData.hiddenOperations } ?: emptySpecification()) and
                 (Operation::id containsNot linkedOperations))
             .let { operationRepository.findAll(it) }
             .groupBy { it.date }
@@ -77,8 +84,6 @@ class ImportDataService(
                 ?.map { importDataConverter.toRecord(importData, it) }
                 ?: emptyList()
             val entries = day.entries
-                .filter { request.entryVisible == null || it.visible == request.entryVisible }
-                .filter { request.linkage == null || (it.operation == null) == request.linkage }
                 .map { importDataConverter.toRecord(importData, it) }
             ImportDataDayRecord(
                 date = day.date,
@@ -86,7 +91,41 @@ class ImportDataService(
                 totals = day.totals.map { importDataConverter.toRecord(it) },
                 entries = entries + operations,
             )
-        }.sortedBy { it.date }
+        }.sortedByDescending { it.date }
+    }
+
+    private fun findNearDates(
+        pointer: LocalDate,
+        direction: SeekDirection,
+        importData: ImportData,
+    ): List<LocalDate> {
+        val specification = (ImportDataDay::importData eq importData) and
+                when (direction) {
+                    SeekDirection.FORWARD -> ImportDataDay::date gt pointer
+                    SeekDirection.BACKWARD -> ImportDataDay::date lt pointer
+                }
+
+        val sortDirection = when (direction) {
+            SeekDirection.FORWARD -> Sort.Direction.ASC
+            SeekDirection.BACKWARD -> Sort.Direction.DESC
+        }
+        val page = PageRequest.of(1, NEAREST_DATE_LIMIT, sortDirection, "date")
+        val importDataDates = importDataDayRepository.findAll(specification, page)
+            .map { it.date }
+
+        val operationsDates = operationService.findNearDates(pointer, direction, byAccount(importData.account), NEAREST_DATE_LIMIT)
+
+        return (importDataDates + operationsDates)
+            .asSequence()
+            .distinct()
+            .let {
+                when (direction) {
+                    SeekDirection.FORWARD -> it.sorted()
+                    SeekDirection.BACKWARD -> it.sortedDescending()
+                }
+            }
+            .take(NEAREST_DATE_LIMIT)
+            .toList()
     }
 
     fun save(request: ImportDataCreateRequest): ImportData {
@@ -98,6 +137,10 @@ class ImportDataService(
 
     fun delete(id: UUID) {
         importDataRepository.deleteById(id)
+    }
+
+    private companion object {
+        const val NEAREST_DATE_LIMIT = 5
     }
 
 }

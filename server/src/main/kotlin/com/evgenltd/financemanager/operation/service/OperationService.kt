@@ -10,7 +10,6 @@ import com.evgenltd.financemanager.common.repository.currency
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.gt
-import com.evgenltd.financemanager.common.repository.gte
 import com.evgenltd.financemanager.common.repository.lt
 import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.operation.converter.OperationConverter
@@ -45,12 +44,12 @@ class OperationService(
         val baseSpecification = (
             (Operation::date between filter.date) and
                 (Operation::type eq filter.type) and
-                ((Operation::accountFrom account filter.account) or (Operation::accountTo account filter.account)) and
-                ((Operation::accountFrom account filter.category) or (Operation::accountTo account filter.category)) and
+                byAccount(filter.account) and
+                byAccount(filter.category) and
                 ((Operation::amountFrom currency filter.currency) or (Operation::amountTo currency filter.currency))
         )
 
-        val dates = findDistinctDates(pointer, direction, baseSpecification)
+        val dates = findNearDates(pointer, direction, baseSpecification)
 
         if (dates.isEmpty()) {
             return emptyList()
@@ -71,7 +70,12 @@ class OperationService(
             .sortedByDescending { it.date }
     }
 
-    private fun findDistinctDates(date: LocalDate, direction: SeekDirection, baseSpecification: Specification<Operation>): List<LocalDate> {
+    fun findNearDates(
+        date: LocalDate,
+        direction: SeekDirection,
+        baseSpecification: Specification<Operation>,
+        limit: Int = NEAREST_DATE_LIMIT
+    ): List<LocalDate> {
         val cb = entityManager.criteriaBuilder
         val query = cb.createQuery(LocalDate::class.java)
         val root = query.from(Operation::class.java)
@@ -79,14 +83,14 @@ class OperationService(
         val datePath = root.get<LocalDate>(Operation::date.name)
 
         val predicate = (when (direction) {
-            SeekDirection.BACKWARD -> Operation::date lt date
             SeekDirection.FORWARD  -> Operation::date gt date
+            SeekDirection.BACKWARD -> Operation::date lt date
         } and baseSpecification)
             .toPredicate(root, query, cb)
 
         val order = when (direction) {
-            SeekDirection.BACKWARD -> cb.desc(datePath)
             SeekDirection.FORWARD  -> cb.asc(datePath)
+            SeekDirection.BACKWARD -> cb.desc(datePath)
         }
 
         query
@@ -96,7 +100,7 @@ class OperationService(
             .orderBy(order)
 
         return entityManager.createQuery(query)
-            .setMaxResults(5)
+            .setMaxResults(limit)
             .resultList
     }
 
@@ -157,6 +161,10 @@ class OperationService(
         }
 
         return changes
+    }
+
+    private companion object {
+        const val NEAREST_DATE_LIMIT = 5
     }
 
 }

@@ -7,13 +7,18 @@ import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.entity.TransactionType
 import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.common.repository.account
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import org.springframework.data.jpa.domain.Specification
+import java.util.UUID
 
 fun Transaction.signedAmount(): Amount = if (type == TransactionType.OUT) -amount else amount
 
 fun byAccount(account: Account): Specification<Operation> =
     (Operation::accountFrom eq account) or (Operation::accountTo eq account)
+
+fun byAccount(account: UUID?): Specification<Operation> =
+    (Operation::accountFrom account account) or (Operation::accountTo account account)
 
 fun List<Operation>.amountsForAccount(account: Account): List<Amount> = flatMap { operation ->
     listOf(
