@@ -8,9 +8,8 @@ import {
   authenticatedRequest,
 } from '@/lib/auth'
 
-function loginRedirect(req: NextRequest): NextResponse {
-  const redirectUrl = encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search) // todo rewrite it
-  return NextResponse.redirect(new URL(`/login?redirectUrl=${redirectUrl}`, req.nextUrl.origin))
+function unauthorized(): NextResponse {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 }
 
 function isAuthFailure(status: number): boolean {
@@ -31,17 +30,17 @@ async function protectedRequest(req: NextRequest): Promise<NextResponse> {
 
   const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value
   if (!refreshToken) {
-    return loginRedirect(req)
+    return unauthorized()
   }
 
   const refreshRes = await refreshRequest(refreshToken)
   if (!refreshRes) {
-    return loginRedirect(req)
+    return unauthorized()
   }
 
   const res = await authenticatedRequest(req, refreshRes.accessToken, body)
   if (isAuthFailure(res.status)) {
-    return loginRedirect(req)
+    return unauthorized()
   }
 
   res.cookies.set(ACCESS_TOKEN_COOKIE, refreshRes.accessToken, accessTokenCookieOptions)

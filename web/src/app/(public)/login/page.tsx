@@ -53,7 +53,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <FieldGroup>
             <Field data-invalid={errors.login ? 'true' : undefined}>
-              <FieldLabel htmlFor="login">Логин</FieldLabel>
+              <FieldLabel htmlFor="login">Login</FieldLabel>
               <Input
                 id="login"
                 type="text"
@@ -66,7 +66,7 @@ export default function LoginPage() {
               <FieldError>{errors.login?.message}</FieldError>
             </Field>
             <Field data-invalid={errors.password ? 'true' : undefined}>
-              <FieldLabel htmlFor="password">Пароль</FieldLabel>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
               <Input
                 id="password"
                 type="password"

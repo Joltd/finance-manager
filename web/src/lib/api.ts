@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { BackendRequestOptions } from '@/types/common/common'
+import path from 'node:path'
 
 const BACKEND_HOST = process.env.BACKEND_HOST
 
@@ -31,8 +32,8 @@ export async function backendNextRequest(
   const { pathname, search } = req.nextUrl
 
   const headers = new Headers({
-    ...req.headers,
-    ...options?.headers,
+    ...Object.fromEntries(req.headers.entries()),
+    ...(options?.headers ?? {}),
   })
   headers.delete('host')
 

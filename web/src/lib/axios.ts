@@ -19,9 +19,18 @@ const api = axios.create({
   },
 })
 
-api.interceptors.response.use((response) => {
-  response.data = nullToUndefined(response.data)
-  return response
-})
+api.interceptors.response.use(
+  (response) => {
+    response.data = nullToUndefined(response.data)
+    return response
+  },
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      const redirectUrl = encodeURIComponent(window.location.pathname + window.location.search)
+      window.location.href = `/login?redirectUrl=${redirectUrl}`
+    }
+    return Promise.reject(error)
+  },
+)
 
 export default api
