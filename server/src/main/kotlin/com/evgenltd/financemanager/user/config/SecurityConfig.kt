@@ -45,8 +45,7 @@ class SecurityConfig(
         .httpBasic { it.disable() }
         .formLogin { it.disable() }
         .authorizeHttpRequests {
-            it.requestMatchers("/api/v1/user/auth").permitAll()
-                .requestMatchers("/api/v1/user/auth/refresh").permitAll()
+            it.requestMatchers("/api/public/**").permitAll()
                 .anyRequest().authenticated()
         }
         .oauth2ResourceServer { resourceServer ->

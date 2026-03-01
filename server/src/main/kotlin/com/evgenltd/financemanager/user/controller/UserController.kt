@@ -53,7 +53,7 @@ class UserController(
         userService.update(id, request)
     }
 
-    @PostMapping("/api/v1/user/auth")
+    @PostMapping("/api/public/v1/user/auth")
     fun auth(@RequestBody request: AuthenticationRequest): ResponseEntity<AuthenticationResponse> {
         val authRequest = UsernamePasswordAuthenticationToken.unauthenticated(request.login, request.password)
         val authResponse = authenticationManager.authenticate(authRequest)
@@ -71,7 +71,7 @@ class UserController(
         return ResponseEntity.ok(AuthenticationResponse(accessToken = accessToken, refreshToken = refreshToken))
     }
 
-    @PostMapping("/api/v1/user/auth/refresh")
+    @PostMapping("/api/public/v1/user/auth/refresh")
     fun authRefresh(@RequestBody request: AuthenticationRefreshRequest): ResponseEntity<AuthenticationRefreshResponse> {
         val jwt = try {
             jwtDecoder.decode(request.refreshToken)
