@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { BackendRequestOptions } from '@/types/common/common'
-import path from 'node:path'
 
 const BACKEND_HOST = process.env.BACKEND_HOST
 

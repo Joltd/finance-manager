@@ -25,7 +25,7 @@ async function protectedRequest(req: NextRequest): Promise<NextResponse> {
     if (!isAuthFailure(res.status)) {
       return res
     }
-    await res.body?.cancel()
+    await res.arrayBuffer() // drain and release the response body stream
   }
 
   const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value
