@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/input/date-input'
-import { type AskType, useAskDialogStore } from '@/store/ask-dialog'
+import { type AskType, useAskDialogStore } from '@/store/common/ask-dialog'
 
 interface InputRendererProps {
   type: AskType
