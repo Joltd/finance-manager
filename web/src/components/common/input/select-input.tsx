@@ -1,11 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,23 +12,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-type SelectInputContextValue<T = unknown> = {
-  value?: T
-  onChange?: (value: T) => void
-  label: string
+// ─── Context ──────────────────────────────────────────────────────────────────
+
+type SelectInputContextValue = {
+  value: unknown
+  onChange: ((value: unknown) => void) | undefined
   setLabel: (label: string) => void
   setOpen: (open: boolean) => void
 }
 
 const SelectInputContext = createContext<SelectInputContextValue | null>(null)
 
-function useSelectInput() {
+function useSelectInputContext() {
   const ctx = useContext(SelectInputContext)
-  if (!ctx) {
-    throw new Error('useSelectInput must be used within SelectInput')
-  }
+  if (!ctx) throw new Error('SelectInputOption must be used within SelectInput')
   return ctx
 }
+
+// ─── SelectInputOption ────────────────────────────────────────────────────────
 
 type SelectInputOptionProps<T> = {
   id: T
@@ -37,11 +37,11 @@ type SelectInputOptionProps<T> = {
 }
 
 function SelectInputOption<T>({ id, label }: SelectInputOptionProps<T>) {
-  const { value, onChange, setLabel, setOpen } = useSelectInput()
+  const { value, onChange, setLabel, setOpen } = useSelectInputContext()
   const isSelected = value === id
 
   const handleSelect = () => {
-    onChange?.(id as unknown as never)
+    onChange?.(id)
     setLabel(label)
     setOpen(false)
   }
@@ -54,7 +54,7 @@ function SelectInputOption<T>({ id, label }: SelectInputOptionProps<T>) {
   )
 }
 
-// ─── SelectInput ─────────────────────────────────────────────────────────────
+// ─── SelectInput ──────────────────────────────────────────────────────────────
 
 type SelectInputProps<T> = {
   value?: T
@@ -62,60 +62,63 @@ type SelectInputProps<T> = {
   placeholder?: string
   disabled?: boolean
   className?: string
-  children?: ReactNode
+  id?: string
+  'aria-invalid'?: boolean | 'true' | 'false'
+  children?: React.ReactNode
 }
 
 function SelectInput<T>({
   value,
   onChange,
-  placeholder = 'Choose an option',
+  placeholder = 'Select...',
   disabled = false,
   className,
+  id,
+  'aria-invalid': ariaInvalid,
   children,
 }: SelectInputProps<T>) {
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
 
   useEffect(() => {
-    if (value === undefined || value === null) {
-      setLabel('')
-    }
+    if (value === undefined || value === null) setLabel('')
   }, [value])
 
   const contextValue = useMemo<SelectInputContextValue>(
     () => ({
       value,
       onChange: onChange as ((v: unknown) => void) | undefined,
-      label,
       setLabel,
       setOpen,
     }),
-    [value, onChange, label],
+    [value, onChange],
   )
 
   return (
     <SelectInputContext.Provider value={contextValue}>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
-          <Button
+          <button
+            id={id}
             data-slot="input"
-            variant="outline"
+            type="button"
             disabled={disabled}
             role="combobox"
             aria-haspopup="listbox"
             aria-expanded={open}
+            aria-invalid={ariaInvalid}
             className={cn(
-              'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+              'border-input dark:bg-input/30 flex h-9 w-full min-w-0 items-center justify-between rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm',
               'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
               'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-              'justify-between font-normal',
+              'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
               !label && 'text-muted-foreground',
               className,
             )}
           >
             <span className="truncate">{label || placeholder}</span>
             <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width)">
           {children}
@@ -125,7 +128,7 @@ function SelectInput<T>({
   )
 }
 
-// ─── Exports ─────────────────────────────────────────────────────────────────
+// ─── Exports ──────────────────────────────────────────────────────────────────
 
 export { SelectInput, SelectInputOption }
 export type { SelectInputProps, SelectInputOptionProps }
