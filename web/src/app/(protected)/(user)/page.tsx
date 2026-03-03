@@ -2,18 +2,24 @@
 import { Layout } from '@/components/common/layout/layout'
 import { Stack } from '@/components/common/layout/stack'
 import { useState } from 'react'
-import {DateInput} from "@/components/common/input/date-input";
+import { Button } from '@/components/ui/button'
+import { ask } from '@/store/ask-dialog'
 
 export default function Page() {
   const [day, setDay] = useState<any>(undefined)
   const [month, setMonth] = useState<any>(undefined)
 
+  const handleAsk = () => {
+    ask({
+      type: 'number',
+      label: 'Select a date',
+    }).then((result) => console.log(result))
+  }
+
   return (
     <Layout>
       <Stack gap={2}>
-
-        <DateInput value={day} onChange={setDay} />
-
+        <Button onClick={handleAsk}>Ask</Button>
       </Stack>
     </Layout>
   )
