@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Method } from 'axios'
+import { toast } from 'sonner'
 import api from '@/lib/axios'
 import { buildPath } from '@/lib/api'
 
@@ -63,7 +64,9 @@ export function useRequest<
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         setError(message)
-        throw err
+        toast.error(message)
+        console.error(err)
+        return Promise.reject(err)
       } finally {
         setLoading(false)
       }

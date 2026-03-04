@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 
-import { useCurrencyStore } from '@/store/account'
+import { useCurrencyListStore } from '@/store/account'
 import { SelectInput, SelectInputOption } from '@/components/common/input/select-input'
 
 type CurrencyInputProps = {
@@ -24,7 +24,7 @@ function CurrencyInput({
   id,
   'aria-invalid': ariaInvalid,
 }: CurrencyInputProps) {
-  const { data, fetch } = useCurrencyStore()
+  const { data, fetch } = useCurrencyListStore()
 
   useEffect(() => {
     if (!data) void fetch()
