@@ -1,4 +1,5 @@
 import { Reference } from '@/types/common/reference'
+import { Amount } from '@/types/common/amount'
 
 export type AccountType = 'ACCOUNT' | 'EXPENSE' | 'INCOME'
 
@@ -27,4 +28,15 @@ export interface Currency {
   id?: string
   name: string
   crypto: boolean
+}
+
+export interface AccountBalance {
+  account: AccountReference
+  balances: Amount[]
+}
+
+export interface AccountBalanceGroup {
+  id: string | null
+  name: string | null
+  accounts: AccountBalance[]
 }

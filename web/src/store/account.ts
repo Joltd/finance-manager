@@ -1,6 +1,13 @@
 import { createFetchStore } from '@/store/common/fetch'
 import { accountUrls, currencyUrls, groupUrls } from '@/api/account'
-import { Account, AccountGroup, AccountReference, AccountType, Currency } from '@/types/account'
+import {
+  Account,
+  AccountBalanceGroup,
+  AccountGroup,
+  AccountReference,
+  AccountType,
+  Currency,
+} from '@/types/account'
 import { Reference } from '@/types/common/reference'
 
 export const useAccountListStore = createFetchStore<Account[], unknown, { type?: AccountType }>(
@@ -12,6 +19,10 @@ export const useAccountReferenceStore = createFetchStore<
   unknown,
   { mask?: string }
 >(accountUrls.reference)
+
+export const useAccountBalanceStore = createFetchStore<AccountBalanceGroup[], unknown>(
+  accountUrls.balance,
+)
 
 export const useAccountGroupListStore = createFetchStore<AccountGroup[]>(groupUrls.root)
 

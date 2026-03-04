@@ -2,6 +2,7 @@ export const accountUrls = {
   root: '/api/v1/account',
   id: '/api/v1/account/:id',
   reference: '/api/v1/account/reference',
+  balance: '/api/v1/account/balance',
 }
 
 export const groupUrls = {
