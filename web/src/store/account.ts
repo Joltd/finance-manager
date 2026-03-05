@@ -17,7 +17,7 @@ export const useAccountListStore = createFetchStore<Account[], unknown, { type?:
 export const useAccountReferenceStore = createFetchStore<
   AccountReference[],
   unknown,
-  { mask?: string }
+  { mask?: string; type?: AccountType }
 >(accountUrls.reference)
 
 export const useAccountBalanceStore = createFetchStore<AccountBalanceGroup[], unknown>(

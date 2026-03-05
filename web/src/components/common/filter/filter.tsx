@@ -1,0 +1,160 @@
+'use client'
+
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { ListFilter, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
+
+interface FilterRegistration {
+  id: string
+  label: string
+}
+
+interface FilterContextValue {
+  register: (entry: FilterRegistration) => void
+  unregister: (id: string) => void
+  isActive: (id: string) => boolean
+  getValue: (id: string) => unknown
+  handleChange: (id: string, val: unknown) => void
+  removeFilter: (id: string) => void
+}
+
+const FilterContext = createContext<FilterContextValue | null>(null)
+
+export function useFilterContext(): FilterContextValue {
+  const ctx = useContext(FilterContext)
+  if (!ctx) throw new Error('useFilterContext must be used within <Filter>')
+  return ctx
+}
+
+export interface FilterItemProps {
+  id: string
+  label: string
+  children: React.ReactNode
+  className?: string
+}
+
+export function FilterItem({ id, label, children, className }: FilterItemProps) {
+  const { register, unregister, isActive, removeFilter } = useFilterContext()
+
+  useLayoutEffect(() => {
+    register({ id, label })
+    return () => unregister(id)
+  }, [id, label, register, unregister])
+
+  if (!isActive(id)) return null
+
+  return (
+    <div
+      className={cn('flex h-9 overflow-hidden rounded-md border border-input text-sm', className)}
+    >
+      <span className="flex items-center border-r border-input bg-muted px-2.5 whitespace-nowrap text-muted-foreground shrink-0">
+        {label}
+      </span>
+      <div className="flex flex-1 items-center **:data-[slot=input]:h-full **:data-[slot=input]:rounded-none **:data-[slot=input]:border-0 **:data-[slot=input]:shadow-none">
+        {children}
+      </div>
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        onClick={() => removeFilter(id)}
+        className="rounded-none border-l border-input shrink-0 h-full w-8"
+      >
+        <X />
+      </Button>
+    </div>
+  )
+}
+
+export interface FilterProps {
+  value?: Record<string, unknown>
+  onChange?: (value: Record<string, unknown>) => void
+  children: React.ReactNode
+}
+
+export function Filter({ value = {}, onChange, children }: FilterProps) {
+  const [registrations, setRegistrations] = useState<FilterRegistration[]>([])
+  const [activeIds, setActiveIds] = useState<string[]>(() =>
+    Object.keys(value).filter((k) => value[k] != null),
+  )
+
+  // Ref keeps the latest value to avoid stale closures in callbacks
+  const valueRef = useRef(value)
+  valueRef.current = value
+
+  const register = useCallback((entry: FilterRegistration) => {
+    setRegistrations((prev) => (prev.some((r) => r.id === entry.id) ? prev : [...prev, entry]))
+  }, [])
+
+  const unregister = useCallback((id: string) => {
+    setRegistrations((prev) => prev.filter((r) => r.id !== id))
+  }, [])
+
+  const isActive = useCallback((id: string) => activeIds.includes(id), [activeIds])
+
+  const getValue = useCallback((id: string) => valueRef.current[id], [])
+
+  const handleChange = useCallback(
+    (id: string, val: unknown) => {
+      onChange?.({ ...valueRef.current, [id]: val })
+    },
+    [onChange],
+  )
+
+  const removeFilter = useCallback(
+    (id: string) => {
+      setActiveIds((prev) => prev.filter((i) => i !== id))
+      const next = { ...valueRef.current }
+      delete next[id]
+      onChange?.(next)
+    },
+    [onChange],
+  )
+
+  const addFilter = (id: string) => setActiveIds((prev) => [...prev, id])
+
+  const ctx = useMemo<FilterContextValue>(
+    () => ({ register, unregister, isActive, getValue, handleChange, removeFilter }),
+    [register, unregister, isActive, getValue, handleChange, removeFilter],
+  )
+
+  const inactiveRegistrations = registrations.filter((r) => !activeIds.includes(r.id))
+
+  return (
+    <FilterContext.Provider value={ctx}>
+      <div className="flex flex-wrap items-center gap-2">
+        {children}
+        {inactiveRegistrations.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <ListFilter />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {inactiveRegistrations.map((r) => (
+                <DropdownMenuItem key={r.id} onClick={() => addFilter(r.id)}>
+                  {r.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+    </FilterContext.Provider>
+  )
+}

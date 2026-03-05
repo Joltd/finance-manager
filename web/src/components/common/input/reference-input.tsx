@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CheckIcon, ChevronsUpDownIcon, PlusIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -9,22 +9,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ask } from '@/store/common/ask-dialog'
-
-// ─── Store facade ─────────────────────────────────────────────────────────────
-
-interface ReferenceStoreFacade<T> {
-  data: T[] | undefined
-  loading: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fetch: () => Promise<any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setQueryParams: (params: any) => void
-}
-
-// ─── Props ────────────────────────────────────────────────────────────────────
+import { useDebounce } from '@/hooks/use-debounce'
+import { FetchSlice } from '@/store/common/fetch'
 
 type ReferenceInputProps<T> = {
-  useStore: () => ReferenceStoreFacade<T>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  store: Pick<FetchSlice<T[], unknown, any>, 'data' | 'loading' | 'queryParams' | 'fetch' | 'setQueryParams'>
   value?: T
   onChange?: (value: T) => void
   getLabel: (item: T) => string
@@ -36,10 +26,8 @@ type ReferenceInputProps<T> = {
   newLabel?: string
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 function ReferenceInput<T>({
-  useStore,
+  store,
   value,
   onChange,
   getLabel,
@@ -50,33 +38,27 @@ function ReferenceInput<T>({
   onNew,
   newLabel = 'New',
 }: ReferenceInputProps<T>) {
-  const { data, loading, fetch, setQueryParams } = useStore()
+  const { data, loading, queryParams, fetch, setQueryParams } = store
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (open) {
       setSearch('')
-      setQueryParams({ mask: undefined })
+      setQueryParams({ ...queryParams, mask: undefined })
       void fetch()
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [])
+  const debouncedSearch = useDebounce((val: string) => {
+    setQueryParams({ ...queryParams, mask: val || undefined })
+    void fetch()
+  }, 300)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setSearch(val)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      setQueryParams({ mask: val || undefined })
-      void fetch()
-    }, 300)
+    debouncedSearch(val)
   }
 
   const handleSelect = (item: T) => {
@@ -86,7 +68,7 @@ function ReferenceInput<T>({
 
   const handleNew = async () => {
     if (!onNew) return
-    const name = await ask({ type: 'string', label: 'Название' })
+    const name = await ask({ type: 'string', label: 'Name' })
     if (!name) return
     const created = await onNew(name)
     onChange?.(created)
@@ -123,7 +105,7 @@ function ReferenceInput<T>({
         <div className="flex flex-col">
           {/* Search */}
           <div className="border-b p-2">
-            <Input placeholder="Поиск..." value={search} onChange={handleSearchChange} autoFocus />
+            <Input placeholder="Search..." value={search} onChange={handleSearchChange} autoFocus />
           </div>
 
           {/* List */}
