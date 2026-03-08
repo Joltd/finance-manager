@@ -19,7 +19,7 @@ export interface FetchState<TData, TBody, TQuery, TPath> {
 }
 
 export interface FetchActions<TData, TBody, TQuery, TPath> {
-  fetch: () => Promise<TData>
+  fetch: () => Promise<void>
   setBody: (body: TBody) => void
   setQueryParams: (params: TQuery) => void
   setPathParams: (params: TPath) => void
@@ -47,7 +47,7 @@ export function createFetchSlice<
     queryParams: undefined,
     pathParams: undefined,
 
-    fetch: async (): Promise<TData> => {
+    fetch: async (): Promise<void> => {
       const { body, queryParams, pathParams } = get()
       const url = buildPath(path, pathParams as Record<string, string> | undefined)
       set({ loading: true, error: null })
@@ -61,9 +61,7 @@ export function createFetchSlice<
         if (!response.data.success) {
           throw new Error(response.data.error)
         }
-        const data = response.data.body
-        set({ data, loading: false })
-        return data
+        set({ data: response.data.body, loading: false })
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         set({ error: message, loading: false })
