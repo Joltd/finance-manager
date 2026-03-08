@@ -1,7 +1,17 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { ArrowDownLeft, ArrowLeftRight, ArrowRight, ArrowUpRight, CalendarSearch } from 'lucide-react'
+import {
+  ArrowDownLeft,
+  ArrowLeftRight,
+  ArrowRight,
+  ArrowUpRight,
+  CalendarSearch,
+  MoreHorizontalIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { ask } from '@/store/common/ask-dialog'
 
 import { useOperationSeekStore } from '@/store/operation'
@@ -17,10 +27,20 @@ import { AmountLabel } from '@/components/common/typography/amount-label'
 import { SelectInputOption } from '@/components/common/input/select-input'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useRequest } from '@/hooks/use-request'
 import { cn } from '@/lib/utils'
 import { OperationFilter, OperationGroup, OperationRecord, OperationType } from '@/types/operation'
 import { AccountReference } from '@/types/account'
 import { DateFilter } from '@/components/common/filter/date-filter'
+import { operationUrls } from '@/api/operation'
+import { OperationSheet } from './operation-sheet'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
@@ -76,8 +96,12 @@ function formatGroupDate(dateStr: string): string {
 
 export default function OperationPage() {
   const store = useOperationSeekStore()
+  const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
   const { data, loading, exhausted, seek, reset, setQueryParams, setPointer } = store
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingOperation, setEditingOperation] = useState<OperationRecord | undefined>(undefined)
 
   useEffect(() => {
     setPointer(new Date().toISOString().split('T')[0])
@@ -101,14 +125,51 @@ export default function OperationPage() {
     void seek(SeekDirection.BACKWARD)
   }, [reset, setQueryParams, filterValue, setPointer, seek])
 
+  const handleNew = () => {
+    setEditingOperation(undefined)
+    setSheetOpen(true)
+  }
+
+  const handleEdit = (operation: OperationRecord) => {
+    setEditingOperation(operation)
+    setSheetOpen(true)
+  }
+
+  const handleDelete = async (operation: OperationRecord) => {
+    if (!operation.id) return
+    await deleteOperation.submit({ pathParams: { id: operation.id } })
+    reset()
+    setQueryParams(toQuery(filterValue))
+    void seek(SeekDirection.BACKWARD)
+  }
+
+  const handleSaved = () => {
+    reset()
+    setQueryParams(toQuery(filterValue))
+    void seek(SeekDirection.BACKWARD)
+  }
+
   return (
     <Layout>
+      <OperationSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        operation={editingOperation}
+        onSaved={handleSaved}
+      />
+
       <div className="shrink-0 flex items-center justify-between">
         <Typography variant="h3">Operations</Typography>
-        <Button variant="outline" size="sm" onClick={() => void handleGoto()}>
-          <CalendarSearch className="size-4" />
-          Goto
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => void handleGoto()}>
+            <CalendarSearch className="size-4" />
+            Goto
+          </Button>
+          <Button size="sm" onClick={handleNew}>
+            <PlusIcon />
+            New
+          </Button>
+        </div>
       </div>
 
       <div className="shrink-0">
@@ -127,14 +188,27 @@ export default function OperationPage() {
 
       <Seek seek={seek} loading={loading} exhausted={exhausted} className="flex-1 min-h-0">
         {data.map((group) => (
-          <OperationGroupSection key={group.date} group={group} />
+          <OperationGroupSection
+            key={group.date}
+            group={group}
+            onEdit={handleEdit}
+            onDelete={(op) => void handleDelete(op)}
+          />
         ))}
       </Seek>
     </Layout>
   )
 }
 
-function OperationGroupSection({ group }: { group: OperationGroup }) {
+function OperationGroupSection({
+  group,
+  onEdit,
+  onDelete,
+}: {
+  group: OperationGroup
+  onEdit: (op: OperationRecord) => void
+  onDelete: (op: OperationRecord) => void
+}) {
   return (
     <div>
       <div className="flex items-center gap-3 py-2 sticky top-0 bg-background z-10">
@@ -145,21 +219,29 @@ function OperationGroupSection({ group }: { group: OperationGroup }) {
       </div>
       <div className="flex flex-col">
         {group.operations.map((op, i) => (
-          <OperationRow key={op.id ?? i} operation={op} />
+          <OperationRow key={op.id ?? i} operation={op} onEdit={onEdit} onDelete={onDelete} />
         ))}
       </div>
     </div>
   )
 }
 
-function OperationRow({ operation }: { operation: OperationRecord }) {
+function OperationRow({
+  operation,
+  onEdit,
+  onDelete,
+}: {
+  operation: OperationRecord
+  onEdit: (op: OperationRecord) => void
+  onDelete: (op: OperationRecord) => void
+}) {
   const { type, amountFrom, accountFrom, amountTo, accountTo, description } = operation
   const { icon: Icon, className } = TYPE_CONFIG[type]
   const showBothAmounts =
     amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
 
   return (
-    <div className="flex items-start gap-3 py-2 -mx-1 px-1 rounded-md hover:bg-muted/40 transition-colors">
+    <div className="group flex items-start gap-3 py-2 -mx-1 px-1 rounded-md hover:bg-muted/40 transition-colors">
       <div
         className={cn(
           'mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full',
@@ -186,6 +268,29 @@ function OperationRow({ operation }: { operation: OperationRecord }) {
           {showBothAmounts && <AmountLabel amount={amountTo} />}
         </div>
       </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <MoreHorizontalIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onEdit(operation)}>
+            <PencilIcon />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" onClick={() => onDelete(operation)}>
+            <Trash2Icon />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

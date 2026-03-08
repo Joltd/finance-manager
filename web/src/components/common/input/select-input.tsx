@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -15,10 +15,12 @@ import {
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 type SelectInputContextValue = {
+  mode: 'register' | 'dropdown'
   value: unknown
   onChange: ((value: unknown) => void) | undefined
-  setLabel: (label: string) => void
   setOpen: (open: boolean) => void
+  register: (id: unknown, label: string) => void
+  unregister: (id: unknown) => void
 }
 
 const SelectInputContext = createContext<SelectInputContextValue | null>(null)
@@ -37,12 +39,18 @@ type SelectInputOptionProps<T> = {
 }
 
 function SelectInputOption<T>({ id, label }: SelectInputOptionProps<T>) {
-  const { value, onChange, setLabel, setOpen } = useSelectInputContext()
-  const isSelected = value === id
+  const { mode, value, onChange, setOpen, register, unregister } = useSelectInputContext()
 
+  useEffect(() => {
+    register(id, label)
+    return () => unregister(id)
+  }, [id, label, register, unregister])
+
+  if (mode === 'register') return null
+
+  const isSelected = value === id
   const handleSelect = () => {
     onChange?.(id)
-    setLabel(label)
     setOpen(false)
   }
 
@@ -78,24 +86,53 @@ function SelectInput<T>({
   children,
 }: SelectInputProps<T>) {
   const [open, setOpen] = useState(false)
-  const [label, setLabel] = useState('')
+  const [registry, setRegistry] = useState<Map<unknown, string>>(new Map())
 
-  useEffect(() => {
-    if (value === undefined || value === null) setLabel('')
-  }, [value])
+  const register = useCallback((optId: unknown, optLabel: string) => {
+    setRegistry((prev) => {
+      if (prev.get(optId) === optLabel) return prev
+      return new Map(prev).set(optId, optLabel)
+    })
+  }, [])
 
-  const contextValue = useMemo<SelectInputContextValue>(
-    () => ({
-      value,
-      onChange: onChange as ((v: unknown) => void) | undefined,
-      setLabel,
-      setOpen,
-    }),
-    [value, onChange],
-  )
+  const unregister = useCallback((optId: unknown) => {
+    setRegistry((prev) => {
+      if (!prev.has(optId)) return prev
+      const next = new Map(prev)
+      next.delete(optId)
+      return next
+    })
+  }, [])
+
+  const label = value !== undefined && value !== null ? (registry.get(value) ?? '') : ''
+
+  const registerCtx: SelectInputContextValue = {
+    mode: 'register',
+    value,
+    onChange: onChange as ((v: unknown) => void) | undefined,
+    setOpen,
+    register,
+    unregister,
+  }
+
+  const dropdownCtx: SelectInputContextValue = {
+    mode: 'dropdown',
+    value,
+    onChange: onChange as ((v: unknown) => void) | undefined,
+    setOpen,
+    register,
+    unregister,
+  }
 
   return (
-    <SelectInputContext.Provider value={contextValue}>
+    <>
+      {/*Hidden layer — always mounted so options register their id→label mapping */}
+      <SelectInputContext.Provider value={registerCtx}>
+        <div style={{ display: 'none' }} aria-hidden="true">
+          {children}
+        </div>
+      </SelectInputContext.Provider>
+
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <button
@@ -120,11 +157,13 @@ function SelectInput<T>({
             <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width)">
-          {children}
-        </DropdownMenuContent>
+        <SelectInputContext.Provider value={dropdownCtx}>
+          <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width)">
+            {children}
+          </DropdownMenuContent>
+        </SelectInputContext.Provider>
       </DropdownMenu>
-    </SelectInputContext.Provider>
+    </>
   )
 }
 

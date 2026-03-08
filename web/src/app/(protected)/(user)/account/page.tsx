@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { MoreHorizontalIcon, PencilIcon, PlusIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
 import { AmountLabel } from '@/components/common/typography/amount-label'
-import type { AccountBalance, AccountBalanceGroup } from '@/types/account'
+import type { Account, AccountBalance, AccountBalanceGroup } from '@/types/account'
 import { Layout } from '@/components/common/layout/layout'
 import { Typography } from '@/components/common/typography/typography'
 import { Button } from '@/components/ui/button'
@@ -19,27 +19,83 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useRequest } from '@/hooks/use-request'
+import { accountUrls, groupUrls } from '@/api/account'
+import { ask } from '@/store/common/ask-dialog'
+import { AccountSheet } from './account-sheet'
 
 export default function AccountPage() {
   const store = useAccountBalanceStore()
+  const saveGroup = useRequest(groupUrls.root)
+  const deleteGroup = useRequest(groupUrls.id, { method: 'DELETE' })
+  const deleteAccount = useRequest(accountUrls.id, { method: 'DELETE' })
+  const restoreAccount = useRequest(accountUrls.root)
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingAccount, setEditingAccount] = useState<Account | undefined>(undefined)
 
   useEffect(() => {
     void store.fetch()
   }, [store.fetch])
 
-  const groups = store.data?.filter((g) => g.id !== null) ?? []
-  const ungrouped = store.data?.find((g) => g.id === null) ?? null
+  const handleAddGroup = async () => {
+    const name = await ask({ type: 'string', label: 'Group name' })
+    await saveGroup.submit({ body: { name } })
+    void store.fetch()
+  }
+
+  const handleEditGroup = async (group: AccountBalanceGroup) => {
+    const name = await ask({
+      type: 'string',
+      label: 'Group name',
+      initialValue: group.name ?? undefined,
+    })
+    await saveGroup.submit({ body: { id: group.id, name } })
+    void store.fetch()
+  }
+
+  const handleDeleteGroup = async (group: AccountBalanceGroup) => {
+    await deleteGroup.submit({ pathParams: { id: group.id! } })
+    void store.fetch()
+  }
+
+  const handleAddAccount = () => {
+    setEditingAccount(undefined)
+    setSheetOpen(true)
+  }
+
+  const handleEditAccount = (account: Account) => {
+    setEditingAccount(account)
+    setSheetOpen(true)
+  }
+
+  const handleDeleteAccount = async (account: Account) => {
+    await deleteAccount.submit({ pathParams: { id: account.id! } })
+    void store.fetch()
+  }
+
+  const handleRestoreAccount = async (account: Account) => {
+    await restoreAccount.submit({ body: { ...account, deleted: false } })
+    void store.fetch()
+  }
 
   return (
     <Layout scrollable>
+      <AccountSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        account={editingAccount}
+        onSaved={() => void store.fetch()}
+      />
+
       <div className="flex items-center justify-between">
         <Typography variant="h3">Accounts</Typography>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => console.log('add group')}>
+          <Button variant="outline" size="sm" onClick={() => void handleAddGroup()}>
             <PlusIcon />
             Group
           </Button>
-          <Button size="sm" onClick={() => console.log('add account')}>
+          <Button size="sm" onClick={handleAddAccount}>
             <PlusIcon />
             Account
           </Button>
@@ -50,17 +106,38 @@ export default function AccountPage() {
         <LoadingSkeleton />
       ) : (
         <div className="flex flex-col gap-8 max-w-2xl">
-          {groups.map((group) => (
-            <GroupSection key={group.id} group={group} />
+          {store.data?.map((group) => (
+            <GroupSection
+              key={group.id ?? '-'}
+              group={group}
+              onEdit={handleEditGroup}
+              onDelete={handleDeleteGroup}
+              onEditAccount={handleEditAccount}
+              onDeleteAccount={(a) => void handleDeleteAccount(a)}
+              onRestoreAccount={(a) => void handleRestoreAccount(a)}
+            />
           ))}
-          {ungrouped && ungrouped.accounts.length > 0 && <GroupSection group={ungrouped} />}
         </div>
       )}
     </Layout>
   )
 }
 
-function GroupSection({ group }: { group: AccountBalanceGroup }) {
+function GroupSection({
+  group,
+  onEdit,
+  onDelete,
+  onEditAccount,
+  onDeleteAccount,
+  onRestoreAccount,
+}: {
+  group: AccountBalanceGroup
+  onEdit: (group: AccountBalanceGroup) => void
+  onDelete: (group: AccountBalanceGroup) => void
+  onEditAccount: (account: Account) => void
+  onDeleteAccount: (account: Account) => void
+  onRestoreAccount: (account: Account) => void
+}) {
   const isUngrouped = !group.id
 
   return (
@@ -85,15 +162,12 @@ function GroupSection({ group }: { group: AccountBalanceGroup }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => console.log('edit group', group.id)}>
+              <DropdownMenuItem onClick={() => onEdit(group)}>
                 <PencilIcon />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => console.log('delete group', group.id)}
-              >
+              <DropdownMenuItem variant="destructive" onClick={() => onDelete(group)}>
                 <Trash2Icon />
                 Delete
               </DropdownMenuItem>
@@ -110,16 +184,42 @@ function GroupSection({ group }: { group: AccountBalanceGroup }) {
             No accounts in this group
           </Typography>
         ) : (
-          group.accounts.map((entry) => <AccountRow key={entry.account.id} entry={entry} />)
+          group.accounts.map((entry) => (
+              <AccountRow
+                key={entry.account.id}
+                entry={entry}
+                onEdit={onEditAccount}
+                onDelete={onDeleteAccount}
+                onRestore={onRestoreAccount}
+              />
+            ))
         )}
       </div>
     </div>
   )
 }
 
-function AccountRow({ entry }: { entry: AccountBalance }) {
+function AccountRow({
+  entry,
+  onEdit,
+  onDelete,
+  onRestore,
+}: {
+  entry: AccountBalance
+  onEdit: (account: Account) => void
+  onDelete: (account: Account) => void
+  onRestore: (account: Account) => void
+}) {
   const { account, balances } = entry
   const deleted = account.deleted
+
+  const accountEntity: Account = {
+    id: account.id,
+    name: account.name,
+    type: account.type,
+    deleted: account.deleted,
+    reviseDate: account.reviseDate,
+  }
 
   return (
     <div className="group flex items-center justify-between py-2.5 hover:bg-muted/40 -mx-2 px-2 rounded-sm">
@@ -148,21 +248,18 @@ function AccountRow({ entry }: { entry: AccountBalance }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => console.log('edit account', account.id)}>
+          <DropdownMenuItem onClick={() => onEdit(accountEntity)}>
             <PencilIcon />
             Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {deleted ? (
-            <DropdownMenuItem onClick={() => console.log('restore account', account.id)}>
+            <DropdownMenuItem onClick={() => onRestore(accountEntity)}>
               <RotateCcwIcon />
               Restore
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => console.log('delete account', account.id)}
-            >
+            <DropdownMenuItem variant="destructive" onClick={() => onDelete(accountEntity)}>
               <Trash2Icon />
               Delete
             </DropdownMenuItem>
