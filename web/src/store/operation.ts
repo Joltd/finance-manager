@@ -5,5 +5,4 @@ import { OperationFilter, OperationGroup } from '@/types/operation'
 export const useOperationSeekStore = createSeekStore<OperationGroup, string, OperationFilter>(
   operationUrls.root,
   (group) => group.date,
-  new Date().toISOString().split('T')[0],
 )

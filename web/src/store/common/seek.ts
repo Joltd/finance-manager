@@ -11,18 +11,20 @@ export enum SeekDirection {
   FORWARD = 'FORWARD',
 }
 
-export interface SeekState<TData, TBody, TQuery, TPath> {
+export interface SeekState<TData, TBody, TQuery, TPath, TPointer> {
   data: TData[]
   loading: Record<SeekDirection, boolean>
   error: string | null
+  pointer: TPointer | undefined
   body: TBody | undefined
   queryParams: TQuery | undefined
   pathParams: TPath | undefined
   exhausted: Record<SeekDirection, boolean>
 }
 
-export interface SeekActions<TBody, TQuery, TPath> {
+export interface SeekActions<TBody, TQuery, TPath, TPointer> {
   seek: (direction: SeekDirection) => Promise<void>
+  setPointer: (pointer: TPointer) => void
   setBody: (body: TBody) => void
   setQueryParams: (params: TQuery) => void
   setPathParams: (params: TPath) => void
@@ -31,10 +33,11 @@ export interface SeekActions<TBody, TQuery, TPath> {
 
 export type SeekSlice<
   TData,
+  TPointer = string,
   TBody = unknown,
   TQuery = unknown,
   TPath extends Record<string, string> = Record<string, string>,
-> = SeekState<TData, TBody, TQuery, TPath> & SeekActions<TBody, TQuery, TPath>
+> = SeekState<TData, TBody, TQuery, TPath, TPointer> & SeekActions<TBody, TQuery, TPath, TPointer>
 
 const initialLoading: Record<SeekDirection, boolean> = {
   [SeekDirection.FORWARD]: false,
@@ -55,20 +58,20 @@ export function createSeekSlice<
 >(
   path: string,
   getPointer: (item: TData) => TPointer,
-  initialPointer: TPointer | undefined,
   method: Method = 'GET',
-): StateCreator<SeekSlice<TData, TBody, TQuery, TPath>> {
+): StateCreator<SeekSlice<TData, TPointer, TBody, TQuery, TPath>> {
   return (set, get) => ({
     data: [],
     loading: { ...initialLoading },
     error: null,
+    pointer: undefined,
     body: undefined,
     queryParams: undefined,
     pathParams: undefined,
     exhausted: { ...initialExhausted },
 
     seek: async (direction: SeekDirection): Promise<void> => {
-      const { loading, data, exhausted, body, queryParams, pathParams } = get()
+      const { loading, data, exhausted, body, queryParams, pathParams, pointer: storedPointer } = get()
 
       if (exhausted[direction] || loading[direction]) {
         return
@@ -79,7 +82,7 @@ export function createSeekSlice<
           ? direction === SeekDirection.FORWARD
             ? getPointer(data[0])
             : getPointer(data[data.length - 1])
-          : initialPointer
+          : storedPointer
 
       const url = buildPath(path, pathParams as Record<string, string> | undefined)
       set((state) => ({ loading: { ...state.loading, [direction]: true }, error: null }))
@@ -138,6 +141,7 @@ export function createSeekSlice<
       }
     },
 
+    setPointer: (pointer: TPointer) => set({ pointer }),
     setBody: (body: TBody) => set({ body }),
     setQueryParams: (params: TQuery) => set({ queryParams: params }),
     setPathParams: (params: TPath) => set({ pathParams: params }),
@@ -147,6 +151,7 @@ export function createSeekSlice<
         data: [],
         loading: { ...initialLoading },
         error: null,
+        pointer: undefined,
         body: undefined,
         queryParams: undefined,
         pathParams: undefined,
@@ -164,10 +169,9 @@ export function createSeekStore<
 >(
   path: string,
   getPointer: (item: TData) => TPointer,
-  initialPointer: TPointer | undefined,
   method: Method = 'GET',
 ) {
-  return create<SeekSlice<TData, TBody, TQuery, TPath>>(
-    createSeekSlice(path, getPointer, initialPointer, method),
+  return create<SeekSlice<TData, TPointer, TBody, TQuery, TPath>>(
+    createSeekSlice(path, getPointer, method),
   )
 }

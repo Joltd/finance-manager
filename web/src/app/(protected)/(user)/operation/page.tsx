@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
-import { ArrowDownLeft, ArrowLeftRight, ArrowRight, ArrowUpRight } from 'lucide-react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { ArrowDownLeft, ArrowLeftRight, ArrowRight, ArrowUpRight, CalendarSearch } from 'lucide-react'
+import { ask } from '@/store/common/ask-dialog'
 
 import { useOperationSeekStore } from '@/store/operation'
 import { SeekDirection } from '@/store/common/seek'
@@ -14,10 +15,12 @@ import { CurrencyFilter } from '@/components/common/filter/currency-filter'
 import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { SelectInputOption } from '@/components/common/input/select-input'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { OperationFilter, OperationGroup, OperationRecord, OperationType } from '@/types/operation'
 import { AccountReference } from '@/types/account'
+import { DateFilter } from '@/components/common/filter/date-filter'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
@@ -74,8 +77,11 @@ function formatGroupDate(dateStr: string): string {
 export default function OperationPage() {
   const store = useOperationSeekStore()
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
+  const { data, loading, exhausted, seek, reset, setQueryParams, setPointer } = store
 
-  const { data, loading, exhausted, seek, reset, setQueryParams } = store
+  useEffect(() => {
+    setPointer(new Date().toISOString().split('T')[0])
+  }, [])
 
   const handleFilterChange = useCallback(
     (value: Record<string, unknown>) => {
@@ -87,14 +93,27 @@ export default function OperationPage() {
     [reset, setQueryParams, seek],
   )
 
+  const handleGoto = useCallback(async () => {
+    const date = await ask({ type: 'date', label: 'Select date' })
+    reset()
+    setQueryParams(toQuery(filterValue))
+    setPointer(date.toISOString().split('T')[0])
+    void seek(SeekDirection.BACKWARD)
+  }, [reset, setQueryParams, filterValue, setPointer, seek])
+
   return (
     <Layout>
       <div className="shrink-0 flex items-center justify-between">
         <Typography variant="h3">Operations</Typography>
+        <Button variant="outline" size="sm" onClick={() => void handleGoto()}>
+          <CalendarSearch className="size-4" />
+          Goto
+        </Button>
       </div>
 
       <div className="shrink-0">
         <Filter value={filterValue} onChange={handleFilterChange}>
+          <DateFilter id="date" label="Date" />
           <SelectFilter<OperationType> id="type" label="Type">
             <SelectInputOption<OperationType> id="EXPENSE" label="Expense" />
             <SelectInputOption<OperationType> id="INCOME" label="Income" />
