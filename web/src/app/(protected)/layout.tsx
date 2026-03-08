@@ -1,6 +1,7 @@
 import React from 'react'
 import { UserLoader } from '@/components/user/user-loader'
 import { AskDialog } from '@/components/common/ask-dialog'
+import { SidebarProvider } from '@/components/ui/sidebar'
 
 export default function RootLayout({
   children,
@@ -9,9 +10,9 @@ export default function RootLayout({
 }>) {
   return (
     <UserLoader>
-      <main className="flex flex-col w-full h-full overflow-x-auto overflow-y-hidden relative">
+      <SidebarProvider className="h-full">
         {children}
-      </main>
+      </SidebarProvider>
       <AskDialog />
     </UserLoader>
   )
