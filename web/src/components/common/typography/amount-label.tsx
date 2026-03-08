@@ -1,22 +1,50 @@
 import type { Amount } from '@/types/common/amount'
-import { toDisplayString } from '@/types/common/amount'
+import { isNegative, isPositive, toDisplayString } from '@/types/common/amount'
 import { cn } from '@/lib/utils'
 
+type AmountVariant = 'default' | 'income' | 'expense' | 'balance'
+
 interface AmountLabelProps {
-  amount: Amount
+  amount?: Amount
+  variant?: AmountVariant
   className?: string
 }
 
-export function AmountLabel({ amount, className }: AmountLabelProps) {
+function getColorClass(amount: Amount, variant: AmountVariant): string {
+  switch (variant) {
+    case 'income':
+      return 'text-green-600 dark:text-green-400'
+    case 'expense':
+      return 'text-destructive'
+    case 'balance':
+      if (isPositive(amount)) return 'text-green-600 dark:text-green-400'
+      if (isNegative(amount)) return 'text-destructive'
+      return 'text-muted-foreground'
+    default:
+      return isNegative(amount) ? 'text-destructive' : 'text-muted-foreground'
+  }
+}
+
+export function AmountLabel({ amount, variant = 'default', className }: AmountLabelProps) {
+  if (!amount) {
+    return (
+      <span className={cn('text-xs font-mono tabular-nums text-muted-foreground', className)}>
+        —
+      </span>
+    )
+  }
+
+  const prefix = variant === 'balance' && isPositive(amount) ? '+' : ''
+
   return (
     <span
       className={cn(
         'text-xs font-mono tabular-nums px-1.5 py-0.5 rounded bg-muted',
-        amount.value < 0 ? 'text-destructive' : 'text-muted-foreground',
+        getColorClass(amount, variant),
         className,
       )}
     >
-      {toDisplayString(amount)}
+      {prefix}{toDisplayString(amount)}
     </span>
   )
 }

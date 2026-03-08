@@ -102,3 +102,7 @@ export function isNegative(a: Amount): boolean {
 export function sumAmounts(amounts: Amount[], currency: string): Amount {
   return amounts.reduce((acc, a) => add(acc, a), emptyAmount(currency))
 }
+
+export function accumulate(a: Amount | undefined, b: Amount): Amount {
+  return a ? add(a, b) : b
+}

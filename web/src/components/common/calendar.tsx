@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { format, setMonth, startOfMonth } from 'date-fns'
-import { ru } from 'date-fns/locale'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -116,7 +115,7 @@ export function MonthCalendar(props: MonthCalendarProps) {
                   'rounded-none bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground',
               )}
             >
-              {format(monthDate, 'LLL', { locale: ru })}
+              {format(monthDate, 'LLL')}
             </button>
           )
         })}

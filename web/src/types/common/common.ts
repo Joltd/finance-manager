@@ -1,3 +1,8 @@
+export interface DateRange {
+  from: string
+  to: string
+}
+
 export interface BackendRequestOptions {
   headers?: HeadersInit
   body?: BodyInit
