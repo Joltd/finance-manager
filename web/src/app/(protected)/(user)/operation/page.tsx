@@ -18,6 +18,7 @@ import { useOperationSeekStore } from '@/store/operation'
 import { SeekDirection } from '@/store/common/seek'
 import { Layout } from '@/components/common/layout/layout'
 import { Seek } from '@/components/common/layout/seek'
+import { Group } from '@/components/common/layout/group'
 import { Filter } from '@/components/common/filter/filter'
 import { AccountFilter } from '@/components/common/filter/account-filter'
 import { SelectFilter } from '@/components/common/filter/select-filter'
@@ -26,7 +27,6 @@ import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { SelectInputOption } from '@/components/common/input/select-input'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -210,19 +210,11 @@ function OperationGroupSection({
   onDelete: (op: OperationRecord) => void
 }) {
   return (
-    <div>
-      <div className="flex items-center gap-3 py-2 sticky top-0 bg-background z-10">
-        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-          {formatGroupDate(group.date)}
-        </span>
-        <Separator className="flex-1" />
-      </div>
-      <div className="flex flex-col">
-        {group.operations.map((op, i) => (
-          <OperationRow key={op.id ?? i} operation={op} onEdit={onEdit} onDelete={onDelete} />
-        ))}
-      </div>
-    </div>
+    <Group title={formatGroupDate(group.date)}>
+      {group.operations.map((op, i) => (
+        <OperationRow key={op.id ?? i} operation={op} onEdit={onEdit} onDelete={onDelete} />
+      ))}
+    </Group>
   )
 }
 

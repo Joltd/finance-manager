@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MoreHorizontalIcon, PencilIcon, PlusIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react'
+import { PencilIcon, PlusIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import type { Account, AccountBalance, AccountBalanceGroup } from '@/types/account'
 import { Layout } from '@/components/common/layout/layout'
+import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -23,6 +24,8 @@ import { useRequest } from '@/hooks/use-request'
 import { accountUrls, groupUrls } from '@/api/account'
 import { ask } from '@/store/common/ask-dialog'
 import { AccountSheet } from './account-sheet'
+import { Stack } from '@/components/common/layout/stack'
+import { Flow } from '@/components/common/layout/flow'
 
 export default function AccountPage() {
   const store = useAccountBalanceStore()
@@ -80,7 +83,7 @@ export default function AccountPage() {
   }
 
   return (
-    <Layout scrollable>
+    <Layout>
       <AccountSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
@@ -88,114 +91,78 @@ export default function AccountPage() {
         onSaved={() => void store.fetch()}
       />
 
-      <div className="flex items-center justify-between">
-        <Typography variant="h3">Accounts</Typography>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => void handleAddGroup()}>
-            <PlusIcon />
-            Group
-          </Button>
-          <Button size="sm" onClick={handleAddAccount}>
-            <PlusIcon />
-            Account
-          </Button>
-        </div>
-      </div>
+      <Stack orientation="horizontal" gap={2}>
+        <Typography variant="h3" className="grow">
+          Accounts
+        </Typography>
+        <Button variant="outline" size="sm" onClick={() => void handleAddGroup()}>
+          <PlusIcon />
+          Group
+        </Button>
+        <Button size="sm" onClick={handleAddAccount}>
+          <PlusIcon />
+          Account
+        </Button>
+      </Stack>
 
       {store.loading ? (
         <LoadingSkeleton />
       ) : (
-        <div className="flex flex-col gap-8 max-w-2xl">
-          {store.data?.map((group) => (
-            <GroupSection
-              key={group.id ?? '-'}
-              group={group}
-              onEdit={handleEditGroup}
-              onDelete={handleDeleteGroup}
-              onEditAccount={handleEditAccount}
-              onDeleteAccount={(a) => void handleDeleteAccount(a)}
-              onRestoreAccount={(a) => void handleRestoreAccount(a)}
-            />
-          ))}
-        </div>
+        <Stack scrollable gap={6}>
+          {store.data?.map((group) => {
+            const isUngrouped = !group.id
+            const accounts =
+              group.accounts.length === 0 ? (
+                <Typography variant="muted" className="py-3">
+                  No accounts in this group
+                </Typography>
+              ) : (
+                group.accounts.map((entry) => (
+                  <AccountRow
+                    key={entry.account.id}
+                    entry={entry}
+                    onEdit={handleEditAccount}
+                    onDelete={(a) => void handleDeleteAccount(a)}
+                    onRestore={(a) => void handleRestoreAccount(a)}
+                  />
+                ))
+              )
+
+            if (isUngrouped) {
+              return (
+                <Group key="-" title="Ungrouped">
+                  {accounts}
+                </Group>
+              )
+            }
+
+            return (
+              <DropdownMenu key={group.id}>
+                <DropdownMenuTrigger asChild>
+                  <Group title={group.name} className="cursor-pointer">
+                    {accounts}
+                  </Group>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => void handleEditGroup(group)}>
+                    <PencilIcon />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => void handleDeleteGroup(group)}
+                  >
+                    <Trash2Icon />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+          })}
+        </Stack>
       )}
     </Layout>
-  )
-}
-
-function GroupSection({
-  group,
-  onEdit,
-  onDelete,
-  onEditAccount,
-  onDeleteAccount,
-  onRestoreAccount,
-}: {
-  group: AccountBalanceGroup
-  onEdit: (group: AccountBalanceGroup) => void
-  onDelete: (group: AccountBalanceGroup) => void
-  onEditAccount: (account: Account) => void
-  onDeleteAccount: (account: Account) => void
-  onRestoreAccount: (account: Account) => void
-}) {
-  const isUngrouped = !group.id
-
-  return (
-    <div className="flex flex-col group/section">
-      <div className="flex items-center justify-between gap-4 mb-1">
-        <Typography
-          as="span"
-          variant="small"
-          className={cn('uppercase tracking-widest', isUngrouped && 'text-muted-foreground')}
-        >
-          {isUngrouped ? 'Ungrouped' : group.name}
-        </Typography>
-        {!isUngrouped && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="opacity-0 group-hover/section:opacity-100 transition-opacity"
-              >
-                <MoreHorizontalIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(group)}>
-                <PencilIcon />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => onDelete(group)}>
-                <Trash2Icon />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-
-      <Separator />
-
-      <div>
-        {group.accounts.length === 0 ? (
-          <Typography variant="muted" className="py-3">
-            No accounts in this group
-          </Typography>
-        ) : (
-          group.accounts.map((entry) => (
-              <AccountRow
-                key={entry.account.id}
-                entry={entry}
-                onEdit={onEditAccount}
-                onDelete={onDeleteAccount}
-                onRestore={onRestoreAccount}
-              />
-            ))
-        )}
-      </div>
-    </div>
   )
 }
 
@@ -222,57 +189,55 @@ function AccountRow({
   }
 
   return (
-    <div className="group flex items-center justify-between py-2.5 hover:bg-muted/40 -mx-2 px-2 rounded-sm">
-      <Typography
-        as="span"
-        variant="small"
-        className={cn('w-48 shrink-0', deleted && 'line-through text-muted-foreground')}
-      >
-        {account.name}
-      </Typography>
-
-      <div className="flex-1 flex items-center gap-1.5 flex-wrap">
-        {balances.map((a) => (
-          <AmountLabel key={a.currency} amount={a} />
-        ))}
-      </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Stack
+          orientation="horizontal"
+          align="center"
+          justify="between"
+          gap={1}
+          className="py-2.5 hover:bg-muted/40 rounded-sm cursor-pointer focus-visible:outline-none"
+        >
+          <Typography
+            as="span"
+            variant="small"
+            className={cn('grow', deleted && 'line-through text-muted-foreground')}
           >
-            <MoreHorizontalIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(accountEntity)}>
-            <PencilIcon />
-            Edit
+            {account.name}
+          </Typography>
+
+          <Flow gap={2} className="justify-end">
+            {balances.map((a) => (
+              <AmountLabel key={a.currency} amount={a} />
+            ))}
+          </Flow>
+        </Stack>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem onClick={() => onEdit(accountEntity)}>
+          <PencilIcon />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {deleted ? (
+          <DropdownMenuItem onClick={() => onRestore(accountEntity)}>
+            <RotateCcwIcon />
+            Restore
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {deleted ? (
-            <DropdownMenuItem onClick={() => onRestore(accountEntity)}>
-              <RotateCcwIcon />
-              Restore
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem variant="destructive" onClick={() => onDelete(accountEntity)}>
-              <Trash2Icon />
-              Delete
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        ) : (
+          <DropdownMenuItem variant="destructive" onClick={() => onDelete(accountEntity)}>
+            <Trash2Icon />
+            Delete
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-8 max-w-2xl">
+    <div className="flex flex-col gap-8">
       {[28, 20, 36].map((w) => (
         <div key={w} className="flex flex-col gap-0">
           <div className="flex items-center justify-between mb-1">
