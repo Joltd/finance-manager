@@ -6,6 +6,8 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 
 import { useTopFlowReportStore } from '@/store/report'
 import { Layout } from '@/components/common/layout/layout'
+import { Stack } from '@/components/common/layout/stack'
+import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
 import { Filter } from '@/components/common/filter/filter'
 import { MonthFilter } from '@/components/common/filter/month-filter'
@@ -89,9 +91,9 @@ export default function TopFlowPage() {
 
   return (
     <Layout scrollable>
-      <div className="shrink-0 flex items-center justify-between">
+      <Stack orientation="horizontal" align="center" justify="between" className="shrink-0">
         <Typography variant="h3">Top Flow</Typography>
-      </div>
+      </Stack>
 
       <div className="shrink-0">
         <Filter value={filterValue} onChange={handleFilterChange}>
@@ -100,33 +102,22 @@ export default function TopFlowPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-16 gap-2">
+        <Stack orientation="horizontal" align="center" justify="center" gap={2} className="py-16">
           <Spinner className="size-4" />
           <Typography variant="muted">Loading...</Typography>
-        </div>
+        </Stack>
       ) : groups.length === 0 ? (
-        <div className="flex items-center justify-center py-16">
+        <Stack align="center" justify="center" className="py-16">
           <Typography variant="muted">No data for selected period</Typography>
-        </div>
+        </Stack>
       ) : (
-        <div className="flex flex-col gap-3">
+        <Stack gap={4}>
           {groups.map((group) => {
             const isExpanded = expanded.has(group.date)
             const maxAmount = getMaxAmount(group)
 
             return (
-              <div key={group.date} className="rounded-lg border overflow-hidden">
-                {/* Month header */}
-                <div className="grid grid-cols-2 px-4 py-2.5 bg-muted/50 border-b">
-                  <Typography variant="small" className="font-semibold">
-                    {formatMonth(group.date)}
-                  </Typography>
-                  <div className="text-right">
-                    <AmountLabel amount={group.amount} variant="expense" />
-                  </div>
-                </div>
-
-                {/* Entries */}
+              <Group key={group.date} title={formatMonth(group.date)}>
                 {group.entries.map((entry, i) => {
                   const isOther = entry.other
                   const hasOtherEntries = isOther && group.otherEntries.length > 0
@@ -139,13 +130,12 @@ export default function TopFlowPage() {
                     <React.Fragment key={isOther ? '__other__' : entry.account?.id ?? i}>
                       <div
                         className={cn(
-                          'relative px-4 py-2.5 flex items-center justify-between transition-colors hover:bg-muted/30',
+                          'relative py-2 transition-colors hover:bg-muted/30',
                           i > 0 && 'border-t',
                           hasOtherEntries && 'cursor-pointer select-none',
                         )}
                         onClick={hasOtherEntries ? () => toggleExpanded(group.date) : undefined}
                       >
-                        {/* Proportional bar */}
                         {!isOther && (
                           <div
                             className="absolute inset-y-0 left-0 bg-destructive/10 pointer-events-none transition-all"
@@ -153,23 +143,31 @@ export default function TopFlowPage() {
                           />
                         )}
 
-                        <Typography
-                          variant="small"
-                          className={cn('relative', isOther && 'text-muted-foreground italic')}
+                        <Stack
+                          orientation="horizontal"
+                          align="center"
+                          justify="between"
+                          gap={2}
+                          className="relative"
                         >
-                          {isOther
-                            ? `Other (${group.otherEntries.length})`
-                            : (entry.account?.name ?? '—')}
-                        </Typography>
+                          <Typography
+                            variant="small"
+                            className={cn(isOther && 'text-muted-foreground italic')}
+                          >
+                            {isOther
+                              ? `Other (${group.otherEntries.length})`
+                              : (entry.account?.name ?? '—')}
+                          </Typography>
 
-                        <div className="relative flex items-center gap-2">
-                          <AmountLabel amount={entry.amount} variant="expense" />
-                          {hasOtherEntries && (
-                            isExpanded
-                              ? <ChevronUp className="size-3.5 text-muted-foreground" />
-                              : <ChevronDown className="size-3.5 text-muted-foreground" />
-                          )}
-                        </div>
+                          <Stack orientation="horizontal" align="center" gap={2}>
+                            <AmountLabel amount={entry.amount} variant="expense" />
+                            {hasOtherEntries && (
+                              isExpanded
+                                ? <ChevronUp className="size-3.5 text-muted-foreground" />
+                                : <ChevronDown className="size-3.5 text-muted-foreground" />
+                            )}
+                          </Stack>
+                        </Stack>
                       </div>
 
                       {/* Expanded "other" breakdown */}
@@ -177,21 +175,35 @@ export default function TopFlowPage() {
                         group.otherEntries.map((other, j) => (
                           <div
                             key={other.account?.id ?? j}
-                            className="border-t pl-8 pr-4 py-2 flex items-center justify-between bg-muted/20"
+                            className="border-t pl-6 py-1.5 bg-muted/20"
                           >
-                            <Typography variant="small" className="text-muted-foreground">
-                              {other.account?.name ?? '—'}
-                            </Typography>
-                            <AmountLabel amount={other.amount} variant="expense" />
+                            <Stack orientation="horizontal" align="center" justify="between" gap={2}>
+                              <Typography variant="small" className="text-muted-foreground">
+                                {other.account?.name ?? '—'}
+                              </Typography>
+                              <AmountLabel amount={other.amount} variant="expense" />
+                            </Stack>
                           </div>
                         ))}
                     </React.Fragment>
                   )
                 })}
-              </div>
+
+                {/* Total row */}
+                <Stack
+                  orientation="horizontal"
+                  align="center"
+                  justify="between"
+                  gap={2}
+                  className="py-2 border-t"
+                >
+                  <Typography variant="muted">Total</Typography>
+                  <AmountLabel amount={group.amount} variant="expense" />
+                </Stack>
+              </Group>
             )
           })}
-        </div>
+        </Stack>
       )}
     </Layout>
   )

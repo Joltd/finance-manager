@@ -34,7 +34,7 @@ function monthIdx(d: Date) {
 }
 
 export function MonthInput(props: MonthInputProps) {
-  const { mode = 'single', placeholder = 'Выберите месяц', disabled = false, className } = props
+  const { mode = 'single', placeholder = 'Select', disabled = false, className } = props
 
   const [open, setOpen] = React.useState(false)
   const [year, setYear] = React.useState(() => new Date().getFullYear())

@@ -1,23 +1,14 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  ArrowDownLeft,
-  ArrowLeftRight,
-  ArrowRight,
-  ArrowUpRight,
-  CalendarSearch,
-  MoreHorizontalIcon,
-  PencilIcon,
-  PlusIcon,
-  Trash2Icon,
-} from 'lucide-react'
+import { ArrowRight, CalendarSearch, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 import { ask } from '@/store/common/ask-dialog'
 
 import { useOperationSeekStore } from '@/store/operation'
 import { SeekDirection } from '@/store/common/seek'
 import { Layout } from '@/components/common/layout/layout'
 import { Seek } from '@/components/common/layout/seek'
+import { Stack } from '@/components/common/layout/stack'
 import { Group } from '@/components/common/layout/group'
 import { Filter } from '@/components/common/filter/filter'
 import { AccountFilter } from '@/components/common/filter/account-filter'
@@ -35,11 +26,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useRequest } from '@/hooks/use-request'
-import { cn } from '@/lib/utils'
-import { OperationFilter, OperationGroup, OperationRecord, OperationType } from '@/types/operation'
+import { OperationFilter, OperationRecord, OperationType } from '@/types/operation'
 import { AccountReference } from '@/types/account'
 import { DateFilter } from '@/components/common/filter/date-filter'
 import { operationUrls } from '@/api/operation'
+import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { OperationSheet } from './operation-sheet'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
@@ -48,35 +39,6 @@ function toQuery(filterValue: Record<string, unknown>): OperationFilter {
     account: (filterValue.account as AccountReference | undefined)?.id,
     currency: filterValue.currency as string | undefined,
   }
-}
-
-type TypeConfig = {
-  label: string
-  icon: React.ElementType
-  className: string
-}
-
-const TYPE_CONFIG: Record<OperationType, TypeConfig> = {
-  EXPENSE: {
-    label: 'Expense',
-    icon: ArrowUpRight,
-    className: 'bg-destructive/10 text-destructive',
-  },
-  INCOME: {
-    label: 'Income',
-    icon: ArrowDownLeft,
-    className: 'bg-green-500/10 text-green-600 dark:text-green-400',
-  },
-  TRANSFER: {
-    label: 'Transfer',
-    icon: ArrowRight,
-    className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  },
-  EXCHANGE: {
-    label: 'Exchange',
-    icon: ArrowLeftRight,
-    className: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-  },
 }
 
 function formatGroupDate(dateStr: string): string {
@@ -98,7 +60,7 @@ export default function OperationPage() {
   const store = useOperationSeekStore()
   const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
-  const { data, loading, exhausted, seek, reset, setQueryParams, setPointer } = store
+  const { data, loading, exhausted, seek, resetData, setQueryParams, setPointer } = store
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingOperation, setEditingOperation] = useState<OperationRecord | undefined>(undefined)
@@ -110,20 +72,18 @@ export default function OperationPage() {
   const handleFilterChange = useCallback(
     (value: Record<string, unknown>) => {
       setFilterValue(value)
-      reset()
+      resetData()
       setQueryParams(toQuery(value))
       void seek(SeekDirection.BACKWARD)
     },
-    [reset, setQueryParams, seek],
+    [resetData, setQueryParams, seek],
   )
 
-  const handleGoto = useCallback(async () => {
+  const handleToDate = useCallback(async () => {
     const date = await ask({ type: 'date', label: 'Select date' })
-    reset()
-    setQueryParams(toQuery(filterValue))
+    resetData()
     setPointer(date.toISOString().split('T')[0])
-    void seek(SeekDirection.BACKWARD)
-  }, [reset, setQueryParams, filterValue, setPointer, seek])
+  }, [resetData, setQueryParams, filterValue, setPointer, seek])
 
   const handleNew = () => {
     setEditingOperation(undefined)
@@ -138,14 +98,12 @@ export default function OperationPage() {
   const handleDelete = async (operation: OperationRecord) => {
     if (!operation.id) return
     await deleteOperation.submit({ pathParams: { id: operation.id } })
-    reset()
-    setQueryParams(toQuery(filterValue))
+    resetData()
     void seek(SeekDirection.BACKWARD)
   }
 
   const handleSaved = () => {
-    reset()
-    setQueryParams(toQuery(filterValue))
+    resetData()
     void seek(SeekDirection.BACKWARD)
   }
 
@@ -158,63 +116,47 @@ export default function OperationPage() {
         onSaved={handleSaved}
       />
 
-      <div className="shrink-0 flex items-center justify-between">
-        <Typography variant="h3">Operations</Typography>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => void handleGoto()}>
-            <CalendarSearch className="size-4" />
-            Goto
-          </Button>
-          <Button size="sm" onClick={handleNew}>
-            <PlusIcon />
-            New
-          </Button>
-        </div>
-      </div>
+      <Stack orientation="horizontal" align="center" gap={2}>
+        <Typography variant="h3" className="grow">
+          Operations
+        </Typography>
+        <Button variant="outline" size="sm" onClick={() => void handleToDate()}>
+          <CalendarSearch className="size-4" />
+          To date...
+        </Button>
+        <Button size="sm" onClick={handleNew}>
+          <PlusIcon />
+          New
+        </Button>
+      </Stack>
 
-      <div className="shrink-0">
-        <Filter value={filterValue} onChange={handleFilterChange}>
-          <DateFilter id="date" label="Date" />
-          <SelectFilter<OperationType> id="type" label="Type">
-            <SelectInputOption<OperationType> id="EXPENSE" label="Expense" />
-            <SelectInputOption<OperationType> id="INCOME" label="Income" />
-            <SelectInputOption<OperationType> id="TRANSFER" label="Transfer" />
-            <SelectInputOption<OperationType> id="EXCHANGE" label="Exchange" />
-          </SelectFilter>
-          <AccountFilter id="account" label="Account" />
-          <CurrencyFilter id="currency" label="Currency" />
-        </Filter>
-      </div>
+      <Filter value={filterValue} onChange={handleFilterChange}>
+        <DateFilter id="date" label="Date" />
+        <SelectFilter<OperationType> id="type" label="Type">
+          <SelectInputOption<OperationType> id="EXPENSE" label="Expense" />
+          <SelectInputOption<OperationType> id="INCOME" label="Income" />
+          <SelectInputOption<OperationType> id="TRANSFER" label="Transfer" />
+          <SelectInputOption<OperationType> id="EXCHANGE" label="Exchange" />
+        </SelectFilter>
+        <AccountFilter id="account" label="Account" />
+        <CurrencyFilter id="currency" label="Currency" />
+      </Filter>
 
-      <Seek seek={seek} loading={loading} exhausted={exhausted} className="flex-1 min-h-0">
+      <Seek seek={seek} loading={loading} exhausted={exhausted}>
         {data.map((group) => (
-          <OperationGroupSection
-            key={group.date}
-            group={group}
-            onEdit={handleEdit}
-            onDelete={(op) => void handleDelete(op)}
-          />
+          <Group key={group.date} title={formatGroupDate(group.date)}>
+            {group.operations.map((op, i) => (
+              <OperationRow
+                key={op.id ?? i}
+                operation={op}
+                onEdit={() => handleEdit(op)}
+                onDelete={() => void handleDelete(op)}
+              />
+            ))}
+          </Group>
         ))}
       </Seek>
     </Layout>
-  )
-}
-
-function OperationGroupSection({
-  group,
-  onEdit,
-  onDelete,
-}: {
-  group: OperationGroup
-  onEdit: (op: OperationRecord) => void
-  onDelete: (op: OperationRecord) => void
-}) {
-  return (
-    <Group title={formatGroupDate(group.date)}>
-      {group.operations.map((op, i) => (
-        <OperationRow key={op.id ?? i} operation={op} onEdit={onEdit} onDelete={onDelete} />
-      ))}
-    </Group>
   )
 }
 
@@ -224,65 +166,59 @@ function OperationRow({
   onDelete,
 }: {
   operation: OperationRecord
-  onEdit: (op: OperationRecord) => void
-  onDelete: (op: OperationRecord) => void
+  onEdit: () => void
+  onDelete: () => void
 }) {
-  const { type, amountFrom, accountFrom, amountTo, accountTo, description } = operation
-  const { icon: Icon, className } = TYPE_CONFIG[type]
+  const { type, amountFrom, accountFrom, amountTo, accountTo } = operation
   const showBothAmounts =
     amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
 
   return (
-    <div className="group flex items-start gap-3 py-2 -mx-1 px-1 rounded-md hover:bg-muted/40 transition-colors">
-      <div
-        className={cn(
-          'mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full',
-          className,
-        )}
-      >
-        <Icon className="size-3.5" />
-      </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Stack
+          orientation="horizontal"
+          align="center"
+          gap={3}
+          className="py-2.5 rounded-sm hover:bg-muted/40 transition-colors cursor-pointer focus-visible:outline-none"
+        >
+          <OperationIcon type={type} size={16} colored className="shrink-0" />
 
-      <div className="flex flex-1 items-start justify-between gap-4 min-w-0">
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <div className="flex items-center gap-1.5 text-sm min-w-0">
-            <span className="truncate font-medium">{accountFrom.name}</span>
-            <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
-            <span className="truncate text-muted-foreground">{accountTo.name}</span>
-          </div>
-          {description && (
-            <span className="text-xs text-muted-foreground truncate">{description}</span>
-          )}
-        </div>
-
-        <div className="flex flex-col items-end gap-0.5 shrink-0">
-          <AmountLabel amount={amountFrom} />
-          {showBothAmounts && <AmountLabel amount={amountTo} />}
-        </div>
-      </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+          <Stack
+            orientation="horizontal"
+            align="center"
+            justify="between"
+            gap={4}
+            className="flex-1 min-w-0"
           >
-            <MoreHorizontalIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(operation)}>
-            <PencilIcon />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onClick={() => onDelete(operation)}>
-            <Trash2Icon />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+            <Stack orientation="horizontal" align="center" gap={1} className="min-w-0">
+              <Typography as="span" variant="small" className="truncate font-medium">
+                {accountFrom.name}
+              </Typography>
+              <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
+              <Typography as="span" variant="small" className="truncate text-muted-foreground">
+                {accountTo.name}
+              </Typography>
+            </Stack>
+
+            <Stack orientation="horizontal" align="end" gap={1} className="shrink-0">
+              <AmountLabel amount={amountFrom} />
+              {showBothAmounts && <AmountLabel amount={amountTo} />}
+            </Stack>
+          </Stack>
+        </Stack>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem onClick={onEdit}>
+          <PencilIcon />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onClick={onDelete}>
+          <Trash2Icon />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

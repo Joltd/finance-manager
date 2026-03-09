@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react'
 import { cva, VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-const layoutVariants = cva('flex flex-col gap-6 p-4 md:gap-12 md:p-6 overflow-y-hidden', {
+const layoutVariants = cva('flex flex-col gap-6 p-4 md:gap-6 md:p-6 overflow-y-hidden', {
   variants: {
     scrollable: {
       true: 'overflow-y-auto',
@@ -14,8 +14,7 @@ const layoutVariants = cva('flex flex-col gap-6 p-4 md:gap-12 md:p-6 overflow-y-
 })
 
 export interface LayoutProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof layoutVariants> {}
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof layoutVariants> {}
 
 export const Layout = forwardRef<HTMLDivElement, LayoutProps>(
   ({ scrollable, className, children, ...props }, ref) => (

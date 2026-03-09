@@ -28,6 +28,7 @@ export interface SeekActions<TBody, TQuery, TPath, TPointer> {
   setBody: (body: TBody) => void
   setQueryParams: (params: TQuery) => void
   setPathParams: (params: TPath) => void
+  resetData: () => void
   reset: () => void
 }
 
@@ -71,7 +72,15 @@ export function createSeekSlice<
     exhausted: { ...initialExhausted },
 
     seek: async (direction: SeekDirection): Promise<void> => {
-      const { loading, data, exhausted, body, queryParams, pathParams, pointer: storedPointer } = get()
+      const {
+        loading,
+        data,
+        exhausted,
+        body,
+        queryParams,
+        pathParams,
+        pointer: storedPointer,
+      } = get()
 
       if (exhausted[direction] || loading[direction]) {
         return
@@ -146,6 +155,14 @@ export function createSeekSlice<
     setQueryParams: (params: TQuery) => set({ queryParams: params }),
     setPathParams: (params: TPath) => set({ pathParams: params }),
 
+    resetData: () =>
+      set({
+        data: [],
+        loading: { ...initialLoading },
+        error: null,
+        exhausted: { ...initialExhausted },
+      }),
+
     reset: () =>
       set({
         data: [],
@@ -166,11 +183,7 @@ export function createSeekStore<
   TBody = unknown,
   TQuery = unknown,
   TPath extends Record<string, string> = Record<string, string>,
->(
-  path: string,
-  getPointer: (item: TData) => TPointer,
-  method: Method = 'GET',
-) {
+>(path: string, getPointer: (item: TData) => TPointer, method: Method = 'GET') {
   return create<SeekSlice<TData, TPointer, TBody, TQuery, TPath>>(
     createSeekSlice(path, getPointer, method),
   )

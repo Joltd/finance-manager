@@ -11,12 +11,14 @@ import React, {
 } from 'react'
 import { ListFilter, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Flow } from '@/components/common/layout/flow'
 import { cn } from '@/lib/utils'
 
 interface FilterRegistration {
@@ -59,24 +61,22 @@ export function FilterItem({ id, label, children, className }: FilterItemProps) 
   if (!isActive(id)) return null
 
   return (
-    <div
-      className={cn('flex h-9 overflow-hidden rounded-md border border-input text-sm', className)}
-    >
-      <span className="flex items-center border-r border-input bg-muted px-2.5 whitespace-nowrap text-muted-foreground shrink-0">
+    <ButtonGroup className={cn('h-8 overflow-hidden text-sm', className)}>
+      <ButtonGroupText className="px-2.5 font-normal text-muted-foreground shadow-none whitespace-nowrap shrink-0">
         {label}
-      </span>
-      <div className="flex flex-1 items-center **:data-[slot=input]:h-full **:data-[slot=input]:rounded-none **:data-[slot=input]:border-0 **:data-[slot=input]:shadow-none">
+      </ButtonGroupText>
+      <div className="flex flex-1 items-center border border-input **:data-[slot=input]:h-full **:data-[slot=input]:rounded-none **:data-[slot=input]:border-0 **:data-[slot=input]:shadow-none">
         {children}
       </div>
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon-xs"
         onClick={() => removeFilter(id)}
-        className="rounded-none border-l border-input shrink-0 h-full w-8"
+        className="shrink-0 h-full w-8"
       >
         <X />
       </Button>
-    </div>
+    </ButtonGroup>
   )
 }
 
@@ -136,7 +136,7 @@ export function Filter({ value = {}, onChange, children }: FilterProps) {
 
   return (
     <FilterContext.Provider value={ctx}>
-      <div className="flex flex-wrap items-center gap-2">
+      <Flow align="center" className="bg-muted/50 rounded-md p-2">
         {children}
         {inactiveRegistrations.length > 0 && (
           <DropdownMenu>
@@ -154,7 +154,7 @@ export function Filter({ value = {}, onChange, children }: FilterProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      </div>
+      </Flow>
     </FilterContext.Provider>
   )
 }

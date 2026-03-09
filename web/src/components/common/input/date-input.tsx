@@ -22,7 +22,7 @@ type DateInputProps = {
 function DateInput({
   value,
   onChange,
-  placeholder = 'Выберите дату',
+  placeholder = 'Select',
   disabled = false,
   className,
   calendarProps,

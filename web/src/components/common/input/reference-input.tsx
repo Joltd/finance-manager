@@ -101,7 +101,7 @@ function ReferenceInput<T>({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
+      <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-48 p-0">
         <div className="flex flex-col">
           {/* Search */}
           <div className="border-b p-2">

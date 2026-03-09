@@ -5,13 +5,14 @@ import { format, parseISO } from 'date-fns'
 
 import { useIncomeExpenseReportStore } from '@/store/report'
 import { Layout } from '@/components/common/layout/layout'
+import { Stack } from '@/components/common/layout/stack'
+import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
 import { Filter } from '@/components/common/filter/filter'
 import { MonthFilter } from '@/components/common/filter/month-filter'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Spinner } from '@/components/ui/spinner'
-import { cn } from '@/lib/utils'
-import { Amount, emptyAmount, subtract } from '@/types/common/amount'
+import { Amount, emptyAmount, subtract, toDecimal } from '@/types/common/amount'
 import { IncomeExpenseGroup } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
 
@@ -46,7 +47,6 @@ function getBalance(group: IncomeExpenseGroup): Amount | undefined {
   return subtract(income ?? emptyAmount(currency), expense ?? emptyAmount(currency))
 }
 
-
 export default function IncomeExpensePage() {
   const { data, loading, fetch, setBody } = useIncomeExpenseReportStore()
 
@@ -80,11 +80,19 @@ export default function IncomeExpensePage() {
 
   const groups = data?.groups ?? []
 
+  const globalMax = Math.max(
+    ...groups.flatMap((g) => [
+      getEntry(g, 'INCOME') ? Math.abs(toDecimal(getEntry(g, 'INCOME')!)) : 0,
+      getEntry(g, 'EXPENSE') ? Math.abs(toDecimal(getEntry(g, 'EXPENSE')!)) : 0,
+    ]),
+    0,
+  )
+
   return (
     <Layout scrollable>
-      <div className="shrink-0 flex items-center justify-between">
+      <Stack orientation="horizontal" align="center" justify="between" className="shrink-0">
         <Typography variant="h3">Income &amp; Expense</Typography>
-      </div>
+      </Stack>
 
       <div className="shrink-0">
         <Filter value={filterValue} onChange={handleFilterChange}>
@@ -93,60 +101,68 @@ export default function IncomeExpensePage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-16 gap-2">
+        <Stack orientation="horizontal" align="center" justify="center" gap={2} className="py-16">
           <Spinner className="size-4" />
           <Typography variant="muted">Loading...</Typography>
-        </div>
+        </Stack>
       ) : groups.length === 0 ? (
-        <div className="flex items-center justify-center py-16">
+        <Stack align="center" justify="center" className="py-16">
           <Typography variant="muted">No data for selected period</Typography>
-        </div>
+        </Stack>
       ) : (
-        <div className="rounded-lg border overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-4 px-4 py-2.5 bg-muted/50 border-b">
-            <Typography variant="muted" className="text-xs uppercase tracking-wider font-semibold">
-              Month
-            </Typography>
-            <Typography variant="muted" className="text-xs uppercase tracking-wider font-semibold text-right text-green-600 dark:text-green-400">
-              Income
-            </Typography>
-            <Typography variant="muted" className="text-xs uppercase tracking-wider font-semibold text-right text-destructive">
-              Expense
-            </Typography>
-            <Typography variant="muted" className="text-xs uppercase tracking-wider font-semibold text-right">
-              Balance
-            </Typography>
-          </div>
-
-          {/* Rows */}
-          {groups.map((group, i) => {
+        <Stack gap={4}>
+          {groups.map((group) => {
             const income = getEntry(group, 'INCOME')
             const expense = getEntry(group, 'EXPENSE')
             const balance = getBalance(group)
+            const incomeBar = income && globalMax > 0 ? (Math.abs(toDecimal(income)) / globalMax) * 100 : 0
+            const expenseBar = expense && globalMax > 0 ? (Math.abs(toDecimal(expense)) / globalMax) * 100 : 0
+
             return (
-              <div
-                key={group.date}
-                className={cn(
-                  'grid grid-cols-4 px-4 py-3 items-center text-sm transition-colors hover:bg-muted/30',
-                  i > 0 && 'border-t',
-                )}
-              >
-                <Typography variant="small">{formatMonth(group.date)}</Typography>
-                <div className="text-right">
-                  <AmountLabel amount={income} variant="income" />
+              <Group key={group.date} title={formatMonth(group.date)}>
+                {/* Income row */}
+                <div className="relative py-2">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-green-500/10 pointer-events-none transition-all"
+                    style={{ width: `${incomeBar}%` }}
+                  />
+                  <Stack orientation="horizontal" align="center" justify="between" gap={2} className="relative">
+                    <Typography variant="small" className="text-green-600 dark:text-green-400">
+                      Income
+                    </Typography>
+                    <AmountLabel amount={income} variant="income" />
+                  </Stack>
                 </div>
-                <div className="text-right">
-                  <AmountLabel amount={expense} variant="expense" />
+
+                {/* Expense row */}
+                <div className="relative py-2">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-destructive/10 pointer-events-none transition-all"
+                    style={{ width: `${expenseBar}%` }}
+                  />
+                  <Stack orientation="horizontal" align="center" justify="between" gap={2} className="relative">
+                    <Typography variant="small" className="text-destructive">
+                      Expense
+                    </Typography>
+                    <AmountLabel amount={expense} variant="expense" />
+                  </Stack>
                 </div>
-                <div className="text-right">
+
+                {/* Balance row */}
+                <Stack
+                  orientation="horizontal"
+                  align="center"
+                  justify="between"
+                  gap={2}
+                  className="py-2 border-t"
+                >
+                  <Typography variant="muted">Balance</Typography>
                   <AmountLabel amount={balance} variant="balance" />
-                </div>
-              </div>
+                </Stack>
+              </Group>
             )
           })}
-
-        </div>
+        </Stack>
       )}
     </Layout>
   )

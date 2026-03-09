@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef } from 'react'
-import { cn } from '@/lib/utils'
 import { SeekDirection } from '@/store/common/seek'
 import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/common/typography/typography'
+import { Stack } from '@/components/common/layout/stack'
 
 interface SeekSentinelProps {
   onIntersect: () => void
@@ -35,7 +36,7 @@ function SeekSentinel({ onIntersect, loading, exhausted }: SeekSentinelProps) {
   return (
     <div ref={ref} data-id="seek-sentinel" className="flex min-h-10 items-center justify-center">
       {exhausted ? (
-        <div className="h-px w-16 rounded-full bg-border" />
+        <Typography variant="muted">End of data</Typography>
       ) : loading ? (
         <Spinner className="text-muted-foreground" />
       ) : null}
@@ -74,18 +75,20 @@ export function Seek({ seek, loading, exhausted, children, className }: SeekProp
   }, [seek])
 
   return (
-    <div ref={containerRef} className={cn('flex flex-col overflow-y-auto', className)}>
+    <Stack scrollable gap={0} className={className}>
       <SeekSentinel
         onIntersect={seekForward}
         loading={loading[SeekDirection.FORWARD]}
         exhausted={exhausted[SeekDirection.FORWARD]}
       />
-      {children}
+      <Stack ref={containerRef} gap={6}>
+        {children}
+      </Stack>
       <SeekSentinel
         onIntersect={seekBackward}
         loading={loading[SeekDirection.BACKWARD]}
         exhausted={exhausted[SeekDirection.BACKWARD]}
       />
-    </div>
+    </Stack>
   )
 }

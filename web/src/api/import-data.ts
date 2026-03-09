@@ -1,0 +1,5 @@
+export const importDataUrls = {
+  root: '/api/v1/import-data',
+  id: '/api/v1/import-data/:id',
+  entry: '/api/v1/import-data/:id/entry',
+}
