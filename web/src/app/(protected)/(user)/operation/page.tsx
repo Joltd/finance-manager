@@ -16,7 +16,7 @@ import { SelectFilter } from '@/components/common/filter/select-filter'
 import { CurrencyFilter } from '@/components/common/filter/currency-filter'
 import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
-import { SelectInputOption } from '@/components/common/input/select-input'
+import { SelectItem } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -132,11 +132,11 @@ export default function OperationPage() {
 
       <Filter value={filterValue} onChange={handleFilterChange}>
         <DateFilter id="date" label="Date" />
-        <SelectFilter<OperationType> id="type" label="Type">
-          <SelectInputOption<OperationType> id="EXPENSE" label="Expense" />
-          <SelectInputOption<OperationType> id="INCOME" label="Income" />
-          <SelectInputOption<OperationType> id="TRANSFER" label="Transfer" />
-          <SelectInputOption<OperationType> id="EXCHANGE" label="Exchange" />
+        <SelectFilter id="type" label="Type">
+          <SelectItem value="EXPENSE">Expense</SelectItem>
+          <SelectItem value="INCOME">Income</SelectItem>
+          <SelectItem value="TRANSFER">Transfer</SelectItem>
+          <SelectItem value="EXCHANGE">Exchange</SelectItem>
         </SelectFilter>
         <AccountFilter id="account" label="Account" />
         <CurrencyFilter id="currency" label="Currency" />

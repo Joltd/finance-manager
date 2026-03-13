@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { ArrowLeftRight, ArrowUpDown, BookOpen, PlusIcon, TrendingUp, Wallet } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { ArrowLeftRight, ArrowUpDown, BookOpen, PlusIcon, Trash2Icon, TrendingUp, Wallet } from 'lucide-react'
 import { useEffect } from 'react'
 import {
   Sidebar,
@@ -12,12 +12,17 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { SidebarAppHeader } from './sidebar-app-header'
 import { SidebarUserFooter } from './sidebar-user-footer'
 import { useImportDataListStore } from '@/store/import-data'
+import { useRequest } from '@/hooks/use-request'
+import { importDataUrls } from '@/api/import-data'
+import { openImportDataBeginDialog } from '@/app/(protected)/(user)/import-data/[id]/import-data-begin-dialog'
+import { Reference } from '@/types/common/reference'
 
 const mainNav = [
   { href: '/operation', label: 'Operations', icon: ArrowLeftRight },
@@ -35,11 +40,21 @@ const settingsNav = [
 
 export function UserAppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const importDataList = useImportDataListStore()
+  const deleteImport = useRequest(importDataUrls.id, { method: 'DELETE' })
 
   useEffect(() => {
     void importDataList.fetch()
   }, [importDataList.fetch])
+
+  const handleDelete = async (item: Reference) => {
+    await deleteImport.submit({ pathParams: { id: item.id } })
+    if (pathname === `/import-data/${item.id}`) {
+      router.push('/')
+    }
+    void importDataList.fetch()
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -100,7 +115,7 @@ export function UserAppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel>Import Data</SidebarGroupLabel>
-          <SidebarGroupAction title="New import">
+          <SidebarGroupAction title="New import" onClick={openImportDataBeginDialog}>
             <PlusIcon />
           </SidebarGroupAction>
           <SidebarGroupContent>
@@ -116,6 +131,13 @@ export function UserAppSidebar() {
                       <span>{item.name}</span>
                     </Link>
                   </SidebarMenuButton>
+                  <SidebarMenuAction
+                    showOnHover
+                    title="Delete import"
+                    onClick={() => handleDelete(item)}
+                  >
+                    <Trash2Icon />
+                  </SidebarMenuAction>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

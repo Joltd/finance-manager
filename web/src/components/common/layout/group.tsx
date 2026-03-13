@@ -1,43 +1,35 @@
 import React, { forwardRef } from 'react'
+import { PencilIcon } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/common/typography/typography'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 
 interface GroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title: React.ReactNode
-  actions?: React.ReactNode
+  onEdit?: () => void
 }
 
 export const Group = forwardRef<HTMLDivElement, GroupProps>(
-  ({ title, actions, children, className, ...props }, ref) => (
-    <div ref={ref} className={cn(className)} {...props}>
+  ({ title, onEdit, children, className, ...props }, ref) => (
+    <div ref={ref} className={cn('group/group', className)} {...props}>
       <div className="flex items-center gap-3 py-2 sticky top-0 bg-background z-10">
-        {actions ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Typography
-                as="span"
-                variant="small"
-                className="uppercase tracking-widest whitespace-nowrap shrink-0 cursor-pointer"
-              >
-                {title}
-              </Typography>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">{actions}</DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Typography
-            as="span"
-            variant="small"
-            className="uppercase tracking-widest whitespace-nowrap shrink-0"
+        <Typography
+          as="span"
+          variant="small"
+          className="uppercase tracking-widest whitespace-nowrap shrink-0"
+        >
+          {title}
+        </Typography>
+        {onEdit && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="opacity-0 w-5 h-5 group-hover/group:opacity-100 transition-opacity shrink-0"
+            onClick={onEdit}
           >
-            {title}
-          </Typography>
+            <PencilIcon className="w-3! h-3!" />
+          </Button>
         )}
         <Separator className="flex-1" />
       </div>

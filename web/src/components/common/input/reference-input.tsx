@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { CheckIcon, ChevronsUpDownIcon, PlusIcon } from 'lucide-react'
+import { CheckIcon, ChevronDownIcon, PlusIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,10 @@ import { FetchSlice } from '@/store/common/fetch'
 
 type ReferenceInputProps<T> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  store: Pick<FetchSlice<T[], unknown, any>, 'data' | 'loading' | 'queryParams' | 'fetch' | 'setQueryParams'>
+  store: Pick<
+    FetchSlice<T[], unknown, any>,
+    'data' | 'loading' | 'queryParams' | 'fetch' | 'setQueryParams'
+  >
   value?: T
   onChange?: (value: T) => void
   getLabel: (item: T) => string
@@ -88,7 +91,7 @@ function ReferenceInput<T>({
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn(
-            'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+            'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
             'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
             'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
             'justify-between font-normal',
@@ -97,7 +100,7 @@ function ReferenceInput<T>({
           )}
         >
           <span className="truncate">{selectedLabel ?? placeholder}</span>
-          <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          <ChevronDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
 

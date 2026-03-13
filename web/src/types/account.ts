@@ -1,12 +1,18 @@
-import { Reference } from '@/types/common/reference'
+import { z } from 'zod'
+import { Reference, referenceSchema } from '@/types/common/reference'
 import { Amount } from '@/types/common/amount'
 
 export type AccountType = 'ACCOUNT' | 'EXPENSE' | 'INCOME'
 
 export interface AccountReference extends Reference {
   type: AccountType
-  reviseDate: string | undefined
+  reviseDate?: string
 }
+
+export const accountReferenceSchema = referenceSchema.extend({
+  type: z.enum(['ACCOUNT', 'EXPENSE', 'INCOME']),
+  reviseDate: z.string().optional(),
+})
 
 export interface AccountGroup {
   id?: string
@@ -19,7 +25,7 @@ export interface Account {
   name: string
   type: AccountType
   parser?: string
-  group?: AccountGroup
+  group?: Reference
   deleted: boolean
   reviseDate?: string
 }
@@ -36,7 +42,7 @@ export interface AccountBalance {
 }
 
 export interface AccountBalanceGroup {
-  id: string | null
-  name: string | null
+  id?: string
+  name?: string
   accounts: AccountBalance[]
 }

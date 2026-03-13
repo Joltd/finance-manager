@@ -3,7 +3,13 @@
 import { useEffect } from 'react'
 
 import { useCurrencyListStore } from '@/store/account'
-import { SelectInput, SelectInputOption } from '@/components/common/input/select-input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 type CurrencyInputProps = {
   value?: string
@@ -31,19 +37,18 @@ function CurrencyInput({
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <SelectInput
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      disabled={disabled}
-      className={className}
-      id={id}
-      aria-invalid={ariaInvalid}
-    >
-      {data?.map((currency) => (
-        <SelectInputOption key={currency.name} id={currency.name} label={currency.name} />
-      ))}
-    </SelectInput>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger id={id} className={className} aria-invalid={ariaInvalid}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent position="popper">
+        {data?.map((currency) => (
+          <SelectItem key={currency.name} value={currency.name}>
+            {currency.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 

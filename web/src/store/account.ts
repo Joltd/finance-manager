@@ -14,6 +14,10 @@ export const useAccountListStore = createFetchStore<Account[], unknown, { type?:
   accountUrls.root,
 )
 
+export const useAccountStore = createFetchStore<Account, unknown, unknown, { id: string }>(
+  accountUrls.id,
+)
+
 export const useAccountReferenceStore = createFetchStore<
   AccountReference[],
   unknown,

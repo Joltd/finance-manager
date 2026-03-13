@@ -6,7 +6,13 @@ import { operationUrls } from '@/api/operation'
 import { AccountInput } from '@/components/common/input/account-input'
 import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
-import { SelectInput, SelectInputOption } from '@/components/common/input/select-input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -29,7 +35,6 @@ const TO_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
   INCOME: 'ACCOUNT',
   TRANSFER: 'ACCOUNT',
 }
-
 
 // ─── Form state ───────────────────────────────────────────────────────────────
 
@@ -153,12 +158,17 @@ export function OperationSheet({ open, onOpenChange, operation, onSaved }: Opera
         <div className="flex flex-col gap-4 px-4 flex-1 overflow-y-auto">
           <Field>
             <FieldLabel>Type</FieldLabel>
-            <SelectInput<OperationType> value={form.type} onChange={handleTypeChange}>
-              <SelectInputOption<OperationType> id="EXCHANGE" label="Exchange" />
-              <SelectInputOption<OperationType> id="TRANSFER" label="Transfer" />
-              <SelectInputOption<OperationType> id="EXPENSE" label="Expense" />
-              <SelectInputOption<OperationType> id="INCOME" label="Income" />
-            </SelectInput>
+            <Select value={form.type} onValueChange={(v) => handleTypeChange(v as OperationType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="EXCHANGE">Exchange</SelectItem>
+                <SelectItem value="TRANSFER">Transfer</SelectItem>
+                <SelectItem value="EXPENSE">Expense</SelectItem>
+                <SelectItem value="INCOME">Income</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
 
           <Field>

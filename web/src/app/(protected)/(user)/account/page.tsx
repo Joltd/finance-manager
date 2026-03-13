@@ -30,12 +30,11 @@ import { Flow } from '@/components/common/layout/flow'
 export default function AccountPage() {
   const store = useAccountBalanceStore()
   const saveGroup = useRequest(groupUrls.root)
-  const deleteGroup = useRequest(groupUrls.id, { method: 'DELETE' })
   const deleteAccount = useRequest(accountUrls.id, { method: 'DELETE' })
   const restoreAccount = useRequest(accountUrls.root)
 
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [editingAccount, setEditingAccount] = useState<Account | undefined>(undefined)
+  const [editingAccount, setEditingAccount] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     void store.fetch()
@@ -57,18 +56,13 @@ export default function AccountPage() {
     void store.fetch()
   }
 
-  const handleDeleteGroup = async (group: AccountBalanceGroup) => {
-    await deleteGroup.submit({ pathParams: { id: group.id! } })
-    void store.fetch()
-  }
-
   const handleAddAccount = () => {
     setEditingAccount(undefined)
     setSheetOpen(true)
   }
 
   const handleEditAccount = (account: Account) => {
-    setEditingAccount(account)
+    setEditingAccount(account.id)
     setSheetOpen(true)
   }
 
@@ -87,8 +81,7 @@ export default function AccountPage() {
       <AccountSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
-        account={editingAccount}
-        onSaved={() => void store.fetch()}
+        accountId={editingAccount}
       />
 
       <Stack orientation="horizontal" gap={2}>
@@ -137,27 +130,9 @@ export default function AccountPage() {
             }
 
             return (
-              <DropdownMenu key={group.id}>
-                <DropdownMenuTrigger asChild>
-                  <Group title={group.name} className="cursor-pointer">
-                    {accounts}
-                  </Group>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem onClick={() => void handleEditGroup(group)}>
-                    <PencilIcon />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => void handleDeleteGroup(group)}
-                  >
-                    <Trash2Icon />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Group key={group.id} title={group.name} onEdit={() => void handleEditGroup(group)}>
+                {accounts}
+              </Group>
             )
           })}
         </Stack>

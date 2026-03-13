@@ -9,5 +9,5 @@ export interface Reference {
 export const referenceSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  deleted: z.boolean().default(false),
+  deleted: z.boolean(),
 })
