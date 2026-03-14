@@ -5,6 +5,7 @@ import {
   CheckCircle2Icon,
   CircleDashedIcon,
   Loader2Icon,
+  PencilIcon,
   WalletIcon,
   XCircleIcon,
 } from 'lucide-react'
@@ -17,7 +18,10 @@ import { Flow } from '@/components/common/layout/flow'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useImportDataStore } from '@/store/import-data'
 import { ImportDataTotal } from '@/types/import-data'
-import { add } from '@/types/common/amount'
+import { add, Amount } from '@/types/common/amount'
+import { ask } from '@/store/common/ask-dialog'
+import { useRequest } from '@/hooks/use-request'
+import { importDataUrls } from '@/api/import-data'
 
 function ValidIcon({ valid, tooltip }: { valid: boolean; tooltip: string }) {
   return (
@@ -36,7 +40,12 @@ function ValidIcon({ valid, tooltip }: { valid: boolean; tooltip: string }) {
   )
 }
 
-function TotalsList({ totals }: { totals: ImportDataTotal[] }) {
+interface TotalsListProps {
+  totals: ImportDataTotal[]
+  onEditActual: (total: ImportDataTotal) => void
+}
+
+function TotalsList({ totals, onEditActual }: TotalsListProps) {
   return (
     <div className="grid grid-cols-2 gap-2">
       <div className="space-y-1">
@@ -74,6 +83,19 @@ function TotalsList({ totals }: { totals: ImportDataTotal[] }) {
                   : 'Mismatch: operation + suggested ≠ parsed'
               }
             />
+            <Typography variant="muted" as="span" className="text-xs">
+              --
+            </Typography>
+            <Typography variant="muted" as="span" className="text-xs shrink-0">
+              Actual
+            </Typography>
+            <AmountLabel amount={t.actual} />
+            <button
+              onClick={() => onEditActual(t)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <PencilIcon className="size-3" />
+            </button>
           </Flow>
         ))}
       </div>
@@ -94,11 +116,24 @@ export interface ImportDataHeaderProps {
 
 export function ImportDataHeader({ id }: ImportDataHeaderProps) {
   const { data, loading, fetch, setPathParams } = useImportDataStore()
+  const { submit: saveActualBalance } = useRequest<void, Amount, never, { id: string }>(
+    importDataUrls.actualBalance,
+  )
 
   useEffect(() => {
     setPathParams({ id })
     void fetch()
   }, [id, setPathParams, fetch])
+
+  const handleEditActual = async (total: ImportDataTotal) => {
+    const newAmount = await ask<'amount'>({
+      type: 'amount',
+      label: `Actual balance (${total.currency})`,
+      initialValue: total.actual,
+    })
+    await saveActualBalance({ body: newAmount, pathParams: { id } })
+    void fetch()
+  }
 
   return (
     <Stack className="shrink-0 px-6 py-4 border-b" gap={4}>
@@ -182,7 +217,7 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
           <Skeleton className="h-4 w-72" />
         </div>
       ) : data && data.totals.length > 0 ? (
-        <TotalsList totals={data.totals} />
+        <TotalsList totals={data.totals} onEditActual={handleEditActual} />
       ) : null}
     </Stack>
   )

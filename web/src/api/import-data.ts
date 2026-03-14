@@ -3,4 +3,5 @@ export const importDataUrls = {
   id: '/api/v1/import-data/:id',
   entry: '/api/v1/import-data/:id/entry',
   begin: '/api/v1/import-data/begin',
+  actualBalance: '/api/v1/import-data/:id/actual-balance',
 }

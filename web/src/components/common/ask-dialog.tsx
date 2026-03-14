@@ -12,58 +12,63 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/input/date-input'
+import { AmountInput } from '@/components/common/input/amount-input'
 import { type AskType, useAskDialogStore } from '@/store/common/ask-dialog'
+import { Amount } from '@/types/common/amount'
 
 interface InputRendererProps {
   type: AskType
-  value: string
-  onChange: (raw: string) => void
+  value: unknown
+  onChange: (value: unknown) => void
 }
 
 function AskInputRenderer({ type, value, onChange }: InputRendererProps) {
   if (type === 'date') {
-    const dateValue = value ? new Date(value) : undefined
     return (
-      <DateInput value={dateValue} onChange={(date) => onChange(date ? date.toISOString() : '')} />
+      <DateInput value={value as Date | undefined} onChange={onChange} />
     )
   }
 
   if (type === 'number') {
     return (
-      <Input type="number" value={value} onChange={(e) => onChange(e.target.value)} autoFocus />
+      <Input
+        type="number"
+        value={value != null ? String(value as number) : ''}
+        onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+        autoFocus
+      />
     )
   }
 
-  return <Input type="text" value={value} onChange={(e) => onChange(e.target.value)} autoFocus />
-}
+  if (type === 'amount') {
+    return (
+      <AmountInput value={value as Amount | undefined} onChange={onChange} />
+    )
+  }
 
-function parseValue(type: AskType, raw: string): unknown {
-  if (type === 'number') return Number(raw)
-  if (type === 'date') return raw ? new Date(raw) : undefined
-  return raw
+  return (
+    <Input
+      type="text"
+      value={(value as string) ?? ''}
+      onChange={(e) => onChange(e.target.value)}
+      autoFocus
+    />
+  )
 }
 
 export function AskDialog() {
   const { entry, open, confirm, dismiss } = useAskDialogStore()
-  const [rawValue, setRawValue] = React.useState<string>('')
+  const [value, setValue] = React.useState<unknown>(undefined)
 
   useEffect(() => {
     if (open && entry) {
-      const init = entry.params.initialValue
-      if (init instanceof Date) {
-        setRawValue(init.toISOString())
-      } else if (init !== undefined && init !== null) {
-        setRawValue(String(init))
-      } else {
-        setRawValue('')
-      }
+      setValue(entry.params.initialValue ?? (entry.params.type === 'string' ? '' : undefined))
     }
   }, [open, entry])
 
   const handleConfirm = () => {
     if (!entry) return
-    const parsed = parseValue(entry.params.type, rawValue)
-    confirm(parsed as never)
+    confirm(value as never)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -84,7 +89,7 @@ export function AskDialog() {
 
         <div className="flex flex-col gap-2">
           {entry && (
-            <AskInputRenderer type={entry.params.type} value={rawValue} onChange={setRawValue} />
+            <AskInputRenderer type={entry.params.type} value={value} onChange={setValue} />
           )}
         </div>
 

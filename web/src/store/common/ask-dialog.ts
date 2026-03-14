@@ -1,11 +1,13 @@
 import { create } from 'zustand'
+import { Amount } from '@/types/common/amount'
 
-export type AskType = 'string' | 'number' | 'date'
+export type AskType = 'string' | 'number' | 'date' | 'amount'
 
 type AskTypeMap = {
   string: string
   number: number
   date: Date
+  amount: Amount
 }
 
 export interface AskParams<T extends AskType> {
