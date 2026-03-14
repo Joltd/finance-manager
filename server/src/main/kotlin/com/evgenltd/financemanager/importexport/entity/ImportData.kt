@@ -1,15 +1,7 @@
 package com.evgenltd.financemanager.importexport.entity
 
 import com.evgenltd.financemanager.account.entity.Account
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.TenantId
 import org.hibernate.type.SqlTypes
@@ -34,6 +26,9 @@ class ImportData(
 
     var progress: Boolean = false,
 
+    /**
+     * Valid by all grand totals validity and "operation + suggested = actual" condition
+     */
     var valid: Boolean = false,
 
     @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)

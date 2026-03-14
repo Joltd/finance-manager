@@ -1,7 +1,12 @@
 import { backendNextRequest } from '@/lib/api'
+import { NextRequest } from 'next/server'
 
-export const GET = backendNextRequest
-export const POST = backendNextRequest
-export const PUT = backendNextRequest
-export const PATCH = backendNextRequest
-export const DELETE = backendNextRequest
+type RouteContext = { params: Promise<{ route: string[] }> }
+
+const handler = (req: NextRequest, _context: RouteContext) => backendNextRequest(req)
+
+export const GET = handler
+export const POST = handler
+export const PUT = handler
+export const PATCH = handler
+export const DELETE = handler

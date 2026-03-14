@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { format, isSameYear, isToday, isYesterday, parseISO } from 'date-fns'
 import { ArrowRight, CheckCircle2Icon, XCircleIcon } from 'lucide-react'
 import { SeekDirection } from '@/store/common/seek'
 import { useImportDataEntrySeekStore } from '@/store/import-data'
@@ -11,6 +12,7 @@ import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   ImportDataDay,
   ImportDataEntry,
@@ -18,39 +20,106 @@ import {
   ImportDataTotal,
 } from '@/types/import-data'
 import { OperationRecord } from '@/types/operation'
+import { add } from '@/types/common/amount'
+
+// ─── Date formatting ─────────────────────────────────────────────────────────
 
 function formatGroupDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00')
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const diff = today.getTime() - date.getTime()
-  const day = 86_400_000
-  if (diff === 0) return 'Today'
-  if (diff === day) return 'Yesterday'
-  const opts: Intl.DateTimeFormatOptions =
-    date.getFullYear() === today.getFullYear()
-      ? { weekday: 'short', month: 'short', day: 'numeric' }
-      : { month: 'short', day: 'numeric', year: 'numeric' }
-  return date.toLocaleDateString('en', opts)
+  const date = parseISO(dateStr)
+  if (isToday(date)) return 'Today'
+  if (isYesterday(date)) return 'Yesterday'
+  if (isSameYear(date, new Date())) return format(date, 'EEE, MMM d')
+  return format(date, 'MMM d, yyyy')
 }
 
-function DayTotals({ totals }: { totals: ImportDataTotal[] }) {
-  if (!totals.length) return null
+// ─── Valid icons ──────────────────────────────────────────────────────────────
+
+function ValidIcon({ valid, tooltip }: { valid: boolean; tooltip: string }) {
   return (
-    <Flow align="center" gap={2}>
-      {totals.map((t) => (
-        <Stack key={t.currency} orientation="horizontal" align="center" gap={1}>
-          <AmountLabel amount={t.actual} />
-          {t.valid ? (
-            <CheckCircle2Icon className="size-3 text-green-500" />
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {valid ? (
+            <CheckCircle2Icon className="size-3 text-green-500 shrink-0 cursor-default" />
           ) : (
-            <XCircleIcon className="size-3 text-destructive" />
+            <XCircleIcon className="size-3 text-destructive shrink-0 cursor-default" />
           )}
-        </Stack>
-      ))}
-    </Flow>
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
+
+function DayValidIcon({ valid }: { valid: boolean }) {
+  return (
+    <ValidIcon
+      valid={valid}
+      tooltip={valid ? 'All totals for this day are valid' : 'Some totals for this day are invalid'}
+    />
+  )
+}
+
+function TotalValidIcon({ valid }: { valid: boolean }) {
+  return (
+    <ValidIcon
+      valid={valid}
+      tooltip={
+        valid ? 'Operation + Suggested = Parsed' : 'Mismatch: operation + suggested ≠ parsed'
+      }
+    />
+  )
+}
+
+// ─── Day totals row ───────────────────────────────────────────────────────────
+
+function DayTotalsRow({ totals }: { totals: ImportDataTotal[] }) {
+  if (!totals.length) return null
+  return (
+    <div className="grid grid-cols-2 gap-2 pb-1.5">
+      <div className="space-y-0.5">
+        {totals.map((t) => (
+          <Flow key={t.currency} align="center" gap={1}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1 cursor-default">
+                    <Typography variant="muted" as="span" className="text-xs">
+                      Operation
+                    </Typography>
+                    <AmountLabel amount={add(t.operation, t.suggested)} />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="inline-flex items-center gap-1">
+                    <AmountLabel amount={t.operation} />
+                    <Typography variant="muted" as="span" className="text-xs">
+                      + Suggested
+                    </Typography>
+                    <AmountLabel amount={t.suggested} />
+                  </span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TotalValidIcon valid={t.valid} />
+          </Flow>
+        ))}
+      </div>
+      <div className="space-y-0.5">
+        {totals.map((t) => (
+          <Flow key={t.currency} align="center" gap={1}>
+            <Typography variant="muted" as="span" className="text-xs">
+              Parsed
+            </Typography>
+            <AmountLabel amount={t.parsed} />
+          </Flow>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Entry cards ──────────────────────────────────────────────────────────────
 
 function OperationCard({ operation }: { operation: OperationRecord }) {
   const { type, amountFrom, accountFrom, amountTo, accountTo, description } = operation
@@ -153,21 +222,21 @@ function ImportEntryRow({ entry }: { entry: ImportDataEntry }) {
   )
 }
 
+// ─── Day group ────────────────────────────────────────────────────────────────
+
 function ImportDayGroup({ day }: { day: ImportDataDay }) {
   return (
     <Group
       title={
-        <Stack orientation="horizontal" align="center" gap={3}>
-          <span>{formatGroupDate(day.date)}</span>
-          <DayTotals totals={day.totals} />
-          {day.valid ? (
-            <CheckCircle2Icon className="size-3.5 text-green-500 shrink-0" />
-          ) : (
-            <XCircleIcon className="size-3.5 text-destructive shrink-0" />
-          )}
-        </Stack>
+        <Flow align="center" gap={2}>
+          <Typography as="span" variant="small">
+            {formatGroupDate(day.date)}
+          </Typography>
+          <DayValidIcon valid={day.valid} />
+        </Flow>
       }
     >
+      <DayTotalsRow totals={day.totals} />
       <Stack gap={2} className="py-1">
         {day.entries.map((entry, i) => (
           <ImportEntryRow key={entry.id ?? i} entry={entry} />
@@ -176,6 +245,8 @@ function ImportDayGroup({ day }: { day: ImportDataDay }) {
     </Group>
   )
 }
+
+// ─── Root ─────────────────────────────────────────────────────────────────────
 
 interface ImportDataEntriesProps {
   id: string
@@ -195,12 +266,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
   }, [id, setPathParams, seek])
 
   return (
-    <Seek
-      seek={seek}
-      loading={loading}
-      exhausted={exhausted}
-      className="flex-1 min-h-0 px-4 md:px-6 py-2"
-    >
+    <Seek seek={seek} loading={loading} exhausted={exhausted} className="flex-1 min-h-0 px-6">
       {data.map((day) => (
         <ImportDayGroup key={day.date} day={day} />
       ))}

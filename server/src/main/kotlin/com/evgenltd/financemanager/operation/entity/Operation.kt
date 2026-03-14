@@ -1,8 +1,8 @@
 package com.evgenltd.financemanager.operation.entity
 
+import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.ai.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.account.entity.Account
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.TenantId
@@ -21,32 +21,32 @@ class Operation(
     @TenantId
     var tenant: UUID? = null,
 
-    var date: LocalDate,
+    override var date: LocalDate,
 
     @Enumerated(EnumType.STRING)
-    var type: OperationType,
+    override var type: OperationType,
 
     @Embedded
     @AttributeOverrides(
         AttributeOverride(name = "value", column = Column(name = "amount_from_value")),
         AttributeOverride(name = "currency", column = Column(name = "amount_from_currency")),
     )
-    var amountFrom: Amount,
+    override var amountFrom: Amount,
 
     @ManyToOne
     @JoinColumn(name = "account_from_id")
-    var accountFrom: Account,
+    override var accountFrom: Account,
 
     @Embedded
     @AttributeOverrides(
         AttributeOverride(name = "value", column = Column(name = "amount_to_value")),
         AttributeOverride(name = "currency", column = Column(name = "amount_to_currency")),
     )
-    var amountTo: Amount,
+    override var amountTo: Amount,
 
     @ManyToOne
     @JoinColumn(name = "account_to_id")
-    var accountTo: Account,
+    override var accountTo: Account,
 
     var description: String?,
 
@@ -59,7 +59,7 @@ class Operation(
 
     @OneToMany(mappedBy = "operation", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var transactions: MutableList<Transaction> = mutableListOf()
-) {
+) : Operational {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

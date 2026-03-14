@@ -2,17 +2,7 @@ package com.evgenltd.financemanager.importexport.entity
 
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
-import jakarta.persistence.AttributeOverride
-import jakarta.persistence.AttributeOverrides
-import jakarta.persistence.Column
-import jakarta.persistence.Embedded
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.util.*
 
 @Entity
@@ -31,6 +21,9 @@ class ImportDataTotal(
     @JoinColumn(name = "import_data_day_id")
     var importDataDay: ImportDataDay? = null,
 
+    /**
+     * Valid by condition operation + suggested = parsed
+     */
     var valid: Boolean = false,
 
     var currency: String,

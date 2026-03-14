@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import {
   CheckCircle2Icon,
   CircleDashedIcon,
@@ -13,37 +14,94 @@ import { Typography } from '@/components/common/typography/typography'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
-import { ImportData, ImportDataTotal } from '@/types/import-data'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useImportDataStore } from '@/store/import-data'
+import { ImportDataTotal } from '@/types/import-data'
+import { add } from '@/types/common/amount'
 
-interface ImportDataHeaderProps {
-  data: ImportData | undefined
-  loading: boolean
+function ValidIcon({ valid, tooltip }: { valid: boolean; tooltip: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {valid ? (
+            <CheckCircle2Icon className="size-3.5 text-green-500 cursor-default" />
+          ) : (
+            <XCircleIcon className="size-3.5 text-destructive cursor-default" />
+          )}
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
 }
 
-function TotalsRow({ total }: { total: ImportDataTotal }) {
+function TotalsList({ totals }: { totals: ImportDataTotal[] }) {
   return (
-    <div className="grid grid-cols-[5rem_1fr_1fr_1fr_1fr_1.5rem] items-center gap-2 py-1.5 border-b last:border-0">
-      <Typography as="span" variant="small" className="font-mono font-semibold">
-        {total.currency}
-      </Typography>
-      <AmountLabel amount={total.parsed} />
-      <AmountLabel amount={total.suggested} />
-      <AmountLabel amount={total.operation} />
-      <AmountLabel amount={total.actual} />
-      <div className="flex justify-end">
-        {total.valid ? (
-          <CheckCircle2Icon className="size-4 text-green-500" />
-        ) : (
-          <XCircleIcon className="size-4 text-destructive" />
-        )}
+    <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-1">
+        {totals.map((t) => (
+          <Flow key={t.currency} align="center" gap={1}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1 cursor-default">
+                    <Typography variant="muted" as="span" className="text-xs">
+                      Balance
+                    </Typography>
+                    <AmountLabel amount={add(t.operation, t.suggested)} />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="inline-flex items-center gap-1">
+                    <Typography variant="muted" as="span" className="text-xs">
+                      Current balance
+                    </Typography>
+                    <AmountLabel amount={t.operation} />
+                    <Typography variant="muted" as="span" className="text-xs">
+                      + Suggested
+                    </Typography>
+                    <AmountLabel amount={t.suggested} />
+                  </span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <ValidIcon
+              valid={t.valid}
+              tooltip={
+                t.valid
+                  ? 'Operation + Suggested = Parsed'
+                  : 'Mismatch: operation + suggested ≠ parsed'
+              }
+            />
+          </Flow>
+        ))}
+      </div>
+      <div className="space-y-1">
+        {totals.map((t) => (
+          <Flow key={t.currency} align="center" gap={1}>
+            <AmountLabel amount={t.parsed} />
+          </Flow>
+        ))}
       </div>
     </div>
   )
 }
 
-export function ImportDataHeader({ data, loading }: ImportDataHeaderProps) {
+export interface ImportDataHeaderProps {
+  id: string
+}
+
+export function ImportDataHeader({ id }: ImportDataHeaderProps) {
+  const { data, loading, fetch, setPathParams } = useImportDataStore()
+
+  useEffect(() => {
+    setPathParams({ id })
+    void fetch()
+  }, [id, setPathParams, fetch])
+
   return (
-    <Stack className="shrink-0 px-4 md:px-6 py-4 border-b" gap={4}>
+    <Stack className="shrink-0 px-6 py-4 border-b" gap={4}>
       {/* Title + status row */}
       <Stack orientation="horizontal" align="center" gap={3}>
         <div className="flex items-center justify-center size-9 rounded-lg bg-muted shrink-0">
@@ -75,7 +133,12 @@ export function ImportDataHeader({ data, loading }: ImportDataHeaderProps) {
           ) : (
             <>
               {data.progress ? (
-                <span className={cn('inline-flex items-center gap-1.5 text-xs font-medium', 'text-amber-600 dark:text-amber-400')}>
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1.5 text-xs font-medium',
+                    'text-amber-600 dark:text-amber-400',
+                  )}
+                >
                   <Loader2Icon className="size-3.5 animate-spin" />
                   In Progress
                 </span>
@@ -86,44 +149,41 @@ export function ImportDataHeader({ data, loading }: ImportDataHeaderProps) {
                 </span>
               )}
 
-              {data.valid ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400">
-                  <CheckCircle2Icon className="size-3.5" />
-                  Valid
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive">
-                  <XCircleIcon className="size-3.5" />
-                  Invalid
-                </span>
-              )}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {data.valid ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400 cursor-default">
+                        <CheckCircle2Icon className="size-3.5" />
+                        Valid
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive cursor-default">
+                        <XCircleIcon className="size-3.5" />
+                        Invalid
+                      </span>
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {data.valid
+                      ? 'All totals are valid and operation + suggested = actual'
+                      : 'Some totals are invalid or operation + suggested ≠ actual'}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </>
           )}
         </Flow>
       </Stack>
 
       {/* Totals */}
-      {(loading || (data && data.totals.length > 0)) && (
-        <div className="rounded-lg border bg-muted/20 px-3 py-1">
-          <div className="grid grid-cols-[5rem_1fr_1fr_1fr_1fr_1.5rem] items-center gap-2 py-1.5 border-b">
-            {(['Currency', 'Parsed', 'Suggested', 'Operations', 'Actual'] as const).map((label) => (
-              <Typography key={label} variant="muted" as="span" className="text-xs">
-                {label}
-              </Typography>
-            ))}
-            <span />
-          </div>
-
-          {loading || !data ? (
-            <Stack gap={1} className="py-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-4/5" />
-            </Stack>
-          ) : (
-            data.totals.map((total) => <TotalsRow key={total.currency} total={total} />)
-          )}
+      {loading ? (
+        <div className="space-y-1">
+          <Skeleton className="h-4 w-72" />
         </div>
-      )}
+      ) : data && data.totals.length > 0 ? (
+        <TotalsList totals={data.totals} />
+      ) : null}
     </Stack>
   )
 }

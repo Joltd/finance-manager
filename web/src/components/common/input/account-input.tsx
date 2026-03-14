@@ -1,15 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { useEffect, useRef } from 'react'
-import { createStore, useStore } from 'zustand'
+import { useEffect } from 'react'
 
-import { accountUrls } from '@/api/account'
 import { ReferenceInput, ReferenceInputProps } from '@/components/common/input/reference-input'
-import { createFetchSlice, FetchSlice } from '@/store/common/fetch'
+import { useAccountReferenceStore } from '@/store/account'
 import { AccountReference, AccountType } from '@/types/account'
-
-type AccountStore = FetchSlice<AccountReference[], unknown, { mask?: string; type?: AccountType }>
 
 interface AccountInputProps
   extends Omit<ReferenceInputProps<AccountReference>, 'store' | 'getLabel' | 'getId'> {
@@ -17,11 +13,7 @@ interface AccountInputProps
 }
 
 function AccountInput({ type, ...props }: AccountInputProps) {
-  const storeRef = useRef<ReturnType<typeof createStore<AccountStore>> | null>(null)
-  if (!storeRef.current) {
-    storeRef.current = createStore<AccountStore>(createFetchSlice(accountUrls.reference))
-  }
-  const store = useStore(storeRef.current)
+  const store = useAccountReferenceStore()
 
   useEffect(() => {
     store.setQueryParams({ type })

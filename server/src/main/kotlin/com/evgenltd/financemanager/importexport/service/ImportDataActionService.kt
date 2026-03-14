@@ -1,36 +1,23 @@
 package com.evgenltd.financemanager.importexport.service
 
-import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.contains
-import com.evgenltd.financemanager.common.repository.eq
-import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.repository.AccountRepository
+import com.evgenltd.financemanager.ai.service.EmbeddingActionService
+import com.evgenltd.financemanager.common.repository.*
+import com.evgenltd.financemanager.common.service.LockService
+import com.evgenltd.financemanager.common.service.until
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
-import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
-import com.evgenltd.financemanager.importexport.entity.ImportDataOperation
-import com.evgenltd.financemanager.importexport.entity.ImportDataOperationType
-import com.evgenltd.financemanager.importexport.entity.ImportDataTotal
-import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataOperationRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataTotalRepository
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
-import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.operation.repository.OperationRepository
-import com.evgenltd.financemanager.account.repository.AccountRepository
-import com.evgenltd.financemanager.common.service.until
-import com.evgenltd.financemanager.common.repository.between
-import com.evgenltd.financemanager.ai.service.EmbeddingActionService
-import com.evgenltd.financemanager.common.repository.containsNot
-import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.importexport.entity.ImportDataDay
-import com.evgenltd.financemanager.importexport.entity.emptyTotal
+import com.evgenltd.financemanager.importexport.entity.*
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.record.OperationKey
-import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
+import com.evgenltd.financemanager.importexport.repository.*
 import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.operation.entity.Operational
+import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.OperationProcessService
 import com.evgenltd.financemanager.operation.service.amountsForAccount
 import com.evgenltd.financemanager.operation.service.byAccount
@@ -382,98 +369,99 @@ class ImportDataActionService(
     @Transactional
     fun calculateTotal(id: UUID, dates: List<LocalDate>? = null) {
         val importData = importDataRepository.find(id)
+        val account = importData.account
 
-        val totals = importData.totals
-            .onEach {
-                it.parsed = emptyAmount(it.currency)
-                it.operation = emptyAmount(it.currency)
-                it.suggested = emptyAmount(it.currency)
-            }
-            .associateBy { it.currency }
-            .toMutableMap()
+        val freeOperations = loadFreeOperations(importData)
 
-        val days = importData.days
+        importData.days
+            .filter { dates == null || it.date in dates }
+            .onEach { calculateDayTotal(it, account, freeOperations[it.date]) }
 
-        val linkedOperations = days.asSequence()
+        calculateGrandTotal(importData)
+
+        importData.valid = importData.totals.all { it.valid } && importData.totals.all { it.operation + it.suggested == it.actual }
+    }
+
+    private fun loadFreeOperations(importData: ImportData, dates: List<LocalDate>? = null): Map<LocalDate, List<Operation>> {
+        val actualDates = dates ?: importData.days.map { it.date }
+        val linkedOperations = importData.days
+            .asSequence()
             .flatMap { it.entries }
             .mapNotNull { it.operation }
             .mapNotNull { it.id }
             .toList()
 
-        val actualDates = dates ?: days.map { it.date }
-        val freeOperations = ((Operation::date contains actualDates) and
+
+        return ((Operation::date contains actualDates) and
                 byAccount(importData.account) and
-                (Operation::id containsNot linkedOperations) and
-                (Operation::id containsNot importData.hiddenOperations))
+                (Operation::id containsNot linkedOperations))
             .let { operationRepository.findAll(it) }
             .groupBy { it.date }
-
-        for (day in days) {
-            if (dates == null || day.date in dates) {
-                calculateTotal(day, freeOperations)
-            }
-
-            day.totals.onEach { total ->
-                totals.computeIfAbsent(total.currency) {
-                    emptyTotal(total.currency)
-                        .also { it.importData = importData }
-                        .let { importDataTotalRepository.save(it) }
-                }.also {
-                    it.parsed += total.parsed
-                    it.suggested += total.suggested
-                    it.operation += total.operation
-                }
-            }
-        }
-
-        val validByDays = importData.days.all { it.valid }
-        val validByActual = importData.totals.all { it.operation + it.suggested + it.parsed == it.actual } // current balance + suggested totals == actual
-        importData.valid = validByDays && validByActual
     }
 
-    private fun calculateTotal(day: ImportDataDay, freeOperations: Map<LocalDate, List<Operation>>) {
+    private fun calculateDayTotal(day: ImportDataDay, account: Account, freeOperations: List<Operational>?) {
+        val parsedTotals = day.entries
+            .flatMap { it.parsed() }
+            .totalByCurrency(account)
+
+        val suggestionTotals = day.entries
+            .filter { it.operation == null }
+            .flatMap { it.selectedSuggestion() }
+            .totalByCurrency(account)
+
+        val linkedOperationTotals = day.entries
+            .mapNotNull { it.operation }
+            .totalByCurrency(account)
+
+        val freeOperationTotals = freeOperations?.totalByCurrency(account) ?: emptyMap()
+
+        val operationTotals = linkedOperationTotals + freeOperationTotals
+
+        val currencies = parsedTotals.keys + suggestionTotals.keys + operationTotals.keys
+        val dayTotals = currencies.map {
+            val parsed = parsedTotals[it] ?: emptyAmount(it)
+            val suggested = suggestionTotals[it] ?: emptyAmount(it)
+            val operation = operationTotals[it] ?: emptyAmount(it)
+            ImportDataTotal(
+                importDataDay = day,
+                currency = it,
+                parsed = parsed,
+                suggested = suggested,
+                operation = operation,
+                actual = emptyAmount(it),
+                valid = operation + suggested == parsed,
+            )
+        }
+
         day.totals.clear()
-
-        val totals = mutableMapOf<String, ImportDataTotal>()
-
-        for (entry in day.entries) {
-            if (!entry.visible) {
-                continue
-            }
-            entry.parsed()
-                .amountsForAccount(day.importData.account)
-                .calculateTotal(day, totals) { total, amount -> total.parsed += amount }
-
-            entry.suggested()
-                .filter { it.selected && entry.operation == null }
-                .amountsForAccount(day.importData.account)
-                .calculateTotal(day, totals) { total, amount -> total.suggested += amount }
-
-            entry.linked()
-                .amountsForAccount(day.importData.account)
-                .calculateTotal(day, totals) { total, amount -> total.operation += amount }
-        }
-
-        freeOperations.getOrDefault(day.date, emptyList())
-            .amountsForAccount(day.importData.account)
-            .calculateTotal(day, totals) { total, amount -> total.operation += amount }
-
-        totals.values.onEach {
-            it.valid = it.operation + it.suggested == it.parsed
-        }
-        day.totals.addAll(totals.values)
+        day.totals.addAll(dayTotals)
         day.valid = day.totals.all { it.valid }
     }
 
-    private fun List<Amount>.calculateTotal(day: ImportDataDay, totals: MutableMap<String, ImportDataTotal>, block: (ImportDataTotal, Amount) -> Unit) {
-        groupingBy { it.currency }
-            .aggregate { _, accumulator: Amount?, element, _ -> element + accumulator }
-            .onEach { (currency, amount) ->
-                val total = totals.computeIfAbsent(currency) {
-                    emptyTotal(currency).also { it.importDataDay = day }
+
+    private fun calculateGrandTotal(importData: ImportData) {
+        val existingActual = importData.totals.associateBy({ it.currency }, { it.actual })
+
+        val grandTotals = importData.days
+            .flatMap { it.totals }
+            .groupBy { it.currency }
+            .map { (currency, dayTotals) ->
+                emptyTotal(currency).also {
+                    it.importData = importData
+                    it.parsed = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.parsed }
+                    it.operation = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.operation }
+                    it.suggested = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.suggested }
+                    it.actual = existingActual[currency] ?: emptyAmount(currency)
+                    it.valid = dayTotals.all { total -> total.valid }
                 }
-                block(total, amount)
             }
+
+        importData.totals.clear()
+        importData.totals.addAll(grandTotals)
     }
+
+    private fun List<Operational>.totalByCurrency(account: Account): Map<String, Amount> = amountsForAccount(account)
+        .groupingBy { it.currency }
+        .aggregate { _, accumulator: Amount?, element, _ -> element + accumulator }
 
 }

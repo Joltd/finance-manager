@@ -50,8 +50,12 @@ async function protectedRequest(req: NextRequest): Promise<NextResponse> {
   return res
 }
 
-export const GET = protectedRequest
-export const POST = protectedRequest
-export const PUT = protectedRequest
-export const PATCH = protectedRequest
-export const DELETE = protectedRequest
+type RouteContext = { params: Promise<{ route: string[] }> }
+
+const handler = (req: NextRequest, _context: RouteContext) => protectedRequest(req)
+
+export const GET = handler
+export const POST = handler
+export const PUT = handler
+export const PATCH = handler
+export const DELETE = handler
