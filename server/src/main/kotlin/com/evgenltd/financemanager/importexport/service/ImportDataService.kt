@@ -1,28 +1,23 @@
 package com.evgenltd.financemanager.importexport.service
 
+import com.evgenltd.financemanager.account.repository.AccountRepository
+import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.common.component.SkipLogging
-import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.eq
-import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.common.record.SeekDirection
+import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
+import com.evgenltd.financemanager.importexport.entity.ImportDataDay
 import com.evgenltd.financemanager.importexport.record.EntryFilter
 import com.evgenltd.financemanager.importexport.record.ImportDataCreateRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
+import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.repository.OperationRepository
-import com.evgenltd.financemanager.operation.service.byAccount
-import com.evgenltd.financemanager.common.record.Reference
-import com.evgenltd.financemanager.account.repository.AccountRepository
-import com.evgenltd.financemanager.common.record.SeekDirection
-import com.evgenltd.financemanager.common.repository.contains
-import com.evgenltd.financemanager.common.repository.containsNot
-import com.evgenltd.financemanager.common.repository.gt
-import com.evgenltd.financemanager.common.repository.lt
-import com.evgenltd.financemanager.importexport.entity.ImportDataDay
-import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
 import com.evgenltd.financemanager.operation.service.OperationService
+import com.evgenltd.financemanager.operation.service.byAccount
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -33,6 +28,7 @@ import java.util.*
 @SkipLogging
 class ImportDataService(
     private val accountRepository: AccountRepository,
+    private val balanceRepository: BalanceRepository,
     private val operationRepository: OperationRepository,
     private val importDataRepository: ImportDataRepository,
     private val importDataConverter: ImportDataConverter,
@@ -48,7 +44,9 @@ class ImportDataService(
     fun get(id: UUID): ImportDataRecord {
         val importData = importDataRepository.find(id)
         val dateRange = importDataDayRepository.findImportDataDateRange(importData)
-        return importDataConverter.toRecord(importData, dateRange)
+        val balances = balanceRepository.findByAccount(importData.account)
+            .associate { it.amount.currency to it.amount }
+        return importDataConverter.toRecord(importData, dateRange, balances)
     }
 
     @SkipLogging

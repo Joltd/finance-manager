@@ -11,6 +11,8 @@ import java.util.*
 
 interface BalanceRepository : JpaRepository<Balance, UUID>, JpaSpecificationExecutor<Balance> {
 
+    fun findByAccount(account: Account): List<Balance>
+
     fun findByAccountAndAmountCurrency(account: Account, currency: String): Balance?
 
     @Modifying

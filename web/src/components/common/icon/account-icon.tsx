@@ -1,17 +1,18 @@
-import { Landmark, ShoppingCart, Wallet, LucideProps } from 'lucide-react'
+import { LucideProps, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
 import { AccountType } from '@/types/account'
 import { cn } from '@/lib/utils'
+import React from 'react'
 
 const icons: Record<AccountType, React.FC<LucideProps>> = {
-  ACCOUNT: Landmark,
-  EXPENSE: ShoppingCart,
-  INCOME: Wallet,
+  [AccountType.ACCOUNT]: Wallet,
+  [AccountType.EXPENSE]: TrendingDown,
+  [AccountType.INCOME]: TrendingUp,
 }
 
 const colors: Record<AccountType, string> = {
-  ACCOUNT: 'text-blue-500',
-  EXPENSE: 'text-red-500',
-  INCOME: 'text-emerald-500',
+  [AccountType.ACCOUNT]: 'text-blue-500',
+  [AccountType.EXPENSE]: 'text-red-500',
+  [AccountType.INCOME]: 'text-emerald-500',
 }
 
 interface AccountIconProps extends LucideProps {

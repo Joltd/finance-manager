@@ -4,16 +4,23 @@ import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/common/typography/typography'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Stack } from '@/components/common/layout/stack'
 
 interface GroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title: React.ReactNode
+  icon?: React.ReactNode
   onEdit?: () => void
 }
 
 export const Group = forwardRef<HTMLDivElement, GroupProps>(
-  ({ title, onEdit, children, className, ...props }, ref) => (
-    <div ref={ref} className={cn('group/group', className)} {...props}>
-      <div className="flex items-center gap-3 py-2 sticky top-0 bg-background z-10">
+  ({ title, icon, onEdit, children, className, ...props }, ref) => (
+    <Stack ref={ref} className={cn('group/group', className)} {...props}>
+      <Stack
+        orientation="horizontal"
+        align="center"
+        gap={3}
+        className="py-2 sticky top-0 bg-background z-10"
+      >
         <Typography
           as="span"
           variant="small"
@@ -21,6 +28,7 @@ export const Group = forwardRef<HTMLDivElement, GroupProps>(
         >
           {title}
         </Typography>
+        {icon}
         {onEdit && (
           <Button
             variant="ghost"
@@ -32,9 +40,9 @@ export const Group = forwardRef<HTMLDivElement, GroupProps>(
           </Button>
         )}
         <Separator className="flex-1" />
-      </div>
+      </Stack>
       {children}
-    </div>
+    </Stack>
   ),
 )
 Group.displayName = 'Group'

@@ -1,121 +1,28 @@
 'use client'
 
 import { useEffect } from 'react'
-import {
-  CheckCircle2Icon,
-  CircleDashedIcon,
-  Loader2Icon,
-  PencilIcon,
-  WalletIcon,
-  XCircleIcon,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { CheckCircle2Icon, Loader2Icon, PencilIcon, XCircleIcon } from 'lucide-react'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Typography } from '@/components/common/typography/typography'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useImportDataStore } from '@/store/import-data'
-import { ImportDataTotal } from '@/types/import-data'
-import { add, Amount } from '@/types/common/amount'
+import { ImportData, ImportDataTotal } from '@/types/import-data'
+import { abs, add, Amount, isZero, subtract } from '@/types/common/amount'
 import { ask } from '@/store/common/ask-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
-
-function ValidIcon({ valid, tooltip }: { valid: boolean; tooltip: string }) {
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {valid ? (
-            <CheckCircle2Icon className="size-3.5 text-green-500 cursor-default" />
-          ) : (
-            <XCircleIcon className="size-3.5 text-destructive cursor-default" />
-          )}
-        </TooltipTrigger>
-        <TooltipContent>{tooltip}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
-}
-
-interface TotalsListProps {
-  totals: ImportDataTotal[]
-  onEditActual: (total: ImportDataTotal) => void
-}
-
-function TotalsList({ totals, onEditActual }: TotalsListProps) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      <div className="space-y-1">
-        {totals.map((t) => (
-          <Flow key={t.currency} align="center" gap={1}>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex items-center gap-1 cursor-default">
-                    <Typography variant="muted" as="span" className="text-xs">
-                      Balance
-                    </Typography>
-                    <AmountLabel amount={add(t.operation, t.suggested)} />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <span className="inline-flex items-center gap-1">
-                    <Typography variant="muted" as="span" className="text-xs">
-                      Current balance
-                    </Typography>
-                    <AmountLabel amount={t.operation} />
-                    <Typography variant="muted" as="span" className="text-xs">
-                      + Suggested
-                    </Typography>
-                    <AmountLabel amount={t.suggested} />
-                  </span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <ValidIcon
-              valid={t.valid}
-              tooltip={
-                t.valid
-                  ? 'Operation + Suggested = Parsed'
-                  : 'Mismatch: operation + suggested ≠ parsed'
-              }
-            />
-            <Typography variant="muted" as="span" className="text-xs">
-              --
-            </Typography>
-            <Typography variant="muted" as="span" className="text-xs shrink-0">
-              Actual
-            </Typography>
-            <AmountLabel amount={t.actual} />
-            <button
-              onClick={() => onEditActual(t)}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <PencilIcon className="size-3" />
-            </button>
-          </Flow>
-        ))}
-      </div>
-      <div className="space-y-1">
-        {totals.map((t) => (
-          <Flow key={t.currency} align="center" gap={1}>
-            <AmountLabel amount={t.parsed} />
-          </Flow>
-        ))}
-      </div>
-    </div>
-  )
-}
+import { Filler } from '@/components/common/layout/filler'
+import { ValidIcon } from '@/components/common/icon/valid-icon'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@/components/ui/button'
 
 export interface ImportDataHeaderProps {
   id: string
 }
 
 export function ImportDataHeader({ id }: ImportDataHeaderProps) {
-  const { data, loading, fetch, setPathParams } = useImportDataStore()
+  const { data, fetch, setPathParams } = useImportDataStore()
   const { submit: saveActualBalance } = useRequest<void, Amount, never, { id: string }>(
     importDataUrls.actualBalance,
   )
@@ -136,89 +43,190 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
   }
 
   return (
-    <Stack className="shrink-0 px-6 py-4 border-b" gap={4}>
-      {/* Title + status row */}
-      <Stack orientation="horizontal" align="center" gap={3}>
-        <div className="flex items-center justify-center size-9 rounded-lg bg-muted shrink-0">
-          <WalletIcon className="size-4 text-muted-foreground" />
-        </div>
+    <Stack gap={4}>
+      <TitleSection data={data} />
 
-        {loading || !data ? (
-          <Stack gap={1}>
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-4 w-20" />
-          </Stack>
-        ) : (
-          <Flow align="center" gap={2}>
-            <Typography variant="large">{data.account.name}</Typography>
-            {data.account.group && (
-              <Typography variant="muted" as="span">
-                {data.account.group.name}
-              </Typography>
-            )}
-          </Flow>
-        )}
+      {data && data.totals.length > 0 && (
+        <Stack gap={1}>
+          {data.totals.map((t) => (
+            <TotalRow key={t.currency} total={t} onEditActual={() => handleEditActual(t)} />
+          ))}
+        </Stack>
+      )}
+    </Stack>
+  )
+}
 
-        <Flow align="center" gap={3} className="ml-auto">
-          {loading || !data ? (
-            <>
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-16" />
-            </>
-          ) : (
-            <>
-              {data.progress ? (
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1.5 text-xs font-medium',
-                    'text-amber-600 dark:text-amber-400',
-                  )}
-                >
-                  <Loader2Icon className="size-3.5 animate-spin" />
-                  In Progress
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <CircleDashedIcon className="size-3.5" />
-                  Complete
-                </span>
-              )}
+function ImportDataStatus({ data }: { data: ImportData }) {
+  if (data.progress) {
+    return (
+      <Typography
+        variant="muted"
+        as="span"
+        className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400"
+      >
+        <Loader2Icon className="size-3.5 animate-spin" />
+        In Progress
+      </Typography>
+    )
+  }
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    {data.valid ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400 cursor-default">
-                        <CheckCircle2Icon className="size-3.5" />
-                        Valid
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive cursor-default">
-                        <XCircleIcon className="size-3.5" />
-                        Invalid
-                      </span>
-                    )}
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {data.valid
-                      ? 'All totals are valid and operation + suggested = actual'
-                      : 'Some totals are invalid or operation + suggested ≠ actual'}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </>
+  if (data.valid) {
+    return (
+      <Typography
+        variant="muted"
+        as="span"
+        className="inline-flex items-center gap-1.5 text-green-600 dark:text-green-400"
+      >
+        <CheckCircle2Icon className="size-3.5" />
+        All good
+      </Typography>
+    )
+  }
+
+  const hasTotalsMismatch = data.totals.some(
+    (t) => !isZero(subtract(add(t.operation, t.suggested), t.parsed)),
+  )
+  const hasBalanceMismatch = data.totals.some(
+    (t) => !isZero(subtract(add(t.balance, t.suggested), t.actual)),
+  )
+
+  return (
+    <Typography
+      variant="muted"
+      as="span"
+      className="inline-flex items-center gap-1.5 text-destructive"
+    >
+      <XCircleIcon className="size-3.5" />
+      {[hasTotalsMismatch && 'Totals mismatch', hasBalanceMismatch && 'Balance mismatch']
+        .filter(Boolean)
+        .join(', ')}
+    </Typography>
+  )
+}
+
+function TitleSection({ data }: { data: ImportData | undefined }) {
+  return (
+    <Stack orientation="horizontal" align="center" gap={3}>
+      {data && (
+        <Flow align="center" gap={2}>
+          <Typography variant="large">{data.account.name}</Typography>
+          {data.account.group && (
+            <Typography variant="muted" as="span">
+              {data.account.group.name}
+            </Typography>
           )}
         </Flow>
-      </Stack>
+      )}
 
-      {/* Totals */}
-      {loading ? (
-        <div className="space-y-1">
-          <Skeleton className="h-4 w-72" />
-        </div>
-      ) : data && data.totals.length > 0 ? (
-        <TotalsList totals={data.totals} onEditActual={handleEditActual} />
-      ) : null}
+      {data && (
+        <span className="ml-auto">
+          <ImportDataStatus data={data} />
+        </span>
+      )}
     </Stack>
+  )
+}
+
+function TotalRow({ total, onEditActual }: { total: ImportDataTotal; onEditActual: () => void }) {
+  return (
+    <Flow align="center" gap={2}>
+      <Tooltip disableHoverableContent>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1.5 cursor-default">
+            <Typography variant="muted" as="span" className="text-xs shrink-0">
+              Operation
+            </Typography>
+            <AmountLabel amount={add(total.operation, total.suggested)} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <Flow align="center" gap={1}>
+            <Typography variant="muted" as="span" className="text-xs shrink-0">
+              Operation
+            </Typography>
+            <AmountLabel amount={total.operation} />
+            <Typography variant="muted" as="span" className="text-xs shrink-0">
+              + Suggested
+            </Typography>
+            <AmountLabel amount={total.suggested} />
+          </Flow>
+        </TooltipContent>
+      </Tooltip>
+      <Typography variant="muted" as="span" className="text-xs shrink-0">
+        Parsed
+      </Typography>
+      <AmountLabel amount={total.parsed} />
+      <Tooltip disableHoverableContent>
+        <TooltipTrigger asChild>
+          <ValidIcon valid={total.valid} />
+        </TooltipTrigger>
+        <TooltipContent>
+          {total.valid ? (
+            <Typography variant="muted">Operation + Suggested = Parsed</Typography>
+          ) : (
+            <Flow align="center" gap={1}>
+              <Typography variant="muted" as="span">
+                Operation + Suggested ≠ Parsed, diff
+              </Typography>
+              <AmountLabel
+                amount={abs(subtract(add(total.operation, total.suggested), total.parsed))}
+              />
+            </Flow>
+          )}
+        </TooltipContent>
+      </Tooltip>
+
+      <Filler />
+
+      <Tooltip disableHoverableContent>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1.5 cursor-default">
+            <Typography variant="muted" as="span" className="text-xs shrink-0">
+              Balance expected
+            </Typography>
+            <AmountLabel amount={add(total.balance, total.suggested)} />
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <Flow align="center" gap={1}>
+            <Typography variant="muted" as="span" className="text-xs shrink-0">
+              Balance
+            </Typography>
+            <AmountLabel amount={total.balance} />
+            <Typography variant="muted" as="span" className="text-xs shrink-0">
+              + Suggested
+            </Typography>
+            <AmountLabel amount={total.suggested} />
+          </Flow>
+        </TooltipContent>
+      </Tooltip>
+      <Typography variant="muted" as="span" className="text-xs shrink-0">
+        actual
+      </Typography>
+      <AmountLabel amount={total.actual} />
+      <Button variant="ghost" size="icon-xs" onClick={onEditActual}>
+        <PencilIcon />
+      </Button>
+      <Tooltip disableHoverableContent>
+        <TooltipTrigger asChild>
+          <ValidIcon valid={total.valid} />
+        </TooltipTrigger>
+        <TooltipContent>
+          {total.valid ? (
+            <Typography variant="muted">Expected balance = Actual</Typography>
+          ) : (
+            <Flow align="center" gap={1}>
+              <Typography variant="muted" as="span">
+                Expected balance ≠ Actual, diff
+              </Typography>
+              <AmountLabel
+                amount={abs(subtract(add(total.balance, total.suggested), total.actual))}
+              />
+            </Flow>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    </Flow>
   )
 }

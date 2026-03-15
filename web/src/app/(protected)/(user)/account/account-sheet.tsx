@@ -25,7 +25,7 @@ import {
   useAccountGroupReferenceStore,
   useAccountStore,
 } from '@/store/account'
-import type { AccountType } from '@/types/account'
+import { AccountType } from '@/types/account'
 import type { Reference } from '@/types/common/reference'
 
 type AccountFormState = {
@@ -39,7 +39,7 @@ type AccountFormState = {
 
 const defaultFormState: AccountFormState = {
   name: '',
-  type: 'ACCOUNT',
+  type: AccountType.ACCOUNT,
   group: undefined,
   parser: '',
   deleted: false,
@@ -133,9 +133,9 @@ export function AccountSheet({ open, onOpenChange, accountId }: AccountSheetProp
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper">
-                  <SelectItem value="ACCOUNT">Account</SelectItem>
-                  <SelectItem value="EXPENSE">Expense</SelectItem>
-                  <SelectItem value="INCOME">Income</SelectItem>
+                  <SelectItem value={AccountType.ACCOUNT}>Account</SelectItem>
+                  <SelectItem value={AccountType.EXPENSE}>Expense</SelectItem>
+                  <SelectItem value={AccountType.INCOME}>Income</SelectItem>
                 </SelectContent>
               </Select>
             </Field>

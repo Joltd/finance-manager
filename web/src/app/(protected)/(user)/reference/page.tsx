@@ -15,15 +15,16 @@ import {
   useAccountListStore,
   useCurrencyListStore,
 } from '@/store/account'
-import type { Account, AccountGroup, AccountType, Currency } from '@/types/account'
+import type { Account, AccountGroup, Currency } from '@/types/account'
+import { AccountType } from '@/types/account'
 
 export default function ReferencePage() {
   return (
     <Layout scrollable>
       <CurrencySection />
       <AccountGroupSection />
-      <AccountSection title="Expense accounts" accountType="EXPENSE" />
-      <AccountSection title="Income accounts" accountType="INCOME" />
+      <AccountSection title="Expense accounts" accountType={AccountType.EXPENSE} />
+      <AccountSection title="Income accounts" accountType={AccountType.INCOME} />
     </Layout>
   )
 }
@@ -202,7 +203,7 @@ function AccountSection({ title, accountType }: { title: string; accountType: Ac
   }
 
   const subtitle =
-    accountType === 'EXPENSE'
+    accountType === AccountType.EXPENSE
       ? 'Categories and destinations where money is spent'
       : 'Sources and streams from which income is received'
 

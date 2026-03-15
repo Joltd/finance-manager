@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.repository.AccountRepository
+import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
 import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.common.service.LockService
@@ -40,6 +41,7 @@ class ImportDataActionService(
     private val operationProcessService: OperationProcessService,
     private val operationRepository: OperationRepository,
     private val accountRepository: AccountRepository,
+    private val balanceRepository: BalanceRepository,
     private val lockService: LockService,
 ) : Loggable() {
 
@@ -379,7 +381,7 @@ class ImportDataActionService(
 
         calculateGrandTotal(importData)
 
-        importData.valid = importData.totals.all { it.valid } && importData.totals.all { it.operation + it.suggested == it.actual }
+        importData.valid = importData.totals.all { it.valid }
     }
 
     private fun loadFreeOperations(importData: ImportData, dates: List<LocalDate>? = null): Map<LocalDate, List<Operation>> {
@@ -441,18 +443,25 @@ class ImportDataActionService(
 
     private fun calculateGrandTotal(importData: ImportData) {
         val existingActual = importData.totals.associateBy({ it.currency }, { it.actual })
+        val balances = balanceRepository.findByAccount(importData.account)
+            .associate { it.amount.currency to it.amount }
 
         val grandTotals = importData.days
             .flatMap { it.totals }
             .groupBy { it.currency }
             .map { (currency, dayTotals) ->
                 emptyTotal(currency).also {
+                    val parsed = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.parsed }
+                    val operation = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.operation }
+                    val suggested = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.suggested }
+                    val balance = balances[currency] ?: emptyAmount(currency)
+                    val actual = existingActual[currency] ?: emptyAmount(currency)
                     it.importData = importData
-                    it.parsed = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.parsed }
-                    it.operation = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.operation }
-                    it.suggested = dayTotals.fold(emptyAmount(currency)) { acc, total -> acc + total.suggested }
-                    it.actual = existingActual[currency] ?: emptyAmount(currency)
-                    it.valid = dayTotals.all { total -> total.valid }
+                    it.parsed = parsed
+                    it.operation = operation
+                    it.suggested = suggested
+                    it.actual = actual
+                    it.valid = operation + suggested == parsed && balance == actual
                 }
             }
 

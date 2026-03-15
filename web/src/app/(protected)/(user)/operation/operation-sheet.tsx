@@ -18,22 +18,23 @@ import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useRequest } from '@/hooks/use-request'
-import type { Account, AccountReference, AccountType } from '@/types/account'
+import type { Account, AccountReference } from '@/types/account'
+import { AccountType } from '@/types/account'
 import type { Amount } from '@/types/common/amount'
 import type { OperationRecord, OperationType } from '@/types/operation'
 
 // ─── Type config ──────────────────────────────────────────────────────────────
 
 const FROM_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
-  EXPENSE: 'ACCOUNT',
-  INCOME: 'INCOME',
-  TRANSFER: 'ACCOUNT',
+  EXPENSE: AccountType.ACCOUNT,
+  INCOME: AccountType.INCOME,
+  TRANSFER: AccountType.ACCOUNT,
 }
 
 const TO_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
-  EXPENSE: 'EXPENSE',
-  INCOME: 'ACCOUNT',
-  TRANSFER: 'ACCOUNT',
+  EXPENSE: AccountType.EXPENSE,
+  INCOME: AccountType.ACCOUNT,
+  TRANSFER: AccountType.ACCOUNT,
 }
 
 // ─── Form state ───────────────────────────────────────────────────────────────
@@ -217,7 +218,7 @@ export function OperationSheet({ open, onOpenChange, operation, onSaved }: Opera
               <Field>
                 <FieldLabel>From</FieldLabel>
                 <AccountInput
-                  type="ACCOUNT"
+                  type={AccountType.ACCOUNT}
                   value={form.accountFrom}
                   onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
                 />
@@ -225,7 +226,7 @@ export function OperationSheet({ open, onOpenChange, operation, onSaved }: Opera
               <Field>
                 <FieldLabel>To</FieldLabel>
                 <AccountInput
-                  type="ACCOUNT"
+                  type={AccountType.ACCOUNT}
                   value={form.accountTo}
                   onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
                 />
@@ -245,7 +246,7 @@ export function OperationSheet({ open, onOpenChange, operation, onSaved }: Opera
               <Field>
                 <FieldLabel>Account</FieldLabel>
                 <AccountInput
-                  type="ACCOUNT"
+                  type={AccountType.ACCOUNT}
                   value={form.accountFrom}
                   onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
                 />
@@ -253,7 +254,7 @@ export function OperationSheet({ open, onOpenChange, operation, onSaved }: Opera
               <Field>
                 <FieldLabel>Category</FieldLabel>
                 <AccountInput
-                  type="EXPENSE"
+                  type={AccountType.EXPENSE}
                   value={form.accountTo}
                   onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
                 />
@@ -273,7 +274,7 @@ export function OperationSheet({ open, onOpenChange, operation, onSaved }: Opera
               <Field>
                 <FieldLabel>Account</FieldLabel>
                 <AccountInput
-                  type="ACCOUNT"
+                  type={AccountType.ACCOUNT}
                   value={form.accountTo}
                   onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
                 />
@@ -281,7 +282,7 @@ export function OperationSheet({ open, onOpenChange, operation, onSaved }: Opera
               <Field>
                 <FieldLabel>Category</FieldLabel>
                 <AccountInput
-                  type="INCOME"
+                  type={AccountType.INCOME}
                   value={form.accountFrom}
                   onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
                 />

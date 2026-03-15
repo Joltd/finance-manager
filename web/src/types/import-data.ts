@@ -11,6 +11,7 @@ export interface ImportDataTotal {
   suggested: Amount
   operation: Amount
   actual: Amount
+  balance: Amount
   valid: boolean
 }
 

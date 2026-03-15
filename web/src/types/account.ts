@@ -2,7 +2,11 @@ import { z } from 'zod'
 import { Reference, referenceSchema } from '@/types/common/reference'
 import { Amount } from '@/types/common/amount'
 
-export type AccountType = 'ACCOUNT' | 'EXPENSE' | 'INCOME'
+export enum AccountType {
+  ACCOUNT = 'ACCOUNT',
+  EXPENSE = 'EXPENSE',
+  INCOME = 'INCOME',
+}
 
 export interface AccountReference extends Reference {
   type: AccountType
@@ -10,7 +14,7 @@ export interface AccountReference extends Reference {
 }
 
 export const accountReferenceSchema = referenceSchema.extend({
-  type: z.enum(['ACCOUNT', 'EXPENSE', 'INCOME']),
+  type: z.enum(AccountType),
   reviseDate: z.string().optional(),
 })
 

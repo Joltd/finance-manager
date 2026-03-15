@@ -6,44 +6,6 @@ import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 
-interface SeekSentinelProps {
-  onIntersect: () => void
-  loading: boolean
-  exhausted: boolean
-}
-
-function SeekSentinel({ onIntersect, loading, exhausted }: SeekSentinelProps) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (exhausted) return
-    const el = ref.current
-    if (!el) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) onIntersect()
-        }
-      },
-      { threshold: 0.1 },
-    )
-
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [onIntersect, exhausted])
-
-  return (
-    <div ref={ref} data-id="seek-sentinel" className="flex min-h-10 items-center justify-center">
-      {exhausted ? (
-        <Typography variant="muted">End of data</Typography>
-      ) : loading ? (
-        <Spinner className="text-muted-foreground" />
-      ) : null}
-    </div>
-  )
-}
-
 interface SeekProps {
   seek: (direction: SeekDirection) => Promise<void>
   loading: Record<SeekDirection, boolean>
@@ -75,20 +37,63 @@ export function Seek({ seek, loading, exhausted, children, className }: SeekProp
   }, [seek])
 
   return (
-    <Stack scrollable gap={0} className={className}>
+    <Stack ref={containerRef} scrollable gap={0} className={className}>
       <SeekSentinel
+        id="forward"
         onIntersect={seekForward}
         loading={loading[SeekDirection.FORWARD]}
         exhausted={exhausted[SeekDirection.FORWARD]}
       />
-      <Stack ref={containerRef} gap={6}>
-        {children}
-      </Stack>
+      {children}
       <SeekSentinel
+        id="backward"
         onIntersect={seekBackward}
         loading={loading[SeekDirection.BACKWARD]}
         exhausted={exhausted[SeekDirection.BACKWARD]}
       />
     </Stack>
+  )
+}
+
+interface SeekSentinelProps {
+  id: string
+  onIntersect: () => void
+  loading: boolean
+  exhausted: boolean
+}
+
+function SeekSentinel({ id, onIntersect, loading, exhausted }: SeekSentinelProps) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (exhausted) return
+    const el = ref.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        console.log(`SeekSentinel[${id}]`, 'callback triggered')
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            console.log(`SeekSentinel[${id}]`, 'intersected')
+            onIntersect()
+          }
+        }
+      },
+      { threshold: 0 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [onIntersect, exhausted])
+
+  return (
+    <div ref={ref} data-id="seek-sentinel" className="flex min-h-10 items-center justify-center">
+      {exhausted ? (
+        <Typography variant="muted">End of data</Typography>
+      ) : loading ? (
+        <Spinner className="text-muted-foreground" />
+      ) : null}
+    </div>
   )
 }

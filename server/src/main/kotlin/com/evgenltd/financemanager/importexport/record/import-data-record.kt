@@ -1,14 +1,13 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.common.record.DateRange
-import com.evgenltd.financemanager.common.record.Range
-import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.operation.entity.OperationType
-import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.ai.record.EmbeddingRecord
+import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.record.SeekDirection
+import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.operation.record.OperationRecord
 import org.springframework.context.ApplicationEvent
 import java.time.LocalDate
 import java.util.*
@@ -46,6 +45,7 @@ data class ImportDataTotalRecord(
     val suggested: Amount,
     val operation: Amount,
     val actual: Amount,
+    val balance: Amount,
     val valid: Boolean,
 )
 
