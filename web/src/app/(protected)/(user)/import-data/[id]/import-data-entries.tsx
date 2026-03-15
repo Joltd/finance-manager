@@ -11,6 +11,8 @@ import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { openOperationSheet, OperationSheet } from '@/app/(protected)/(user)/operation/operation-sheet'
+import { SeekDirection } from '@/store/common/seek'
 import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { OperationRecord } from '@/types/operation'
 import { abs, add, subtract } from '@/types/common/amount'
@@ -22,7 +24,7 @@ interface ImportDataEntriesProps {
 }
 
 export function ImportDataEntries({ id }: ImportDataEntriesProps) {
-  const { data, loading, exhausted, setPointer, seek, setPathParams } =
+  const { data, loading, exhausted, setPointer, seek, setPathParams, resetData } =
     useImportDataEntrySeekStore()
 
   useEffect(() => {
@@ -33,8 +35,15 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     setPathParams({ id })
   }, [id, setPathParams])
 
+  const handleOperationSaved = () => {
+    resetData()
+    void seek(SeekDirection.BACKWARD)
+  }
+
   return (
-    <Seek seek={seek} loading={loading} exhausted={exhausted}>
+    <>
+      <OperationSheet onSaved={handleOperationSaved} />
+      <Seek seek={seek} loading={loading} exhausted={exhausted}>
       {data.map((day) => (
         <Group
           key={day.date}
@@ -110,25 +119,88 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
         </Group>
       ))}
     </Seek>
+    </>
   )
 }
 
 function ImportEntryRow({ entry }: { entry: ImportDataEntry }) {
+  const selectedSuggestion = !entry.operation
+    ? entry.suggestions.find((s) => s.selected)
+    : undefined
+
   return (
     <div className="grid grid-cols-2 gap-2">
-      {entry.operation ? <OperationCard operation={entry.operation} /> : <EmptySlot />}
+      {entry.operation ? (
+        <OperationCard operation={entry.operation} />
+      ) : selectedSuggestion ? (
+        <SuggestedOperationCard suggestion={selectedSuggestion} />
+      ) : (
+        <EmptySlot />
+      )}
       {entry.parsed ? <ParsedCard parsed={entry.parsed} /> : <EmptySlot />}
     </div>
   )
 }
 
-function OperationCard({ operation }: { operation: OperationRecord }) {
-  const { type, amountFrom, accountFrom, amountTo, accountTo, description } = operation
+function SuggestedOperationCard({ suggestion }: { suggestion: ImportDataOperation }) {
+  const { type, amountFrom, accountFrom, amountTo, accountTo, description } = suggestion
   const showBothAmounts =
     amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
 
   return (
-    <Stack gap={1} className="h-full p-2.5 rounded-md border bg-background">
+    <Stack gap={1} className="h-full p-2.5 rounded-md border border-dashed bg-background opacity-60">
+      <Stack orientation="horizontal" align="center" gap={2} className="min-w-0">
+        <OperationIcon type={type} size={12} colored className="shrink-0" />
+        <Stack orientation="horizontal" align="center" gap={1} className="min-w-0 flex-1">
+          {accountFrom ? (
+            <Typography as="span" variant="small" className="truncate">
+              {accountFrom.name}
+            </Typography>
+          ) : (
+            <Typography as="span" variant="muted" className="truncate text-xs italic">
+              unknown
+            </Typography>
+          )}
+          <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
+          {accountTo ? (
+            <Typography as="span" variant="small" className="truncate text-muted-foreground">
+              {accountTo.name}
+            </Typography>
+          ) : (
+            <Typography as="span" variant="muted" className="truncate text-xs italic">
+              unknown
+            </Typography>
+          )}
+        </Stack>
+      </Stack>
+
+      <Flow align="center" gap={1}>
+        <AmountLabel amount={amountFrom} />
+        {showBothAmounts && <AmountLabel amount={amountTo} />}
+      </Flow>
+
+      {description && (
+        <Typography variant="muted" className="truncate text-xs">
+          {description}
+        </Typography>
+      )}
+    </Stack>
+  )
+}
+
+function OperationCard({ operation }: { operation: OperationRecord }) {
+  const { id, type, amountFrom, accountFrom, amountTo, accountTo, description } = operation
+  const showBothAmounts =
+    amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
+
+  const handleClick = id ? () => openOperationSheet(id) : undefined
+
+  return (
+    <Stack
+      gap={1}
+      className={`h-full p-2.5 rounded-md border bg-background${id ? ' cursor-pointer hover:bg-accent transition-colors' : ''}`}
+      onClick={handleClick}
+    >
       <Stack orientation="horizontal" align="center" gap={2} className="min-w-0">
         <OperationIcon type={type} size={12} colored className="shrink-0" />
         <Stack orientation="horizontal" align="center" gap={1} className="min-w-0 flex-1">
