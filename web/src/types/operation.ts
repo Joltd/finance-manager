@@ -1,16 +1,16 @@
-import { Account } from '@/types/account'
+import { AccountReference } from '@/types/account'
 import { Amount } from '@/types/common/amount'
 
 export type OperationType = 'EXPENSE' | 'INCOME' | 'EXCHANGE' | 'TRANSFER'
 
 export interface OperationRecord {
-  id: string | null
+  id?: string
   date: string
   type: OperationType
   amountFrom: Amount
-  accountFrom: Account
+  accountFrom: AccountReference
   amountTo: Amount
-  accountTo: Account
+  accountTo: AccountReference
   description?: string
   raw: string[]
 }

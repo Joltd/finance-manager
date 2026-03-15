@@ -1,15 +1,13 @@
 package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
-import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.common.record.NotificationType
 import com.evgenltd.financemanager.common.service.FileService
-import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.service.NotificationEventService
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.record.ImportDataCalculateTotalEvent
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
+import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
+import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.service.OperationProcessService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,7 +15,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.*
 
@@ -72,9 +69,9 @@ class ImportDataProcessService(
         }
     }
 
-    fun finish(id: UUID, revise: Boolean) {
+    fun finish(id: UUID) {
         importDataActionService.withLock(id) {
-            importDataActionService.finish(id, revise)
+            importDataActionService.finish(id)
         }
     }
 
@@ -127,6 +124,10 @@ class ImportDataProcessService(
                 }
             }
         }
+    }
+
+    fun calculateTotal(id: UUID) {
+        calculateTotal(id, null)
     }
 
     @EventListener

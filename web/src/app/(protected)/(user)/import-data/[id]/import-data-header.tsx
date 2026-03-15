@@ -1,21 +1,20 @@
 'use client'
 
 import { useEffect } from 'react'
-import { CheckCircle2Icon, Loader2Icon, PencilIcon, XCircleIcon } from 'lucide-react'
+import { CheckCircle2Icon, Loader2Icon, PencilIcon, RefreshCwIcon, XCircleIcon } from 'lucide-react'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
 import { useImportDataStore } from '@/store/import-data'
 import { ImportData, ImportDataTotal } from '@/types/import-data'
-import { abs, add, Amount, isZero, subtract } from '@/types/common/amount'
+import { abs, add, isZero, subtract } from '@/types/common/amount'
 import { ask } from '@/store/common/ask-dialog'
-import { useRequest } from '@/hooks/use-request'
-import { importDataUrls } from '@/api/import-data'
 import { Filler } from '@/components/common/layout/filler'
 import { ValidIcon } from '@/components/common/icon/valid-icon'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
+import { useImportDataActions } from '@/app/(protected)/(user)/import-data/[id]/import-data-actions'
 
 export interface ImportDataHeaderProps {
   id: string
@@ -23,9 +22,7 @@ export interface ImportDataHeaderProps {
 
 export function ImportDataHeader({ id }: ImportDataHeaderProps) {
   const { data, fetch, setPathParams } = useImportDataStore()
-  const { submit: saveActualBalance } = useRequest<void, Amount, never, { id: string }>(
-    importDataUrls.actualBalance,
-  )
+  const { loading, actualBalance, calculateTotal } = useImportDataActions()
 
   useEffect(() => {
     setPathParams({ id })
@@ -33,23 +30,33 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
   }, [id, setPathParams, fetch])
 
   const handleEditActual = async (total: ImportDataTotal) => {
-    const newAmount = await ask<'amount'>({
+    const balance = await ask<'amount'>({
       type: 'amount',
       label: `Actual balance (${total.currency})`,
       initialValue: total.actual,
     })
-    await saveActualBalance({ body: newAmount, pathParams: { id } })
+    await actualBalance(id, balance)
+    void fetch()
+  }
+
+  const handleRecalculate = async () => {
+    await calculateTotal(id)
     void fetch()
   }
 
   return (
     <Stack gap={4}>
-      <TitleSection data={data} />
+      <TitleSection data={data} loading={loading} onRecalculate={handleRecalculate} />
 
       {data && data.totals.length > 0 && (
         <Stack gap={1}>
           {data.totals.map((t) => (
-            <TotalRow key={t.currency} total={t} onEditActual={() => handleEditActual(t)} />
+            <TotalRow
+              key={t.currency}
+              total={t}
+              loading={loading}
+              onEditActual={() => handleEditActual(t)}
+            />
           ))}
         </Stack>
       )}
@@ -105,7 +112,15 @@ function ImportDataStatus({ data }: { data: ImportData }) {
   )
 }
 
-function TitleSection({ data }: { data: ImportData | undefined }) {
+function TitleSection({
+  data,
+  loading,
+  onRecalculate,
+}: {
+  data: ImportData | undefined
+  loading: boolean
+  onRecalculate: () => void
+}) {
   return (
     <Stack orientation="horizontal" align="center" gap={3}>
       {data && (
@@ -120,15 +135,31 @@ function TitleSection({ data }: { data: ImportData | undefined }) {
       )}
 
       {data && (
-        <span className="ml-auto">
+        <Flow align="center" gap={2} className="ml-auto">
           <ImportDataStatus data={data} />
-        </span>
+          <Tooltip disableHoverableContent>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon-xs" onClick={onRecalculate} disabled={loading || data.progress}>
+                <RefreshCwIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Recalculate totals</TooltipContent>
+          </Tooltip>
+        </Flow>
       )}
     </Stack>
   )
 }
 
-function TotalRow({ total, onEditActual }: { total: ImportDataTotal; onEditActual: () => void }) {
+function TotalRow({
+  total,
+  loading,
+  onEditActual,
+}: {
+  total: ImportDataTotal
+  loading: boolean
+  onEditActual: () => void
+}) {
   return (
     <Flow align="center" gap={2}>
       <Tooltip disableHoverableContent>
@@ -205,7 +236,7 @@ function TotalRow({ total, onEditActual }: { total: ImportDataTotal; onEditActua
         actual
       </Typography>
       <AmountLabel amount={total.actual} />
-      <Button variant="ghost" size="icon-xs" onClick={onEditActual}>
+      <Button variant="ghost" size="icon-xs" onClick={onEditActual} disabled={loading}>
         <PencilIcon />
       </Button>
       <Tooltip disableHoverableContent>

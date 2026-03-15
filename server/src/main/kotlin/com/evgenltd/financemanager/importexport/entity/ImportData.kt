@@ -31,7 +31,7 @@ class ImportData(
      */
     var valid: Boolean = false,
 
-    @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE, CascadeType.MERGE, CascadeType.PERSIST], orphanRemoval = true)
     var totals: MutableList<ImportDataTotal> = mutableListOf(),
 
     @OneToMany(mappedBy = "importData", cascade = [CascadeType.REMOVE], orphanRemoval = true)

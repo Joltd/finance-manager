@@ -31,7 +31,7 @@ import { AccountReference } from '@/types/account'
 import { DateFilter } from '@/components/common/filter/date-filter'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
-import { OperationSheet } from './operation-sheet'
+import { OperationSheet, openOperationSheet } from './operation-sheet'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
@@ -62,8 +62,6 @@ export default function OperationPage() {
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
   const { data, loading, exhausted, seek, resetData, setQueryParams, setPointer } = store
 
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [editingOperation, setEditingOperation] = useState<OperationRecord | undefined>(undefined)
 
   useEffect(() => {
     setPointer(new Date().toISOString().split('T')[0])
@@ -86,18 +84,16 @@ export default function OperationPage() {
   }, [resetData, setQueryParams, filterValue, setPointer, seek])
 
   const handleNew = () => {
-    setEditingOperation(undefined)
-    setSheetOpen(true)
+    openOperationSheet()
   }
 
-  const handleEdit = (operation: OperationRecord) => {
-    setEditingOperation(operation)
-    setSheetOpen(true)
+  const handleEdit = (operationId?: string) => {
+    openOperationSheet(operationId)
   }
 
-  const handleDelete = async (operation: OperationRecord) => {
-    if (!operation.id) return
-    await deleteOperation.submit({ pathParams: { id: operation.id } })
+  const handleDelete = async (operationId?: string) => {
+    if (!operationId) return
+    await deleteOperation.submit({ pathParams: { id: operationId } })
     resetData()
     void seek(SeekDirection.BACKWARD)
   }
@@ -109,12 +105,7 @@ export default function OperationPage() {
 
   return (
     <Layout>
-      <OperationSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        operation={editingOperation}
-        onSaved={handleSaved}
-      />
+      <OperationSheet onSaved={handleSaved} />
 
       <Stack orientation="horizontal" align="center" gap={2}>
         <Typography variant="h3" className="grow">
@@ -145,12 +136,12 @@ export default function OperationPage() {
       <Seek seek={seek} loading={loading} exhausted={exhausted}>
         {data.map((group) => (
           <Group key={group.date} title={formatGroupDate(group.date)}>
-            {group.operations.map((op, i) => (
+            {group.operations.map((operation, i) => (
               <OperationRow
-                key={op.id ?? i}
-                operation={op}
-                onEdit={() => handleEdit(op)}
-                onDelete={() => void handleDelete(op)}
+                key={operation.id ?? i}
+                operation={operation}
+                onEdit={() => handleEdit(operation.id)}
+                onDelete={() => void handleDelete(operation.id)}
               />
             ))}
           </Group>

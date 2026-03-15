@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { PencilIcon, PlusIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
@@ -23,7 +23,7 @@ import {
 import { useRequest } from '@/hooks/use-request'
 import { accountUrls, groupUrls } from '@/api/account'
 import { ask } from '@/store/common/ask-dialog'
-import { AccountSheet } from './account-sheet'
+import { AccountSheet, openAccountSheet } from './account-sheet'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
 
@@ -32,9 +32,6 @@ export default function AccountPage() {
   const saveGroup = useRequest(groupUrls.root)
   const deleteAccount = useRequest(accountUrls.id, { method: 'DELETE' })
   const restoreAccount = useRequest(accountUrls.root)
-
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [editingAccount, setEditingAccount] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     void store.fetch()
@@ -57,13 +54,11 @@ export default function AccountPage() {
   }
 
   const handleAddAccount = () => {
-    setEditingAccount(undefined)
-    setSheetOpen(true)
+    openAccountSheet()
   }
 
   const handleEditAccount = (account: Account) => {
-    setEditingAccount(account.id)
-    setSheetOpen(true)
+    openAccountSheet(account.id)
   }
 
   const handleDeleteAccount = async (account: Account) => {
@@ -78,11 +73,7 @@ export default function AccountPage() {
 
   return (
     <Layout>
-      <AccountSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        accountId={editingAccount}
-      />
+      <AccountSheet />
 
       <Stack orientation="horizontal" gap={2}>
         <Typography variant="h3" className="grow">

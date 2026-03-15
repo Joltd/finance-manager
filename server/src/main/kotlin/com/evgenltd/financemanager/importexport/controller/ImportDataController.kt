@@ -2,30 +2,15 @@ package com.evgenltd.financemanager.importexport.controller
 
 import com.evgenltd.financemanager.common.component.DataResponse
 import com.evgenltd.financemanager.common.component.SkipLogging
+import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.importexport.record.EntryFilter
-import com.evgenltd.financemanager.importexport.record.ImportDataCreateRequest
-import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryVisibilityRequest
-import com.evgenltd.financemanager.importexport.record.ImportDataLinkRequest
-import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.importexport.record.*
 import com.evgenltd.financemanager.importexport.service.ImportDataProcessService
 import com.evgenltd.financemanager.importexport.service.ImportDataService
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.common.record.Reference
-import com.evgenltd.financemanager.common.service.FileService
-import com.evgenltd.financemanager.importexport.record.ImportDataEntryApproveSuggestionRequest
-import com.evgenltd.financemanager.importexport.record.ImportDataFinishRequest
-import com.evgenltd.financemanager.importexport.record.ImportDataUnlinkRequest
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
@@ -65,6 +50,12 @@ class ImportDataController(
         importDataProcessService.beginNewImport(importData.id!!, filename)
         return importData.id!!
     }
+    
+    @PostMapping("/api/v1/import-data/{id}/calculate-total")
+    @PreAuthorize("hasRole('USER')")
+    fun calculateTotal(@PathVariable id: UUID) {
+        importDataProcessService.calculateTotal(id)
+    }
 
     @PostMapping("/api/v1/import-data/{id}/actual-balance")
     @PreAuthorize("hasRole('USER')")
@@ -74,8 +65,8 @@ class ImportDataController(
 
     @PostMapping("/api/v1/import-data/{id}/finish")
     @PreAuthorize("hasRole('USER')")
-    fun finish(@PathVariable id: UUID, @RequestBody request: ImportDataFinishRequest) {
-        importDataProcessService.finish(id, request.revise)
+    fun finish(@PathVariable id: UUID) {
+        importDataProcessService.finish(id)
     }
 
     @PostMapping("/api/v1/import-data/{id}/entry/link")

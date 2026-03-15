@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import * as Checkbox from '@radix-ui/react-checkbox'
 import { CheckIcon } from 'lucide-react'
+import { create } from 'zustand'
 
 import { accountUrls } from '@/api/account'
 import { DateInput } from '@/components/common/input/date-input'
@@ -28,6 +29,24 @@ import {
 import { AccountType } from '@/types/account'
 import type { Reference } from '@/types/common/reference'
 
+interface AccountSheetState {
+  open: boolean
+  accountId?: string
+  openSheet: (accountId?: string) => void
+  closeSheet: () => void
+}
+
+const useAccountSheetStore = create<AccountSheetState>((set) => ({
+  open: false,
+  accountId: undefined,
+  openSheet: (accountId) => set({ open: true, accountId }),
+  closeSheet: () => set({ open: false }),
+}))
+
+export function openAccountSheet(accountId?: string) {
+  useAccountSheetStore.getState().openSheet(accountId)
+}
+
 type AccountFormState = {
   name: string
   type: AccountType
@@ -46,13 +65,8 @@ const defaultFormState: AccountFormState = {
   reviseDate: undefined,
 }
 
-interface AccountSheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  accountId?: string
-}
-
-export function AccountSheet({ open, onOpenChange, accountId }: AccountSheetProps) {
+export function AccountSheet() {
+  const { open, accountId, closeSheet } = useAccountSheetStore()
   const groupStore = useAccountGroupReferenceStore()
   const accountStore = useAccountStore()
   const balanceStore = useAccountBalanceStore()
@@ -97,13 +111,17 @@ export function AccountSheet({ open, onOpenChange, accountId }: AccountSheetProp
       },
     })
     void balanceStore.fetch()
-    onOpenChange(false)
+    closeSheet()
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) closeSheet()
   }
 
   const loading = accountStore.loading
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>{accountId ? 'Edit Account' : 'New Account'}</SheetTitle>

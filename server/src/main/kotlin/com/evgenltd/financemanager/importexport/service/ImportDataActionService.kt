@@ -275,11 +275,9 @@ class ImportDataActionService(
     }
 
     @Transactional
-    fun finish(id: UUID, revise: Boolean) {
+    fun finish(id: UUID) {
         val importData = importDataRepository.find(id)
-        if (revise) {
-            importData.account.reviseDate = LocalDate.now()
-        }
+        importData.account.reviseDate = LocalDate.now()
         importDataRepository.delete(importData)
     }
 
