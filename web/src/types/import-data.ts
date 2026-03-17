@@ -1,6 +1,6 @@
 import { Amount } from '@/types/common/amount'
-import { Account } from '@/types/account'
-import { OperationRecord, OperationType } from '@/types/operation'
+import { AccountReference } from '@/types/account'
+import { Operation, OperationType } from '@/types/operation'
 import { DateRange, Embedding } from '@/types/common/common'
 
 export type SuggestionRating = 'GOOD' | 'FAIR' | 'POOR'
@@ -17,7 +17,7 @@ export interface ImportDataTotal {
 
 export interface ImportData {
   id: string
-  account: Account
+  account: AccountReference
   dateRange?: DateRange
   progress: boolean
   valid: boolean
@@ -29,9 +29,9 @@ export interface ImportDataOperation {
   date: string
   type: OperationType
   amountFrom: Amount
-  accountFrom?: Account
+  accountFrom?: AccountReference
   amountTo: Amount
-  accountTo?: Account
+  accountTo?: AccountReference
   description?: string
   raw: string[]
   hint?: Embedding
@@ -43,7 +43,7 @@ export interface ImportDataOperation {
 export interface ImportDataEntry {
   id?: string
   linked: boolean
-  operation?: OperationRecord
+  operation?: Operation
   operationVisible: boolean
   parsed?: ImportDataOperation
   parsedVisible: boolean

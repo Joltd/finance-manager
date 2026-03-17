@@ -3,7 +3,7 @@ import { Amount } from '@/types/common/amount'
 
 export type OperationType = 'EXPENSE' | 'INCOME' | 'EXCHANGE' | 'TRANSFER'
 
-export interface OperationRecord {
+export interface Operation {
   id?: string
   date: string
   type: OperationType
@@ -17,7 +17,7 @@ export interface OperationRecord {
 
 export interface OperationGroup {
   date: string
-  operations: OperationRecord[]
+  operations: Operation[]
 }
 
 export interface OperationFilter {

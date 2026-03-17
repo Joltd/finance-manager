@@ -1,31 +1,31 @@
 'use client'
 
 import { useEffect } from 'react'
-import { ArrowRight } from 'lucide-react'
-import { useImportDataEntrySeekStore } from '@/store/import-data'
+import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
 import { Seek } from '@/components/common/layout/seek'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
 import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
-import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { openOperationSheet, OperationSheet } from '@/app/(protected)/(user)/operation/operation-sheet'
-import { SeekDirection } from '@/store/common/seek'
 import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
-import { OperationRecord } from '@/types/operation'
+import { Operation } from '@/types/operation'
 import { abs, add, subtract } from '@/types/common/amount'
 import { ValidIcon } from '@/components/common/icon/valid-icon'
 import { formatDateCommon } from '@/lib/utils'
+import { openImportDataEntrySheet } from './import-data-entry-sheet'
+import { ImportEntryCard } from './import-entry-card'
 
 interface ImportDataEntriesProps {
   id: string
 }
 
 export function ImportDataEntries({ id }: ImportDataEntriesProps) {
-  const { data, loading, exhausted, setPointer, seek, setPathParams, resetData } =
+  const { data, loading, exhausted, setPointer, seek, setPathParams } =
     useImportDataEntrySeekStore()
+  const { data: importData } = useImportDataStore()
+  const mainAccountId = importData?.account.id
 
   useEffect(() => {
     setPointer(new Date().toISOString().split('T')[0])
@@ -35,15 +35,8 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     setPathParams({ id })
   }, [id, setPathParams])
 
-  const handleOperationSaved = () => {
-    resetData()
-    void seek(SeekDirection.BACKWARD)
-  }
-
   return (
-    <>
-      <OperationSheet onSaved={handleOperationSaved} />
-      <Seek seek={seek} loading={loading} exhausted={exhausted}>
+    <Seek seek={seek} loading={loading} exhausted={exhausted}>
       {data.map((day) => (
         <Group
           key={day.date}
@@ -113,164 +106,107 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
           ))}
           <Stack gap={2}>
             {day.entries.map((entry, i) => (
-              <ImportEntryRow key={entry.id ?? i} entry={entry} />
+              <ImportEntryRow key={entry.id ?? i} entry={entry} mainAccountId={mainAccountId} />
             ))}
           </Stack>
         </Group>
       ))}
     </Seek>
-    </>
   )
 }
 
-function ImportEntryRow({ entry }: { entry: ImportDataEntry }) {
+function ImportEntryRow({
+  entry,
+  mainAccountId,
+}: {
+  entry: ImportDataEntry
+  mainAccountId?: string
+}) {
   const selectedSuggestion = !entry.operation
     ? entry.suggestions.find((s) => s.selected)
     : undefined
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div
+      className="grid grid-cols-2 gap-2 cursor-pointer"
+      onClick={() => openImportDataEntrySheet(entry)}
+    >
       {entry.operation ? (
-        <OperationCard operation={entry.operation} />
+        <OperationEntryCard operation={entry.operation} mainAccountId={mainAccountId} />
       ) : selectedSuggestion ? (
-        <SuggestedOperationCard suggestion={selectedSuggestion} />
+        <SuggestionEntryCard suggestion={selectedSuggestion} mainAccountId={mainAccountId} />
       ) : (
         <EmptySlot />
       )}
-      {entry.parsed ? <ParsedCard parsed={entry.parsed} /> : <EmptySlot />}
+      {entry.parsed ? (
+        <ParsedEntryCard parsed={entry.parsed} mainAccountId={mainAccountId} />
+      ) : (
+        <EmptySlot />
+      )}
     </div>
   )
 }
 
-function SuggestedOperationCard({ suggestion }: { suggestion: ImportDataOperation }) {
-  const { type, amountFrom, accountFrom, amountTo, accountTo, description } = suggestion
-  const showBothAmounts =
-    amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
-
+function OperationEntryCard({
+  operation,
+  mainAccountId,
+}: {
+  operation: Operation
+  mainAccountId?: string
+}) {
   return (
-    <Stack gap={1} className="h-full p-2.5 rounded-md border border-dashed bg-background opacity-60">
-      <Stack orientation="horizontal" align="center" gap={2} className="min-w-0">
-        <OperationIcon type={type} size={12} colored className="shrink-0" />
-        <Stack orientation="horizontal" align="center" gap={1} className="min-w-0 flex-1">
-          {accountFrom ? (
-            <Typography as="span" variant="small" className="truncate">
-              {accountFrom.name}
-            </Typography>
-          ) : (
-            <Typography as="span" variant="muted" className="truncate text-xs italic">
-              unknown
-            </Typography>
-          )}
-          <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
-          {accountTo ? (
-            <Typography as="span" variant="small" className="truncate text-muted-foreground">
-              {accountTo.name}
-            </Typography>
-          ) : (
-            <Typography as="span" variant="muted" className="truncate text-xs italic">
-              unknown
-            </Typography>
-          )}
-        </Stack>
-      </Stack>
-
-      <Flow align="center" gap={1}>
-        <AmountLabel amount={amountFrom} />
-        {showBothAmounts && <AmountLabel amount={amountTo} />}
-      </Flow>
-
-      {description && (
-        <Typography variant="muted" className="truncate text-xs">
-          {description}
-        </Typography>
-      )}
-    </Stack>
+    <ImportEntryCard
+      type={operation.type}
+      amountFrom={operation.amountFrom}
+      amountTo={operation.amountTo}
+      accountFrom={operation.accountFrom}
+      accountTo={operation.accountTo}
+      description={operation.description}
+      mainAccountId={mainAccountId}
+      variant="operation"
+    />
   )
 }
 
-function OperationCard({ operation }: { operation: OperationRecord }) {
-  const { id, type, amountFrom, accountFrom, amountTo, accountTo, description } = operation
-  const showBothAmounts =
-    amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
-
-  const handleClick = id ? () => openOperationSheet(id) : undefined
-
+function SuggestionEntryCard({
+  suggestion,
+  mainAccountId,
+}: {
+  suggestion: ImportDataOperation
+  mainAccountId?: string
+}) {
   return (
-    <Stack
-      gap={1}
-      className={`h-full p-2.5 rounded-md border bg-background${id ? ' cursor-pointer hover:bg-accent transition-colors' : ''}`}
-      onClick={handleClick}
-    >
-      <Stack orientation="horizontal" align="center" gap={2} className="min-w-0">
-        <OperationIcon type={type} size={12} colored className="shrink-0" />
-        <Stack orientation="horizontal" align="center" gap={1} className="min-w-0 flex-1">
-          <Typography as="span" variant="small" className="truncate">
-            {accountFrom.name}
-          </Typography>
-          <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
-          <Typography as="span" variant="small" className="truncate text-muted-foreground">
-            {accountTo.name}
-          </Typography>
-        </Stack>
-      </Stack>
-
-      <Flow align="center" gap={1}>
-        <AmountLabel amount={amountFrom} />
-        {showBothAmounts && <AmountLabel amount={amountTo} />}
-      </Flow>
-
-      {description && (
-        <Typography variant="muted" className="truncate text-xs">
-          {description}
-        </Typography>
-      )}
-    </Stack>
+    <ImportEntryCard
+      type={suggestion.type}
+      amountFrom={suggestion.amountFrom}
+      amountTo={suggestion.amountTo}
+      accountFrom={suggestion.accountFrom}
+      accountTo={suggestion.accountTo}
+      description={suggestion.description}
+      mainAccountId={mainAccountId}
+      variant="suggestion"
+    />
   )
 }
 
-function ParsedCard({ parsed }: { parsed: ImportDataOperation }) {
-  const { type, amountFrom, accountFrom, amountTo, accountTo, description } = parsed
-  const showBothAmounts =
-    amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
-
+function ParsedEntryCard({
+  parsed,
+  mainAccountId,
+}: {
+  parsed: ImportDataOperation
+  mainAccountId?: string
+}) {
   return (
-    <Stack gap={1} className="h-full p-2.5 rounded-md border bg-muted/30">
-      <Stack orientation="horizontal" align="center" gap={2} className="min-w-0">
-        <OperationIcon type={type} size={12} colored className="shrink-0" />
-        <Stack orientation="horizontal" align="center" gap={1} className="min-w-0 flex-1">
-          {accountFrom ? (
-            <Typography as="span" variant="small" className="truncate">
-              {accountFrom.name}
-            </Typography>
-          ) : (
-            <Typography as="span" variant="muted" className="truncate text-xs italic">
-              unknown
-            </Typography>
-          )}
-          <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
-          {accountTo ? (
-            <Typography as="span" variant="small" className="truncate text-muted-foreground">
-              {accountTo.name}
-            </Typography>
-          ) : (
-            <Typography as="span" variant="muted" className="truncate text-xs italic">
-              unknown
-            </Typography>
-          )}
-        </Stack>
-      </Stack>
-
-      <Flow align="center" gap={1}>
-        <AmountLabel amount={amountFrom} />
-        {showBothAmounts && <AmountLabel amount={amountTo} />}
-      </Flow>
-
-      {description && (
-        <Typography variant="muted" className="truncate text-xs">
-          {description}
-        </Typography>
-      )}
-    </Stack>
+    <ImportEntryCard
+      type={parsed.type}
+      amountFrom={parsed.amountFrom}
+      amountTo={parsed.amountTo}
+      accountFrom={parsed.accountFrom}
+      accountTo={parsed.accountTo}
+      description={parsed.description}
+      mainAccountId={mainAccountId}
+      variant="parsed"
+    />
   )
 }
 

@@ -26,12 +26,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useRequest } from '@/hooks/use-request'
-import { OperationFilter, OperationRecord, OperationType } from '@/types/operation'
+import { Operation, OperationFilter, OperationType } from '@/types/operation'
 import { AccountReference } from '@/types/account'
 import { DateFilter } from '@/components/common/filter/date-filter'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
-import { OperationSheet, openOperationSheet } from './operation-sheet'
+import { openOperationSheet, OperationSheet } from './operation-sheet'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
@@ -61,7 +61,6 @@ export default function OperationPage() {
   const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
   const { data, loading, exhausted, seek, resetData, setQueryParams, setPointer } = store
-
 
   useEffect(() => {
     setPointer(new Date().toISOString().split('T')[0])
@@ -156,7 +155,7 @@ function OperationRow({
   onEdit,
   onDelete,
 }: {
-  operation: OperationRecord
+  operation: Operation
   onEdit: () => void
   onDelete: () => void
 }) {

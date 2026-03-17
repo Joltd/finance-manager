@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react'
 import { create } from 'zustand'
 
-import { operationUrls } from '@/api/operation'
 import { AccountInput } from '@/components/common/input/account-input'
 import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
+import { Stack } from '@/components/common/layout/stack'
+import { Typography } from '@/components/common/typography/typography'
 import {
   Select,
   SelectContent,
@@ -14,122 +15,175 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Spinner } from '@/components/ui/spinner'
-import { useRequest } from '@/hooks/use-request'
-import { useOperationStore } from '@/store/operation'
 import { AccountType } from '@/types/account'
 import type { OperationType } from '@/types/operation'
+import type { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import {
   defaultFormState,
   OperationFormState,
   transitType,
 } from '@/app/(protected)/(user)/operation/operation-form'
+import { useImportDataStore } from '@/store/import-data'
+import { cn } from '@/lib/utils'
+import { ImportEntryCard } from './import-entry-card'
 
-interface OperationSheetState {
+// ---------------------------------------------------------------------------
+// Store
+// ---------------------------------------------------------------------------
+
+interface ImportDataEntrySheetState {
   open: boolean
-  operationId?: string
-  openSheet: (operationId?: string) => void
+  entry: ImportDataEntry | null
+  openSheet: (entry: ImportDataEntry) => void
   closeSheet: () => void
 }
 
-const useOperationSheetStore = create<OperationSheetState>((set) => ({
+const useImportDataEntrySheetStore = create<ImportDataEntrySheetState>((set) => ({
   open: false,
-  operationId: undefined,
-  openSheet: (operationId) => set({ open: true, operationId }),
+  entry: null,
+  openSheet: (entry) => set({ open: true, entry }),
   closeSheet: () => set({ open: false }),
 }))
 
-export function openOperationSheet(operationId?: string) {
-  useOperationSheetStore.getState().openSheet(operationId)
+export function openImportDataEntrySheet(entry: ImportDataEntry) {
+  useImportDataEntrySheetStore.getState().openSheet(entry)
 }
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-interface OperationSheetProps {
-  onSaved: () => void
+function suggestionToForm(source: ImportDataOperation): OperationFormState {
+  const type = source.type
+  const isExchange = type === 'EXCHANGE'
+  return {
+    type,
+    date: new Date(source.date + 'T00:00:00'),
+    accountFrom: source.accountFrom,
+    accountTo: source.accountTo,
+    amount: !isExchange ? source.amountFrom : undefined,
+    amountFrom: isExchange ? source.amountFrom : undefined,
+    amountTo: isExchange ? source.amountTo : undefined,
+    description: source.description ?? '',
+  }
 }
 
-export function OperationSheet({ onSaved }: OperationSheetProps) {
-  const { open, operationId, closeSheet } = useOperationSheetStore()
-  const operationStore = useOperationStore()
-  const saveOperation = useRequest(operationUrls.root)
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+export function ImportDataEntrySheet() {
+  const { open, entry, closeSheet } = useImportDataEntrySheetStore()
+  const { data: importData } = useImportDataStore()
+  const mainAccountId = importData?.account.id
   const [form, setForm] = useState<OperationFormState>(defaultFormState)
+  const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
+  const [initialSuggestionIdx, setInitialSuggestionIdx] = useState<number | null>(null)
 
   useEffect(() => {
-    if (open) {
-      if (operationId) {
-        operationStore.setPathParams({ id: operationId })
-        void operationStore.fetch()
+    if (!open || !entry) return
+
+    if (entry.operation) {
+      setSelectedSuggestionIdx(null)
+      setInitialSuggestionIdx(null)
+      const op = entry.operation
+      const type = op.type
+      const isExchange = type === 'EXCHANGE'
+      setForm({
+        type,
+        date: new Date(op.date + 'T00:00:00'),
+        accountFrom: op.accountFrom,
+        accountTo: op.accountTo,
+        amount: !isExchange ? op.amountFrom : undefined,
+        amountFrom: isExchange ? op.amountFrom : undefined,
+        amountTo: isExchange ? op.amountTo : undefined,
+        description: op.description ?? '',
+      })
+    } else {
+      const idx = entry.suggestions.findIndex((s) => s.selected)
+      if (idx >= 0) {
+        setSelectedSuggestionIdx(idx)
+        setInitialSuggestionIdx(idx)
+        setForm(suggestionToForm(entry.suggestions[idx]))
       } else {
-        operationStore.reset()
+        setSelectedSuggestionIdx(null)
+        setInitialSuggestionIdx(null)
         setForm(defaultFormState)
       }
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const operation = operationStore.data
-    if (!operation) return
-    const type = operation.type
-    const isExchange = type === 'EXCHANGE'
-    setForm({
-      type,
-      date: new Date(operation.date + 'T00:00:00'),
-      accountFrom: operation.accountFrom,
-      accountTo: operation.accountTo,
-      amount: !isExchange ? operation.amountFrom : undefined,
-      amountFrom: isExchange ? operation.amountFrom : undefined,
-      amountTo: isExchange ? operation.amountTo : undefined,
-      description: operation.description ?? '',
-    })
-  }, [operationStore.data])
+  }, [open, entry]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTypeChange = (newType: OperationType) => {
     setForm((f) => transitType(f, newType))
-  }
-
-  const handleSubmit = async () => {
-    const isExchange = form.type === 'EXCHANGE'
-    await saveOperation.submit({
-      body: {
-        id: operationId ?? undefined,
-        date: form.date.toISOString().split('T')[0],
-        type: form.type,
-        accountFrom: form.accountFrom,
-        accountTo: form.accountTo,
-        amountFrom: isExchange ? form.amountFrom : form.amount,
-        amountTo: isExchange ? form.amountTo : form.amount,
-        description: form.description || undefined,
-      },
-    })
-    onSaved()
-    closeSheet()
   }
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) closeSheet()
   }
 
-  const loading = operationStore.loading
+  const handleSuggestionClick = (idx: number) => {
+    if (!entry) return
+    setSelectedSuggestionIdx(idx)
+    setForm(suggestionToForm(entry.suggestions[idx]))
+  }
+
+  const hasOperation = !!entry?.operation
+  const hasSuggestions = (entry?.suggestions.length ?? 0) > 0
+  const title = hasOperation ? 'Edit Operation' : 'New Operation'
+
+  const actionLabel: string = hasOperation
+    ? 'Save'
+    : initialSuggestionIdx !== null && selectedSuggestionIdx === initialSuggestionIdx
+      ? 'Approve'
+      : 'Commit'
+
+  const showUnlink = hasOperation && !!entry?.parsed
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent>
+      <SheetContent className={cn(hasSuggestions && 'sm:max-w-160')}>
         <SheetHeader>
-          <SheetTitle>{operationId ? 'Edit Operation' : 'New Operation'}</SheetTitle>
+          <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
 
-        {loading ? (
-          <div className="flex flex-1 items-center justify-center">
-            <Spinner />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4 px-4 flex-1 overflow-y-auto">
-            <Field>
-              <FieldLabel>Type</FieldLabel>
+        <Stack orientation="horizontal" gap={0} className="flex-1 min-h-0 overflow-hidden">
+          {/* Suggestions panel */}
+          {hasSuggestions && (
+            <Stack gap={2} scrollable className="w-64 shrink-0 border-r px-4 pb-4">
+              <Typography
+                variant="muted"
+                className="text-xs font-medium uppercase tracking-wide shrink-0 sticky top-0 bg-background pt-1 pb-1"
+              >
+                Suggestions
+              </Typography>
+              {entry!.suggestions.map((suggestion, idx) => (
+                <ImportEntryCard
+                  key={idx}
+                  type={suggestion.type}
+                  amountFrom={suggestion.amountFrom}
+                  amountTo={suggestion.amountTo}
+                  accountFrom={suggestion.accountFrom}
+                  accountTo={suggestion.accountTo}
+                  description={suggestion.description}
+                  rating={suggestion.rating}
+                  mainAccountId={mainAccountId}
+                  active={selectedSuggestionIdx === idx}
+                  recommended={suggestion.selected}
+                  onClick={() => handleSuggestionClick(idx)}
+                />
+              ))}
+            </Stack>
+          )}
+
+          {/* Form column + footer buttons */}
+          <Stack gap={0} className="flex-1 min-h-0">
+            <Stack gap={4} scrollable className="flex-1 px-4 pb-4">
+              <Field>
+                <FieldLabel>Type</FieldLabel>
               <Select value={form.type} onValueChange={(v) => handleTypeChange(v as OperationType)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -268,21 +322,21 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
               </>
             )}
 
-            <Field>
-              <FieldLabel>Description</FieldLabel>
-              <Input
-                value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              />
-            </Field>
-          </div>
-        )}
+              <Field>
+                <FieldLabel>Description</FieldLabel>
+                <Input
+                  value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                />
+              </Field>
+            </Stack>
 
-        <SheetFooter>
-          <Button onClick={() => void handleSubmit()} disabled={saveOperation.loading || loading}>
-            Save
-          </Button>
-        </SheetFooter>
+            <SheetFooter>
+              {showUnlink && <Button variant="outline">Unlink</Button>}
+              <Button>{actionLabel}</Button>
+            </SheetFooter>
+          </Stack>
+        </Stack>
       </SheetContent>
     </Sheet>
   )

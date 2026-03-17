@@ -7,7 +7,10 @@ import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
-import com.evgenltd.financemanager.importexport.entity.*
+import com.evgenltd.financemanager.importexport.entity.ImportData
+import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
+import com.evgenltd.financemanager.importexport.entity.ImportDataOperation
+import com.evgenltd.financemanager.importexport.entity.ImportDataTotal
 import com.evgenltd.financemanager.importexport.record.*
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -71,8 +74,7 @@ class ImportDataConverter(
             operationVisible = entry.operation?.id !in importData.hiddenOperations,
             parsed = entry.parsed().firstOrNull()?.let { operation -> toRecord(operation) },
             parsedVisible = entry.visible,
-            suggestions = entry.operations
-                .filter { operation -> operation.importType == ImportDataOperationType.SUGGESTION }
+            suggestions = entry.suggested()
                 .map { operation -> toRecord(operation) }
                 .sortedByDescending { it.distance },
         )
