@@ -22,12 +22,13 @@ export interface SeekState<TData, TBody, TQuery, TPath, TPointer> {
   exhausted: Record<SeekDirection, boolean>
 }
 
-export interface SeekActions<TBody, TQuery, TPath, TPointer> {
+export interface SeekActions<TData, TBody, TQuery, TPath, TPointer> {
   seek: (direction: SeekDirection) => Promise<void>
   setPointer: (pointer: TPointer) => void
   setBody: (body: TBody) => void
   setQueryParams: (params: TQuery) => void
   setPathParams: (params: TPath) => void
+  patchData: (items: TData[]) => void
   resetData: () => void
   reset: () => void
 }
@@ -38,7 +39,7 @@ export type SeekSlice<
   TBody = unknown,
   TQuery = unknown,
   TPath extends Record<string, string> = Record<string, string>,
-> = SeekState<TData, TBody, TQuery, TPath, TPointer> & SeekActions<TBody, TQuery, TPath, TPointer>
+> = SeekState<TData, TBody, TQuery, TPath, TPointer> & SeekActions<TData, TBody, TQuery, TPath, TPointer>
 
 const initialLoading: Record<SeekDirection, boolean> = {
   [SeekDirection.FORWARD]: false,
@@ -154,6 +155,14 @@ export function createSeekSlice<
     setBody: (body: TBody) => set({ body }),
     setQueryParams: (params: TQuery) => set({ queryParams: params }),
     setPathParams: (params: TPath) => set({ pathParams: params }),
+
+    patchData: (items: TData[]) =>
+      set((state) => ({
+        data: state.data.map((existing) => {
+          const updated = items.find((item) => getPointer(item) === getPointer(existing))
+          return updated ?? existing
+        }),
+      })),
 
     resetData: () =>
       set({

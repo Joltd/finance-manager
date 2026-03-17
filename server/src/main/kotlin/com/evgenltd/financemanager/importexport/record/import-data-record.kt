@@ -26,10 +26,6 @@ data class ImportDataUnlinkRequest(
     val entryIds: List<UUID>,
 )
 
-data class ImportDataFinishRequest(
-    val revise: Boolean
-)
-
 data class ImportDataRecord(
     val id: UUID,
     val account: AccountRecord,

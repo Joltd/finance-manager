@@ -8,4 +8,6 @@ export const importDataUrls = {
   calculateTotal: '/api/v1/import-data/:id/calculate-total',
   unlink: '/api/v1/import-data/:id/entry/unlink',
   approve: '/api/v1/import-data/:id/entry/approve',
+  link: '/api/v1/import-data/:id/entry/link',
+  linkById: '/api/v1/import-data/:id/entry/:entryId/link',
 }

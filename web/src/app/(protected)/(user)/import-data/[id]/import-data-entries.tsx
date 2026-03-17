@@ -18,6 +18,7 @@ import { ValidIcon } from '@/components/common/icon/valid-icon'
 import { cn, formatDateCommon } from '@/lib/utils'
 import { openImportDataEntrySheet } from './import-data-entry-sheet'
 import { ImportEntryCard } from './import-entry-card'
+import { useImportDataActions } from './import-data-actions'
 
 interface ImportDataEntriesProps {
   id: string
@@ -28,6 +29,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     useImportDataEntrySeekStore()
   const { data: importData } = useImportDataStore()
   const mainAccountId = importData?.account.id
+  const actions = useImportDataActions()
 
   const [linkingEntry, setLinkingEntry] = useState<ImportDataEntry | null>(null)
 
@@ -39,19 +41,16 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     setPathParams({ id })
   }, [id, setPathParams])
 
-  useEffect(() => {
-    if (!linkingEntry) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setLinkingEntry(null)
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [linkingEntry])
-
-  const handleLinkTarget = (_targetEntry: ImportDataEntry) => {
-    // TODO: link linkingEntry!.operation with targetEntry.parsed
-    setLinkingEntry(null)
+  const handleLinkTarget = (targetEntry: ImportDataEntry) => {
+    if (!linkingEntry?.operation?.id || !targetEntry.id) return
+    actions
+      .linkById(id, targetEntry.id, linkingEntry.operation.id)
+      .then(() => setLinkingEntry(null))
   }
+
+  const handleUnlink = (entryId: string) => actions.unlink(id, [entryId])
+
+  const handleApprove = (entryId: string) => actions.approve(id, [entryId])
 
   return (
     <div className="relative flex-1 min-h-0">
@@ -61,7 +60,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
             key={day.date}
             title={formatDateCommon(day.date)}
             icon={
-              <Tooltip>
+              <Tooltip disableHoverableContent>
                 <TooltipTrigger asChild>
                   <ValidIcon valid={day.valid} />
                 </TooltipTrigger>
@@ -132,8 +131,11 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
                   entry={entry}
                   mainAccountId={mainAccountId}
                   linkingEntry={linkingEntry}
+                  loading={actions.loading}
                   onStartLink={setLinkingEntry}
                   onLinkTarget={handleLinkTarget}
+                  onUnlink={handleUnlink}
+                  onApprove={handleApprove}
                 />
               ))}
             </Stack>
@@ -167,14 +169,20 @@ function ImportEntryRow({
   entry,
   mainAccountId,
   linkingEntry,
+  loading,
   onStartLink,
   onLinkTarget,
+  onUnlink,
+  onApprove,
 }: {
   entry: ImportDataEntry
   mainAccountId?: string
   linkingEntry: ImportDataEntry | null
+  loading: boolean
   onStartLink: (entry: ImportDataEntry) => void
   onLinkTarget: (entry: ImportDataEntry) => void
+  onUnlink: (entryId: string) => void
+  onApprove: (entryId: string) => void
 }) {
   const selectedSuggestion = !entry.operation
     ? entry.suggestions.find((s) => s.selected)
@@ -186,7 +194,7 @@ function ImportEntryRow({
   const hasActions = showUnlink || showApprove || showLink
 
   const isLinkingMode = !!linkingEntry
-  const isLinkSource = linkingEntry === entry
+  const isLinkSource = linkingEntry?.id === entry.id
   const isLinkTarget = isLinkingMode && !!entry.parsed && !entry.operation
   const isIrrelevant = isLinkingMode && !isLinkSource && !isLinkTarget
 
@@ -194,10 +202,10 @@ function ImportEntryRow({
     <div
       className={cn(
         'relative group grid grid-cols-2 gap-2 overflow-hidden transition-opacity',
-        !isLinkingMode && 'cursor-pointer',
-        isIrrelevant && 'opacity-35 pointer-events-none',
+        !isLinkingMode && !loading && 'cursor-pointer',
+        (isIrrelevant || loading) && 'opacity-35 pointer-events-none',
       )}
-      onClick={!isLinkingMode ? () => openImportDataEntrySheet(entry) : undefined}
+      onClick={!isLinkingMode && !loading ? () => openImportDataEntrySheet(entry) : undefined}
     >
       {entry.operation ? (
         <OperationEntryCard
@@ -216,13 +224,19 @@ function ImportEntryRow({
         <EmptySlot />
       )}
 
-      {/* Quick actions — left column right edge, shown on hover when not in linking mode */}
-      {hasActions && !isLinkingMode && (
+      {hasActions && !isLinkingMode && !loading && (
         <div className="absolute inset-y-0 left-0 w-[calc(50%-0.25rem)] hidden group-hover:flex items-center justify-end pr-1 pl-3 bg-linear-to-l from-background via-background/95 to-transparent">
           {showUnlink && (
-            <Tooltip>
+            <Tooltip disableHoverableContent>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (entry.id) onUnlink(entry.id)
+                  }}
+                >
                   <Link2Off />
                 </Button>
               </TooltipTrigger>
@@ -230,9 +244,16 @@ function ImportEntryRow({
             </Tooltip>
           )}
           {showApprove && (
-            <Tooltip>
+            <Tooltip disableHoverableContent>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (entry.id) onApprove(entry.id)
+                  }}
+                >
                   <Check />
                 </Button>
               </TooltipTrigger>
@@ -240,7 +261,7 @@ function ImportEntryRow({
             </Tooltip>
           )}
           {showLink && (
-            <Tooltip>
+            <Tooltip disableHoverableContent>
               <TooltipTrigger asChild>
                 <Button
                   size="icon"
@@ -259,10 +280,9 @@ function ImportEntryRow({
         </div>
       )}
 
-      {/* Link target button — right column left edge, always visible for eligible entries in linking mode */}
       {isLinkTarget && (
         <div className="absolute inset-y-0 left-[calc(50%+0.25rem)] right-0 flex items-center justify-end pr-1 pl-3 bg-linear-to-r from-transparent via-background/95 to-background">
-          <Tooltip>
+          <Tooltip disableHoverableContent>
             <TooltipTrigger asChild>
               <Button
                 size="icon"

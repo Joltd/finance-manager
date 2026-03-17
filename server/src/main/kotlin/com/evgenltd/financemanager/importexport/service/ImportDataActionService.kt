@@ -57,13 +57,12 @@ class ImportDataActionService(
         importData.progress = false
     }
 
-    fun withLock(id: UUID?, block: () -> Unit) {
+    fun <T> withLock(id: UUID?, block: () -> T): T =
         lockService.withLockEntity(
             entityName = ImportData::class.simpleName!!,
             id = id!!,
             block = block
         )
-    }
 
     fun withTryLock(id: UUID?, block: () -> Unit): Boolean =
         lockService.withTryLockEntity(

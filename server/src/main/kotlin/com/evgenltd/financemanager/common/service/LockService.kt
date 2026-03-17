@@ -14,11 +14,10 @@ class LockService(
     private val lockRegistry: LockRegistry
 ) : Loggable() {
 
-    fun withLockEntity(entityName: String, id: UUID, block: () -> Unit) {
+    fun <T> withLockEntity(entityName: String, id: UUID, block: () -> T): T =
         withLock("$entityName:$id", block)
-    }
 
-    fun withLock(key: String, block: () -> Unit) {
+    fun <T> withLock(key: String, block: () -> T): T {
         val lock = lockRegistry.obtain(key)
 
         val locked = try {
@@ -33,7 +32,7 @@ class LockService(
         }
 
         try {
-            block()
+            return block()
         } finally {
             lock.unlock()
         }

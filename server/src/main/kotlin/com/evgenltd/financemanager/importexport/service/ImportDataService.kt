@@ -52,14 +52,17 @@ class ImportDataService(
     @SkipLogging
     fun entryList(id: UUID, request: EntryFilter): List<ImportDataDayRecord> {
         val importData = importDataRepository.find(id)
+        val dates = findNearDates(request.pointer, request.direction, importData)
+        return entryList(id, dates).sortedByDescending { it.date }
+    }
 
-        val pointer = request.pointer
-        val direction = request.direction
-        val dates = findNearDates(pointer, direction, importData)
-
+    @SkipLogging
+    fun entryList(id: UUID, dates: List<LocalDate>): List<ImportDataDayRecord> {
         if (dates.isEmpty()) {
             return emptyList()
         }
+
+        val importData = importDataRepository.find(id)
 
         val days = ((ImportDataDay::importData eq importData) and
                 (ImportDataDay::date contains dates))
@@ -89,7 +92,7 @@ class ImportDataService(
                 totals = day.totals.map { importDataConverter.toRecord(it) },
                 entries = entries + operations,
             )
-        }.sortedByDescending { it.date }
+        }
     }
 
     private fun findNearDates(
