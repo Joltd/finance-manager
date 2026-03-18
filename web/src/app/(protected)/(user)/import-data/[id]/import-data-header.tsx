@@ -139,7 +139,12 @@ function TitleSection({
           <ImportDataStatus data={data} />
           <Tooltip disableHoverableContent>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-xs" onClick={onRecalculate} disabled={loading || data.progress}>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={onRecalculate}
+                disabled={loading || data.progress}
+              >
                 <RefreshCwIcon />
               </Button>
             </TooltipTrigger>

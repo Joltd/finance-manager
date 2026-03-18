@@ -29,7 +29,7 @@ import {
 } from '@/app/(protected)/(user)/operation/operation-form'
 import { useImportDataStore } from '@/store/import-data'
 import { cn } from '@/lib/utils'
-import { ImportEntryCard } from './import-entry-card'
+import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from '@/app/(protected)/(user)/import-data/[id]/import-data-actions'
 
 // ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ export function ImportDataEntrySheet() {
                 Suggestions
               </Typography>
               {entry!.suggestions.map((suggestion, idx) => (
-                <ImportEntryCard
+                <ImportDataEntryCard
                   key={idx}
                   type={suggestion.type}
                   amountFrom={suggestion.amountFrom}
@@ -241,6 +241,7 @@ export function ImportDataEntrySheet() {
                   <Field>
                     <FieldLabel>From</FieldLabel>
                     <AccountInput
+                      type={AccountType.ACCOUNT}
                       value={form.accountFrom}
                       onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
                     />
@@ -255,6 +256,7 @@ export function ImportDataEntrySheet() {
                   <Field>
                     <FieldLabel>To</FieldLabel>
                     <AccountInput
+                      type={AccountType.ACCOUNT}
                       value={form.accountTo}
                       onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
                     />

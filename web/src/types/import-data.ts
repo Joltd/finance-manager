@@ -1,5 +1,5 @@
 import { Amount } from '@/types/common/amount'
-import { AccountReference } from '@/types/account'
+import { Account, AccountReference } from '@/types/account'
 import { Operation, OperationType } from '@/types/operation'
 import { DateRange, Embedding } from '@/types/common/common'
 
@@ -17,7 +17,7 @@ export interface ImportDataTotal {
 
 export interface ImportData {
   id: string
-  account: AccountReference
+  account: Account
   dateRange?: DateRange
   progress: boolean
   valid: boolean

@@ -53,10 +53,6 @@ export interface ImportEntryCardProps {
   showAction?: boolean
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const ratingColor: Record<SuggestionRating, string> = {
   GOOD: 'text-green-600 dark:text-green-400',
   FAIR: 'text-yellow-600 dark:text-yellow-400',
@@ -85,7 +81,7 @@ function resolveCounterpart(
 // Component
 // ---------------------------------------------------------------------------
 
-export function ImportEntryCard({
+export function ImportDataEntryCard({
   type,
   amountFrom,
   amountTo,

@@ -121,7 +121,20 @@ export default function AccountPage() {
             }
 
             return (
-              <Group key={group.id} title={group.name} onEdit={() => void handleEditGroup(group)}>
+              <Group
+                key={group.id}
+                title={group.name}
+                actions={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="opacity-0 w-5 h-5 group-hover/group:opacity-100 transition-opacity shrink-0"
+                    onClick={() => void handleEditGroup(group)}
+                  >
+                    <PencilIcon className="w-3! h-3!" />
+                  </Button>
+                }
+              >
                 {accounts}
               </Group>
             )

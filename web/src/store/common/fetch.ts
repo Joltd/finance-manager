@@ -1,4 +1,5 @@
 import { create, StateCreator } from 'zustand'
+import { createStore } from 'zustand/vanilla'
 import { Method } from 'axios'
 import api from '@/lib/axios'
 import { buildPath } from '@/lib/api'
@@ -92,4 +93,13 @@ export function createFetchStore<
   TPath extends Record<string, string> = Record<string, string>,
 >(path: string, method: Method = 'GET') {
   return create<FetchSlice<TData, TBody, TQuery, TPath>>(createFetchSlice(path, method))
+}
+
+export function createFetchStoreInstance<
+  TData,
+  TBody = unknown,
+  TQuery = unknown,
+  TPath extends Record<string, string> = Record<string, string>,
+>(path: string, method: Method = 'GET') {
+  return createStore<FetchSlice<TData, TBody, TQuery, TPath>>(createFetchSlice(path, method))
 }

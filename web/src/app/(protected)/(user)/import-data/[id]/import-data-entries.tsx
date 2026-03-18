@@ -17,7 +17,7 @@ import { abs, add, subtract } from '@/types/common/amount'
 import { ValidIcon } from '@/components/common/icon/valid-icon'
 import { cn, formatDateCommon } from '@/lib/utils'
 import { openImportDataEntrySheet } from './import-data-entry-sheet'
-import { ImportEntryCard } from './import-entry-card'
+import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from './import-data-actions'
 
 interface ImportDataEntriesProps {
@@ -59,22 +59,49 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
           <Group
             key={day.date}
             title={formatDateCommon(day.date)}
-            icon={(() => {
+            actions={(() => {
               const hasUnprocessed = day.entries.some((e) => !e.operation)
               const validState = hasUnprocessed ? null : day.valid
+
+              const approvableIds = day.entries
+                .filter((e) => !e.operation && e.suggestions.some((s) => s.selected))
+                .map((e) => e.id)
+                .filter((eid): eid is string => !!eid)
+
               return (
-                <Tooltip disableHoverableContent>
-                  <TooltipTrigger asChild>
-                    <ValidIcon valid={validState} />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {validState === null
-                      ? 'Some entries have no linked operation yet'
-                      : validState
-                        ? 'All totals for this day are valid'
-                        : 'Some totals for this day are invalid'}
-                  </TooltipContent>
-                </Tooltip>
+                <>
+                  <Tooltip disableHoverableContent>
+                    <TooltipTrigger asChild>
+                      <ValidIcon valid={validState} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {validState === null
+                        ? 'Some entries have no linked operation yet'
+                        : validState
+                          ? 'All totals for this day are valid'
+                          : 'Some totals for this day are invalid'}
+                    </TooltipContent>
+                  </Tooltip>
+                  {approvableIds.length > 0 && (
+                    <Tooltip disableHoverableContent>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="opacity-0 w-5 h-5 group-hover/group:opacity-100 transition-opacity shrink-0"
+                          disabled={actions.loading}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            void actions.approve(id, approvableIds)
+                          }}
+                        >
+                          <Check className="w-3! h-3!" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Approve all ({approvableIds.length})</TooltipContent>
+                    </Tooltip>
+                  )}
+                </>
               )
             })()}
             className="mb-6"
@@ -326,7 +353,7 @@ function OperationEntryCard({
   action?: React.ReactNode
 }) {
   return (
-    <ImportEntryCard
+    <ImportDataEntryCard
       type={operation.type}
       amountFrom={operation.amountFrom}
       amountTo={operation.amountTo}
@@ -351,7 +378,7 @@ function SuggestionEntryCard({
   action?: React.ReactNode
 }) {
   return (
-    <ImportEntryCard
+    <ImportDataEntryCard
       type={suggestion.type}
       amountFrom={suggestion.amountFrom}
       amountTo={suggestion.amountTo}
@@ -377,7 +404,7 @@ function ParsedEntryCard({
   showAction?: boolean
 }) {
   return (
-    <ImportEntryCard
+    <ImportDataEntryCard
       type={parsed.type}
       amountFrom={parsed.amountFrom}
       amountTo={parsed.amountTo}
