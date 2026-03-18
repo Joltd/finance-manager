@@ -71,18 +71,21 @@ class ImportDataController(
 
     @PostMapping("/api/v1/import-data/{id}/entry/link")
     @PreAuthorize("hasRole('USER')")
-    fun linkOperationById(@PathVariable id: UUID, @RequestBody request: ImportDataLinkRequest): List<ImportDataDayRecord> =
+    fun linkOperationById(@PathVariable id: UUID, @RequestBody request: ImportDataLinkRequest) {
         importDataProcessService.linkOperationById(id, request.entryId, request.operationId)
+    }
 
     @PostMapping("/api/v1/import-data/{id}/entry/{entryId}/link")
     @PreAuthorize("hasRole('USER')")
-    fun linkOperation(@PathVariable id: UUID, @PathVariable entryId: UUID, @RequestBody request: OperationRecord): List<ImportDataDayRecord> =
+    fun linkOperation(@PathVariable id: UUID, @PathVariable entryId: UUID, @RequestBody request: OperationRecord) {
         importDataProcessService.linkOperation(id, entryId, request)
+    }
 
     @PostMapping("/api/v1/import-data/{id}/entry/unlink")
     @PreAuthorize("hasRole('USER')")
-    fun unlinkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataUnlinkRequest): List<ImportDataDayRecord> =
+    fun unlinkOperation(@PathVariable id: UUID, @RequestBody request: ImportDataUnlinkRequest) {
         importDataProcessService.unlinkOperation(id, request.entryIds)
+    }
 
     @PostMapping("/api/v1/import-data/{id}/entry/visibility")
     @PreAuthorize("hasRole('USER')")
@@ -92,8 +95,9 @@ class ImportDataController(
 
     @PostMapping("/api/v1/import-data/{id}/entry/approve")
     @PreAuthorize("hasRole('USER')")
-    fun approveSuggestion(@PathVariable id: UUID, @RequestBody request: ImportDataEntryApproveSuggestionRequest): List<ImportDataDayRecord> =
+    fun approveSuggestion(@PathVariable id: UUID, @RequestBody request: ImportDataEntryApproveSuggestionRequest) {
         importDataProcessService.approveSuggestion(id, request.entryIds)
+    }
 
     @DeleteMapping("/api/v1/import-data/{id}")
     @PreAuthorize("hasRole('USER')")

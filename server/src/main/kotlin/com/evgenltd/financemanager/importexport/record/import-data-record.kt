@@ -46,8 +46,9 @@ data class ImportDataTotalRecord(
 )
 
 data class EntryFilter(
-    val pointer: LocalDate,
-    val direction: SeekDirection,
+    val pointer: LocalDate?,
+    val direction: SeekDirection?,
+    val pointers: List<LocalDate>?,
 //    val date: DateRange? = null,
 //    val linkage: Boolean? = null,
 //    val entryVisible: Boolean? = null,

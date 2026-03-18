@@ -4,9 +4,11 @@ import { Operation } from '@/types/operation'
 import { importDataUrls } from '@/api/import-data'
 import { ImportDataDay } from '@/types/import-data'
 import { useImportDataEntrySeekStore } from '@/store/import-data'
+import { operationUrls } from '@/api/operation'
 
 export function useImportDataActions() {
-  const { patchData } = useImportDataEntrySeekStore()
+  const { refresh } = useImportDataEntrySeekStore()
+  const operation = useRequest(operationUrls.root)
 
   const actualBalanceRequest = useRequest<void, Amount, never, { id: string }>(
     importDataUrls.actualBalance,
@@ -35,7 +37,7 @@ export function useImportDataActions() {
 
   const linkRequest = useRequest<
     ImportDataDay[],
-    Operation,
+    Omit<Operation, 'raw'>,
     never,
     { id: string; entryId: string }
   >(importDataUrls.linkById)
@@ -47,7 +49,8 @@ export function useImportDataActions() {
     unlinkRequest.loading ||
     approveRequest.loading ||
     linkByIdRequest.loading ||
-    linkRequest.loading
+    linkRequest.loading ||
+    operation.loading
 
   const error =
     actualBalanceRequest.error ??
@@ -56,7 +59,8 @@ export function useImportDataActions() {
     unlinkRequest.error ??
     approveRequest.error ??
     linkByIdRequest.error ??
-    linkRequest.error
+    linkRequest.error ??
+    operation.error
 
   const actualBalance = (id: string, balance: Amount) =>
     actualBalanceRequest.submit({ pathParams: { id }, body: balance })
@@ -66,22 +70,21 @@ export function useImportDataActions() {
   const calculateTotal = (id: string) => calculateTotalRequest.submit({ pathParams: { id } })
 
   const unlink = (id: string, entryIds: string[]) =>
-    unlinkRequest.submit({ pathParams: { id }, body: { entryIds } }).then((days) => patchData(days))
+    unlinkRequest.submit({ pathParams: { id }, body: { entryIds } }).then(() => refresh())
 
   const approve = (id: string, entryIds: string[]) =>
-    approveRequest
-      .submit({ pathParams: { id }, body: { entryIds } })
-      .then((days) => patchData(days))
+    approveRequest.submit({ pathParams: { id }, body: { entryIds } }).then(() => refresh())
 
   const linkById = (id: string, entryId: string, operationId: string) =>
     linkByIdRequest
       .submit({ pathParams: { id }, body: { entryId, operationId } })
-      .then((days) => patchData(days))
+      .then(() => refresh())
 
-  const link = (id: string, entryId: string, operation: Operation) =>
-    linkRequest
-      .submit({ pathParams: { id, entryId }, body: operation })
-      .then((days) => patchData(days))
+  const link = (id: string, entryId: string, operation: Omit<Operation, 'raw'>) =>
+    linkRequest.submit({ pathParams: { id, entryId }, body: operation }).then(() => refresh())
+
+  const saveOperation = (body: Omit<Operation, 'raw'>) =>
+    operation.submit({ body }).then(() => refresh())
 
   return {
     loading,
@@ -93,5 +96,6 @@ export function useImportDataActions() {
     approve,
     linkById,
     link,
+    saveOperation,
   }
 }

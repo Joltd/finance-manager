@@ -21,7 +21,7 @@ function getColorClass(amount: Amount, variant: AmountVariant): string {
       if (isNegative(amount)) return 'text-destructive'
       return 'text-muted-foreground'
     default:
-      return isNegative(amount) ? 'text-destructive' : 'text-muted-foreground'
+      return 'text-muted-foreground'
   }
 }
 
@@ -44,7 +44,8 @@ export function AmountLabel({ amount, variant = 'default', className }: AmountLa
         className,
       )}
     >
-      {prefix}{toDisplayString(amount)}
+      {prefix}
+      {toDisplayString(amount)}
     </span>
   )
 }

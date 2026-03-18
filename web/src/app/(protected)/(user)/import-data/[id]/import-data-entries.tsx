@@ -59,18 +59,24 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
           <Group
             key={day.date}
             title={formatDateCommon(day.date)}
-            icon={
-              <Tooltip disableHoverableContent>
-                <TooltipTrigger asChild>
-                  <ValidIcon valid={day.valid} />
-                </TooltipTrigger>
-                <TooltipContent>
-                  {day.valid
-                    ? 'All totals for this day are valid'
-                    : 'Some totals for this day are invalid'}
-                </TooltipContent>
-              </Tooltip>
-            }
+            icon={(() => {
+              const hasUnprocessed = day.entries.some((e) => !e.operation)
+              const validState = hasUnprocessed ? null : day.valid
+              return (
+                <Tooltip disableHoverableContent>
+                  <TooltipTrigger asChild>
+                    <ValidIcon valid={validState} />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {validState === null
+                      ? 'Some entries have no linked operation yet'
+                      : validState
+                        ? 'All totals for this day are valid'
+                        : 'Some totals for this day are invalid'}
+                  </TooltipContent>
+                </Tooltip>
+              )
+            })()}
             className="mb-6"
           >
             {day.totals.map((total) => (
@@ -198,10 +204,81 @@ function ImportEntryRow({
   const isLinkTarget = isLinkingMode && !!entry.parsed && !entry.operation
   const isIrrelevant = isLinkingMode && !isLinkSource && !isLinkTarget
 
+  const leftAction =
+    hasActions && !isLinkingMode && !loading ? (
+      showUnlink ? (
+        <Tooltip disableHoverableContent>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (entry.id) onUnlink(entry.id)
+              }}
+            >
+              <Link2Off />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Unlink</TooltipContent>
+        </Tooltip>
+      ) : showApprove ? (
+        <Tooltip disableHoverableContent>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (entry.id) onApprove(entry.id)
+              }}
+            >
+              <Check />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Approve</TooltipContent>
+        </Tooltip>
+      ) : showLink ? (
+        <Tooltip disableHoverableContent>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation()
+                onStartLink(entry)
+              }}
+            >
+              <Link2 />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Link</TooltipContent>
+        </Tooltip>
+      ) : undefined
+    ) : undefined
+
+  const rightAction = isLinkTarget ? (
+    <Tooltip disableHoverableContent>
+      <TooltipTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation()
+            onLinkTarget(entry)
+          }}
+        >
+          <Link2 />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Link here</TooltipContent>
+    </Tooltip>
+  ) : undefined
+
   return (
     <div
       className={cn(
-        'relative group grid grid-cols-2 gap-2 overflow-hidden transition-opacity',
+        'relative grid grid-cols-2 gap-2 transition-opacity',
         !isLinkingMode && !loading && 'cursor-pointer',
         (isIrrelevant || loading) && 'opacity-35 pointer-events-none',
       )}
@@ -212,92 +289,26 @@ function ImportEntryRow({
           operation={entry.operation}
           mainAccountId={mainAccountId}
           className={isLinkSource ? 'border-2 border-primary' : undefined}
+          action={leftAction}
         />
       ) : selectedSuggestion ? (
-        <SuggestionEntryCard suggestion={selectedSuggestion} mainAccountId={mainAccountId} />
+        <SuggestionEntryCard
+          suggestion={selectedSuggestion}
+          mainAccountId={mainAccountId}
+          action={leftAction}
+        />
       ) : (
         <EmptySlot />
       )}
       {entry.parsed ? (
-        <ParsedEntryCard parsed={entry.parsed} mainAccountId={mainAccountId} />
+        <ParsedEntryCard
+          parsed={entry.parsed}
+          mainAccountId={mainAccountId}
+          action={rightAction}
+          showAction={isLinkTarget}
+        />
       ) : (
         <EmptySlot />
-      )}
-
-      {hasActions && !isLinkingMode && !loading && (
-        <div className="absolute inset-y-0 left-0 w-[calc(50%-0.25rem)] hidden group-hover:flex items-center justify-end pr-1 pl-3 bg-linear-to-l from-background via-background/95 to-transparent">
-          {showUnlink && (
-            <Tooltip disableHoverableContent>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (entry.id) onUnlink(entry.id)
-                  }}
-                >
-                  <Link2Off />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Unlink</TooltipContent>
-            </Tooltip>
-          )}
-          {showApprove && (
-            <Tooltip disableHoverableContent>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (entry.id) onApprove(entry.id)
-                  }}
-                >
-                  <Check />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Approve</TooltipContent>
-            </Tooltip>
-          )}
-          {showLink && (
-            <Tooltip disableHoverableContent>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onStartLink(entry)
-                  }}
-                >
-                  <Link2 />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Link</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      )}
-
-      {isLinkTarget && (
-        <div className="absolute inset-y-0 left-[calc(50%+0.25rem)] right-0 flex items-center justify-end pr-1 pl-3 bg-linear-to-r from-transparent via-background/95 to-background">
-          <Tooltip disableHoverableContent>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onLinkTarget(entry)
-                }}
-              >
-                <Link2 />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Link here</TooltipContent>
-          </Tooltip>
-        </div>
       )}
     </div>
   )
@@ -307,10 +318,12 @@ function OperationEntryCard({
   operation,
   mainAccountId,
   className,
+  action,
 }: {
   operation: Operation
   mainAccountId?: string
   className?: string
+  action?: React.ReactNode
 }) {
   return (
     <ImportEntryCard
@@ -322,6 +335,7 @@ function OperationEntryCard({
       description={operation.description}
       mainAccountId={mainAccountId}
       variant="operation"
+      action={action}
       className={className}
     />
   )
@@ -330,9 +344,11 @@ function OperationEntryCard({
 function SuggestionEntryCard({
   suggestion,
   mainAccountId,
+  action,
 }: {
   suggestion: ImportDataOperation
   mainAccountId?: string
+  action?: React.ReactNode
 }) {
   return (
     <ImportEntryCard
@@ -344,6 +360,7 @@ function SuggestionEntryCard({
       description={suggestion.description}
       mainAccountId={mainAccountId}
       variant="suggestion"
+      action={action}
     />
   )
 }
@@ -351,9 +368,13 @@ function SuggestionEntryCard({
 function ParsedEntryCard({
   parsed,
   mainAccountId,
+  action,
+  showAction,
 }: {
   parsed: ImportDataOperation
   mainAccountId?: string
+  action?: React.ReactNode
+  showAction?: boolean
 }) {
   return (
     <ImportEntryCard
@@ -365,6 +386,8 @@ function ParsedEntryCard({
       description={parsed.description}
       mainAccountId={mainAccountId}
       variant="parsed"
+      action={action}
+      showAction={showAction}
     />
   )
 }

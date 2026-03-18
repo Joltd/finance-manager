@@ -5,7 +5,6 @@ import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.common.service.NotificationEventService
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.record.ImportDataCalculateTotalEvent
-import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.record.OperationRecord
@@ -25,7 +24,6 @@ class ImportDataProcessService(
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataActionService: ImportDataActionService,
     private val importDataEventService: ImportDataEventService,
-    private val importDataService: ImportDataService,
     private val operationProcessService: OperationProcessService,
     private val notificationEventService: NotificationEventService,
     private val fileService: FileService,
@@ -83,28 +81,27 @@ class ImportDataProcessService(
         }
     }
 
-    fun linkOperationById(id: UUID, entryId: UUID, operationId: UUID): List<ImportDataDayRecord> =
+    fun linkOperationById(id: UUID, entryId: UUID, operationId: UUID) {
         importDataActionService.withLock(id) {
             val dates = importDataActionService.linkOperation(id, entryId, operationId)
             publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
-            importDataService.entryList(id, dates)
         }
+    }
 
-    fun linkOperation(id: UUID, entryId: UUID, operation: OperationRecord): List<ImportDataDayRecord> =
+    fun linkOperation(id: UUID, entryId: UUID, operation: OperationRecord) {
         importDataActionService.withLock(id) {
             val operationId = operationProcessService.update(operation) // recalculation by operation events
-            val dates = importDataActionService.linkOperation(id, entryId, operationId)
-            importDataService.entryList(id, dates)
+            importDataActionService.linkOperation(id, entryId, operationId)
         }
+    }
 
-    fun unlinkOperation(id: UUID, entryIds: List<UUID>): List<ImportDataDayRecord> {
+    fun unlinkOperation(id: UUID, entryIds: List<UUID>) {
         if (entryIds.isEmpty()) {
-            return emptyList()
+            return
         }
-        return importDataActionService.withLock(id) {
+        importDataActionService.withLock(id) {
             val dates = importDataActionService.unlinkOperation(id, entryIds)
             publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
-            importDataService.entryList(id, dates)
         }
     }
 
@@ -118,16 +115,15 @@ class ImportDataProcessService(
         }
     }
 
-    fun approveSuggestion(id: UUID, entryIds: List<UUID>): List<ImportDataDayRecord> {
+    fun approveSuggestion(id: UUID, entryIds: List<UUID>) {
         if (entryIds.isEmpty()) {
-            return emptyList()
+            return
         }
-        return importDataActionService.withLock(id) {
+        importDataActionService.withLock(id) {
             val result = importDataActionService.approveSuggestion(id, entryIds)  // recalculation by operation events
-            val dates = result.flatMap { (entryId, operationId) ->
+            result.forEach { (entryId, operationId) ->
                 importDataActionService.linkOperation(id, entryId, operationId)
-            }.distinct()
-            importDataService.entryList(id, dates)
+            }
         }
     }
 

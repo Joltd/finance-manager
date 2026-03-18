@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { AccountType } from '@/types/account'
-import type { OperationType } from '@/types/operation'
+import type { Operation, OperationType } from '@/types/operation'
 import type { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import {
   defaultFormState,
@@ -30,6 +30,7 @@ import {
 import { useImportDataStore } from '@/store/import-data'
 import { cn } from '@/lib/utils'
 import { ImportEntryCard } from './import-entry-card'
+import { useImportDataActions } from '@/app/(protected)/(user)/import-data/[id]/import-data-actions'
 
 // ---------------------------------------------------------------------------
 // Store
@@ -79,6 +80,7 @@ function suggestionToForm(source: ImportDataOperation): OperationFormState {
 export function ImportDataEntrySheet() {
   const { open, entry, closeSheet } = useImportDataEntrySheetStore()
   const { data: importData } = useImportDataStore()
+  const { saveOperation, approve, link } = useImportDataActions()
   const mainAccountId = importData?.account.id
   const [form, setForm] = useState<OperationFormState>(defaultFormState)
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
@@ -133,6 +135,32 @@ export function ImportDataEntrySheet() {
 
   const hasOperation = !!entry?.operation
   const hasSuggestions = (entry?.suggestions.length ?? 0) > 0
+
+  const buildOperationBody = (): Omit<Operation, 'raw'> => {
+    const isExchange = form.type === 'EXCHANGE'
+    return {
+      id: entry?.operation?.id,
+      date: form.date.toISOString().split('T')[0],
+      type: form.type,
+      accountFrom: form.accountFrom!,
+      accountTo: form.accountTo!,
+      amountFrom: isExchange ? form.amountFrom! : form.amount!,
+      amountTo: isExchange ? form.amountTo! : form.amount!,
+      description: form.description || undefined,
+    }
+  }
+
+  const handleAction = async () => {
+    if (!entry) return
+    if (hasOperation) {
+      await saveOperation(buildOperationBody())
+    } else if (initialSuggestionIdx !== null && selectedSuggestionIdx === initialSuggestionIdx) {
+      await approve(importData!.id, [entry.id!])
+    } else {
+      await link(importData!.id, entry.id!, buildOperationBody())
+    }
+    closeSheet()
+  }
   const title = hasOperation ? 'Edit Operation' : 'New Operation'
 
   const actionLabel: string = hasOperation
@@ -184,143 +212,146 @@ export function ImportDataEntrySheet() {
             <Stack gap={4} scrollable className="flex-1 px-4 pb-4">
               <Field>
                 <FieldLabel>Type</FieldLabel>
-              <Select value={form.type} onValueChange={(v) => handleTypeChange(v as OperationType)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="EXCHANGE">Exchange</SelectItem>
-                  <SelectItem value="TRANSFER">Transfer</SelectItem>
-                  <SelectItem value="EXPENSE">Expense</SelectItem>
-                  <SelectItem value="INCOME">Income</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
+                <Select
+                  value={form.type}
+                  onValueChange={(v) => handleTypeChange(v as OperationType)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="EXCHANGE">Exchange</SelectItem>
+                    <SelectItem value="TRANSFER">Transfer</SelectItem>
+                    <SelectItem value="EXPENSE">Expense</SelectItem>
+                    <SelectItem value="INCOME">Income</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            <Field>
-              <FieldLabel>Date</FieldLabel>
-              <DateInput
-                value={form.date}
-                onChange={(date) => date && setForm((f) => ({ ...f, date }))}
-              />
-            </Field>
+              <Field>
+                <FieldLabel>Date</FieldLabel>
+                <DateInput
+                  value={form.date}
+                  onChange={(date) => date && setForm((f) => ({ ...f, date }))}
+                />
+              </Field>
 
-            {form.type === 'EXCHANGE' && (
-              <>
-                <Field>
-                  <FieldLabel>From</FieldLabel>
-                  <AccountInput
-                    value={form.accountFrom}
-                    onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Amount From</FieldLabel>
-                  <AmountInput
-                    value={form.amountFrom}
-                    onChange={(amountFrom) => setForm((f) => ({ ...f, amountFrom }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>To</FieldLabel>
-                  <AccountInput
-                    value={form.accountTo}
-                    onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Amount To</FieldLabel>
-                  <AmountInput
-                    value={form.amountTo}
-                    onChange={(amountTo) => setForm((f) => ({ ...f, amountTo }))}
-                  />
-                </Field>
-              </>
-            )}
+              {form.type === 'EXCHANGE' && (
+                <>
+                  <Field>
+                    <FieldLabel>From</FieldLabel>
+                    <AccountInput
+                      value={form.accountFrom}
+                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>Amount From</FieldLabel>
+                    <AmountInput
+                      value={form.amountFrom}
+                      onChange={(amountFrom) => setForm((f) => ({ ...f, amountFrom }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>To</FieldLabel>
+                    <AccountInput
+                      value={form.accountTo}
+                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>Amount To</FieldLabel>
+                    <AmountInput
+                      value={form.amountTo}
+                      onChange={(amountTo) => setForm((f) => ({ ...f, amountTo }))}
+                    />
+                  </Field>
+                </>
+              )}
 
-            {form.type === 'TRANSFER' && (
-              <>
-                <Field>
-                  <FieldLabel>From</FieldLabel>
-                  <AccountInput
-                    type={AccountType.ACCOUNT}
-                    value={form.accountFrom}
-                    onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>To</FieldLabel>
-                  <AccountInput
-                    type={AccountType.ACCOUNT}
-                    value={form.accountTo}
-                    onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Amount</FieldLabel>
-                  <AmountInput
-                    value={form.amount}
-                    onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-                  />
-                </Field>
-              </>
-            )}
+              {form.type === 'TRANSFER' && (
+                <>
+                  <Field>
+                    <FieldLabel>From</FieldLabel>
+                    <AccountInput
+                      type={AccountType.ACCOUNT}
+                      value={form.accountFrom}
+                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>To</FieldLabel>
+                    <AccountInput
+                      type={AccountType.ACCOUNT}
+                      value={form.accountTo}
+                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>Amount</FieldLabel>
+                    <AmountInput
+                      value={form.amount}
+                      onChange={(amount) => setForm((f) => ({ ...f, amount }))}
+                    />
+                  </Field>
+                </>
+              )}
 
-            {form.type === 'EXPENSE' && (
-              <>
-                <Field>
-                  <FieldLabel>Account</FieldLabel>
-                  <AccountInput
-                    type={AccountType.ACCOUNT}
-                    value={form.accountFrom}
-                    onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Category</FieldLabel>
-                  <AccountInput
-                    type={AccountType.EXPENSE}
-                    value={form.accountTo}
-                    onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Amount</FieldLabel>
-                  <AmountInput
-                    value={form.amount}
-                    onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-                  />
-                </Field>
-              </>
-            )}
+              {form.type === 'EXPENSE' && (
+                <>
+                  <Field>
+                    <FieldLabel>Account</FieldLabel>
+                    <AccountInput
+                      type={AccountType.ACCOUNT}
+                      value={form.accountFrom}
+                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>Category</FieldLabel>
+                    <AccountInput
+                      type={AccountType.EXPENSE}
+                      value={form.accountTo}
+                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>Amount</FieldLabel>
+                    <AmountInput
+                      value={form.amount}
+                      onChange={(amount) => setForm((f) => ({ ...f, amount }))}
+                    />
+                  </Field>
+                </>
+              )}
 
-            {form.type === 'INCOME' && (
-              <>
-                <Field>
-                  <FieldLabel>Account</FieldLabel>
-                  <AccountInput
-                    type={AccountType.ACCOUNT}
-                    value={form.accountTo}
-                    onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Category</FieldLabel>
-                  <AccountInput
-                    type={AccountType.INCOME}
-                    value={form.accountFrom}
-                    onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel>Amount</FieldLabel>
-                  <AmountInput
-                    value={form.amount}
-                    onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-                  />
-                </Field>
-              </>
-            )}
+              {form.type === 'INCOME' && (
+                <>
+                  <Field>
+                    <FieldLabel>Account</FieldLabel>
+                    <AccountInput
+                      type={AccountType.ACCOUNT}
+                      value={form.accountTo}
+                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>Category</FieldLabel>
+                    <AccountInput
+                      type={AccountType.INCOME}
+                      value={form.accountFrom}
+                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel>Amount</FieldLabel>
+                    <AmountInput
+                      value={form.amount}
+                      onChange={(amount) => setForm((f) => ({ ...f, amount }))}
+                    />
+                  </Field>
+                </>
+              )}
 
               <Field>
                 <FieldLabel>Description</FieldLabel>
@@ -333,7 +364,7 @@ export function ImportDataEntrySheet() {
 
             <SheetFooter>
               {showUnlink && <Button variant="outline">Unlink</Button>}
-              <Button>{actionLabel}</Button>
+              <Button onClick={handleAction}>{actionLabel}</Button>
             </SheetFooter>
           </Stack>
         </Stack>

@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.record.SeekDirection
 import com.evgenltd.financemanager.common.repository.*
+import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataDay
 import com.evgenltd.financemanager.importexport.record.EntryFilter
@@ -52,17 +53,19 @@ class ImportDataService(
     @SkipLogging
     fun entryList(id: UUID, request: EntryFilter): List<ImportDataDayRecord> {
         val importData = importDataRepository.find(id)
-        val dates = findNearDates(request.pointer, request.direction, importData)
-        return entryList(id, dates).sortedByDescending { it.date }
-    }
 
-    @SkipLogging
-    fun entryList(id: UUID, dates: List<LocalDate>): List<ImportDataDayRecord> {
+        var dates = request.pointers
+        if (dates == null && request.pointer != null && request.direction != null) {
+            dates = findNearDates(request.pointer, request.direction, importData)
+        }
+
+        if (dates == null) {
+            throw badRequestException("Either pointers or pointer with direction should be provided")
+        }
+
         if (dates.isEmpty()) {
             return emptyList()
         }
-
-        val importData = importDataRepository.find(id)
 
         val days = ((ImportDataDay::importData eq importData) and
                 (ImportDataDay::date contains dates))
@@ -92,7 +95,7 @@ class ImportDataService(
                 totals = day.totals.map { importDataConverter.toRecord(it) },
                 entries = entries + operations,
             )
-        }
+        }.sortedByDescending { it.date }
     }
 
     private fun findNearDates(

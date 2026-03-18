@@ -28,7 +28,7 @@ export interface SeekActions<TData, TBody, TQuery, TPath, TPointer> {
   setBody: (body: TBody) => void
   setQueryParams: (params: TQuery) => void
   setPathParams: (params: TPath) => void
-  patchData: (items: TData[]) => void
+  refresh: () => Promise<void>
   resetData: () => void
   reset: () => void
 }
@@ -39,7 +39,8 @@ export type SeekSlice<
   TBody = unknown,
   TQuery = unknown,
   TPath extends Record<string, string> = Record<string, string>,
-> = SeekState<TData, TBody, TQuery, TPath, TPointer> & SeekActions<TData, TBody, TQuery, TPath, TPointer>
+> = SeekState<TData, TBody, TQuery, TPath, TPointer> &
+  SeekActions<TData, TBody, TQuery, TPath, TPointer>
 
 const initialLoading: Record<SeekDirection, boolean> = {
   [SeekDirection.FORWARD]: false,
@@ -62,6 +63,26 @@ export function createSeekSlice<
   getPointer: (item: TData) => TPointer,
   method: Method = 'GET',
 ): StateCreator<SeekSlice<TData, TPointer, TBody, TQuery, TPath>> {
+  const executeRequest = async (
+    path: string,
+    method: Method,
+    pathParams?: Record<string, string>,
+    queryParams?: unknown,
+    data?: unknown,
+  ): Promise<TData[]> => {
+    const url = buildPath(path, pathParams)
+    const response = await api.request<BackendResponse<TData[]>>({
+      url,
+      method,
+      data,
+      params: queryParams,
+    })
+    if (!response.data.success) {
+      throw new Error(response.data.error)
+    }
+    return response.data.body
+  }
+
   return (set, get) => ({
     data: [],
     loading: { ...initialLoading },
@@ -94,22 +115,16 @@ export function createSeekSlice<
             : getPointer(data[data.length - 1])
           : storedPointer
 
-      const url = buildPath(path, pathParams as Record<string, string> | undefined)
       set((state) => ({ loading: { ...state.loading, [direction]: true }, error: null }))
 
       try {
-        const response = await api.request<BackendResponse<TData[]>>({
-          url,
+        const newItems = await executeRequest(
+          path,
           method,
-          data: method !== 'GET' ? body : undefined,
-          params: { ...queryParams, pointer, direction },
-        })
-
-        if (!response.data.success) {
-          throw new Error(response.data.error)
-        }
-
-        const newItems = response.data.body
+          pathParams as Record<string, string> | undefined,
+          { ...queryParams, pointer, direction },
+          method !== 'GET' ? body : undefined,
+        )
 
         if (newItems.length === 0) {
           set((state) => ({
@@ -156,13 +171,29 @@ export function createSeekSlice<
     setQueryParams: (params: TQuery) => set({ queryParams: params }),
     setPathParams: (params: TPath) => set({ pathParams: params }),
 
-    patchData: (items: TData[]) =>
-      set((state) => ({
-        data: state.data.map((existing) => {
-          const updated = items.find((item) => getPointer(item) === getPointer(existing))
-          return updated ?? existing
-        }),
-      })),
+    refresh: async (): Promise<void> => {
+      const { data, body, queryParams, pathParams } = get()
+      const pointers = data.map(getPointer)
+
+      try {
+        const updatedItems = await executeRequest(
+          path,
+          method,
+          pathParams as Record<string, string> | undefined,
+          { ...queryParams, pointers },
+          method !== 'GET' ? body : undefined,
+        )
+
+        set((state) => ({
+          data: state.data.map((existing) => {
+            const updated = updatedItems.find((item) => getPointer(item) === getPointer(existing))
+            return updated ?? existing
+          }),
+        }))
+      } catch (err) {
+        throw err
+      }
+    },
 
     resetData: () =>
       set({

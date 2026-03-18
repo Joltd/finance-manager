@@ -46,6 +46,11 @@ export interface ImportEntryCardProps {
   recommended?: boolean
   onClick?: () => void
   className?: string
+
+  /** Icon button to show on the right edge of the card */
+  action?: React.ReactNode
+  /** When true the action strip is always visible; otherwise only on hover */
+  showAction?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -95,20 +100,24 @@ export function ImportEntryCard({
   recommended = false,
   onClick,
   className,
+  action,
+  showAction = false,
 }: ImportEntryCardProps) {
   const showBothAmounts =
     amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
 
-  const { single: counterpart, showBoth } = resolveCounterpart(mainAccountId, accountFrom, accountTo)
+  const { single: counterpart, showBoth } = resolveCounterpart(
+    mainAccountId,
+    accountFrom,
+    accountTo,
+  )
 
   const isClickable = !!onClick
 
   const baseVariantClass =
     variant === 'suggestion'
       ? 'border border-dashed bg-background opacity-60'
-      : variant === 'parsed'
-        ? 'border bg-muted/30'
-        : 'border bg-background'
+      : 'border bg-muted/30'
 
   const interactiveClass = isClickable
     ? active
@@ -120,7 +129,7 @@ export function ImportEntryCard({
     <Stack
       gap={1}
       className={cn(
-        'p-2.5 rounded-md',
+        'relative group/card overflow-hidden rounded-md p-2.5',
         isClickable ? interactiveClass : baseVariantClass,
         className,
       )}
@@ -183,7 +192,11 @@ export function ImportEntryCard({
             </Typography>
           )}
           {recommended && (
-            <Typography as="span" variant="small" className="inline-flex items-center gap-0.5 text-xs text-primary shrink-0">
+            <Typography
+              as="span"
+              variant="small"
+              className="inline-flex items-center gap-0.5 text-xs text-primary shrink-0"
+            >
               <Sparkles className="size-3" />
               Auto
             </Typography>
@@ -197,7 +210,17 @@ export function ImportEntryCard({
           {description}
         </Typography>
       )}
+
+      {action && (
+        <div
+          className={cn(
+            'absolute inset-y-0 right-0 flex items-center justify-center w-9 bg-muted/80',
+            !showAction && 'hidden group-hover/card:flex',
+          )}
+        >
+          {action}
+        </div>
+      )}
     </Stack>
   )
 }
-
