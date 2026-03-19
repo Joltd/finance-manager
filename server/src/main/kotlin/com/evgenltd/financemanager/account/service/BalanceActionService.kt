@@ -1,9 +1,5 @@
 package com.evgenltd.financemanager.account.service
 
-import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.common.util.Loggable
-import com.evgenltd.financemanager.operation.repository.TransactionRepository
-import com.evgenltd.financemanager.operation.service.signedAmount
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.entity.Turnover
@@ -11,6 +7,10 @@ import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.account.repository.TurnoverRepository
 import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.common.util.Loggable
+import com.evgenltd.financemanager.operation.repository.TransactionRepository
+import com.evgenltd.financemanager.operation.service.signedAmount
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -95,18 +95,6 @@ class BalanceActionService(
             .let { turnoverRepository.saveAll(it) }
 
         return cumulativeAmount
-    }
-
-    private fun calculateBalance(account: Account, currency: String, date: LocalDate, amount: Amount) {
-        val balance = balanceRepository.findByAccountAndAmountCurrency(account, currency) ?: Balance(
-            tenant = account.tenant,
-            account = account,
-            amount = Amount(0, currency),
-            date = date,
-        ).let { balanceRepository.save(it) }
-        balance.amount = amount
-        balance.date = LocalDate.now()
-
     }
 
 }

@@ -4,11 +4,11 @@ import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.service.BalanceProcessService
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.AccountBalanceChangeStateRecord
+import com.evgenltd.financemanager.operation.record.OperationChangeRecord
 import com.evgenltd.financemanager.operation.record.OperationChangeStateRecord
 import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.operation.record.OperationChangeRecord
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class OperationProcessService(
@@ -44,7 +44,7 @@ class OperationProcessService(
     }
 
     private fun notifyChanges(changes: List<OperationChangeRecord>) {
-        operationEventService.operation()
+//        operationEventService.operation()
         changes.asSequence()
             .filter { (old, new) -> isOperationChanged(old, new) }
             .flatMap { (old, new) -> listOf(old, new) }

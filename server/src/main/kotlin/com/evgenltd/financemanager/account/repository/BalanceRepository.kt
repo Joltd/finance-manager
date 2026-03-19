@@ -15,6 +15,8 @@ interface BalanceRepository : JpaRepository<Balance, UUID>, JpaSpecificationExec
 
     fun findByAccountAndAmountCurrency(account: Account, currency: String): Balance?
 
+    fun findByAccountIdAndAmountCurrency(accountId: UUID, currency: String): Balance?
+
     @Modifying
     @Query("""
         insert into balances (id, tenant, account_id, amount_value, amount_currency, date, calculation_date, calculation_version)

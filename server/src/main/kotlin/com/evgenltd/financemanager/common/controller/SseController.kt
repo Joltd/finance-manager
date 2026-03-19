@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
+import org.springframework.http.MediaType
 
 @RestController
 @SkipLogging
@@ -13,8 +14,8 @@ class SseController(
     private val sseService: SseService,
 ) {
 
-    @GetMapping("/sse")
+    @GetMapping("/sse", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     @PreAuthorize("isAuthenticated()")
-    fun sse(): SseEmitter? = sseService.subscribe()
+    fun sse(): SseEmitter = sseService.subscribe()
 
 }

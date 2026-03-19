@@ -10,13 +10,8 @@ import com.evgenltd.financemanager.user.service.UserService
 import com.evgenltd.financemanager.user.service.currentUser
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
+import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @DataResponse
@@ -39,7 +34,7 @@ class AdminUserController(
     fun update(@RequestBody record: AdminUserRecord) {
         try {
             userService.adminUpdate(record)
-                .also { userEventService.adminUser() }
+//                .also { userEventService.adminUser() }
         } catch (e: DataIntegrityViolationException) {
             log.error("Unable to save user", e)
             throw badRequestException("Login already in use")
@@ -57,7 +52,7 @@ class AdminUserController(
         } catch (_: Exception) {
             userService.adminMarkAsDelete(id)
         }
-        userEventService.adminUser()
+//        userEventService.adminUser()
     }
 
 }

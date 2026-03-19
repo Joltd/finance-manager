@@ -1,10 +1,8 @@
 package com.evgenltd.financemanager.common.record
 
-import org.springframework.context.ApplicationEvent
-import java.util.UUID
+import java.time.Instant
 
-data class SseEvent(
-    val id: UUID = UUID.randomUUID(),
-    val name: String,
-    val data: Any = "",
-) : ApplicationEvent(data)
+data class SseEnvelope(
+    val payload: Any? = null,
+    val timestamp: Instant = Instant.now(),
+)

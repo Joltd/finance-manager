@@ -2,7 +2,6 @@ package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
 import com.evgenltd.financemanager.common.service.FileService
-import com.evgenltd.financemanager.common.service.NotificationEventService
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.record.ImportDataCalculateTotalEvent
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
@@ -23,18 +22,12 @@ class ImportDataProcessService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataActionService: ImportDataActionService,
-    private val importDataEventService: ImportDataEventService,
     private val operationProcessService: OperationProcessService,
-    private val notificationEventService: NotificationEventService,
     private val fileService: FileService,
     private val publisher: ApplicationEventPublisher,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
-
-    fun importDataManage(id: UUID, progress: Boolean) {
-        importDataEventService.importDataProgress(id, progress)
-    }
 
     @Async
     fun beginNewImport(id: UUID, filename: String) {

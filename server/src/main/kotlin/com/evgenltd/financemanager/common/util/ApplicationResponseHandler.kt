@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.common.util
 
 import com.evgenltd.financemanager.common.component.DataResponse
-import com.evgenltd.financemanager.common.controller.SseController
 import com.evgenltd.financemanager.common.record.Response
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.MethodParameter
@@ -12,11 +11,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
-import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import org.springframework.web.method.HandlerMethod
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 

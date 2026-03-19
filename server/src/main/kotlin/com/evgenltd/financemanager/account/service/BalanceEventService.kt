@@ -1,11 +1,9 @@
 package com.evgenltd.financemanager.account.service
 
-import com.evgenltd.financemanager.common.component.Patch
-import com.evgenltd.financemanager.common.component.SseEventMapping
-import com.evgenltd.financemanager.common.component.patch
-import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.account.converter.BalanceConverter
+import com.evgenltd.financemanager.account.record.BalanceRecord
 import com.evgenltd.financemanager.account.repository.BalanceRepository
+import com.evgenltd.financemanager.common.component.SseEventMapping
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -16,8 +14,8 @@ class BalanceEventService(
 ) {
 
     @SseEventMapping("/api/v1/balance")
-    fun balance(id: UUID): Patch = balanceRepository.find(id)
-        .let { balanceConverter.toRecord(it) }
-        .let { patch(it, "/id=$id") }
+    fun balance(accountId: UUID, currency: String): BalanceRecord? =
+        balanceRepository.findByAccountIdAndAmountCurrency(accountId, currency)
+            ?.let { balanceConverter.toRecord(it) }
 
 }

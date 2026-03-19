@@ -6,18 +6,18 @@ import com.evgenltd.financemanager.account.record.BalanceCalculationRequest
 import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.user.component.currentTenant
-import com.evgenltd.financemanager.user.component.withRootTenant
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @Service
 class BalanceProcessService(
     private val balanceActionService: BalanceActionService,
+    private val balanceEventService: BalanceEventService,
     private val lockService: LockService,
     private val publisher: ApplicationEventPublisher,
 ) : Loggable() {
@@ -45,11 +45,12 @@ class BalanceProcessService(
             }
         }
         if (locked) {
+            balanceEventService.balance(event.accountId, event.currency)
             publisher.publishEvent(BalanceCalculationCompleted(accountId, currency))
         }
     }
 
-//    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "*/10 * * * * *")
     fun requestCalculateBalance() {
         balanceActionService.getBalancesForCalculation()
             .onEach {

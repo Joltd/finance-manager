@@ -23,12 +23,6 @@ class ImportDataController(
     private val fileService: FileService,
 ) {
 
-    @PostMapping("/api/v1/import-data/{id}/manage")
-    @PreAuthorize("hasRole('USER')")
-    fun importDataManage(@PathVariable id: UUID, @RequestParam progress: Boolean) {
-        importDataProcessService.importDataManage(id, progress)
-    }
-
     @GetMapping("/api/v1/import-data")
     @PreAuthorize("hasRole('USER')")
     fun list(): List<Reference> = importDataService.list()
