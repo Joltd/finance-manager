@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import * as Checkbox from '@radix-ui/react-checkbox'
-import { CheckIcon } from 'lucide-react'
 import { create } from 'zustand'
 
 import { accountUrls } from '@/api/account'
@@ -16,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -188,16 +187,11 @@ export function AccountSheet() {
             </Field>
 
             <Field orientation="horizontal">
-              <Checkbox.Root
+              <Checkbox
                 id="deleted"
                 checked={form.deleted}
                 onCheckedChange={(checked) => setForm((f) => ({ ...f, deleted: checked === true }))}
-                className="size-4 shrink-0 rounded-sm border border-input bg-transparent shadow-xs transition-colors data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              >
-                <Checkbox.Indicator className="flex items-center justify-center text-primary-foreground">
-                  <CheckIcon className="size-3" />
-                </Checkbox.Indicator>
-              </Checkbox.Root>
+              />
               <FieldLabel htmlFor="deleted">Deleted</FieldLabel>
             </Field>
           </div>

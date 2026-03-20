@@ -16,3 +16,12 @@ export interface User {
   role: UserRole
   settings: Settings
 }
+
+export interface AdminUser {
+  id?: string
+  tenant?: string
+  name: string
+  login: string
+  password?: string
+  deleted: boolean
+}
