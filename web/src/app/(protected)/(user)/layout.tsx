@@ -2,6 +2,7 @@ import React from 'react'
 import { RoleGuard } from '@/components/user/role-guard'
 import { SidebarInset } from '@/components/ui/sidebar'
 import { UserAppSidebar } from '@/components/common/sidebar/user-app-sidebar'
+import { MobileSidebarTrigger } from '@/components/common/sidebar/mobile-sidebar-trigger'
 
 export default function UserLayout({
   children,
@@ -11,7 +12,8 @@ export default function UserLayout({
   return (
     <RoleGuard role="USER">
       <UserAppSidebar />
-      <SidebarInset className="h-full overflow-hidden">
+      <SidebarInset className="h-full overflow-hidden flex flex-col">
+        <MobileSidebarTrigger />
         {children}
       </SidebarInset>
     </RoleGuard>

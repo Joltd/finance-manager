@@ -30,7 +30,7 @@ export function SidebarAppHeader({ homeHref }: SidebarAppHeaderProps) {
             <span className="font-semibold">Finance Manager</span>
           </Link>
         </SidebarMenuButton>
-        <SidebarTrigger className="group-data-[collapsible=icon]:hidden shrink-0" />
+        <SidebarTrigger className="group-data-[collapsible=icon]:hidden shrink-0 hidden md:flex" />
       </div>
     </SidebarHeader>
   )

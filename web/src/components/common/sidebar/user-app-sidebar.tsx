@@ -2,7 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ArrowLeftRight, ArrowUpDown, BookOpen, PlusIcon, Trash2Icon, TrendingUp, Wallet } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  ArrowUpDown,
+  BookOpen,
+  PlusIcon,
+  Trash2Icon,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react'
 import { useEffect } from 'react'
 import {
   Sidebar,
@@ -15,6 +23,7 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { SidebarAppHeader } from './sidebar-app-header'
 import { SidebarUserFooter } from './sidebar-user-footer'
@@ -34,15 +43,18 @@ const reportsNav = [
   { href: '/report/top-flow', label: 'Top Flow', icon: ArrowUpDown },
 ]
 
-const settingsNav = [
-  { href: '/reference', label: 'Reference', icon: BookOpen },
-]
+const settingsNav = [{ href: '/reference', label: 'Reference', icon: BookOpen }]
 
 export function UserAppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const { setOpenMobile } = useSidebar()
   const importDataList = useImportDataListStore()
   const deleteImport = useRequest(importDataUrls.id, { method: 'DELETE' })
+
+  useEffect(() => {
+    setOpenMobile(false)
+  }, [pathname, setOpenMobile])
 
   useEffect(() => {
     void importDataList.fetch()
@@ -113,7 +125,7 @@ export function UserAppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup className="hidden md:block">
           <SidebarGroupLabel>Import Data</SidebarGroupLabel>
           <SidebarGroupAction title="New import" onClick={openImportDataBeginDialog}>
             <PlusIcon />
