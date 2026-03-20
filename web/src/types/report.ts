@@ -2,6 +2,33 @@ import { Amount } from '@/types/common/amount'
 import { Reference } from '@/types/common/reference'
 import { DateRange } from '@/types/common/common'
 import { AccountType } from '@/types/account'
+import { Operation } from '@/types/operation'
+
+// dashboard
+
+export interface DashboardGroupBalance {
+  group?: Reference
+  balance: Amount
+}
+
+export interface DashboardMonthlyAvg {
+  income: Amount
+  expense: Amount
+  net: Amount
+}
+
+export interface DashboardTopExpense {
+  expense: Reference
+  avg: Amount
+}
+
+export interface Dashboard {
+  totalBalance: Amount
+  groupBalances: DashboardGroupBalance[]
+  avgMonthly: DashboardMonthlyAvg
+  topExpenses: DashboardTopExpense[]
+  recentOperations: Operation[]
+}
 
 // top-flow
 

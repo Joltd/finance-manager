@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.common.util
 
 import jakarta.persistence.Embeddable
 import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlin.math.absoluteValue
 
 @Embeddable
@@ -31,6 +32,11 @@ data class Amount(val value: Long, val currency: String) : Comparable<Amount> {
 
     operator fun times(other: BigDecimal): Amount = Amount(
         toBigDecimal().multiply(other).toAmountValue(),
+        currency
+    )
+
+    operator fun div(other: BigDecimal): Amount = Amount(
+        toBigDecimal().divide(other, RoundingMode.HALF_UP).toAmountValue(),
         currency
     )
 
