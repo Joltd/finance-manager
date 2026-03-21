@@ -5,6 +5,7 @@ export type UserRole = 'ADMIN' | 'USER'
 export interface Settings {
   version: string
   operationDefaultCurrency: string | undefined
+  operationDefaultCurrencyScale: number | undefined
   operationDefaultAccount: AccountReference | undefined
   operationCashAccount: AccountReference | undefined
 }

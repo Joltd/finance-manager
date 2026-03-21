@@ -14,6 +14,7 @@ class SettingConverter(
 
     fun toRecord(settings: Settings): SettingsRecord = SettingsRecord(
         version = settings.version,
+        operationDefaultCurrencyScale = settings.operationDefaultCurrencyScale,
         operationDefaultCurrency = settings.operationDefaultCurrency?.name,
         operationDefaultAccount = settings.operationDefaultAccount?.let { accountConverter.toAccountReference(it) },
         operationCashAccount = settings.operationCashAccount?.let { accountConverter.toAccountReference(it) },
@@ -21,6 +22,7 @@ class SettingConverter(
 
     fun toEntity(settingsRecord: SettingsRecord): Settings = Settings(
         version = settingsRecord.version,
+        operationDefaultCurrencyScale = settingsRecord.operationDefaultCurrencyScale,
         operationDefaultCurrency = settingsRecord.operationDefaultCurrency?.let { currencyConverter.toEntity(it) },
         operationDefaultAccount = settingsRecord.operationDefaultAccount?.let { accountConverter.toEntity(it) },
         operationCashAccount = settingsRecord.operationCashAccount?.let { accountConverter.toEntity(it) },

@@ -4,6 +4,7 @@ import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 
 data class SettingsRecord(
     val version: String,
+    val operationDefaultCurrencyScale: Int?,
     val operationDefaultCurrency: String?,
     val operationDefaultAccount: AccountReferenceRecord?,
     val operationCashAccount: AccountReferenceRecord?,

@@ -12,6 +12,7 @@ import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.service.withMonday
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.common.util.round
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.converter.OperationConverter
@@ -42,10 +43,11 @@ class DashboardService(
 ) {
 
     fun load(): DashboardRecord {
-        val targetCurrency = settingService.load()
-            .operationDefaultCurrency
+        val settings = settingService.load()
+        val targetCurrency = settings.operationDefaultCurrency
             ?.name
             ?: BASE_CURRENCY
+        val targetCurrencyScale = settings.operationDefaultCurrencyScale ?: 0
 
         val empty = emptyAmount(targetCurrency)
 
@@ -60,7 +62,7 @@ class DashboardService(
                     .reduce { a, b -> a + b }
                 DashboardGroupBalanceRecord(
                     group = group?.let { accountGroupConverter.toReference(it) },
-                    balance = balance,
+                    balance = balance.round(targetCurrencyScale),
                 )
             }
             .sortedByDescending { it.balance.value }
@@ -68,6 +70,7 @@ class DashboardService(
         val totalBalance = groupBalances
             .map { it.balance }
             .reduceOrNull { a, b -> a + b }
+            ?.round(targetCurrencyScale)
             ?: empty
 
         val recentOperations = operationRepository
@@ -126,7 +129,7 @@ class DashboardService(
                 val total = monthEntries.map { it.amount }.reduce { a, b -> a + b }
                 DashboardTopExpenseRecord(
                     expense = accountConverter.toReference(account),
-                    avg = total / numMonths,
+                    avg = (total / numMonths).round(targetCurrencyScale),
                 )
             }
             .sortedByDescending { it.avg.value }
@@ -141,9 +144,9 @@ class DashboardService(
         val incomeTotal = totalByType[AccountType.INCOME] ?: empty
         val expenseTotal = totalByType[AccountType.EXPENSE] ?: empty
         val avgMonthly = DashboardMonthlyAvgRecord(
-            income = incomeTotal / numMonths,
-            expense = expenseTotal / numMonths,
-            net = (incomeTotal - expenseTotal) / numMonths,
+            income = (incomeTotal / numMonths).round(targetCurrencyScale),
+            expense = (expenseTotal / numMonths).round(targetCurrencyScale),
+            net = ((incomeTotal - expenseTotal) / numMonths).round(targetCurrencyScale),
         )
 
         return DashboardRecord(

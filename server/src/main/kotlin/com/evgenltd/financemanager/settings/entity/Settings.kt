@@ -7,6 +7,8 @@ import com.evgenltd.financemanager.exchangerate.service.provider.ExchangeRatePro
 
 data class Settings(
     var version: String = "0.0.0",
+    @property:SettingName("operation.default.currency.scale")
+    var operationDefaultCurrencyScale: Int? = null,
     @property:SettingName("operation.default.currency")
     var operationDefaultCurrency: Currency? = null,
     @property:SettingName("operation.default.account")

@@ -1,6 +1,7 @@
 'use client'
 
-import { LogOutIcon, UserIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { LogOutIcon, SettingsIcon, UserIcon } from 'lucide-react'
 import { useUserStore } from '@/store/user'
 import {
   SidebarFooter,
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function SidebarUserFooter() {
+  const router = useRouter()
   const user = useUserStore((state) => state.data)
 
   const handleLogout = async () => {
@@ -40,6 +42,10 @@ export function SidebarUserFooter() {
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="end" className="w-52">
+              <DropdownMenuItem onClick={() => router.push('/settings')}>
+                <SettingsIcon />
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOutIcon />
                 Logout

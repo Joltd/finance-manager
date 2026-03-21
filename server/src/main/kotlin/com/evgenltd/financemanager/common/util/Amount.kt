@@ -81,6 +81,11 @@ fun Amount.isPositive(): Boolean = value > 0L
 
 fun Amount.isNegative(): Boolean = value < 0L
 
+fun Amount.round(scale: Int): Amount = Amount(
+    toBigDecimal().setScale(scale, RoundingMode.HALF_UP).toAmountValue(),
+    currency
+)
+
 fun emptyAmount(currency: String): Amount = Amount(0, currency)
 
 fun BigDecimal.toAmountValue(): Long = movePointRight(Amount.SCALE).toLong()
