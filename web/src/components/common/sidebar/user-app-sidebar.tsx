@@ -36,14 +36,13 @@ import { Reference } from '@/types/common/reference'
 const mainNav = [
   { href: '/operation', label: 'Operations', icon: ArrowLeftRight },
   { href: '/account', label: 'Accounts', icon: Wallet },
+  { href: '/reference', label: 'Reference', icon: BookOpen },
 ]
 
 const reportsNav = [
   { href: '/report/income-expense', label: 'Income & Expense', icon: TrendingUp },
   { href: '/report/top-flow', label: 'Top Flow', icon: ArrowUpDown },
 ]
-
-const settingsNav = [{ href: '/reference', label: 'Reference', icon: BookOpen }]
 
 export function UserAppSidebar() {
   const pathname = usePathname()
@@ -94,24 +93,6 @@ export function UserAppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {reportsNav.map(({ href, label, icon: Icon }) => (
-                <SidebarMenuItem key={href}>
-                  <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
-                    <Link href={href}>
-                      <Icon />
-                      <span>{label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsNav.map(({ href, label, icon: Icon }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
                     <Link href={href}>

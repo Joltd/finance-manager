@@ -15,11 +15,10 @@ class LockRegistryConfiguration {
     fun lockRepository(dataSource: DataSource): DefaultLockRepository =
         DefaultLockRepository(dataSource).apply {
             setRegion("entity-locks")
-            setTimeToLive(Duration.ofMinutes(5).toMillis().toInt())
         }
 
     @Bean
     fun jdbcLockRegistry(lockRepository: LockRepository): JdbcLockRegistry =
-        JdbcLockRegistry(lockRepository)
+        JdbcLockRegistry(lockRepository, Duration.ofMinutes(5))
 
 }

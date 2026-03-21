@@ -1,12 +1,12 @@
 package com.evgenltd.financemanager.operation.converter
 
-import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.operation.entity.Operation
-import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.ai.converter.EmbeddingConverter
+import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationChangeStateRecord
+import com.evgenltd.financemanager.operation.record.OperationRecord
 import org.springframework.stereotype.Service
 
 @Service
@@ -33,17 +33,17 @@ class OperationConverter(
         it.date = record.date
         it.type = record.type
         it.amountFrom = record.amountFrom
-        it.accountFrom = record.accountFrom.id.let { id -> accountRepository.find(id) }
+        it.accountFrom = record.accountFrom.id.let { id -> accountRepository.find(id!!) }
         it.amountTo = record.amountTo
-        it.accountTo = record.accountTo.id.let { id -> accountRepository.find(id) }
+        it.accountTo = record.accountTo.id.let { id -> accountRepository.find(id!!) }
         it.description = record.description
     } ?: Operation(
         date = record.date,
         type = record.type,
         amountFrom = record.amountFrom,
-        accountFrom = record.accountFrom.id.let { accountRepository.find(it) },
+        accountFrom = record.accountFrom.id.let { accountRepository.find(it!!) },
         amountTo = record.amountTo,
-        accountTo = record.accountTo.id.let { accountRepository.find(it) },
+        accountTo = record.accountTo.id.let { accountRepository.find(it!!) },
         description = record.description,
     )
     

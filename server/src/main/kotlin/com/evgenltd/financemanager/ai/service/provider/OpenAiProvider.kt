@@ -2,23 +2,20 @@ package com.evgenltd.financemanager.ai.service.provider
 
 import com.evgenltd.financemanager.ai.record.EmbeddingResult
 import com.evgenltd.financemanager.ai.service.AiProvider
-import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
+import com.evgenltd.financemanager.common.component.IntegrationRestClient
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.Base64
+import java.util.*
 
 @Service
 class OpenAiProvider(
     @Value("\${ai.open-ai.api-key}")
     private val apiKey: String,
-    private val rest: IntegrationRestTemplate,
+    private val rest: IntegrationRestClient,
 ) : AiProvider {
 
     override val name: AiProviders = AiProviders.OPEN_AI
@@ -44,7 +41,7 @@ class OpenAiProvider(
             ?: emptyList()
     }
 
-    private fun request(path: List<String>, body: Any?): JsonNode? {
+    private fun request(path: List<String>, body: Any): JsonNode? {
         val uri = UriComponentsBuilder
             .newInstance()
             .scheme("https")
@@ -53,15 +50,12 @@ class OpenAiProvider(
             .build()
             .toUri()
 
-        val headers = HttpHeaders()
-        headers.setBearerAuth(apiKey)
-
-        val response = rest.exchange(
-            uri,
-            HttpMethod.POST,
-            HttpEntity<Any>(body, headers),
-            JsonNode::class.java,
-        )
+        val response = rest.post()
+            .uri(uri)
+            .headers { it.setBearerAuth(apiKey) }
+            .body(body)
+            .retrieve()
+            .toEntity(JsonNode::class.java)
 
         if (!response.statusCode.is2xxSuccessful) {
             return null

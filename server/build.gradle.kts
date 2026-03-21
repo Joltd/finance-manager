@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.spring") version "1.9.24"
-    id("org.springframework.boot") version "3.3.2"
-    id("io.spring.dependency-management") version "1.1.6"
-    kotlin("plugin.jpa") version "1.9.24"
-    kotlin("plugin.allopen") version "2.1.21"
+    kotlin("jvm") version "2.3.20"
+    kotlin("plugin.spring") version "2.3.20"
+    id("org.springframework.boot") version "4.0.4"
+    id("io.spring.dependency-management") version "1.1.7"
+    kotlin("plugin.jpa") version "2.3.20"
+    kotlin("plugin.allopen") version "2.3.20"
 }
 
 group = "com.evgenltd"
@@ -34,14 +34,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.postgresql:postgresql")
-    implementation("org.flywaydb:flyway-core:11.20.3")
-    runtimeOnly("org.flywaydb:flyway-database-postgresql:11.20.3")
-    implementation("org.hibernate.orm:hibernate-vector:6.6.15.Final")
+    implementation("org.flywaydb:flyway-core:12.1.1")
+    runtimeOnly("org.flywaydb:flyway-database-postgresql:12.1.1")
+    implementation("org.hibernate.orm:hibernate-vector:7.3.0.Final")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.17.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jsoup:jsoup:1.17.1")
+    implementation("org.jsoup:jsoup:1.22.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

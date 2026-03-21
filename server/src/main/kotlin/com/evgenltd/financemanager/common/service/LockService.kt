@@ -3,15 +3,16 @@ package com.evgenltd.financemanager.common.service
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.conflictException
+import org.springframework.integration.support.locks.DistributedLock
 import org.springframework.integration.support.locks.LockRegistry
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Service
 @SkipLogging
 class LockService(
-    private val lockRegistry: LockRegistry
+    private val lockRegistry: LockRegistry<DistributedLock>
 ) : Loggable() {
 
     fun <T> withLockEntity(entityName: String, id: UUID, block: () -> T): T =

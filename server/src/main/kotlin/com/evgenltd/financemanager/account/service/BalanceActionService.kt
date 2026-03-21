@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.account.entity.Turnover
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.account.repository.TurnoverRepository
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
@@ -25,6 +26,7 @@ class BalanceActionService(
     private val balanceEventService: BalanceEventService,
 ) : Loggable() {
 
+    @SkipLogging
     fun getBalancesForCalculation(): List<Balance> {
         return balanceRepository.findByCalculationDateIsNotNull()
     }

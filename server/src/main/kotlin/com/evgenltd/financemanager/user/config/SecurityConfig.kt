@@ -1,6 +1,5 @@
 package com.evgenltd.financemanager.user.config
 
-import com.evgenltd.financemanager.user.config.MdcFilter
 import com.nimbusds.jose.jwk.source.ImmutableSecret
 import com.nimbusds.jose.util.Base64
 import org.springframework.context.annotation.Bean
@@ -105,8 +104,7 @@ class SecurityConfig(
 
     @Bean
     fun authenticationProvider(passwordEncoder: PasswordEncoder, userDetailsService: UserDetailsService): DaoAuthenticationProvider {
-        val provider = DaoAuthenticationProvider()
-        provider.setUserDetailsService(userDetailsService)
+        val provider = DaoAuthenticationProvider(userDetailsService)
         provider.setPasswordEncoder(passwordEncoder)
         return provider
     }

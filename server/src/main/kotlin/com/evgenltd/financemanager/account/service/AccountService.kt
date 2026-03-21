@@ -3,12 +3,14 @@ package com.evgenltd.financemanager.account.service
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
-import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.record.*
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.common.component.SkipLogging
-import com.evgenltd.financemanager.common.repository.*
+import com.evgenltd.financemanager.common.repository.and
+import com.evgenltd.financemanager.common.repository.eq
+import com.evgenltd.financemanager.common.repository.find
+import com.evgenltd.financemanager.common.repository.like
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
@@ -37,7 +39,7 @@ class AccountService(
         .map { accountConverter.toRecord(it) }
 
     fun listBalances(filter: AccountBalanceFilter): List<AccountBalanceGroupRecord> {
-        val balances = balanceRepository.findAll(Balance::amount.isNotZero().takeIf { filter.hideZeroBalances })
+        val balances = balanceRepository.findAll()
             .groupBy { it.account }
             .mapValues { it.value.map { balance -> balance.amount } }
 

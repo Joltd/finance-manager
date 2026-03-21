@@ -10,8 +10,6 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.time.LocalDate
@@ -350,15 +348,20 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
 
     // --- helpers ---
 
-    private fun postOperation(record: OperationRecord): ResponseEntity<String> {
-        val request = HttpEntity(record, authHeaders())
-        return restTemplate.exchange("/api/v1/operation", HttpMethod.POST, request, String::class.java)
-    }
+    private fun postOperation(record: OperationRecord): ResponseEntity<String> =
+        restClient.post()
+            .uri("/api/v1/operation")
+            .headers { it.addAll(authHeaders()) }
+            .body(record)
+            .retrieve()
+            .toEntity(String::class.java)
 
-    private fun deleteOperation(id: UUID): ResponseEntity<String> {
-        val request = HttpEntity<Any>(authHeaders())
-        return restTemplate.exchange("/api/v1/operation/$id", HttpMethod.DELETE, request, String::class.java)
-    }
+    private fun deleteOperation(id: UUID): ResponseEntity<String> =
+        restClient.delete()
+            .uri("/api/v1/operation/$id")
+            .headers { it.addAll(authHeaders()) }
+            .retrieve()
+            .toEntity(String::class.java)
 
     private fun accountRecordOf(account: Account) = AccountRecord(
         id = account.id,

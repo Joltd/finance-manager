@@ -1,6 +1,6 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
-import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
+import com.evgenltd.financemanager.common.component.IntegrationRestClient
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.oppositeRate
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
@@ -8,9 +8,6 @@ import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import java.math.BigDecimal
@@ -22,7 +19,7 @@ import java.time.format.DateTimeFormatter
 class CoinGeckoProvider(
     @Value("\${exchange.coin-gecko.api-key}")
     private val apiKey: String,
-    private val rest: IntegrationRestTemplate
+    private val rest: IntegrationRestClient
 ) : ExchangeRateProvider {
 
     override val name: ExchangeRateProviders = ExchangeRateProviders.COIN_GECKO
@@ -54,15 +51,11 @@ class CoinGeckoProvider(
             .build()
             .toUri()
 
-        val headers = HttpHeaders()
-        headers.set("x-cg-demo-api-key", apiKey)
-
-        val response = rest.exchange(
-            uri,
-            HttpMethod.GET,
-            HttpEntity<Void>(headers),
-            JsonNode::class.java,
-        )
+        val response = rest.get()
+            .uri(uri)
+            .header("x-cg-demo-api-key", apiKey)
+            .retrieve()
+            .toEntity(JsonNode::class.java)
 
         if (!response.statusCode.is2xxSuccessful) {
             return null

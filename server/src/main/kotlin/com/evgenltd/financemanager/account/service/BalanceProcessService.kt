@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.account.service
 import com.evgenltd.financemanager.account.entity.Balance
 import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
 import com.evgenltd.financemanager.account.record.BalanceCalculationRequest
+import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.user.component.currentTenant
@@ -51,6 +52,7 @@ class BalanceProcessService(
     }
 
     @Scheduled(cron = "*/10 * * * * *")
+    @SkipLogging
     fun requestCalculateBalance() {
         balanceActionService.getBalancesForCalculation()
             .onEach {

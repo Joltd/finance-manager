@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 @SkipLogging
@@ -71,7 +71,7 @@ class UserService(
             if (record.password.length < 8) {
                 throw badRequestException("Password must be 8 characters long")
             }
-            user.password = passwordEncoder.encode(record.password)
+            user.password = passwordEncoder.encode(record.password) ?: ""
         }
 
         userRepository.save(user)
@@ -98,8 +98,8 @@ class UserService(
         userRepository.save(user)
     }
 
-    override fun loadUserByUsername(username: String?): UserDetails? {
-        if (username.isNullOrBlank()) {
+    override fun loadUserByUsername(username: String): UserDetails {
+        if (username.isBlank()) {
             throw UsernameNotFoundException("Username is not specified")
         }
 

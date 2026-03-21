@@ -11,11 +11,13 @@ import com.evgenltd.financemanager.user.entity.UserRole
 import com.evgenltd.financemanager.user.service.TokenProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.RestClient
 import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -23,8 +25,15 @@ import java.util.UUID
 @Import(TestAsyncConfig::class)
 abstract class AbstractIntegrationTest {
 
-    @Autowired
-    protected lateinit var restTemplate: TestRestTemplate
+    @LocalServerPort
+    private var port: Int = 0
+
+    protected val restClient: RestClient by lazy {
+        RestClient.builder()
+            .baseUrl("http://localhost:$port")
+            .defaultStatusHandler(HttpStatusCode::isError) { _, _ -> }
+            .build()
+    }
 
     @Autowired
     protected lateinit var tokenProvider: TokenProvider

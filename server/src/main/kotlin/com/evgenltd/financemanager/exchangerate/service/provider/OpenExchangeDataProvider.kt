@@ -1,13 +1,12 @@
 package com.evgenltd.financemanager.exchangerate.service.provider
 
-import com.evgenltd.financemanager.common.component.IntegrationRestTemplate
+import com.evgenltd.financemanager.common.component.IntegrationRestClient
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.LocalDate
@@ -17,7 +16,7 @@ import java.time.LocalDate
 class OpenExchangeDataProvider(
     @Value("\${exchange.open-exchange.app-id}")
     private val appId: String,
-    private val rest: IntegrationRestTemplate
+    private val rest: IntegrationRestClient
 ) : ExchangeRateProvider {
 
     override val name: ExchangeRateProviders = ExchangeRateProviders.OPEN_EXCHANGE
@@ -37,12 +36,10 @@ class OpenExchangeDataProvider(
             .build()
             .toUri()
 
-        val response = rest.exchange(
-            uri,
-            HttpMethod.GET,
-            null,
-            JsonNode::class.java
-        )
+        val response = rest.get()
+            .uri(uri)
+            .retrieve()
+            .toEntity(JsonNode::class.java)
 
         if (!response.statusCode.is2xxSuccessful) {
             return emptyList()
