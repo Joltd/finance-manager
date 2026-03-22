@@ -38,14 +38,14 @@ export function Seek({ seek, loading, exhausted, children, className }: SeekProp
 
   return (
     <Stack ref={containerRef} scrollable gap={0} className={className}>
-      <SeekSentinel
+      <SeekSentinelBlock
         id="forward"
         onIntersect={seekForward}
         loading={loading[SeekDirection.FORWARD]}
         exhausted={exhausted[SeekDirection.FORWARD]}
       />
       {children}
-      <SeekSentinel
+      <SeekSentinelBlock
         id="backward"
         onIntersect={seekBackward}
         loading={loading[SeekDirection.BACKWARD]}
@@ -55,26 +55,44 @@ export function Seek({ seek, loading, exhausted, children, className }: SeekProp
   )
 }
 
-interface SeekSentinelProps {
+interface SeekSentinelBlockProps {
   id: string
-  onIntersect: () => Promise<void>
+  onIntersect: () => void
   loading: boolean
   exhausted: boolean
 }
 
-function SeekSentinel({ id, onIntersect, loading, exhausted }: SeekSentinelProps) {
+function SeekSentinelBlock({ id, onIntersect, loading, exhausted }: SeekSentinelBlockProps) {
+  return (
+    <div data-id="seek-sentinel" className="flex min-h-10 items-center justify-center">
+      {exhausted ? (
+        <Typography variant="muted">End of data</Typography>
+      ) : loading ? (
+        <Spinner className="text-muted-foreground" />
+      ) : (
+        <SeekSentinel id={id} onIntersect={onIntersect} />
+      )}
+    </div>
+  )
+}
+
+interface SeekSentinelProps {
+  id: string
+  onIntersect: () => void
+}
+
+function SeekSentinel({ id, onIntersect }: SeekSentinelProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (exhausted) return
     const el = ref.current
     if (!el) return
 
     const observer = new IntersectionObserver(
-      async (entries) => {
+      (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            await onIntersect()
+            onIntersect()
           }
         }
       },
@@ -83,17 +101,7 @@ function SeekSentinel({ id, onIntersect, loading, exhausted }: SeekSentinelProps
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [onIntersect, exhausted])
+  }, [onIntersect, ref.current])
 
-  return (
-    <div data-id="seek-sentinel" className="flex min-h-10 items-center justify-center">
-      {exhausted ? (
-        <Typography variant="muted">End of data</Typography>
-      ) : loading ? (
-        <Spinner className="text-muted-foreground" />
-      ) : (
-        <div className="flex full-h" ref={ref} />
-      )}
-    </div>
-  )
+  return <div ref={ref} className="flex h-full w-full" />
 }

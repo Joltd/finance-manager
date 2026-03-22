@@ -5,7 +5,6 @@ import { ArrowRight, CalendarSearch, PencilIcon, PlusIcon, Trash2Icon } from 'lu
 import { ask } from '@/store/common/ask-dialog'
 
 import { useOperationSeekStore } from '@/store/operation'
-import { SeekDirection } from '@/store/common/seek'
 import { Layout } from '@/components/common/layout/layout'
 import { Seek } from '@/components/common/layout/seek'
 import { Stack } from '@/components/common/layout/stack'
@@ -60,7 +59,7 @@ export default function OperationPage() {
   const store = useOperationSeekStore()
   const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
-  const { data, loading, exhausted, seek, resetData, setQueryParams, setPointer } = store
+  const { data, loading, exhausted, seek, refresh, resetData, setQueryParams, setPointer } = store
 
   useEffect(() => {
     setPointer(format(addDays(new Date(), 1), 'yyyy-MM-dd'))
@@ -71,7 +70,6 @@ export default function OperationPage() {
       setFilterValue(value)
       resetData()
       setQueryParams(toQuery(value))
-      void seek(SeekDirection.BACKWARD)
     },
     [resetData, setQueryParams, seek],
   )
@@ -94,12 +92,12 @@ export default function OperationPage() {
     if (!operationId) return
     await deleteOperation.submit({ pathParams: { id: operationId } })
     resetData()
-    void seek(SeekDirection.BACKWARD)
+    void refresh()
   }
 
   const handleSaved = () => {
     resetData()
-    void seek(SeekDirection.BACKWARD)
+    void refresh()
   }
 
   return (
