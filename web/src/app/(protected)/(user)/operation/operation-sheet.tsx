@@ -22,6 +22,7 @@ import {
   OperationFormState,
   transitType,
 } from '@/app/(protected)/(user)/operation/operation-form'
+import { formatDate } from 'date-fns'
 
 interface OperationSheetState {
   open: boolean
@@ -97,7 +98,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
     await saveOperation.submit({
       body: {
         id: copy ? undefined : (operationId ?? undefined),
-        date: form.date.toISOString().split('T')[0],
+        date: formatDate(form.date, 'yyyy-MM-dd'),
         type: form.type,
         accountFrom: form.accountFrom,
         accountTo: form.accountTo,

@@ -25,6 +25,7 @@ import { useImportDataStore } from '@/store/import-data'
 import { cn } from '@/lib/utils'
 import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from '@/app/(protected)/(user)/import-data/[id]/import-data-actions'
+import { formatDate } from 'date-fns'
 
 // ---------------------------------------------------------------------------
 // Store
@@ -130,7 +131,7 @@ export function ImportDataEntrySheet() {
     const isExchange = form.type === 'EXCHANGE'
     return {
       id: entry?.operation?.id,
-      date: form.date.toISOString().split('T')[0],
+      date: formatDate(form.date, 'yyyy-MM-dd'),
       type: form.type,
       accountFrom: form.accountFrom!,
       accountTo: form.accountTo!,
