@@ -5,8 +5,8 @@ import com.evgenltd.financemanager.common.record.SortDirection
 import com.evgenltd.financemanager.entity.converter.EntityConverter
 import com.evgenltd.financemanager.entity.record.*
 import com.evgenltd.financemanager.common.record.Reference
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.treeToValue
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.treeToValue
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

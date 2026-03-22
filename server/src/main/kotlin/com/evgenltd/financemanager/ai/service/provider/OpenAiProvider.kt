@@ -3,7 +3,7 @@ package com.evgenltd.financemanager.ai.service.provider
 import com.evgenltd.financemanager.ai.record.EmbeddingResult
 import com.evgenltd.financemanager.ai.service.AiProvider
 import com.evgenltd.financemanager.common.component.IntegrationRestClient
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder

@@ -113,9 +113,10 @@ class ImportDataService(
             SeekDirection.FORWARD -> Sort.Direction.ASC
             SeekDirection.BACKWARD -> Sort.Direction.DESC
         }
-        val page = PageRequest.of(1, NEAREST_DATE_LIMIT, sortDirection, "date")
+        val page = PageRequest.of(0, NEAREST_DATE_LIMIT, sortDirection, "date")
         val importDataDates = importDataDayRepository.findAll(specification, page)
             .map { it.date }
+            .toList()
 
         val operationsDates = operationService.findNearDates(pointer, direction, byAccount(importData.account), NEAREST_DATE_LIMIT)
 

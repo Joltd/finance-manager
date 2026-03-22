@@ -3,7 +3,7 @@ package com.evgenltd.financemanager.entity.service
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.entity.record.*
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.Path
 import jakarta.persistence.criteria.Predicate

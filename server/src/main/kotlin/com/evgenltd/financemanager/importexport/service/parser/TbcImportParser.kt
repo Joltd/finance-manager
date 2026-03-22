@@ -5,10 +5,10 @@ import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.dataformat.csv.CsvMapper
-import com.fasterxml.jackson.dataformat.csv.CsvSchema
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.stereotype.Service
+import tools.jackson.dataformat.csv.CsvMapper
+import tools.jackson.dataformat.csv.CsvSchema
+import tools.jackson.module.kotlin.KotlinModule
 import java.io.InputStream
 import java.util.*
 

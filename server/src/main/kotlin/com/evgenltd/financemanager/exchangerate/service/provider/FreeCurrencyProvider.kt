@@ -6,7 +6,7 @@ import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
@@ -23,7 +23,7 @@ class FreeCurrencyProvider(
     override val name: ExchangeRateProviders = ExchangeRateProviders.FREE_CURRENCY
 
     override fun latest(currencyHints: List<String>): List<ExchangeRateToDefault> = request("latest")
-        ?.fields()
+        ?.properties()
         ?.asSequence()
         ?.map { ExchangeRateToDefault(it.key, it.value.asText().toBigDecimal()) }
         ?.toList()
@@ -32,7 +32,7 @@ class FreeCurrencyProvider(
     override fun historical(date: LocalDate, currencyHints: List<String>): List<ExchangeRateToDefault> =
         request("historical") { it.queryParam("date", date) }
             ?.get(date.toString())
-            ?.fields()
+            ?.properties()
             ?.asSequence()
             ?.map { ExchangeRateToDefault(it.key, it.value.asText().toBigDecimal()) }
             ?.toList()

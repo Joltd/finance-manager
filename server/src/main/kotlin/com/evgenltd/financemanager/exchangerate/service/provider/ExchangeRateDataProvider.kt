@@ -6,7 +6,7 @@ import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateToDefault
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateProvider
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
@@ -48,7 +48,7 @@ class ExchangeRateDataProvider(
 
         return response.body
             ?.get("conversion_rates")
-            ?.fields()
+            ?.properties()
             ?.asSequence()
             ?.map { ExchangeRateToDefault(it.key, it.value.asText().toBigDecimal()) }
             ?.toList()
