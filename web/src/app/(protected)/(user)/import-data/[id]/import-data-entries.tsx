@@ -228,7 +228,7 @@ function ImportEntryRow({
   const hasActions = showUnlink || showApprove || showLink
 
   const isLinkingMode = !!linkingEntry
-  const isLinkSource = linkingEntry?.id === entry.id
+  const isLinkSource = isLinkingMode && linkingEntry?.id === entry.id
   const isLinkTarget = isLinkingMode && !!entry.parsed && !entry.operation
   const isIrrelevant = isLinkingMode && !isLinkSource && !isLinkTarget
 

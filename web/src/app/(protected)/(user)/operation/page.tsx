@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { ArrowRight, CalendarSearch, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
+import { ArrowRight, CalendarSearch, CopyIcon, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 import { ask } from '@/store/common/ask-dialog'
 
 import { useOperationSeekStore } from '@/store/operation'
@@ -30,7 +30,7 @@ import { DateFilter } from '@/components/common/filter/date-filter'
 import { addDays, format } from 'date-fns'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
-import { openOperationSheet, OperationSheet } from './operation-sheet'
+import { openOperationSheet, openOperationSheetForCopy, OperationSheet } from './operation-sheet'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
@@ -88,6 +88,10 @@ export default function OperationPage() {
     openOperationSheet(operationId)
   }
 
+  const handleCopy = (operationId?: string) => {
+    openOperationSheetForCopy(operationId)
+  }
+
   const handleDelete = async (operationId?: string) => {
     if (!operationId) return
     await deleteOperation.submit({ pathParams: { id: operationId } })
@@ -133,6 +137,7 @@ export default function OperationPage() {
                 key={operation.id ?? i}
                 operation={operation}
                 onEdit={() => handleEdit(operation.id)}
+                onCopy={() => handleCopy(operation.id)}
                 onDelete={() => void handleDelete(operation.id)}
               />
             ))}
@@ -146,10 +151,12 @@ export default function OperationPage() {
 function OperationRow({
   operation,
   onEdit,
+  onCopy,
   onDelete,
 }: {
   operation: Operation
   onEdit: () => void
+  onCopy: () => void
   onDelete: () => void
 }) {
   const { type, amountFrom, accountFrom, amountTo, accountTo } = operation
@@ -195,6 +202,10 @@ function OperationRow({
         <DropdownMenuItem onClick={onEdit}>
           <PencilIcon />
           Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onCopy}>
+          <CopyIcon />
+          Copy
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={onDelete}>

@@ -26,14 +26,18 @@ import {
 interface OperationSheetState {
   open: boolean
   operationId?: string
+  copy: boolean
   openSheet: (operationId?: string) => void
+  openSheetForCopy: (operationId?: string) => void
   closeSheet: () => void
 }
 
 const useOperationSheetStore = create<OperationSheetState>((set) => ({
   open: false,
   operationId: undefined,
-  openSheet: (operationId) => set({ open: true, operationId }),
+  copy: false,
+  openSheet: (operationId) => set({ open: true, copy: false, operationId }),
+  openSheetForCopy: (operationId) => set({ open: true, copy: true, operationId }),
   closeSheet: () => set({ open: false }),
 }))
 
@@ -41,12 +45,16 @@ export function openOperationSheet(operationId?: string) {
   useOperationSheetStore.getState().openSheet(operationId)
 }
 
+export function openOperationSheetForCopy(operationId?: string) {
+  useOperationSheetStore.getState().openSheetForCopy(operationId)
+}
+
 interface OperationSheetProps {
   onSaved: () => void
 }
 
 export function OperationSheet({ onSaved }: OperationSheetProps) {
-  const { open, operationId, closeSheet } = useOperationSheetStore()
+  const { open, copy, operationId, closeSheet } = useOperationSheetStore()
   const operationStore = useOperationStore()
   const saveOperation = useRequest(operationUrls.root)
   const [form, setForm] = useState<OperationFormState>(defaultFormState)
@@ -88,7 +96,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
     const isExchange = form.type === 'EXCHANGE'
     await saveOperation.submit({
       body: {
-        id: operationId ?? undefined,
+        id: copy ? undefined : (operationId ?? undefined),
         date: form.date.toISOString().split('T')[0],
         type: form.type,
         accountFrom: form.accountFrom,
