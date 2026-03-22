@@ -47,7 +47,6 @@ export function openOperationSheet(operationId?: string) {
   useOperationSheetStore.getState().openSheet(operationId)
 }
 
-
 interface OperationSheetProps {
   onSaved: () => void
 }
@@ -103,6 +102,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
         amountFrom: isExchange ? form.amountFrom : form.amount,
         amountTo: isExchange ? form.amountTo : form.amount,
         description: form.description || undefined,
+        raw: [],
       },
     })
     onSaved()
