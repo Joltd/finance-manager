@@ -28,6 +28,7 @@ import { useRequest } from '@/hooks/use-request'
 import { Operation, OperationFilter, OperationType } from '@/types/operation'
 import { AccountReference } from '@/types/account'
 import { DateFilter } from '@/components/common/filter/date-filter'
+import { addDays, format } from 'date-fns'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { openOperationSheet, OperationSheet } from './operation-sheet'
@@ -62,7 +63,7 @@ export default function OperationPage() {
   const { data, loading, exhausted, seek, resetData, setQueryParams, setPointer } = store
 
   useEffect(() => {
-    setPointer(new Date().toISOString().split('T')[0])
+    setPointer(format(addDays(new Date(), 1), 'yyyy-MM-dd'))
   }, [])
 
   const handleFilterChange = useCallback(
@@ -78,7 +79,7 @@ export default function OperationPage() {
   const handleToDate = useCallback(async () => {
     const date = await ask({ type: 'date', label: 'Select date' })
     resetData()
-    setPointer(date.toISOString().split('T')[0])
+    setPointer(format(addDays(date, 1), 'yyyy-MM-dd'))
   }, [resetData, setQueryParams, filterValue, setPointer, seek])
 
   const handleNew = () => {
