@@ -1,7 +1,6 @@
 FROM node:22-slim
 
 COPY ./.next ./.next
-COPY ./public ./public
 COPY ./package*.json ./
 COPY ./node_modules ./node_modules
 
