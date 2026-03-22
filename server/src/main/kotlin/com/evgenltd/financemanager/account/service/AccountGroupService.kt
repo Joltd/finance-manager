@@ -1,14 +1,14 @@
 package com.evgenltd.financemanager.account.service
 
-import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.account.converter.AccountGroupConverter
 import com.evgenltd.financemanager.account.entity.AccountGroup
 import com.evgenltd.financemanager.account.record.AccountGroupRecord
-import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.account.repository.AccountGroupRepository
 import com.evgenltd.financemanager.common.component.SkipLogging
+import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.eq
+import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.like
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Sort
@@ -25,7 +25,7 @@ class AccountGroupService(
 ) {
 
     fun listReference(mask: String?, id: UUID?): List<Reference> =
-        ((AccountGroup::name like mask) and (AccountGroup::id eq id))
+        ((AccountGroup::name like mask) and (AccountGroup::id eq id) and (AccountGroup::deleted eq false))
             .let { accountGroupRepository.findAll(it, Sort.by(AccountGroup::name.name)) }
             .map { accountGroupConverter.toReference(it) }
 

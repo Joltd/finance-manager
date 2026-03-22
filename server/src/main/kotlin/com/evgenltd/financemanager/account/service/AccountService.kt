@@ -11,6 +11,7 @@ import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.like
+import com.evgenltd.financemanager.common.util.isNotZero
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.repository.findByIdOrNull
@@ -28,7 +29,7 @@ class AccountService(
 ) {
 
     fun listReference(mask: String?, type: AccountType?): List<AccountReferenceRecord> {
-        val filter = (Account::type eq type) and (Account::name like mask)
+        val filter = (Account::type eq type) and (Account::name like mask) and (Account::deleted eq false)
         val pageable = PageRequest.of(0, 5, Sort.by(Account::name.name))
         return accountRepository.findAll(filter, pageable)
             .content
@@ -41,7 +42,11 @@ class AccountService(
     fun listBalances(filter: AccountBalanceFilter): List<AccountBalanceGroupRecord> {
         val balances = balanceRepository.findAll()
             .groupBy { it.account }
-            .mapValues { it.value.map { balance -> balance.amount } }
+            .mapValues {
+                it.value
+                    .map { balance -> balance.amount }
+                    .filter { balance -> balance.isNotZero() }
+            }
 
         return accountRepository.findAll((Account::type eq AccountType.ACCOUNT))
             .groupBy { it.group }

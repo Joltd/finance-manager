@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { isBefore, subWeeks, parseISO, format } from 'date-fns'
 import { PencilIcon, PlusIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
@@ -26,6 +27,8 @@ import { ask } from '@/store/common/ask-dialog'
 import { AccountSheet, openAccountSheet } from './account-sheet'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Badge } from '@/components/ui/badge'
 
 export default function AccountPage() {
   const store = useAccountBalanceStore()
@@ -159,6 +162,9 @@ function AccountRow({
   const { account, balances } = entry
   const deleted = account.deleted
 
+  const overdueRevise =
+    account.reviseDate && isBefore(parseISO(account.reviseDate), subWeeks(new Date(), 2))
+
   const accountEntity: Account = {
     id: account.id,
     name: account.name,
@@ -184,6 +190,17 @@ function AccountRow({
           >
             {account.name}
           </Typography>
+
+          {overdueRevise && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline">Revise</Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                Last revised: {format(parseISO(account.reviseDate!), 'dd MMM yyyy')}
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           <Flow gap={2} className="justify-end">
             {balances.map((a) => (

@@ -58,6 +58,7 @@ function DateInput({
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
+          defaultMonth={value ?? new Date()}
           selected={value}
           onSelect={handleSelect}
           captionLayout="dropdown"
