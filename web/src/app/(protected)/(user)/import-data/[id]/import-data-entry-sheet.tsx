@@ -74,18 +74,16 @@ function suggestionToForm(source: ImportDataOperation): OperationFormState {
 export function ImportDataEntrySheet() {
   const { open, entry, closeSheet } = useImportDataEntrySheetStore()
   const { data: importData } = useImportDataStore()
-  const { saveOperation, approve, link } = useImportDataActions()
+  const { loading, saveOperation, link } = useImportDataActions()
   const mainAccountId = importData?.account.id
   const [form, setForm] = useState<OperationFormState>(defaultFormState)
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
-  const [initialSuggestionIdx, setInitialSuggestionIdx] = useState<number | null>(null)
 
   useEffect(() => {
     if (!open || !entry) return
 
     if (entry.operation) {
       setSelectedSuggestionIdx(null)
-      setInitialSuggestionIdx(null)
       const op = entry.operation
       const type = op.type
       const isExchange = type === 'EXCHANGE'
@@ -103,11 +101,9 @@ export function ImportDataEntrySheet() {
       const idx = entry.suggestions.findIndex((s) => s.selected)
       if (idx >= 0) {
         setSelectedSuggestionIdx(idx)
-        setInitialSuggestionIdx(idx)
         setForm(suggestionToForm(entry.suggestions[idx]))
       } else {
         setSelectedSuggestionIdx(null)
-        setInitialSuggestionIdx(null)
         setForm(defaultFormState)
       }
     }
@@ -148,8 +144,6 @@ export function ImportDataEntrySheet() {
     if (!entry) return
     if (hasOperation) {
       await saveOperation(buildOperationBody())
-    } else if (initialSuggestionIdx !== null && selectedSuggestionIdx === initialSuggestionIdx) {
-      await approve(importData!.id, [entry.id!])
     } else {
       await link(importData!.id, entry.id!, buildOperationBody())
     }
@@ -157,11 +151,7 @@ export function ImportDataEntrySheet() {
   }
   const title = hasOperation ? 'Edit Operation' : 'New Operation'
 
-  const actionLabel: string = hasOperation
-    ? 'Save'
-    : initialSuggestionIdx !== null && selectedSuggestionIdx === initialSuggestionIdx
-      ? 'Approve'
-      : 'Commit'
+  const actionLabel: string = hasOperation ? 'Save' : 'Commit'
 
   const showUnlink = hasOperation && !!entry?.parsed
 
@@ -346,8 +336,14 @@ export function ImportDataEntrySheet() {
             </Stack>
 
             <SheetFooter>
-              {showUnlink && <Button variant="outline">Unlink</Button>}
-              <Button onClick={handleAction}>{actionLabel}</Button>
+              {showUnlink && (
+                <Button variant="outline" disabled={loading}>
+                  Unlink
+                </Button>
+              )}
+              <Button onClick={handleAction} disabled={loading}>
+                {actionLabel}
+              </Button>
             </SheetFooter>
           </Stack>
         </Stack>
