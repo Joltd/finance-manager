@@ -1,7 +1,5 @@
-'use client'
-
 import * as React from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CheckIcon, ChevronDownIcon, PlusIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -10,14 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ask } from '@/store/common/ask-dialog'
 import { useDebounce } from '@/hooks/use-debounce'
-import { FetchSlice } from '@/store/common/fetch'
 
-type ReferenceInputProps<T> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  store: Pick<
-    FetchSlice<T[], unknown, any>,
-    'data' | 'loading' | 'queryParams' | 'fetch' | 'setQueryParams'
-  >
+export type ReferenceInputProps<T> = {
+  loading?: boolean
+  data?: T[]
+  onSearch?: (val: string) => void
   value?: T
   onChange?: (value: T) => void
   getLabel: (item: T) => string
@@ -25,12 +20,15 @@ type ReferenceInputProps<T> = {
   placeholder?: string
   disabled?: boolean
   className?: string
+  'aria-invalid'?: boolean | 'true' | 'false'
   onNew?: (name: string) => Promise<T>
   newLabel?: string
 }
 
-function ReferenceInput<T>({
-  store,
+export function ReferenceInput<T>({
+  loading,
+  data,
+  onSearch,
   value,
   onChange,
   getLabel,
@@ -38,24 +36,15 @@ function ReferenceInput<T>({
   placeholder = 'Select...',
   disabled = false,
   className,
+  'aria-invalid': ariaInvalid,
   onNew,
   newLabel = 'New',
 }: ReferenceInputProps<T>) {
-  const { data, loading, queryParams, fetch, setQueryParams } = store
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    if (open) {
-      setSearch('')
-      setQueryParams({ ...queryParams, mask: undefined })
-      void fetch()
-    }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
-
   const debouncedSearch = useDebounce((val: string) => {
-    setQueryParams({ ...queryParams, mask: val || undefined })
-    void fetch()
+    onSearch?.(val)
   }, 300)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +79,7 @@ function ReferenceInput<T>({
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={open}
+          aria-invalid={ariaInvalid}
           className={cn(
             'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
             'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
@@ -107,9 +97,11 @@ function ReferenceInput<T>({
       <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-48 p-0">
         <div className="flex flex-col">
           {/* Search */}
-          <div className="border-b p-2">
-            <Input placeholder="Search..." value={search} onChange={handleSearchChange} autoFocus />
-          </div>
+          {onSearch && (
+            <div className="border-b p-2">
+              <Input placeholder="Search..." value={search} onChange={handleSearchChange} autoFocus />
+            </div>
+          )}
 
           {/* List */}
           <div className="max-h-60 overflow-y-auto">
@@ -158,8 +150,3 @@ function ReferenceInput<T>({
     </Popover>
   )
 }
-
-// ─── Exports ──────────────────────────────────────────────────────────────────
-
-export { ReferenceInput }
-export type { ReferenceInputProps }

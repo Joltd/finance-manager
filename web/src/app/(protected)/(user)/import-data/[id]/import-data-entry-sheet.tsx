@@ -8,13 +8,7 @@ import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
 import { Stack } from '@/components/common/layout/stack'
 import { Typography } from '@/components/common/typography/typography'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { OperationTypeInput } from '@/components/common/input/operation-type-input'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -212,20 +206,7 @@ export function ImportDataEntrySheet() {
             <Stack gap={4} scrollable className="flex-1 px-4 pb-4">
               <Field>
                 <FieldLabel>Type</FieldLabel>
-                <Select
-                  value={form.type}
-                  onValueChange={(v) => handleTypeChange(v as OperationType)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    <SelectItem value="EXCHANGE">Exchange</SelectItem>
-                    <SelectItem value="TRANSFER">Transfer</SelectItem>
-                    <SelectItem value="EXPENSE">Expense</SelectItem>
-                    <SelectItem value="INCOME">Income</SelectItem>
-                  </SelectContent>
-                </Select>
+                <OperationTypeInput value={form.type} onChange={handleTypeChange} />
               </Field>
 
               <Field>

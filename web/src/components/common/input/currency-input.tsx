@@ -1,56 +1,45 @@
-'use client'
-
 import { useEffect } from 'react'
 
+import { ReferenceInput } from '@/components/common/input/reference-input'
 import { useCurrencyListStore } from '@/store/account'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Currency } from '@/types/account'
 
-type CurrencyInputProps = {
+export type CurrencyInputProps = {
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
   disabled?: boolean
   className?: string
-  id?: string
   'aria-invalid'?: boolean | 'true' | 'false'
 }
 
-function CurrencyInput({
+export function CurrencyInput({
   value,
   onChange,
   placeholder,
   disabled,
   className,
-  id,
   'aria-invalid': ariaInvalid,
 }: CurrencyInputProps) {
   const { data, fetch } = useCurrencyListStore()
 
   useEffect(() => {
-    if (!data) void fetch()
+    void fetch()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const selectedCurrency = data?.find((c) => c.name === value)
+
   return (
-    <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger id={id} className={className} aria-invalid={ariaInvalid}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent position="popper">
-        {data?.map((currency) => (
-          <SelectItem key={currency.name} value={currency.name}>
-            {currency.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <ReferenceInput<Currency>
+      data={data}
+      getLabel={(c) => c.name}
+      getId={(c) => c.name}
+      value={selectedCurrency}
+      onChange={(c) => onChange?.(c.name)}
+      placeholder={placeholder}
+      disabled={disabled}
+      className={className}
+      aria-invalid={ariaInvalid}
+    />
   )
 }
-
-export { CurrencyInput }
-export type { CurrencyInputProps }

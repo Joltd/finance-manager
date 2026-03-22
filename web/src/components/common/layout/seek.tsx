@@ -57,7 +57,7 @@ export function Seek({ seek, loading, exhausted, children, className }: SeekProp
 
 interface SeekSentinelProps {
   id: string
-  onIntersect: () => void
+  onIntersect: () => Promise<void>
   loading: boolean
   exhausted: boolean
 }
@@ -71,12 +71,10 @@ function SeekSentinel({ id, onIntersect, loading, exhausted }: SeekSentinelProps
     if (!el) return
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        console.log(`SeekSentinel[${id}]`, 'callback triggered')
+      async (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            console.log(`SeekSentinel[${id}]`, 'intersected')
-            onIntersect()
+            await onIntersect()
           }
         }
       },
@@ -88,12 +86,14 @@ function SeekSentinel({ id, onIntersect, loading, exhausted }: SeekSentinelProps
   }, [onIntersect, exhausted])
 
   return (
-    <div ref={ref} data-id="seek-sentinel" className="flex min-h-10 items-center justify-center">
+    <div data-id="seek-sentinel" className="flex min-h-10 items-center justify-center">
       {exhausted ? (
         <Typography variant="muted">End of data</Typography>
       ) : loading ? (
         <Spinner className="text-muted-foreground" />
-      ) : null}
+      ) : (
+        <div className="flex full-h" ref={ref} />
+      )}
     </div>
   )
 }

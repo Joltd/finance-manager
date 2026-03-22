@@ -7,13 +7,7 @@ import { operationUrls } from '@/api/operation'
 import { AccountInput } from '@/components/common/input/account-input'
 import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { OperationTypeInput } from '@/components/common/input/operation-type-input'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -130,17 +124,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
           <div className="flex flex-col gap-4 px-4 flex-1 overflow-y-auto">
             <Field>
               <FieldLabel>Type</FieldLabel>
-              <Select value={form.type} onValueChange={(v) => handleTypeChange(v as OperationType)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="EXCHANGE">Exchange</SelectItem>
-                  <SelectItem value="TRANSFER">Transfer</SelectItem>
-                  <SelectItem value="EXPENSE">Expense</SelectItem>
-                  <SelectItem value="INCOME">Income</SelectItem>
-                </SelectContent>
-              </Select>
+              <OperationTypeInput value={form.type} onChange={handleTypeChange} />
             </Field>
 
             <Field>

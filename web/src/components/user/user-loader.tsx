@@ -8,11 +8,11 @@ export function UserLoader({ children }: { children: React.ReactNode }) {
   const { data, fetch } = useUserStore()
 
   useEffect(() => {
-    fetch()
+    void fetch()
   }, [fetch])
 
   if (!data) {
-    return <Spinner className="size-8" />
+    return <Spinner className="size-8 p-4" />
   }
 
   return <>{children}</>

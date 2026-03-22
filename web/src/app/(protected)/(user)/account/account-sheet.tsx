@@ -5,14 +5,8 @@ import { create } from 'zustand'
 
 import { accountUrls } from '@/api/account'
 import { DateInput } from '@/components/common/input/date-input'
-import { ReferenceInput } from '@/components/common/input/reference-input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { AccountGroupInput } from '@/components/common/input/account-group-input'
+import { AccountTypeInput } from '@/components/common/input/account-type-input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
@@ -20,11 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useRequest } from '@/hooks/use-request'
-import {
-  useAccountBalanceStore,
-  useAccountGroupReferenceStore,
-  useAccountStore,
-} from '@/store/account'
+import { useAccountBalanceStore, useAccountStore } from '@/store/account'
 import { AccountType } from '@/types/account'
 import type { Reference } from '@/types/common/reference'
 
@@ -66,7 +56,6 @@ const defaultFormState: AccountFormState = {
 
 export function AccountSheet() {
   const { open, accountId, closeSheet } = useAccountSheetStore()
-  const groupStore = useAccountGroupReferenceStore()
   const accountStore = useAccountStore()
   const balanceStore = useAccountBalanceStore()
   const saveAccount = useRequest(accountUrls.root)
@@ -142,29 +131,17 @@ export function AccountSheet() {
 
             <Field>
               <FieldLabel>Type</FieldLabel>
-              <Select
+              <AccountTypeInput
                 value={form.type}
-                onValueChange={(v) => setForm((f) => ({ ...f, type: v as AccountType }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value={AccountType.ACCOUNT}>Account</SelectItem>
-                  <SelectItem value={AccountType.EXPENSE}>Expense</SelectItem>
-                  <SelectItem value={AccountType.INCOME}>Income</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(type) => setForm((f) => ({ ...f, type }))}
+              />
             </Field>
 
             <Field>
               <FieldLabel>Group</FieldLabel>
-              <ReferenceInput<Reference>
-                store={groupStore}
+              <AccountGroupInput
                 value={form.group}
                 onChange={(group) => setForm((f) => ({ ...f, group }))}
-                getLabel={(g) => g.name}
-                getId={(g) => g.id}
                 placeholder="No group"
               />
             </Field>
