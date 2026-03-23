@@ -11,6 +11,7 @@ import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.service.withMonday
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.round
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
@@ -28,7 +29,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 @Service
 class DashboardService(
@@ -40,7 +40,7 @@ class DashboardService(
     private val operationConverter: OperationConverter,
     private val exchangeRateService: ExchangeRateService,
     private val transactionRepository: TransactionRepository,
-) {
+) : Loggable() {
 
     fun load(): DashboardRecord {
         val settings = settingService.load()
@@ -103,7 +103,6 @@ class DashboardService(
         )
 
         val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
-        val numMonths = ChronoUnit.MONTHS.between(from, to).coerceAtLeast(1).toBigDecimal()
 
         val entries = transactions.map {
             Entry(
@@ -123,13 +122,14 @@ class DashboardService(
                     amount = element.amount + acc?.amount,
                 )
             }
+            .also { log.info("Top expenses: {}", it) }
             .values
             .groupBy { it.account }
             .map { (account, monthEntries) ->
                 val total = monthEntries.map { it.amount }.reduce { a, b -> a + b }
                 DashboardTopExpenseRecord(
                     expense = accountConverter.toReference(account),
-                    avg = (total / numMonths).round(targetCurrencyScale),
+                    avg = if (monthEntries.isNotEmpty()) (total / monthEntries.size.toBigDecimal()).round(targetCurrencyScale) else empty,
                 )
             }
             .sortedByDescending { it.avg.value }
@@ -138,15 +138,22 @@ class DashboardService(
         val totalByType = entries
             .groupBy { it.account.type }
             .mapValues { (_, typeEntries) ->
-                typeEntries.map { it.amount }.reduce { a, b -> a + b }
+                if (typeEntries.isEmpty()) {
+                    empty
+                } else {
+                    typeEntries.map { it.amount }
+                        .reduce { a, b -> a + b }
+                        .div(typeEntries.size.toBigDecimal())
+                        .round(targetCurrencyScale)
+                }
             }
 
         val incomeTotal = totalByType[AccountType.INCOME] ?: empty
         val expenseTotal = totalByType[AccountType.EXPENSE] ?: empty
         val avgMonthly = DashboardMonthlyAvgRecord(
-            income = (incomeTotal / numMonths).round(targetCurrencyScale),
-            expense = (expenseTotal / numMonths).round(targetCurrencyScale),
-            net = ((incomeTotal - expenseTotal) / numMonths).round(targetCurrencyScale),
+            income = incomeTotal,
+            expense = expenseTotal,
+            net = incomeTotal - expenseTotal,
         )
 
         return DashboardRecord(
