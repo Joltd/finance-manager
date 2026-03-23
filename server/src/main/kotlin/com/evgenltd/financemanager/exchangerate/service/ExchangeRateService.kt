@@ -7,21 +7,19 @@ import com.evgenltd.financemanager.common.repository.between
 import com.evgenltd.financemanager.common.repository.contains
 import com.evgenltd.financemanager.common.service.withMonday
 import com.evgenltd.financemanager.common.service.withNextMonday
-import com.evgenltd.financemanager.common.util.*
+import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.exchangerate.converter.ExchangeRateConverter
 import com.evgenltd.financemanager.exchangerate.entity.ExchangeRateHistory
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateHistoryIndex
 import com.evgenltd.financemanager.exchangerate.record.ExchangeRateIndex
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateHistoryRepository
 import com.evgenltd.financemanager.exchangerate.repository.ExchangeRateRepository
+import com.evgenltd.financemanager.user.component.ROOT_TENANT
+import com.evgenltd.financemanager.user.component.withTenant
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.time.DayOfWeek
-import java.time.Instant
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAdjusters
 
 @Service
 class ExchangeRateService(
@@ -44,7 +42,11 @@ class ExchangeRateService(
         rates.outdated(currencies)
             .isNotEmpty()
             .takeIf { it }
-            ?.let { exchangeRateGatheringService.updateActual() }
+            ?.let {
+                withTenant(ROOT_TENANT) {
+                    exchangeRateGatheringService.updateActual()
+                }
+            }
         return rates.associate { it.currency to it.value }
     }
 
@@ -69,7 +71,9 @@ class ExchangeRateService(
                     .onEach { date ->
                         val currencyWithoutRates = currencies - (index[date]?.keys ?: emptySet()).toSet()
                         if (currencyWithoutRates.isNotEmpty()) {
-                            exchangeRateGatheringService.updateHistory(date, currencyWithoutRates)
+                            withTenant(ROOT_TENANT) {
+                                exchangeRateGatheringService.updateHistory(date, currencyWithoutRates)
+                            }
                         }
                     }
             }
