@@ -27,6 +27,7 @@ class AccountConverter(
         group = entity.group?.let { accountGroupConverter.toRecord(it) },
         deleted = entity.deleted,
         reviseDate = entity.reviseDate,
+        reportExclude = entity.reportExclude,
     )
 
     fun toReference(entity: Account): Reference = Reference(
@@ -52,6 +53,7 @@ class AccountConverter(
         it.group = record.group?.id?.let { id -> accountGroupRepository.find(id) }
         it.deleted = record.deleted
         it.reviseDate = record.reviseDate
+        it.reportExclude = record.reportExclude
     } ?: Account(
         id = record.id,
         name = record.name,
@@ -60,6 +62,7 @@ class AccountConverter(
         group = record.group?.id?.let { id -> accountGroupRepository.find(id) },
         deleted = record.deleted,
         reviseDate = record.reviseDate,
+        reportExclude = record.reportExclude,
     )
 
 }

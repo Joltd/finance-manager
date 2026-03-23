@@ -104,7 +104,9 @@ class DashboardService(
 
         val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
 
-        val entries = transactions.map {
+        val entries = transactions
+            .filter { !it.account.reportExclude }
+            .map {
             Entry(
                 account = it.account,
                 month = it.date.withDayOfMonth(1),
@@ -136,15 +138,18 @@ class DashboardService(
             .take(5)
 
         val totalByType = entries
-            .groupBy { it.account.type }
-            .mapValues { (_, typeEntries) ->
-                if (typeEntries.isEmpty()) {
+            .groupBy { it.account.type to it.month }
+            .map { (key, groupEntries) ->
+                val total = groupEntries.map { it.amount }.reduce { a, b -> a + b }
+                Triple(key.first, key.second, total)
+            }
+            .groupBy { it.first }
+            .mapValues { (_, typeMonthEntries) ->
+                if (typeMonthEntries.isEmpty()) {
                     empty
                 } else {
-                    typeEntries.map { it.amount }
-                        .reduce { a, b -> a + b }
-                        .div(typeEntries.size.toBigDecimal())
-                        .round(targetCurrencyScale)
+                    val total = typeMonthEntries.map { it.third }.reduce { a, b -> a + b }
+                    (total / typeMonthEntries.size.toBigDecimal()).round(targetCurrencyScale)
                 }
             }
 

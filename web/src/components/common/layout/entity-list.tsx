@@ -1,22 +1,16 @@
 'use client'
 
 import * as React from 'react'
-import { useEffect } from 'react'
 import { AlertCircleIcon, PlusIcon } from 'lucide-react'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/common/typography/typography'
 
-interface EntityListStore<TItem> {
+export interface EntityListProps<TItem> {
   data: TItem[] | undefined
   loading: boolean
   error: string | null
-  fetch: () => Promise<unknown>
-}
-
-export interface EntityListProps<TItem> {
-  store: EntityListStore<TItem>
   title?: string
   subtitle?: string
   renderRow: (item: TItem) => React.ReactNode
@@ -25,23 +19,15 @@ export interface EntityListProps<TItem> {
 }
 
 export function EntityList<TItem>({
-  store,
+  data,
+  loading,
+  error,
   title,
   subtitle,
   renderRow,
   getId,
   onAdd,
 }: EntityListProps<TItem>) {
-  const { data, loading, error, fetch } = store
-
-  useEffect(() => {
-    void fetch()
-  }, [fetch])
-
-  const handleAdd = async () => {
-    await onAdd?.()
-    void fetch()
-  }
 
   const count = data?.length ?? 0
 
@@ -61,7 +47,7 @@ export function EntityList<TItem>({
           </CardTitle>
           {onAdd && (
             <CardAction>
-              <Button size="icon-sm" variant="ghost" onClick={handleAdd}>
+              <Button size="icon-sm" variant="ghost" onClick={onAdd}>
                 <PlusIcon />
               </Button>
             </CardAction>

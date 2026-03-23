@@ -1,11 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { useEffect } from 'react'
 
 import { ReferenceInput, ReferenceInputProps } from '@/components/common/input/reference-input'
 import { AccountReference, AccountType } from '@/types/account'
-import { useAccountReferenceStore } from '@/store/account'
+import { useRequest } from '@/hooks/use-request'
+import { accountUrls } from '@/api/account'
 
 export interface AccountInputProps extends Omit<
   ReferenceInputProps<AccountReference>,
@@ -15,21 +15,19 @@ export interface AccountInputProps extends Omit<
 }
 
 export function AccountInput({ type, ...props }: AccountInputProps) {
-  const store = useAccountReferenceStore()
-
-  useEffect(() => {
-    store.setQueryParams({ type })
-  }, [type]) // eslint-disable-line react-hooks/exhaustive-deps
+  const listReq = useRequest<AccountReference[], unknown, { type?: AccountType; mask?: string }>(
+    accountUrls.reference,
+    { method: 'GET' },
+  )
 
   const handleSearch = (val: string) => {
-    store.setQueryParams({ type, mask: val || undefined })
-    void store.fetch()
+    void listReq.submit({ queryParams: { type, mask: val || undefined } })
   }
 
   return (
     <ReferenceInput
-      loading={store.loading}
-      data={store.data}
+      loading={listReq.loading}
+      data={listReq.data}
       onSearch={handleSearch}
       getLabel={(item) => item.name}
       getId={(item) => item.id}

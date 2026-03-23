@@ -4,7 +4,8 @@ import * as React from 'react'
 
 import { ReferenceInput, ReferenceInputProps } from '@/components/common/input/reference-input'
 import { Reference } from '@/types/common/reference'
-import { useAccountGroupReferenceStore } from '@/store/account'
+import { useRequest } from '@/hooks/use-request'
+import { groupUrls } from '@/api/account'
 
 export interface AccountGroupInputProps extends Omit<
   ReferenceInputProps<Reference>,
@@ -12,17 +13,19 @@ export interface AccountGroupInputProps extends Omit<
 > {}
 
 export function AccountGroupInput(props: AccountGroupInputProps) {
-  const store = useAccountGroupReferenceStore()
+  const listReq = useRequest<Reference[], unknown, { mask?: string }>(
+    groupUrls.reference,
+    { method: 'GET' },
+  )
 
   const handleSearch = (val: string) => {
-    store.setQueryParams({ mask: val || undefined })
-    void store.fetch()
+    void listReq.submit({ queryParams: { mask: val || undefined } })
   }
 
   return (
     <ReferenceInput
-      loading={store.loading}
-      data={store.data}
+      loading={listReq.loading}
+      data={listReq.data}
       onSearch={handleSearch}
       getLabel={(g) => g.name}
       getId={(g) => g.id}

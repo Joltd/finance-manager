@@ -10,17 +10,14 @@ import { Layout } from '@/components/common/layout/layout'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { accountUrls, currencyUrls, groupUrls } from '@/api/account'
-import {
-  useAccountGroupListStore,
-  useAccountListStore,
-  useCurrencyListStore,
-} from '@/store/account'
 import type { Account, AccountGroup, Currency } from '@/types/account'
 import { AccountType } from '@/types/account'
+import { AccountDialog, openAccountDialog } from './account-dialog'
 
 export default function ReferencePage() {
   return (
     <Layout scrollable>
+      <AccountDialog />
       <CurrencySection />
       <AccountGroupSection />
       <AccountSection title="Expense accounts" accountType={AccountType.EXPENSE} />
@@ -70,34 +67,42 @@ function ReferenceRow({ label, deleted, badge, onEdit, onDelete, onRestore }: Re
 }
 
 function CurrencySection() {
-  const store = useCurrencyListStore()
+  const listReq = useRequest<Currency[]>(currencyUrls.root, { method: 'GET' })
   const updateReq = useRequest<Currency, Currency>(currencyUrls.root)
   const deleteReq = useRequest<void, void, void, { id: string }>(currencyUrls.id, {
     method: 'DELETE',
   })
 
+  useEffect(() => {
+    void listReq.submit()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleAdd = async () => {
     const name = await ask({ type: 'string', label: 'Currency name' })
     if (!name.trim()) return
     await updateReq.submit({ body: { name: name.trim(), crypto: false } })
+    void listReq.submit()
   }
 
   const handleEdit = async (item: Currency) => {
     const name = await ask({ type: 'string', label: 'Currency name', initialValue: item.name })
     if (!name.trim()) return
     await updateReq.submit({ body: { ...item, name: name.trim() } })
-    void store.fetch()
+    void listReq.submit()
   }
 
   const handleDelete = async (item: Currency) => {
     if (!item.id) return
     await deleteReq.submit({ pathParams: { id: item.id } })
-    void store.fetch()
+    void listReq.submit()
   }
 
   return (
     <EntityList
-      store={store}
+      data={listReq.data}
+      loading={listReq.loading}
+      error={listReq.error ?? null}
       title="Currencies"
       subtitle="Fiat and crypto currencies used across accounts and transactions"
       getId={(item) => item.id!}
@@ -115,39 +120,47 @@ function CurrencySection() {
 }
 
 function AccountGroupSection() {
-  const store = useAccountGroupListStore()
+  const listReq = useRequest<AccountGroup[]>(groupUrls.root, { method: 'GET' })
   const updateReq = useRequest<AccountGroup, AccountGroup>(groupUrls.root)
   const deleteReq = useRequest<void, void, void, { id: string }>(groupUrls.id, {
     method: 'DELETE',
   })
 
+  useEffect(() => {
+    void listReq.submit()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleAdd = async () => {
     const name = await ask({ type: 'string', label: 'Group name' })
     if (!name.trim()) return
     await updateReq.submit({ body: { name: name.trim(), deleted: false } })
+    void listReq.submit()
   }
 
   const handleEdit = async (item: AccountGroup) => {
     const name = await ask({ type: 'string', label: 'Group name', initialValue: item.name })
     if (!name.trim()) return
     await updateReq.submit({ body: { ...item, name: name.trim() } })
-    void store.fetch()
+    void listReq.submit()
   }
 
   const handleDelete = async (item: AccountGroup) => {
     if (!item.id) return
     await deleteReq.submit({ pathParams: { id: item.id } })
-    void store.fetch()
+    void listReq.submit()
   }
 
   const handleRestore = async (item: AccountGroup) => {
     await updateReq.submit({ body: { ...item, deleted: false } })
-    void store.fetch()
+    void listReq.submit()
   }
 
   return (
     <EntityList
-      store={store}
+      data={listReq.data}
+      loading={listReq.loading}
+      error={listReq.error ?? null}
       title="Account groups"
       subtitle="Logical groups for organizing accounts on the balance sheet"
       getId={(item) => item.id!}
@@ -166,40 +179,39 @@ function AccountGroupSection() {
 }
 
 function AccountSection({ title, accountType }: { title: string; accountType: AccountType }) {
-  const store = useAccountListStore()
+  const listReq = useRequest<Account[]>(accountUrls.root, { method: 'GET' })
   const updateReq = useRequest<Account, Account>(accountUrls.root)
   const deleteReq = useRequest<void, void, void, { id: string }>(accountUrls.id, {
     method: 'DELETE',
   })
 
+  const fetchList = () => listReq.submit({ queryParams: { type: accountType } })
+
   useEffect(() => {
-    store.setQueryParams({ type: accountType })
-    void store.fetch()
+    void fetchList()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAdd = async () => {
     const name = await ask({ type: 'string', label: 'Account name' })
     if (!name.trim()) return
-    await updateReq.submit({ body: { name: name.trim(), type: accountType, deleted: false } })
+    await updateReq.submit({ body: { name: name.trim(), type: accountType, deleted: false, reportExclude: false } })
+    void fetchList()
   }
 
-  const handleEdit = async (item: Account) => {
-    const name = await ask({ type: 'string', label: 'Account name', initialValue: item.name })
-    if (!name.trim()) return
-    await updateReq.submit({ body: { ...item, name: name.trim() } })
-    void store.fetch()
+  const handleEdit = (item: Account) => {
+    openAccountDialog(item, fetchList)
   }
 
   const handleDelete = async (item: Account) => {
     if (!item.id) return
     await deleteReq.submit({ pathParams: { id: item.id } })
-    void store.fetch()
+    void fetchList()
   }
 
   const handleRestore = async (item: Account) => {
     await updateReq.submit({ body: { ...item, deleted: false } })
-    void store.fetch()
+    void fetchList()
   }
 
   const subtitle =
@@ -209,7 +221,9 @@ function AccountSection({ title, accountType }: { title: string; accountType: Ac
 
   return (
     <EntityList
-      store={store}
+      data={listReq.data}
+      loading={listReq.loading}
+      error={listReq.error ?? null}
       title={title}
       subtitle={subtitle}
       getId={(item) => item.id!}

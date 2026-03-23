@@ -32,6 +32,7 @@ export interface Account {
   group?: Reference
   deleted: boolean
   reviseDate?: string
+  reportExclude: boolean
 }
 
 export interface Currency {

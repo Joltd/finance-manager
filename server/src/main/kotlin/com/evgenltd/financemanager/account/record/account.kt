@@ -19,6 +19,7 @@ data class AccountRecord(
     val group: AccountGroupRecord?,
     val deleted: Boolean,
     val reviseDate: LocalDate?,
+    val reportExclude: Boolean = false,
 )
 
 data class AccountReferenceRecord(

@@ -35,6 +35,8 @@ class Account(
 
     var parser: String? = null,
 
+    var reportExclude: Boolean = false,
+
     @ManyToOne
     @JoinColumn(name = "group_id")
     var group: AccountGroup? = null,

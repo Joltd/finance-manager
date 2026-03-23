@@ -22,8 +22,9 @@ export interface SubmitRequest<TBody, TQuery, TPath> {
 }
 
 interface UseRequestReturn<TData, TBody, TQuery, TPath> {
+  data?: TData
   loading: boolean
-  error: string | null
+  error?: string
   reset: () => void
   submit: (request?: SubmitRequest<TBody, TQuery, TPath>) => Promise<TData>
 }
@@ -36,19 +37,21 @@ export function useRequest<
 >(path: string, options?: UseRequestOptions): UseRequestReturn<TData, TBody, TQuery, TPath> {
   const { method = 'POST', multipart = false } = options ?? {}
 
+  const [data, setData] = useState<TData | undefined>()
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>()
 
   const reset = useCallback(() => {
+    setData(undefined)
     setLoading(false)
-    setError(null)
+    setError(undefined)
   }, [])
 
   const submit = useCallback(
     async (request?: SubmitRequest<TBody, TQuery, TPath>): Promise<TData> => {
       const url = buildPath(path, request?.pathParams as Record<string, string> | undefined)
       setLoading(true)
-      setError(null)
+      setError(undefined)
       try {
         const response = await api.request<ApiResponse<TData>>({
           url,
@@ -60,6 +63,7 @@ export function useRequest<
         if (!response.data.success) {
           throw new Error(response.data.error)
         }
+        setData(response.data.body)
         return response.data.body
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
@@ -74,5 +78,5 @@ export function useRequest<
     [path, method, multipart],
   )
 
-  return { loading, error, reset, submit }
+  return { data, loading, error, reset, submit }
 }
