@@ -1,20 +1,20 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.importexport.entity.ImportData
+import com.evgenltd.financemanager.importexport.record.ImportDataParsed
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Service
 import java.io.InputStream
-import java.util.*
 
 @Service
 class BccImportParser : ImportParser {
 
-    override val id: UUID = UUID.fromString("cdc75c19-c79d-4b9b-b54e-581b52750e5b")
     override val name: String = "Bank Center Credit"
 
-    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> = Jsoup.parse(stream, null, "")
+    override fun parse(importData: ImportData, stream: InputStream): ImportDataParsed = ImportDataParsed(
+        entries = Jsoup.parse(stream, null, "")
         .select(".history__list__item")
         .map {
             val descriptionNode = it[1][1]
@@ -36,7 +36,9 @@ class BccImportParser : ImportParser {
                 amount.amount("KZT"),
                 description
             )
-        }
+        },
+        failed = emptyList(),
+    )
 
     private fun String.cleanAmount(): String = replace("₸", "")
         .replace(" ", "")

@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.importexport.entity.ImportData
+import com.evgenltd.financemanager.importexport.record.ImportDataParsed
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -10,15 +11,13 @@ import tools.jackson.dataformat.csv.CsvMapper
 import tools.jackson.dataformat.csv.CsvSchema
 import tools.jackson.module.kotlin.KotlinModule
 import java.io.InputStream
-import java.util.*
 
 @Service
 class TbcImportParser : ImportParser {
 
-    override val id: UUID = UUID.fromString("4cedb5cf-d946-4702-8c78-1b0c47c225a0")
     override val name: String = "TBC"
 
-    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData, stream: InputStream): ImportDataParsed {
         val currency = importData.currency ?: throw RuntimeException("Currency must be specified")
         val account = importData.account
 
@@ -30,7 +29,7 @@ class TbcImportParser : ImportParser {
             reader.readLine() // Skip the first (Georgian) header line.
             val remaining = reader.readText()
             if (remaining.isBlank()) {
-                return emptyList()
+                return ImportDataParsed(emptyList(), emptyList())
             }
             val cleaned = remaining.removePrefix("\uFEFF")
             val schema = CsvSchema.emptySchema().withHeader().withColumnSeparator(',')
@@ -40,7 +39,8 @@ class TbcImportParser : ImportParser {
                 .readAll()
         }
 
-        return rows.map { row ->
+        return ImportDataParsed(
+            entries = rows.map { row ->
             val paidOut = row.paidOut?.trim().orEmpty()
             val paidIn = row.paidIn?.trim().orEmpty()
 
@@ -66,7 +66,9 @@ class TbcImportParser : ImportParser {
                 amountTo = amount,
                 description = row.description?.trim().orEmpty(),
             )
-        }
+        },
+            failed = emptyList(),
+        )
     }
 
     data class Row(

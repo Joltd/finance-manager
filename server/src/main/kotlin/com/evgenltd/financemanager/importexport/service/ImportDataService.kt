@@ -136,7 +136,7 @@ class ImportDataService(
     fun save(request: ImportDataCreateRequest): ImportData {
         val account = accountRepository.find(request.account)
 
-        val importData = ImportData(account = account, currency = request.currency, progress = true)
+        val importData = ImportData(account = account, currency = request.currency)
         return importDataRepository.save(importData)
     }
 

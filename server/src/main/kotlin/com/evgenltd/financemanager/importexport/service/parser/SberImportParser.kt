@@ -1,20 +1,19 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.importexport.entity.ImportData
+import com.evgenltd.financemanager.importexport.record.ImportDataParsed
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.operation.entity.OperationType
 import org.jsoup.Jsoup
 import org.springframework.stereotype.Service
 import java.io.InputStream
-import java.util.*
 
 @Service
 class SberImportParser : ImportParser {
 
-    override val id: UUID = UUID.fromString("eb1869ad-7d1c-45c1-a4a3-a96c6b9d2855")
     override val name: String = "Sber"
 
-    override fun parse(importData: ImportData, stream: InputStream): List<ImportDataParsedEntry> {
+    override fun parse(importData: ImportData, stream: InputStream): ImportDataParsed {
         val lines = Jsoup.parse(stream, null, "")
             .select("tr")
             .map { element -> element.select("td")
@@ -53,7 +52,7 @@ class SberImportParser : ImportParser {
             )
             index += 2
         }
-        return result
+        return ImportDataParsed(entries = result, failed = emptyList())
     }
 
     private fun String.cleanAmount(): String = trim()

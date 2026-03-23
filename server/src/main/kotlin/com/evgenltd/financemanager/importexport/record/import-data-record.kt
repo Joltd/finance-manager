@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.ai.record.EmbeddingRecord
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.record.SeekDirection
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import org.springframework.context.ApplicationEvent
@@ -30,7 +31,8 @@ data class ImportDataRecord(
     val id: UUID,
     val account: AccountRecord,
     val dateRange: Range<LocalDate>?,
-    val progress: Boolean,
+    val parsingStatus: ImportDataParsingStatus,
+    val failedEntries: List<ImportDataParsedFailedEntry>,
     val valid: Boolean,
     val totals: List<ImportDataTotalRecord>
 )
@@ -105,6 +107,11 @@ data class ImportDataEntryApproveSuggestionRequest(
     val entryIds: List<UUID>,
 )
 
+data class ImportDataParsed(
+    val entries: List<ImportDataParsedEntry>,
+    val failed: List<ImportDataParsedFailedEntry>,
+)
+
 data class ImportDataParsedEntry(
     val rawEntries: List<String> = emptyList(),
     val date: LocalDate,
@@ -116,6 +123,12 @@ data class ImportDataParsedEntry(
     val description: String,
     val hint: String? = null,
 )
+
+data class ImportDataParsedFailedEntry(
+    val raw: String,
+    val message: String,
+)
+
 
 interface ImportDataDateRange {
     val min: LocalDate

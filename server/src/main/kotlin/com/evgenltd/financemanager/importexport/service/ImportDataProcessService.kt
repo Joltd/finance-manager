@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.importexport.service
 import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
 import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.importexport.record.ImportDataCalculateTotalEvent
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
@@ -31,12 +32,19 @@ class ImportDataProcessService(
 
     @Async
     fun beginNewImport(id: UUID, filename: String) {
-        try {
-            importDataActionService.withTryLock(id) {
-                fileService.load(filename) {
+        importDataActionService.withTryLock(id) {
+            try {
+                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.PARSING)
+                val result = fileService.load(filename) {
                     importDataActionService.parseImportData(id, it)
                 }
+                importDataActionService.prepareImportData(id, result)
+                if (result.entries.isEmpty()) {
+                    importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.FAILED)
+                    return@withTryLock
+                }
 
+                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.INTERPRETATION)
                 importDataEntryRepository.findByImportDataId(id)
                     .chunked(50)
                     .onEach { ids ->
@@ -44,15 +52,17 @@ class ImportDataProcessService(
                         importDataActionService.interpretImportDataEntries(ids)
                     }
 
+                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.LINKING)
                 importDataActionService.linkExistedOperations(id)
 
+                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.CALCULATION)
                 importDataActionService.calculateTotal(id)
 
-                importDataActionService.endProgress(id)
+                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.DONE)
+            } catch (e: Exception) {
+                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.FAILED, e.message)
+                log.error("Unable to parse data", e)
             }
-        } catch (e: Exception) {
-            log.error("Unable to parse data", e)
-            // write to notification
         }
     }
 

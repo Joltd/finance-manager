@@ -35,7 +35,8 @@ class ImportDataConverter(
         dateRange = dateRange?.let {
             Range(from = dateRange.min, to = dateRange.max)
         },
-        progress = importData.progress,
+        parsingStatus = importData.parsingStatus,
+        failedEntries = importData.failedEntries,
         valid = importData.valid,
         totals = importData.totals.map { toRecord(it, balances[it.currency]) }
     )

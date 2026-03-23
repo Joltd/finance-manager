@@ -3,7 +3,21 @@ import { Account, AccountReference } from '@/types/account'
 import { Operation, OperationType } from '@/types/operation'
 import { DateRange, Embedding } from '@/types/common/common'
 
-export type SuggestionRating = 'GOOD' | 'FAIR' | 'POOR'
+export enum SuggestionRating {
+  GOOD = 'GOOD',
+  FAIR = 'FAIR',
+  POOR = 'POOR',
+}
+
+export enum ImportDataParsingStatus {
+  CREATED = 'CREATED',
+  PARSING = 'PARSING',
+  INTERPRETATION = 'INTERPRETATION',
+  LINKING = 'LINKING',
+  CALCULATION = 'CALCULATION',
+  DONE = 'DONE',
+  FAILED = 'FAILED',
+}
 
 export interface ImportDataTotal {
   currency: string
@@ -19,9 +33,15 @@ export interface ImportData {
   id: string
   account: Account
   dateRange?: DateRange
-  progress: boolean
+  parsingStatus: ImportDataParsingStatus
+  failedEntries: ImportDataParsedFailedEntry[]
   valid: boolean
   totals: ImportDataTotal[]
+}
+
+export interface ImportDataParsedFailedEntry {
+  raw: string
+  message: string
 }
 
 export interface ImportDataOperation {

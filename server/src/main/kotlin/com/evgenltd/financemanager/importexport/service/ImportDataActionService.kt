@@ -12,7 +12,9 @@ import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.importexport.entity.*
+import com.evgenltd.financemanager.importexport.record.ImportDataParsed
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedFailedEntry
 import com.evgenltd.financemanager.importexport.record.OperationKey
 import com.evgenltd.financemanager.importexport.repository.*
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -45,18 +47,6 @@ class ImportDataActionService(
     private val lockService: LockService,
 ) : Loggable() {
 
-    @Transactional
-    fun startProgress(id: UUID) {
-        val importData = importDataRepository.find(id)
-        importData.progress = true
-    }
-
-    @Transactional
-    fun endProgress(id: UUID) {
-        val importData = importDataRepository.find(id)
-        importData.progress = false
-    }
-
     fun <T> withLock(id: UUID?, block: () -> T): T =
         lockService.withLockEntity(
             entityName = ImportData::class.simpleName!!,
@@ -71,13 +61,30 @@ class ImportDataActionService(
             block = block
         )
 
-    @Transactional
-    fun parseImportData(id: UUID, stream: InputStream) {
+
+    fun parseImportData(id: UUID, stream: InputStream): ImportDataParsed {
         val importData = importDataRepository.find(id)
-        val entries = importDataParserResolver.resolve(importData.account.parser).parse(importData, stream)
-        val days = prepareDays(entries, importData)
-        for (entry in entries) {
+        return importDataParserResolver.resolve(importData.account.parser).parse(importData, stream)
+    }
+
+    @Transactional
+    fun prepareImportData(id: UUID, result: ImportDataParsed) {
+        val importData = importDataRepository.find(id)
+
+        importData.failedEntries.addAll(result.failed)
+
+        val days = prepareDays(result.entries, importData)
+        for (entry in result.entries) {
             prepareEntry(entry, importData, days)
+        }
+    }
+
+    @Transactional
+    fun updateParsingStatus(id: UUID, status: ImportDataParsingStatus, message: String? = null) {
+        val importData = importDataRepository.find(id)
+        importData.parsingStatus = status
+        if (message != null) {
+            importData.failedEntries.add(0, ImportDataParsedFailedEntry("", message))
         }
     }
 

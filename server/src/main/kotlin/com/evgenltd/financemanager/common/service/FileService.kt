@@ -2,13 +2,12 @@ package com.evgenltd.financemanager.common.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.UUID
+import java.util.*
 
 @SkipLogging
 @Service
@@ -24,8 +23,8 @@ class FileService(
         return filename
     }
 
-    fun load(file: String, block: (stream: InputStream) -> Unit) {
-        Files.newInputStream(Paths.get(path).resolve(file)).use {
+    fun <T> load(file: String, block: (stream: InputStream) -> T): T {
+        return Files.newInputStream(Paths.get(path).resolve(file)).use {
             block(it)
         }
     }
