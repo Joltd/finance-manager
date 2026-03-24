@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
-import { isBefore, subWeeks, parseISO, format } from 'date-fns'
-import { PencilIcon, PlusIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react'
+import { format, isBefore, parseISO, subWeeks } from 'date-fns'
+import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
 import { AmountLabel } from '@/components/common/typography/amount-label'
-import type { Account, AccountBalance, AccountBalanceGroup } from '@/types/account'
+import type { AccountBalance, AccountBalanceGroup } from '@/types/account'
 import { Layout } from '@/components/common/layout/layout'
 import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
@@ -14,13 +14,6 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { useRequest } from '@/hooks/use-request'
 import { accountUrls, groupUrls } from '@/api/account'
 import { ask } from '@/store/common/ask-dialog'
@@ -34,7 +27,6 @@ export default function AccountPage() {
   const store = useAccountBalanceStore()
   const saveGroup = useRequest(groupUrls.root)
   const deleteAccount = useRequest(accountUrls.id, { method: 'DELETE' })
-  const restoreAccount = useRequest(accountUrls.root)
 
   useEffect(() => {
     void store.fetch()
@@ -60,17 +52,12 @@ export default function AccountPage() {
     openAccountSheet()
   }
 
-  const handleEditAccount = (account: Account) => {
-    openAccountSheet(account.id)
+  const handleEditAccount = (accountId: string) => {
+    openAccountSheet(accountId)
   }
 
-  const handleDeleteAccount = async (account: Account) => {
-    await deleteAccount.submit({ pathParams: { id: account.id! } })
-    void store.fetch()
-  }
-
-  const handleRestoreAccount = async (account: Account) => {
-    await restoreAccount.submit({ body: { ...account, deleted: false } })
+  const handleDeleteAccount = async (accountId: string) => {
+    await deleteAccount.submit({ pathParams: { id: accountId } })
     void store.fetch()
   }
 
@@ -110,7 +97,6 @@ export default function AccountPage() {
                     entry={entry}
                     onEdit={handleEditAccount}
                     onDelete={(a) => void handleDeleteAccount(a)}
-                    onRestore={(a) => void handleRestoreAccount(a)}
                   />
                 ))
               )
@@ -148,108 +134,97 @@ export default function AccountPage() {
   )
 }
 
-function AccountRow({
-  entry,
-  onEdit,
-  onDelete,
-  onRestore,
-}: {
+interface AccountRowProps {
   entry: AccountBalance
-  onEdit: (account: Account) => void
-  onDelete: (account: Account) => void
-  onRestore: (account: Account) => void
-}) {
+  onEdit: (accountId: string) => void
+  onDelete: (accountId: string) => void
+}
+
+function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
   const { account, balances } = entry
   const deleted = account.deleted
 
   const overdueRevise =
     account.reviseDate && isBefore(parseISO(account.reviseDate), subWeeks(new Date(), 2))
 
-  const accountEntity: Account = {
-    id: account.id,
-    name: account.name,
-    type: account.type,
-    deleted: account.deleted,
-    reviseDate: account.reviseDate,
-  }
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Stack
-          orientation="horizontal"
-          align="center"
-          justify="between"
-          gap={1}
-          className="py-2.5 hover:bg-muted/40 rounded-sm cursor-pointer focus-visible:outline-none"
+    <Stack
+      orientation="horizontal"
+      align="center"
+      justify="between"
+      gap={1}
+      className="group/account py-2.5"
+    >
+      <Typography
+        as="span"
+        variant="small"
+        className={cn('grow', deleted && 'line-through text-muted-foreground')}
+      >
+        {account.name}
+      </Typography>
+
+      {overdueRevise && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="outline">Revise</Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            Last revised: {format(parseISO(account.reviseDate!), 'dd MMM yyyy')}
+          </TooltipContent>
+        </Tooltip>
+      )}
+
+      <Flow gap={2} className="justify-end">
+        {balances.map((a) => (
+          <AmountLabel key={a.currency} amount={a} />
+        ))}
+      </Flow>
+
+      <Stack orientation="horizontal" gap={0}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="opacity-0 w-5 h-5 group-hover/account:opacity-100 transition-opacity"
+          onClick={() => onEdit(account.id!!)}
         >
-          <Typography
-            as="span"
-            variant="small"
-            className={cn('grow', deleted && 'line-through text-muted-foreground')}
+          <PencilIcon className="w-3! h-3!" />
+        </Button>
+        {!deleted && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="opacity-0 w-5 h-5 group-hover/account:opacity-100 transition-opacity text-destructive hover:text-destructive"
+            onClick={() => onDelete(account.id!!)}
           >
-            {account.name}
-          </Typography>
-
-          {overdueRevise && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="outline">Revise</Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                Last revised: {format(parseISO(account.reviseDate!), 'dd MMM yyyy')}
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          <Flow gap={2} className="justify-end">
-            {balances.map((a) => (
-              <AmountLabel key={a.currency} amount={a} />
-            ))}
-          </Flow>
-        </Stack>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuItem onClick={() => onEdit(accountEntity)}>
-          <PencilIcon />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        {deleted ? (
-          <DropdownMenuItem onClick={() => onRestore(accountEntity)}>
-            <RotateCcwIcon />
-            Restore
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem variant="destructive" onClick={() => onDelete(accountEntity)}>
-            <Trash2Icon />
-            Delete
-          </DropdownMenuItem>
+            <Trash2Icon className="w-3! h-3!" />
+          </Button>
         )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </Stack>
+    </Stack>
   )
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-8">
-      {[28, 20, 36].map((w) => (
-        <div key={w} className="flex flex-col gap-0">
-          <div className="flex items-center justify-between mb-1">
-            <Skeleton className={`h-3 w-${w}`} />
-          </div>
-          <Separator />
-          <div className="flex flex-col gap-0.5 pt-0.5">
+    <Stack gap={6}>
+      {(['w-28', 'w-20', 'w-36'] as const).map((w) => (
+        <Stack key={w}>
+          <Stack orientation="horizontal" align="center" gap={3} className="py-2">
+            <Skeleton className={`h-3 ${w}`} />
+            <Separator className="flex-1" />
+          </Stack>
+          <Stack gap={0}>
             {[1, 2].map((j) => (
-              <div key={j} className="flex items-center gap-4 py-2.5">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-4 w-24" />
-              </div>
+              <Stack key={j} orientation="horizontal" align="center" gap={1} className="py-2.5">
+                <Skeleton className="h-4 w-40 grow" />
+                <Flow gap={2}>
+                  <Skeleton className="h-4 w-16" />
+                </Flow>
+              </Stack>
             ))}
-          </div>
-        </div>
+          </Stack>
+        </Stack>
       ))}
-    </div>
+    </Stack>
   )
 }
