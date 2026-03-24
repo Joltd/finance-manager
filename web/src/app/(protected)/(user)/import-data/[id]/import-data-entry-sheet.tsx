@@ -103,6 +103,9 @@ export function ImportDataEntrySheet() {
       if (idx >= 0) {
         setSelectedSuggestionIdx(idx)
         setForm(suggestionToForm(entry.suggestions[idx]))
+      } else if (entry.parsed) {
+        setSelectedSuggestionIdx(null)
+        setForm(suggestionToForm(entry.parsed))
       } else {
         setSelectedSuggestionIdx(null)
         setForm(defaultFormState)
