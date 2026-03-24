@@ -34,6 +34,7 @@ export interface ImportData {
   account: Account
   dateRange?: DateRange
   parsingStatus: ImportDataParsingStatus
+  message?: string
   failedEntries: ImportDataParsedFailedEntry[]
   valid: boolean
   totals: ImportDataTotal[]

@@ -12,7 +12,7 @@ import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
-import { ImportDataEntry, ImportDataOperation, ImportDataParsingStatus } from '@/types/import-data'
+import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import { Operation } from '@/types/operation'
 import { abs, add, subtract } from '@/types/common/amount'
 import { ValidIcon } from '@/components/common/icon/valid-icon'
@@ -35,9 +35,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
   const [linkingEntry, setLinkingEntry] = useState<ImportDataEntry | null>(null)
 
   useEffect(() => {
-    if (importData?.parsingStatus === ImportDataParsingStatus.DONE) {
-      setPointer(format(addDays(new Date(), 1), 'yyyy-MM-dd'))
-    }
+    setPointer(format(addDays(new Date(), 1), 'yyyy-MM-dd'))
   }, [])
 
   useEffect(() => {
@@ -57,6 +55,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
 
   return (
     <div className="relative flex-1 min-h-0">
+      <ImportDataEntrySheet />
       <Seek seek={seek} loading={loading} exhausted={exhausted} className="h-full">
         {data.map((day) => (
           <Group

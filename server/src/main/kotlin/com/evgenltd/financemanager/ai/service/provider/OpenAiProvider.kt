@@ -6,8 +6,6 @@ import com.evgenltd.financemanager.ai.record.ParseResult
 import com.evgenltd.financemanager.ai.service.AiProvider
 import com.evgenltd.financemanager.common.component.IntegrationRestClient
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import tools.jackson.databind.JsonNode
@@ -16,8 +14,6 @@ import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 
 @Service
@@ -29,14 +25,6 @@ class OpenAiProvider(
 ) : AiProvider {
 
     override val name: AiProviders = AiProviders.OPEN_AI
-    
-    @EventListener(ApplicationReadyEvent::class)
-    fun init() {
-        val stream = Files.newInputStream(Paths.get("C:\\Users\\lebed\\Downloads\\Transfers_20260323.csv"))
-        
-        val result = parse(stream)
-        println(result)
-    }
 
     override fun embedding(data: List<String>): List<EmbeddingResult> {
         val request = mapOf(

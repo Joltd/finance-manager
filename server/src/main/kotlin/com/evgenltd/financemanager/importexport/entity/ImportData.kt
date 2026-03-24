@@ -28,6 +28,8 @@ class ImportData(
     @Enumerated(EnumType.STRING)
     var parsingStatus: ImportDataParsingStatus = ImportDataParsingStatus.CREATED,
 
+    var message: String? = null,
+
     /**
      * Valid by all grand totals validity and "operation + suggested = actual" condition
      */

@@ -32,6 +32,7 @@ data class ImportDataRecord(
     val account: AccountRecord,
     val dateRange: Range<LocalDate>?,
     val parsingStatus: ImportDataParsingStatus,
+    val message: String?,
     val failedEntries: List<ImportDataParsedFailedEntry>,
     val valid: Boolean,
     val totals: List<ImportDataTotalRecord>
@@ -131,8 +132,8 @@ data class ImportDataParsedFailedEntry(
 
 
 interface ImportDataDateRange {
-    val min: LocalDate
-    val max: LocalDate
+    val min: LocalDate?
+    val max: LocalDate?
 }
 
 interface AccountScore {

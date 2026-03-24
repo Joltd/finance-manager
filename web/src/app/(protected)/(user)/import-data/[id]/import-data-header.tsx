@@ -89,10 +89,20 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
 }
 
 function ImportDataStatus({ data }: { data: ImportData }) {
-  if (
-    data.parsingStatus !== ImportDataParsingStatus.DONE &&
-    data.parsingStatus !== ImportDataParsingStatus.FAILED
-  ) {
+  if (data.parsingStatus === ImportDataParsingStatus.FAILED) {
+    return (
+      <Typography
+        variant="muted"
+        as="span"
+        className="inline-flex items-center gap-1.5 text-destructive"
+      >
+        <XCircleIcon className="size-3.5" />
+        {data.message ?? 'Parsing failed'}
+      </Typography>
+    )
+  }
+
+  if (data.parsingStatus !== ImportDataParsingStatus.DONE) {
     return (
       <Typography
         variant="muted"

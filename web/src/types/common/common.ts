@@ -1,6 +1,6 @@
 export interface DateRange {
-  from?: string
-  to?: string
+  from: string
+  to: string
 }
 
 export interface BackendRequestOptions {

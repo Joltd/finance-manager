@@ -29,13 +29,13 @@ class ImportDataConverter(
         name = "${entity.account.name} - ${entity.id!!.toString().substring(0, 4)}",
     )
 
-    fun toRecord(importData: ImportData, dateRange: ImportDataDateRange?, balances: Map<String, Amount>): ImportDataRecord = ImportDataRecord(
+    fun toRecord(importData: ImportData, dateRange: ImportDataDateRange, balances: Map<String, Amount>): ImportDataRecord = ImportDataRecord(
         id = importData.id!!,
         account = accountConverter.toRecord(importData.account),
-        dateRange = dateRange?.let {
-            Range(from = dateRange.min, to = dateRange.max)
-        },
+        dateRange = dateRange.takeIf { it.min != null && it.max != null }
+            ?.let { Range(from = it.min, to = it.max) },
         parsingStatus = importData.parsingStatus,
+        message = importData.message,
         failedEntries = importData.failedEntries,
         valid = importData.valid,
         totals = importData.totals.map { toRecord(it, balances[it.currency]) }

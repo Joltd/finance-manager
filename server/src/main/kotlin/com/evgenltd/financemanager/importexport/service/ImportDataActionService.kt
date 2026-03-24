@@ -14,7 +14,6 @@ import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.importexport.entity.*
 import com.evgenltd.financemanager.importexport.record.ImportDataParsed
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedFailedEntry
 import com.evgenltd.financemanager.importexport.record.OperationKey
 import com.evgenltd.financemanager.importexport.repository.*
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -84,7 +83,7 @@ class ImportDataActionService(
         val importData = importDataRepository.find(id)
         importData.parsingStatus = status
         if (message != null) {
-            importData.failedEntries.add(0, ImportDataParsedFailedEntry("", message))
+            importData.message = message
         }
     }
 

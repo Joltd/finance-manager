@@ -1,8 +1,10 @@
 package com.evgenltd.financemanager.ai.service.provider
 
 import com.evgenltd.financemanager.ai.record.EmbeddingResult
+import com.evgenltd.financemanager.ai.record.ParseEntry
 import com.evgenltd.financemanager.ai.service.AiProvider
 import org.springframework.stereotype.Service
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import kotlin.random.Random
@@ -13,6 +15,10 @@ class AiStubProvider : AiProvider {
     override val name: AiProviders = AiProviders.STUB
 
     override fun embedding(data: List<String>): List<EmbeddingResult> = data.map { stubEmbedding(it) }
+
+    override fun parse(stream: InputStream): List<ParseEntry> {
+        return emptyList()
+    }
 
     private fun stubEmbedding(text: String): EmbeddingResult {
         val hash = DIGEST.digest(text.toByteArray())
