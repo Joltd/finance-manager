@@ -1,7 +1,14 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { ArrowRight, CalendarSearch, CopyIcon, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
+import {
+  ArrowRight,
+  CalendarSearch,
+  CopyIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { ask } from '@/store/common/ask-dialog'
 
 import { useOperationSeekStore } from '@/store/operation'
@@ -26,17 +33,21 @@ import {
 import { useRequest } from '@/hooks/use-request'
 import { Operation, OperationFilter, OperationType } from '@/types/operation'
 import { AccountReference } from '@/types/account'
-import { DateFilter } from '@/components/common/filter/date-filter'
 import { addDays, format } from 'date-fns'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { openOperationSheet, openOperationSheetForCopy, OperationSheet } from './operation-sheet'
+import { AmountRangeFilter } from '@/components/common/filter/amount-range-filter'
+import { Range } from '@/types/common/common'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
     type: filterValue.type as OperationType | undefined,
     account: (filterValue.account as AccountReference | undefined)?.id,
     currency: filterValue.currency as string | undefined,
+    // amount: filterValue.amount as Range<string> | undefined,
+    'amount.from': (filterValue.amount as Range<string> | undefined)?.from,
+    'amount.to': (filterValue.amount as Range<string> | undefined)?.to,
   }
 }
 
@@ -59,7 +70,20 @@ export default function OperationPage() {
   const store = useOperationSeekStore()
   const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
-  const { data, loading, exhausted, seek, refresh, resetData, setQueryParams, setPointer } = store
+  const {
+    data,
+    loadingForward,
+    loadingBackward,
+    exhaustedForward,
+    exhaustedBackward,
+    seekForward,
+    seekBackward,
+    refresh,
+    resetData,
+    setQueryParams,
+    setPointer,
+    error,
+  } = store
 
   useEffect(() => {
     setPointer(format(addDays(new Date(), 1), 'yyyy-MM-dd'))
@@ -67,18 +91,19 @@ export default function OperationPage() {
 
   const handleFilterChange = useCallback(
     (value: Record<string, unknown>) => {
+      console.log(value)
       setFilterValue(value)
       resetData()
       setQueryParams(toQuery(value))
     },
-    [resetData, setQueryParams, seek],
+    [resetData, setQueryParams],
   )
 
   const handleToDate = useCallback(async () => {
     const date = await ask({ type: 'date', label: 'Select date' })
     resetData()
     setPointer(format(addDays(date, 1), 'yyyy-MM-dd'))
-  }, [resetData, setQueryParams, filterValue, setPointer, seek])
+  }, [resetData, setQueryParams, filterValue, setPointer])
 
   const handleNew = () => {
     openOperationSheet()
@@ -123,13 +148,22 @@ export default function OperationPage() {
       </Stack>
 
       <Filter value={filterValue} onChange={handleFilterChange}>
-        <DateFilter id="date" label="Date" />
+        {/*<DateFilter id="date" label="Date" />*/}
         <OperationTypeFilter id="type" label="Type" />
         <AccountFilter id="account" label="Account" />
         <CurrencyFilter id="currency" label="Currency" />
+        <AmountRangeFilter id="amount" label="Amount" />
       </Filter>
 
-      <Seek seek={seek} loading={loading} exhausted={exhausted}>
+      <Seek
+        seekForward={seekForward}
+        seekBackward={seekBackward}
+        error={error}
+        loadingForward={loadingForward}
+        loadingBackward={loadingBackward}
+        exhaustedForward={exhaustedForward}
+        exhaustedBackward={exhaustedBackward}
+      >
         {data.map((group) => (
           <Group key={group.date} title={formatGroupDate(group.date)}>
             {group.operations.map((operation, i) => (

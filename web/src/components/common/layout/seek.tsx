@@ -1,55 +1,78 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef } from 'react'
-import { SeekDirection } from '@/store/common/seek'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 
 interface SeekProps {
-  seek: (direction: SeekDirection) => Promise<void>
-  loading: Record<SeekDirection, boolean>
-  exhausted: Record<SeekDirection, boolean>
+  seekForward: () => Promise<void>
+  seekBackward: () => Promise<void>
+  error?: string
+  loadingForward: boolean
+  loadingBackward: boolean
+  exhaustedForward: boolean
+  exhaustedBackward: boolean
   children: React.ReactNode
   className?: string
 }
 
-export function Seek({ seek, loading, exhausted, children, className }: SeekProps) {
+export function Seek({
+  seekForward,
+  seekBackward,
+  loadingForward,
+  loadingBackward,
+  exhaustedForward,
+  exhaustedBackward,
+  children,
+  className,
+  error,
+}: SeekProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const seekForward = useCallback(async () => {
+  const handleSeekForward = useCallback(async () => {
     const container = containerRef.current
     const children = Array.from(container?.children ?? []) as HTMLDivElement[]
     const child = children.find((it) => it.dataset.id !== 'seek-sentinel')
     const childOffsetTop = child?.offsetTop ?? 0
 
-    await seek(SeekDirection.FORWARD)
+    await seekForward()
 
     if (child && container) {
       requestAnimationFrame(() => {
         container.scrollTop = child.offsetTop - childOffsetTop
       })
     }
-  }, [seek])
+  }, [seekForward])
 
-  const seekBackward = useCallback(async () => {
-    await seek(SeekDirection.BACKWARD)
-  }, [seek])
+  const handleSeekBackward = useCallback(async () => {
+    await seekBackward()
+  }, [seekBackward])
+
+  if (error) {
+    return (
+      <Stack ref={containerRef} scrollable gap={0} className={className}>
+        <Stack align="center" justify="center" className="flex-1">
+          <Typography variant="muted">{error}</Typography>
+        </Stack>
+      </Stack>
+    )
+  }
 
   return (
     <Stack ref={containerRef} scrollable gap={0} className={className}>
       <SeekSentinelBlock
         id="forward"
-        onIntersect={seekForward}
-        loading={loading[SeekDirection.FORWARD]}
-        exhausted={exhausted[SeekDirection.FORWARD]}
+        onIntersect={handleSeekForward}
+        loading={loadingForward}
+        exhausted={exhaustedForward}
       />
       {children}
       <SeekSentinelBlock
         id="backward"
-        onIntersect={seekBackward}
-        loading={loading[SeekDirection.BACKWARD]}
-        exhausted={exhausted[SeekDirection.BACKWARD]}
+        onIntersect={handleSeekBackward}
+        loading={loadingBackward}
+        exhausted={exhaustedBackward}
       />
     </Stack>
   )

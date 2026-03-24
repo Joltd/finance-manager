@@ -3,8 +3,9 @@ package com.evgenltd.financemanager.operation.record
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.ai.record.EmbeddingRecord
+import com.evgenltd.financemanager.common.record.BigDecimalRange
+import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.record.SeekDirection
-import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import java.time.LocalDate
@@ -13,11 +14,12 @@ import java.util.*
 data class OperationFilter(
     val pointer: LocalDate,
     val direction: SeekDirection,
-    val date: Range<LocalDate>? = null,
+    val date: DateRange? = null,
     val type: OperationType? = null,
     val account: UUID? = null,
     val category: UUID? = null,
     val currency: String? = null,
+    val amount: BigDecimalRange? = null,
 )
 
 data class OperationGroupRecord(

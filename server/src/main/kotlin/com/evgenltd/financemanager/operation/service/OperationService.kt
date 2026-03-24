@@ -2,16 +2,7 @@ package com.evgenltd.financemanager.operation.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.record.SeekDirection
-import com.evgenltd.financemanager.common.repository.account
-import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.between
-import com.evgenltd.financemanager.common.repository.contains
-import com.evgenltd.financemanager.common.repository.currency
-import com.evgenltd.financemanager.common.repository.eq
-import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.repository.gt
-import com.evgenltd.financemanager.common.repository.lt
-import com.evgenltd.financemanager.common.repository.or
+import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationChangeRecord
@@ -21,7 +12,6 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -42,11 +32,12 @@ class OperationService(
         val direction = filter.direction
 
         val baseSpecification = (
-            (Operation::date between filter.date) and
+//            (Operation::date between filter.date) and
                 (Operation::type eq filter.type) and
                 byAccount(filter.account) and
                 byAccount(filter.category) and
-                ((Operation::amountFrom currency filter.currency) or (Operation::amountTo currency filter.currency))
+                ((Operation::amountFrom currency filter.currency) or (Operation::amountTo currency filter.currency)) and
+                ((Operation::amountFrom amountBetween filter.amount) or (Operation::amountTo amountBetween filter.amount))
         )
 
         val dates = findNearDates(pointer, direction, baseSpecification)
@@ -103,9 +94,6 @@ class OperationService(
             .setMaxResults(limit)
             .resultList
     }
-
-    fun listLast(): List<OperationRecord> = operationRepository.findAllByOrderByDateDesc(Pageable.ofSize(5))
-        .map { operationConverter.toRecord(it) }
 
     fun byId(id: UUID): OperationRecord = operationRepository.find(id).let { operationConverter.toRecord(it) }
 

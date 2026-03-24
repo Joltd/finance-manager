@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.common.record
 
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -8,6 +9,8 @@ data class Response(val success: Boolean, val body: Any?, val error: String?)
 data class Range<T>(val from: T?, val to: T?)
 
 data class DateRange(val from: LocalDate?, val to: LocalDate?)
+
+data class BigDecimalRange(val from: BigDecimal?, val to: BigDecimal?)
 
 data class SortRecord(val field: String, val direction: SortDirection)
 

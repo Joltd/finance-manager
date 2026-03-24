@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import {
   AlertTriangleIcon,
   CheckCircle2Icon,
-  Loader2Icon,
   PencilIcon,
   RefreshCwIcon,
   XCircleIcon,
@@ -14,12 +13,7 @@ import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
 import { useImportDataStore } from '@/store/import-data'
-import {
-  ImportData,
-  ImportDataParsedFailedEntry,
-  ImportDataParsingStatus,
-  ImportDataTotal,
-} from '@/types/import-data'
+import { ImportData, ImportDataParsedFailedEntry, ImportDataTotal } from '@/types/import-data'
 import { abs, add, isZero, subtract } from '@/types/common/amount'
 import { ask } from '@/store/common/ask-dialog'
 import { Filler } from '@/components/common/layout/filler'
@@ -88,33 +82,7 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
   )
 }
 
-function ImportDataStatus({ data }: { data: ImportData }) {
-  if (data.parsingStatus === ImportDataParsingStatus.FAILED) {
-    return (
-      <Typography
-        variant="muted"
-        as="span"
-        className="inline-flex items-center gap-1.5 text-destructive"
-      >
-        <XCircleIcon className="size-3.5" />
-        {data.message ?? 'Parsing failed'}
-      </Typography>
-    )
-  }
-
-  if (data.parsingStatus !== ImportDataParsingStatus.DONE) {
-    return (
-      <Typography
-        variant="muted"
-        as="span"
-        className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400"
-      >
-        <Loader2Icon className="size-3.5 animate-spin" />
-        {data.parsingStatus}
-      </Typography>
-    )
-  }
-
+function ValidityStatus({ data }: { data: ImportData }) {
   if (data.valid) {
     return (
       <Typography
@@ -209,19 +177,10 @@ function TitleSection({
 
       {data && (
         <Flow align="center" gap={2} className="ml-auto">
-          <ImportDataStatus data={data} />
+          <ValidityStatus data={data} />
           <Tooltip disableHoverableContent>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={onRecalculate}
-                disabled={
-                  loading ||
-                  (data.parsingStatus !== ImportDataParsingStatus.DONE &&
-                    data.parsingStatus !== ImportDataParsingStatus.FAILED)
-                }
-              >
+              <Button variant="ghost" size="icon-xs" onClick={onRecalculate} disabled={loading}>
                 <RefreshCwIcon />
               </Button>
             </TooltipTrigger>

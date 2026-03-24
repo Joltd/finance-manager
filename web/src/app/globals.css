@@ -132,6 +132,15 @@
   --success-foreground: var(--color-green-900);
 }
 
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+@theme inline {
+  --animate-progress-indeterminate: progress-indeterminate 1.2s ease-in-out infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

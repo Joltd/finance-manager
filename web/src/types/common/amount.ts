@@ -74,6 +74,17 @@ export function convert(a: Amount, rate: number, targetCurrency: string): Amount
   return { value: Math.round(a.value * rate), currency: targetCurrency }
 }
 
+// --- scale conversion ---
+
+export function decimalToScaled(decimal: string | number): number | undefined {
+  const num = typeof decimal === 'number' ? decimal : parseFloat(decimal.replace(',', '.'))
+  return isNaN(num) ? undefined : Math.round(num * SCALE_FACTOR)
+}
+
+export function scaledToDecimal(scaled: number): number {
+  return scaled / SCALE_FACTOR
+}
+
 // --- comparison ---
 
 export function compare(a: Amount, b: Amount): number {

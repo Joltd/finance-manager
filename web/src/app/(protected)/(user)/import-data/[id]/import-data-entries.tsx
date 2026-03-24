@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { addDays, format } from 'date-fns'
-import { Check, Link2, Link2Off, X } from 'lucide-react'
+import { Check, Link2, Link2Off, Loader2Icon, X, XCircleIcon } from 'lucide-react'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
 import { Seek } from '@/components/common/layout/seek'
 import { Stack } from '@/components/common/layout/stack'
@@ -12,12 +12,13 @@ import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
-import { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
+import { ImportDataEntry, ImportDataOperation, ImportDataParsingStatus } from '@/types/import-data'
 import { Operation } from '@/types/operation'
 import { abs, add, subtract } from '@/types/common/amount'
 import { ValidIcon } from '@/components/common/icon/valid-icon'
 import { cn, formatDateCommon } from '@/lib/utils'
-import { openImportDataEntrySheet } from './import-data-entry-sheet'
+import { Progress } from '@/components/ui/progress'
+import { ImportDataEntrySheet, openImportDataEntrySheet } from './import-data-entry-sheet'
 import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from './import-data-actions'
 
@@ -26,8 +27,19 @@ interface ImportDataEntriesProps {
 }
 
 export function ImportDataEntries({ id }: ImportDataEntriesProps) {
-  const { data, loading, exhausted, setPointer, seek, setPathParams } =
-    useImportDataEntrySeekStore()
+  const {
+    data,
+    loadingForward,
+    loadingBackward,
+    loadingRefresh,
+    exhaustedForward,
+    exhaustedBackward,
+    setPointer,
+    seekForward,
+    seekBackward,
+    setPathParams,
+    error,
+  } = useImportDataEntrySeekStore()
   const { data: importData } = useImportDataStore()
   const mainAccountId = importData?.account.id
   const actions = useImportDataActions()
@@ -56,7 +68,19 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
   return (
     <div className="relative flex-1 min-h-0">
       <ImportDataEntrySheet />
-      <Seek seek={seek} loading={loading} exhausted={exhausted} className="h-full">
+      {loadingRefresh && (
+        <Progress className="absolute top-0 inset-x-0 z-20 rounded-none bg-transparent h-0.5" />
+      )}
+      <Seek
+        seekForward={seekForward}
+        seekBackward={seekBackward}
+        error={error}
+        loadingForward={loadingForward}
+        loadingBackward={loadingBackward}
+        exhaustedForward={exhaustedForward}
+        exhaustedBackward={exhaustedBackward}
+        className="h-full"
+      >
         {data.map((day) => (
           <Group
             key={day.date}
@@ -423,4 +447,40 @@ function ParsedEntryCard({
 
 function EmptySlot() {
   return <div className="h-full min-h-10 rounded-md border border-dashed border-muted" />
+}
+
+export interface ImportDataInProgressPlaceholderProps {
+  status: ImportDataParsingStatus
+}
+
+export function ImportDataInProgressPlaceholder({ status }: ImportDataInProgressPlaceholderProps) {
+  return (
+    <Stack align="center" justify="center" gap={3} className="flex-1 p-8 text-center">
+      <Loader2Icon className="size-12 text-amber-500 animate-spin opacity-80" />
+      <Typography variant="large">{status}</Typography>
+      <Typography variant="muted" className="max-w-md">
+        Parsing is in progress, data will be ready soon
+      </Typography>
+    </Stack>
+  )
+}
+
+export interface ImportDataFailedPlaceholderProps {
+  message?: string
+}
+
+export function ImportDataFailedPlaceholder({ message }: ImportDataFailedPlaceholderProps) {
+  return (
+    <Stack align="center" justify="center" gap={3} className="flex-1 p-8 text-center">
+      <XCircleIcon className="size-12 text-destructive opacity-80" />
+      <Typography variant="large" className="text-destructive">
+        Parsing failed
+      </Typography>
+      {message && (
+        <Typography variant="muted" className="max-w-md">
+          {message}
+        </Typography>
+      )}
+    </Stack>
+  )
 }

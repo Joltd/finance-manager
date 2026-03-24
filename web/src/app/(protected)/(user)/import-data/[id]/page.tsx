@@ -2,7 +2,11 @@
 
 import { Layout } from '@/components/common/layout/layout'
 import { ImportDataHeader } from './import-data-header'
-import { ImportDataEntries } from './import-data-entries'
+import {
+  ImportDataEntries,
+  ImportDataFailedPlaceholder,
+  ImportDataInProgressPlaceholder,
+} from './import-data-entries'
 import { useParams } from 'next/navigation'
 import { useImportDataStore } from '@/store/import-data'
 import { ImportDataParsingStatus } from '@/types/import-data'
@@ -14,7 +18,13 @@ export default function ImportDataPage() {
   return (
     <Layout>
       <ImportDataHeader id={id} />
-      {data?.parsingStatus === ImportDataParsingStatus.DONE && <ImportDataEntries id={id} />}
+      {data?.parsingStatus === ImportDataParsingStatus.DONE ? (
+        <ImportDataEntries id={id} />
+      ) : data?.parsingStatus === ImportDataParsingStatus.FAILED ? (
+        <ImportDataFailedPlaceholder message={data.message} />
+      ) : !!data ? (
+        <ImportDataInProgressPlaceholder status={data.parsingStatus} />
+      ) : null}
     </Layout>
   )
 }

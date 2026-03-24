@@ -13,17 +13,21 @@ export enum SeekDirection {
 
 export interface SeekState<TData, TBody, TQuery, TPath, TPointer> {
   data: TData[]
-  loading: Record<SeekDirection, boolean>
-  error: string | null
-  pointer: TPointer | undefined
-  body: TBody | undefined
-  queryParams: TQuery | undefined
-  pathParams: TPath | undefined
-  exhausted: Record<SeekDirection, boolean>
+  loadingForward: boolean
+  loadingBackward: boolean
+  error?: string
+  pointer?: TPointer
+  body?: TBody
+  queryParams?: TQuery
+  pathParams?: TPath
+  exhaustedForward: boolean
+  exhaustedBackward: boolean
+  loadingRefresh: boolean
 }
 
 export interface SeekActions<TData, TBody, TQuery, TPath, TPointer> {
-  seek: (direction: SeekDirection) => Promise<void>
+  seekForward: () => Promise<void>
+  seekBackward: () => Promise<void>
   setPointer: (pointer: TPointer) => void
   setBody: (body: TBody) => void
   setQueryParams: (params: TQuery) => void
@@ -41,16 +45,6 @@ export type SeekSlice<
   TPath extends Record<string, string> = Record<string, string>,
 > = SeekState<TData, TBody, TQuery, TPath, TPointer> &
   SeekActions<TData, TBody, TQuery, TPath, TPointer>
-
-const initialLoading: Record<SeekDirection, boolean> = {
-  [SeekDirection.FORWARD]: false,
-  [SeekDirection.BACKWARD]: false,
-}
-
-const initialExhausted: Record<SeekDirection, boolean> = {
-  [SeekDirection.FORWARD]: false,
-  [SeekDirection.BACKWARD]: false,
-}
 
 export function createSeekSlice<
   TData,
@@ -85,83 +79,107 @@ export function createSeekSlice<
 
   return (set, get) => ({
     data: [],
-    loading: { ...initialLoading },
-    error: null,
+    loadingForward: false,
+    loadingBackward: false,
+    error: undefined,
     pointer: undefined,
     body: undefined,
     queryParams: undefined,
     pathParams: undefined,
-    exhausted: { ...initialExhausted },
+    exhaustedForward: false,
+    exhaustedBackward: false,
+    loadingRefresh: false,
 
-    seek: async (direction: SeekDirection): Promise<void> => {
+    seekForward: async (): Promise<void> => {
       const {
-        loading,
+        loadingForward,
+        exhaustedForward,
         data,
-        exhausted,
         body,
         queryParams,
         pathParams,
         pointer: storedPointer,
       } = get()
 
-      if (exhausted[direction] || loading[direction]) {
-        return
-      }
+      if (exhaustedForward || loadingForward) return
 
-      const pointer =
-        data.length > 0
-          ? direction === SeekDirection.FORWARD
-            ? getPointer(data[0])
-            : getPointer(data[data.length - 1])
-          : storedPointer
+      const pointer = data.length > 0 ? getPointer(data[0]) : storedPointer
 
-      set((state) => ({ loading: { ...state.loading, [direction]: true }, error: null }))
+      set({ loadingForward: true, error: undefined })
 
       try {
         const newItems = await executeRequest(
           path,
           method,
           pathParams as Record<string, string> | undefined,
-          { ...queryParams, pointer, direction },
+          { ...queryParams, pointer, direction: SeekDirection.FORWARD },
           method !== 'GET' ? body : undefined,
         )
 
         if (newItems.length === 0) {
-          set((state) => ({
-            loading: { ...state.loading, [direction]: false },
-            exhausted: { ...state.exhausted, [direction]: true },
-          }))
+          set({ loadingForward: false, exhaustedForward: true })
           return
         }
 
         set((state) => {
-          const merged =
-            direction === SeekDirection.FORWARD
-              ? [...newItems, ...state.data]
-              : [...state.data, ...newItems]
-
-          const newLoading = { ...state.loading, [direction]: false }
-
-          if (merged.length <= MAX_SIZE) {
-            return { data: merged, loading: newLoading }
-          }
-
-          const newExhausted = { ...state.exhausted }
-          if (direction === SeekDirection.FORWARD) {
-            newExhausted[SeekDirection.BACKWARD] = false
-            return { data: merged.slice(0, MAX_SIZE), loading: newLoading, exhausted: newExhausted }
-          } else {
-            newExhausted[SeekDirection.FORWARD] = false
-            return {
-              data: merged.slice(merged.length - MAX_SIZE),
-              loading: newLoading,
-              exhausted: newExhausted,
-            }
+          const merged = [...newItems, ...state.data]
+          if (merged.length <= MAX_SIZE) return { data: merged, loadingForward: false }
+          return {
+            data: merged.slice(0, MAX_SIZE),
+            loadingForward: false,
+            exhaustedBackward: false,
           }
         })
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        set((state) => ({ error: message, loading: { ...state.loading, [direction]: false } }))
+        set({ error: message, loadingForward: false })
+        throw err
+      }
+    },
+
+    seekBackward: async (): Promise<void> => {
+      const {
+        loadingBackward,
+        exhaustedBackward,
+        data,
+        body,
+        queryParams,
+        pathParams,
+        pointer: storedPointer,
+      } = get()
+
+      if (exhaustedBackward || loadingBackward) return
+
+      const pointer = data.length > 0 ? getPointer(data[data.length - 1]) : storedPointer
+
+      set({ loadingBackward: true, error: undefined })
+
+      try {
+        const newItems = await executeRequest(
+          path,
+          method,
+          pathParams as Record<string, string> | undefined,
+          { ...queryParams, pointer, direction: SeekDirection.BACKWARD },
+          method !== 'GET' ? body : undefined,
+        )
+
+        if (newItems.length === 0) {
+          set({ loadingBackward: false, exhaustedBackward: true })
+          return
+        }
+
+        set((state) => {
+          const merged = [...state.data, ...newItems]
+          if (merged.length <= MAX_SIZE) return { data: merged, loadingBackward: false }
+          return {
+            data: merged.slice(merged.length - MAX_SIZE),
+            loadingBackward: false,
+            exhaustedForward: false,
+          }
+        })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        set({ error: message, loadingBackward: false })
         throw err
       }
     },
@@ -175,6 +193,8 @@ export function createSeekSlice<
       const { data, body, queryParams, pathParams } = get()
       const pointers = data.map(getPointer)
 
+      set({ loadingRefresh: true })
+
       try {
         const updatedItems = await executeRequest(
           path,
@@ -185,12 +205,14 @@ export function createSeekSlice<
         )
 
         set((state) => ({
+          loadingRefresh: false,
           data: state.data.map((existing) => {
             const updated = updatedItems.find((item) => getPointer(item) === getPointer(existing))
             return updated ?? existing
           }),
         }))
       } catch (err) {
+        set({ loadingRefresh: false })
         throw err
       }
     },
@@ -198,21 +220,25 @@ export function createSeekSlice<
     resetData: () =>
       set({
         data: [],
-        loading: { ...initialLoading },
-        error: null,
-        exhausted: { ...initialExhausted },
+        loadingForward: false,
+        loadingBackward: false,
+        error: undefined,
+        exhaustedForward: false,
+        exhaustedBackward: false,
       }),
 
     reset: () =>
       set({
         data: [],
-        loading: { ...initialLoading },
-        error: null,
+        loadingForward: false,
+        loadingBackward: false,
+        error: undefined,
         pointer: undefined,
         body: undefined,
         queryParams: undefined,
         pathParams: undefined,
-        exhausted: { ...initialExhausted },
+        exhaustedForward: false,
+        exhaustedBackward: false,
       }),
   })
 }

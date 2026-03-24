@@ -1,3 +1,8 @@
+export interface Range<T> {
+  from?: T
+  to?: T
+}
+
 export interface DateRange {
   from: string
   to: string

@@ -1,5 +1,6 @@
 import { AccountReference } from '@/types/account'
 import { Amount } from '@/types/common/amount'
+import { Range } from '@/types/common/common'
 
 export type OperationType = 'EXPENSE' | 'INCOME' | 'EXCHANGE' | 'TRANSFER'
 
@@ -21,9 +22,12 @@ export interface OperationGroup {
 }
 
 export interface OperationFilter {
-  date?: { from?: string; to?: string }
+  date?: Range<string>
   type?: OperationType
   account?: string
   category?: string
   currency?: string
+  // amount?: Range<string>
+  'amount.from'?: string
+  'amount.to'?: string
 }
