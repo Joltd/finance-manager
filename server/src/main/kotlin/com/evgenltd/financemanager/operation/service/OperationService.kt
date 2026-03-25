@@ -36,7 +36,7 @@ class OperationService(
                 (Operation::type eq filter.type) and
                 byAccount(filter.account) and
                 byAccount(filter.category) and
-                ((Operation::amountFrom currency filter.currency) or (Operation::amountTo currency filter.currency)) and
+                byCurrency(filter.currency) and
                 ((Operation::amountFrom amountBetween filter.amount) or (Operation::amountTo amountBetween filter.amount))
         )
 

@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.operation.service
 
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.common.repository.account
+import com.evgenltd.financemanager.common.repository.currency
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.or
 import com.evgenltd.financemanager.common.util.Amount
@@ -19,6 +20,9 @@ fun byAccount(account: Account): Specification<Operation> =
 
 fun byAccount(account: UUID?): Specification<Operation> =
     (Operation::accountFrom account account) or (Operation::accountTo account account)
+
+fun byCurrency(currency: String?): Specification<Operation> =
+    (Operation::amountFrom currency currency) or (Operation::amountTo currency currency)
 
 fun List<Operational>.amountsForAccount(account: Account): List<Amount> = flatMap { operation ->
     listOf(

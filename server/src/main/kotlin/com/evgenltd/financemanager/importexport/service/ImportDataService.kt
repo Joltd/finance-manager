@@ -19,6 +19,7 @@ import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.operation.service.byAccount
+import com.evgenltd.financemanager.operation.service.byCurrency
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -79,6 +80,7 @@ class ImportDataService(
 
         val freeOperations = ((Operation::date contains actualDates) and
                 byAccount(importData.account) and
+                byCurrency(importData.currency) and
                 (Operation::id containsNot linkedOperations))
             .let { operationRepository.findAll(it) }
             .groupBy { it.date }
@@ -118,7 +120,8 @@ class ImportDataService(
             .map { it.date }
             .toList()
 
-        val operationsDates = operationService.findNearDates(pointer, direction, byAccount(importData.account), NEAREST_DATE_LIMIT)
+        val operationSpecification = byAccount(importData.account) and byCurrency(importData.currency)
+        val operationsDates = operationService.findNearDates(pointer, direction, operationSpecification, NEAREST_DATE_LIMIT)
 
         return (importDataDates + operationsDates)
             .asSequence()

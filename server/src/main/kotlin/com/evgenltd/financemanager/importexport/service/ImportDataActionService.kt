@@ -23,6 +23,7 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.OperationProcessService
 import com.evgenltd.financemanager.operation.service.amountsForAccount
 import com.evgenltd.financemanager.operation.service.byAccount
+import com.evgenltd.financemanager.operation.service.byCurrency
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
@@ -375,12 +376,13 @@ class ImportDataActionService(
     fun calculateTotal(id: UUID, dates: List<LocalDate>? = null) {
         val importData = importDataRepository.find(id)
         val account = importData.account
+        val currency = importData.currency
 
         val freeOperations = loadFreeOperations(importData)
 
         importData.days
             .filter { dates == null || it.date in dates }
-            .onEach { calculateDayTotal(it, account, freeOperations[it.date]) }
+            .onEach { calculateDayTotal(it, account, currency, freeOperations[it.date]) }
 
         calculateGrandTotal(importData)
 
@@ -399,12 +401,18 @@ class ImportDataActionService(
 
         return ((Operation::date contains actualDates) and
                 byAccount(importData.account) and
+                byCurrency(importData.currency) and
                 (Operation::id containsNot linkedOperations))
             .let { operationRepository.findAll(it) }
             .groupBy { it.date }
     }
 
-    private fun calculateDayTotal(day: ImportDataDay, account: Account, freeOperations: List<Operational>?) {
+    private fun calculateDayTotal(
+        day: ImportDataDay,
+        account: Account,
+        currency: String?,
+        freeOperations: List<Operational>?
+    ) {
         val parsedTotals = day.entries
             .flatMap { it.parsed() }
             .totalByCurrency(account)
@@ -423,20 +431,21 @@ class ImportDataActionService(
         val operationTotals = linkedOperationTotals + freeOperationTotals
 
         val currencies = parsedTotals.keys + suggestionTotals.keys + operationTotals.keys
-        val dayTotals = currencies.map {
-            val parsed = parsedTotals[it] ?: emptyAmount(it)
-            val suggested = suggestionTotals[it] ?: emptyAmount(it)
-            val operation = operationTotals[it] ?: emptyAmount(it)
-            ImportDataTotal(
-                importDataDay = day,
-                currency = it,
-                parsed = parsed,
-                suggested = suggested,
-                operation = operation,
-                actual = emptyAmount(it),
-                valid = operation + suggested == parsed,
-            )
-        }
+        val dayTotals = currencies.filter { currency == null || it == currency }
+            .map {
+                val parsed = parsedTotals[it] ?: emptyAmount(it)
+                val suggested = suggestionTotals[it] ?: emptyAmount(it)
+                val operation = operationTotals[it] ?: emptyAmount(it)
+                ImportDataTotal(
+                    importDataDay = day,
+                    currency = it,
+                    parsed = parsed,
+                    suggested = suggested,
+                    operation = operation,
+                    actual = emptyAmount(it),
+                    valid = operation + suggested == parsed,
+                )
+            }
 
         day.totals.clear()
         day.totals.addAll(dayTotals)
