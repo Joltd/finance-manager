@@ -159,6 +159,7 @@ export function AccountSheet() {
               <DateInput
                 value={form.reviseDate}
                 onChange={(date) => setForm((f) => ({ ...f, reviseDate: date }))}
+                clearable
                 placeholder="Not set"
               />
             </Field>

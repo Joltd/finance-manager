@@ -158,27 +158,10 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
       <Typography
         as="span"
         variant="small"
-        className={cn('grow', deleted && 'line-through text-muted-foreground')}
+        className={cn(deleted && 'line-through text-muted-foreground')}
       >
         {account.name}
       </Typography>
-
-      {overdueRevise && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant="outline">Revise</Badge>
-          </TooltipTrigger>
-          <TooltipContent>
-            Last revised: {format(parseISO(account.reviseDate!), 'dd MMM yyyy')}
-          </TooltipContent>
-        </Tooltip>
-      )}
-
-      <Flow gap={2} className="justify-end">
-        {balances.map((a) => (
-          <AmountLabel key={a.currency} amount={a} />
-        ))}
-      </Flow>
 
       <Stack orientation="horizontal" gap={0}>
         <Button
@@ -200,6 +183,25 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
           </Button>
         )}
       </Stack>
+
+      <div className="grow" />
+
+      {overdueRevise && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="outline">Revise</Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            Last revised: {format(parseISO(account.reviseDate!), 'dd MMM yyyy')}
+          </TooltipContent>
+        </Tooltip>
+      )}
+
+      <Flow gap={2} className="justify-end">
+        {balances.map((a) => (
+          <AmountLabel key={a.currency} amount={a} />
+        ))}
+      </Flow>
     </Stack>
   )
 }

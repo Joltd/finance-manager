@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect } from 'react'
-import { PencilIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react'
+import { PencilIcon, Trash2Icon } from 'lucide-react'
 
 import { ask } from '@/store/common/ask-dialog'
 import { useRequest } from '@/hooks/use-request'
 import { EntityList } from '@/components/common/layout/entity-list'
 import { Layout } from '@/components/common/layout/layout'
+import { Stack } from '@/components/common/layout/stack'
+import { Typography } from '@/components/common/typography/typography'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { accountUrls, currencyUrls, groupUrls } from '@/api/account'
@@ -32,37 +34,46 @@ interface ReferenceRowProps {
   badge?: string
   onEdit: () => void
   onDelete: () => void
-  onRestore?: () => void
 }
 
-function ReferenceRow({ label, deleted, badge, onEdit, onDelete, onRestore }: ReferenceRowProps) {
+function ReferenceRow({ label, deleted, badge, onEdit, onDelete }: ReferenceRowProps) {
   return (
-    <div className="flex items-center justify-between px-6 py-1.5 hover:bg-muted/50">
-      <div className="flex items-center gap-2">
-        <span className={cn('text-sm', deleted && 'line-through text-muted-foreground')}>
-          {label}
-        </span>
-        {badge && (
-          <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-            {badge}
-          </span>
-        )}
-      </div>
-      <div className="flex items-center gap-1">
-        <Button size="icon-sm" variant="ghost" onClick={onEdit}>
-          <PencilIcon />
+    <Stack orientation="horizontal" align="center" gap={1} className="group px-6 py-3">
+      <Typography
+        as="span"
+        variant="small"
+        className={cn(deleted && 'line-through text-muted-foreground')}
+      >
+        {label}
+      </Typography>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="opacity-0 w-5 h-5 group-hover:opacity-100 transition-opacity"
+        onClick={onEdit}
+      >
+        <PencilIcon className="w-3! h-3!" />
+      </Button>
+      {!deleted && (
+        <Button
+          size="icon"
+          variant="ghost"
+          className="opacity-0 w-5 h-5 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+          onClick={onDelete}
+        >
+          <Trash2Icon className="w-3! h-3!" />
         </Button>
-        {deleted && onRestore ? (
-          <Button size="icon-sm" variant="ghost" onClick={onRestore}>
-            <RotateCcwIcon />
-          </Button>
-        ) : (
-          <Button size="icon-sm" variant="ghost" onClick={onDelete}>
-            <Trash2Icon />
-          </Button>
-        )}
-      </div>
-    </div>
+      )}
+      {badge && (
+        <Typography
+          as="span"
+          variant="muted"
+          className="ml-auto text-xs bg-muted px-1.5 py-0.5 rounded"
+        >
+          {badge}
+        </Typography>
+      )}
+    </Stack>
   )
 }
 
@@ -151,11 +162,6 @@ function AccountGroupSection() {
     void listReq.submit()
   }
 
-  const handleRestore = async (item: AccountGroup) => {
-    await updateReq.submit({ body: { ...item, deleted: false } })
-    void listReq.submit()
-  }
-
   return (
     <EntityList
       data={listReq.data}
@@ -171,7 +177,6 @@ function AccountGroupSection() {
           deleted={item.deleted}
           onEdit={() => handleEdit(item)}
           onDelete={() => handleDelete(item)}
-          onRestore={item.deleted ? () => handleRestore(item) : undefined}
         />
       )}
     />
@@ -195,7 +200,9 @@ function AccountSection({ title, accountType }: { title: string; accountType: Ac
   const handleAdd = async () => {
     const name = await ask({ type: 'string', label: 'Account name' })
     if (!name.trim()) return
-    await updateReq.submit({ body: { name: name.trim(), type: accountType, deleted: false, reportExclude: false } })
+    await updateReq.submit({
+      body: { name: name.trim(), type: accountType, deleted: false, reportExclude: false },
+    })
     void fetchList()
   }
 
@@ -206,11 +213,6 @@ function AccountSection({ title, accountType }: { title: string; accountType: Ac
   const handleDelete = async (item: Account) => {
     if (!item.id) return
     await deleteReq.submit({ pathParams: { id: item.id } })
-    void fetchList()
-  }
-
-  const handleRestore = async (item: Account) => {
-    await updateReq.submit({ body: { ...item, deleted: false } })
     void fetchList()
   }
 
@@ -235,7 +237,6 @@ function AccountSection({ title, accountType }: { title: string; accountType: Ac
           badge={item.group?.name}
           onEdit={() => handleEdit(item)}
           onDelete={() => handleDelete(item)}
-          onRestore={item.deleted ? () => handleRestore(item) : undefined}
         />
       )}
     />
