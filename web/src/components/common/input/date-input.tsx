@@ -62,6 +62,7 @@ function DateInput({
           selected={value}
           onSelect={handleSelect}
           captionLayout="dropdown"
+          weekStartsOn={1}
           {...calendarProps}
         />
       </PopoverContent>
