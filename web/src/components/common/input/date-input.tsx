@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
@@ -10,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
-type DateInputProps = {
+export interface DateInputProps {
   value?: Date
   onChange?: (date: Date | undefined) => void
   placeholder?: string
@@ -19,7 +17,7 @@ type DateInputProps = {
   calendarProps?: Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect'>
 }
 
-function DateInput({
+export function DateInput({
   value,
   onChange,
   placeholder = 'Select',
@@ -69,6 +67,3 @@ function DateInput({
     </Popover>
   )
 }
-
-export { DateInput }
-export type { DateInputProps }
