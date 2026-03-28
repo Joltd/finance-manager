@@ -31,9 +31,9 @@ class ReportService(
 ) {
 
     fun preset(): ReportPresetRecord {
-        val exclude = ((Account::type eq AccountType.EXPENSE) and (Account::reportExclude eq true))
+        val exclude = (Account::reportExclude eq true)
             .let { accountRepository.findAll(it) }
-            .mapNotNull { it.id }
+            .map { accountConverter.toAccountReference(it) }
 
         return ReportPresetRecord(exclude)
     }

@@ -91,7 +91,6 @@ export default function OperationPage() {
 
   const handleFilterChange = useCallback(
     (value: Record<string, unknown>) => {
-      console.log(value)
       setFilterValue(value)
       resetData()
       setQueryParams(toQuery(value))

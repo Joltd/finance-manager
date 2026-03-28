@@ -4,6 +4,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -88,9 +89,15 @@ export interface FilterProps {
 
 export function Filter({ value = {}, onChange, children }: FilterProps) {
   const [registrations, setRegistrations] = useState<FilterRegistration[]>([])
-  const [activeIds, setActiveIds] = useState<string[]>(() =>
-    Object.keys(value).filter((k) => value[k] != null),
-  )
+  const [activeIds, setActiveIds] = useState<string[]>([])
+
+  // Sync activeIds when value prop gains new non-null keys (e.g. after preset load)
+  useEffect(() => {
+    setActiveIds((prev) => {
+      const newKeys = Object.keys(value).filter((k) => value[k] != null && !prev.includes(k))
+      return newKeys.length > 0 ? [...prev, ...newKeys] : prev
+    })
+  }, [value])
 
   // Ref keeps the latest value to avoid stale closures in callbacks
   const valueRef = useRef(value)

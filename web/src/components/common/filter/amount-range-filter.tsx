@@ -69,7 +69,9 @@ export function AmountRangeFilter({ id, label }: AmountRangeFilterProps) {
       mounted.current = true
       return
     }
-    const timer = setTimeout(() => handleChange(id, pending), DEBOUNCE_MS)
+    const timer = setTimeout(() => {
+      if (pending.from != null || pending.to != null) handleChange(id, pending)
+    }, DEBOUNCE_MS)
     return () => clearTimeout(timer)
   }, [pending.from, pending.to]) // eslint-disable-line react-hooks/exhaustive-deps
 

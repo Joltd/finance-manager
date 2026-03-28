@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.report.record
 
 import com.evgenltd.financemanager.account.entity.AccountType
+import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.Amount
@@ -8,7 +9,7 @@ import java.time.LocalDate
 import java.util.*
 
 data class ReportPresetRecord(
-    val exclude: List<UUID> = emptyList(),
+    val exclude: List<AccountReferenceRecord> = emptyList(),
 )
 
 data class TopFlowFilter(

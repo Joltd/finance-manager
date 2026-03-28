@@ -15,9 +15,11 @@ import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Spinner } from '@/components/ui/spinner'
 import { formatMonth, getDefaultMonthRange } from '@/lib/utils'
 import { Amount, emptyAmount, subtract, toDecimal } from '@/types/common/amount'
-import { IncomeExpenseGroup } from '@/types/report'
+import { IncomeExpenseGroup, ReportPreset } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
 import { AccountReference } from '@/types/account'
+import { useRequest } from '@/hooks/use-request'
+import { reportUrls } from '@/api/report'
 
 function getEntry(group: IncomeExpenseGroup, type: 'INCOME' | 'EXPENSE'): Amount | undefined {
   return group.entries.find((e) => e.type === type)?.amount
@@ -33,6 +35,7 @@ function getBalance(group: IncomeExpenseGroup): Amount | undefined {
 
 export default function IncomeExpensePage() {
   const { data, loading, fetch, setBody } = useIncomeExpenseReportStore()
+  const presetReq = useRequest<ReportPreset>(reportUrls.preset, { method: 'GET' })
 
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({
     period: getDefaultMonthRange() satisfies MonthRange,
@@ -57,7 +60,16 @@ export default function IncomeExpensePage() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    applyFilter(filterValue)
+    const initial: Record<string, unknown> = { period: getDefaultMonthRange() satisfies MonthRange }
+    presetReq.submit().then((preset) => {
+      if (preset.exclude.length > 0) {
+        initial.exclude = preset.exclude
+        setFilterValue(initial)
+      }
+      applyFilter(initial)
+    }).catch(() => {
+      applyFilter(initial)
+    })
   }, [])
 
   const handleFilterChange = useCallback(

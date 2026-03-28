@@ -14,13 +14,16 @@ import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Spinner } from '@/components/ui/spinner'
 import { cn, formatMonth, getDefaultMonthRange } from '@/lib/utils'
 import { toDecimal } from '@/types/common/amount'
-import { TopFlowGroup } from '@/types/report'
+import { ReportPreset, TopFlowGroup } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
 import { AccountFilter } from '@/components/common/filter/account-filter'
 import { AccountReference } from '@/types/account'
+import { useRequest } from '@/hooks/use-request'
+import { reportUrls } from '@/api/report'
 
 export default function TopFlowPage() {
   const { data, loading, fetch, setBody } = useTopFlowReportStore()
+  const presetReq = useRequest<ReportPreset>(reportUrls.preset, { method: 'GET' })
 
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({
     period: getDefaultMonthRange() satisfies MonthRange,
@@ -45,7 +48,16 @@ export default function TopFlowPage() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    applyFilter(filterValue)
+    const initial: Record<string, unknown> = { period: getDefaultMonthRange() satisfies MonthRange }
+    presetReq.submit().then((preset) => {
+      if (preset.exclude.length > 0) {
+        initial.exclude = preset.exclude
+        setFilterValue(initial)
+      }
+      applyFilter(initial)
+    }).catch(() => {
+      applyFilter(initial)
+    })
   }, [])
 
   const handleFilterChange = useCallback(
