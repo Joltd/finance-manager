@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { format, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 
 import { useIncomeExpenseReportStore } from '@/store/report'
 import { Layout } from '@/components/common/layout/layout'
@@ -10,30 +10,14 @@ import { Group } from '@/components/common/layout/group'
 import { Typography } from '@/components/common/typography/typography'
 import { Filter } from '@/components/common/filter/filter'
 import { MonthFilter } from '@/components/common/filter/month-filter'
+import { AccountFilter } from '@/components/common/filter/account-filter'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Spinner } from '@/components/ui/spinner'
+import { formatMonth, getDefaultMonthRange } from '@/lib/utils'
 import { Amount, emptyAmount, subtract, toDecimal } from '@/types/common/amount'
 import { IncomeExpenseGroup } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
-
-function getDefaultDates() {
-  const now = new Date()
-  const to = new Date(now.getFullYear(), now.getMonth(), 1)
-  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1)
-  return { from, to }
-}
-
-function toMonthStart(date: Date): string {
-  return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]
-}
-
-function toMonthEnd(date: Date): string {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
-}
-
-function formatMonth(dateStr: string): string {
-  return format(parseISO(dateStr), 'MMMM yyyy')
-}
+import { AccountReference } from '@/types/account'
 
 function getEntry(group: IncomeExpenseGroup, type: 'INCOME' | 'EXPENSE'): Amount | undefined {
   return group.entries.find((e) => e.type === type)?.amount
@@ -50,9 +34,8 @@ function getBalance(group: IncomeExpenseGroup): Amount | undefined {
 export default function IncomeExpensePage() {
   const { data, loading, fetch, setBody } = useIncomeExpenseReportStore()
 
-  const defaults = getDefaultDates()
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({
-    period: { from: defaults.from, to: defaults.to } satisfies MonthRange,
+    period: getDefaultMonthRange() satisfies MonthRange,
   })
 
   const applyFilter = useCallback(
@@ -61,14 +44,21 @@ export default function IncomeExpensePage() {
       const from = period?.from
       const to = period?.to
       if (!from || !to) return
-      setBody({ date: { from: toMonthStart(from), to: toMonthEnd(to) } })
+      const ids = (key: string) => (value[key] as AccountReference[] | undefined)?.map((a) => a.id)
+      setBody({
+        date: { from: format(from, 'yyyy-MM-dd'), to: format(to, 'yyyy-MM-dd') },
+        include: ids('include'),
+        exclude: ids('exclude'),
+      })
       void fetch()
     },
     [setBody, fetch],
   )
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { applyFilter(filterValue) }, [])
+  useEffect(() => {
+    applyFilter(filterValue)
+  }, [])
 
   const handleFilterChange = useCallback(
     (value: Record<string, unknown>) => {
@@ -94,11 +84,11 @@ export default function IncomeExpensePage() {
         <Typography variant="h3">Income &amp; Expense</Typography>
       </Stack>
 
-      <div className="shrink-0">
-        <Filter value={filterValue} onChange={handleFilterChange}>
-          <MonthFilter id="period" label="Period" mode="range" />
-        </Filter>
-      </div>
+      <Filter value={filterValue} onChange={handleFilterChange}>
+        <MonthFilter id="period" label="Period" mode="range" />
+        <AccountFilter id="include" label="Include" mode="multi" />
+        <AccountFilter id="exclude" label="Exclude" mode="multi" />
+      </Filter>
 
       {loading ? (
         <Stack orientation="horizontal" align="center" justify="center" gap={2} className="py-16">
@@ -115,38 +105,48 @@ export default function IncomeExpensePage() {
             const income = getEntry(group, 'INCOME')
             const expense = getEntry(group, 'EXPENSE')
             const balance = getBalance(group)
-            const incomeBar = income && globalMax > 0 ? (Math.abs(toDecimal(income)) / globalMax) * 100 : 0
-            const expenseBar = expense && globalMax > 0 ? (Math.abs(toDecimal(expense)) / globalMax) * 100 : 0
+            const incomeBar =
+              income && globalMax > 0 ? (Math.abs(toDecimal(income)) / globalMax) * 100 : 0
+            const expenseBar =
+              expense && globalMax > 0 ? (Math.abs(toDecimal(expense)) / globalMax) * 100 : 0
 
             return (
               <Group key={group.date} title={formatMonth(group.date)}>
                 {/* Income row */}
-                <div className="relative py-2">
+                <Stack
+                  orientation="horizontal"
+                  align="center"
+                  justify="between"
+                  gap={2}
+                  className="relative py-2"
+                >
                   <div
                     className="absolute inset-y-0 left-0 bg-green-500/10 pointer-events-none transition-all"
                     style={{ width: `${incomeBar}%` }}
                   />
-                  <Stack orientation="horizontal" align="center" justify="between" gap={2} className="relative">
-                    <Typography variant="small" className="text-green-600 dark:text-green-400">
-                      Income
-                    </Typography>
-                    <AmountLabel amount={income} variant="income" />
-                  </Stack>
-                </div>
+                  <Typography variant="small" className="text-green-600 dark:text-green-400">
+                    Income
+                  </Typography>
+                  <AmountLabel amount={income} variant="income" />
+                </Stack>
 
                 {/* Expense row */}
-                <div className="relative py-2">
+                <Stack
+                  orientation="horizontal"
+                  align="center"
+                  justify="between"
+                  gap={2}
+                  className="relative py-2"
+                >
                   <div
                     className="absolute inset-y-0 left-0 bg-destructive/10 pointer-events-none transition-all"
                     style={{ width: `${expenseBar}%` }}
                   />
-                  <Stack orientation="horizontal" align="center" justify="between" gap={2} className="relative">
-                    <Typography variant="small" className="text-destructive">
-                      Expense
-                    </Typography>
-                    <AmountLabel amount={expense} variant="expense" />
-                  </Stack>
-                </div>
+                  <Typography variant="small" className="text-destructive">
+                    Expense
+                  </Typography>
+                  <AmountLabel amount={expense} variant="expense" />
+                </Stack>
 
                 {/* Balance row */}
                 <Stack
@@ -154,7 +154,7 @@ export default function IncomeExpensePage() {
                   align="center"
                   justify="between"
                   gap={2}
-                  className="py-2 border-t"
+                  className="py-2"
                 >
                   <Typography variant="muted">Balance</Typography>
                   <AmountLabel amount={balance} variant="balance" />

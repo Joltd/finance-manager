@@ -60,6 +60,8 @@ export interface TopFlowReport {
 
 export interface IncomeExpenseFilter {
   date: DateRange
+  exclude?: string[]
+  include?: string[]
 }
 
 export interface IncomeExpenseEntry {

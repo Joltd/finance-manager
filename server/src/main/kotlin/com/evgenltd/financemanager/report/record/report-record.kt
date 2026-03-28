@@ -5,11 +5,14 @@ import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.Amount
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
+
+data class ReportPresetRecord(
+    val exclude: List<UUID> = emptyList(),
+)
 
 data class TopFlowFilter(
     val date: DateRange,
-    val type: AccountType? = null,
     val exclude: List<UUID>? = null,
     val include: List<UUID>? = null,
 )
@@ -33,6 +36,8 @@ data class TopFlowEntryRecord(
 
 data class IncomeExpenseFilter(
     val date: DateRange,
+    val exclude: List<UUID>? = null,
+    val include: List<UUID>? = null,
 )
 
 data class IncomeExpenseReportRecord(

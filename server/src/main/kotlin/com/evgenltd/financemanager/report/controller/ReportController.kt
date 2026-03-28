@@ -1,10 +1,7 @@
 package com.evgenltd.financemanager.report.controller
 
 import com.evgenltd.financemanager.common.component.DataResponse
-import com.evgenltd.financemanager.report.record.IncomeExpenseFilter
-import com.evgenltd.financemanager.report.record.IncomeExpenseReportRecord
-import com.evgenltd.financemanager.report.record.TopFlowFilter
-import com.evgenltd.financemanager.report.record.TopFlowReportRecord
+import com.evgenltd.financemanager.report.record.*
 import com.evgenltd.financemanager.report.service.ReportService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController
 class ReportController(
     private val reportService: ReportService,
 ) {
+
+    @GetMapping("/api/v1/report/preset")
+    fun preset(): ReportPresetRecord = reportService.preset()
 
     @PostMapping("/api/v1/report/top-flow")
     @PreAuthorize("hasRole('USER')")

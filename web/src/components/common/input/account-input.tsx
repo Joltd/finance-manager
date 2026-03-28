@@ -35,8 +35,5 @@ export function AccountInput({ type, ...props }: AccountInputProps) {
     getId: (item: AccountReference) => item.id,
   }
 
-  if (props.mode === 'multi') {
-    return <ReferenceInput<AccountReference> mode="multi" {...common} {...props} />
-  }
   return <ReferenceInput<AccountReference> {...common} {...props} />
 }

@@ -8,10 +8,24 @@ interface AccountFilterProps {
   id: string
   label: string
   type?: AccountType
+  mode?: 'single' | 'multi'
 }
 
-export function AccountFilter({ id, label, type }: AccountFilterProps) {
+export function AccountFilter({ id, label, type, mode = 'single' }: AccountFilterProps) {
   const { getValue, handleChange } = useFilterContext()
+
+  if (mode === 'multi') {
+    return (
+      <FilterItem id={id} label={label}>
+        <AccountInput
+          mode="multi"
+          value={getValue(id) as AccountReference[] | undefined}
+          onChange={(v) => handleChange(id, v)}
+          type={type}
+        />
+      </FilterItem>
+    )
+  }
 
   return (
     <FilterItem id={id} label={label}>

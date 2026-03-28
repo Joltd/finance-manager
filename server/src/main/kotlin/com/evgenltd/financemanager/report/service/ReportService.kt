@@ -3,36 +3,23 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
+import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.common.record.Range
-import com.evgenltd.financemanager.common.repository.accountTypes
-import com.evgenltd.financemanager.common.repository.accounts
-import com.evgenltd.financemanager.common.repository.accountsNot
-import com.evgenltd.financemanager.common.repository.and
-import com.evgenltd.financemanager.common.repository.between
-import com.evgenltd.financemanager.common.repository.currency
-import com.evgenltd.financemanager.common.service.validHalfYear
+import com.evgenltd.financemanager.common.repository.*
+import com.evgenltd.financemanager.common.service.validMonthRange
 import com.evgenltd.financemanager.common.service.withMonday
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.common.util.isNotZero
+import com.evgenltd.financemanager.common.util.round
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
-import com.evgenltd.financemanager.exchangerate.record.ExchangeRateHistoryIndex
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
-import com.evgenltd.financemanager.report.record.IncomeExpenseEntryRecord
-import com.evgenltd.financemanager.report.record.IncomeExpenseFilter
-import com.evgenltd.financemanager.report.record.IncomeExpenseGroupRecord
-import com.evgenltd.financemanager.report.record.IncomeExpenseReportRecord
-import com.evgenltd.financemanager.report.record.TopFlowEntryRecord
-import com.evgenltd.financemanager.report.record.TopFlowGroupRecord
-import com.evgenltd.financemanager.report.record.TopFlowFilter
-import com.evgenltd.financemanager.report.record.TopFlowReportRecord
+import com.evgenltd.financemanager.report.record.*
 import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 @Service
 class ReportService(
@@ -40,21 +27,28 @@ class ReportService(
     private val settingService: SettingService,
     private val exchangeRateService: ExchangeRateService,
     private val accountConverter: AccountConverter,
+    private val accountRepository: AccountRepository,
 ) {
 
+    fun preset(): ReportPresetRecord {
+        val exclude = ((Account::type eq AccountType.EXPENSE) and (Account::reportExclude eq true))
+            .let { accountRepository.findAll(it) }
+            .mapNotNull { it.id }
+
+        return ReportPresetRecord(exclude)
+    }
+
     fun topFlowReport(filter: TopFlowFilter): TopFlowReportRecord {
+        val groupLimit = 5
 
-        if (filter.type == AccountType.ACCOUNT) {
-            throw IllegalArgumentException("Account type doesn't supported")
-        }
-
-        val targetCurrency = settingService.load()
-            .operationDefaultCurrency
+        val settings = settingService.load()
+        val targetCurrency = settings.operationDefaultCurrency
             ?.name
             ?: BASE_CURRENCY
+        val targetCurrencyScale = settings.operationDefaultCurrencyScale ?: 0
 
-        val transactions = ((Transaction::date between filter.date.validHalfYear()) and
-                (Transaction::account accountTypes filter.type?.let { listOf(it) }) and
+        val transactions = ((Transaction::date between filter.date.validMonthRange()) and
+                (Transaction::account accountTypes listOf(AccountType.EXPENSE)) and
                 (Transaction::account accountsNot filter.exclude) and
                 (Transaction::account accounts filter.include))
             .let { transactionRepository.findAll(it) }
@@ -71,14 +65,8 @@ class ReportService(
 
         val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
 
-        val result = topFlowData(transactions, rateIndex, targetCurrency)
-        return TopFlowReportRecord(result)
-    }
-
-    fun topFlowData(transactions: List<Transaction>, rateIndex: ExchangeRateHistoryIndex, targetCurrency: String, groupLimit: Int = 5): List<TopFlowGroupRecord> =
-        transactions
+        return transactions
             .asSequence()
-            .filter { it.account.type == AccountType.EXPENSE }
             .map {
                 TopFlowAggregation(
                     date = it.date.withDayOfMonth(1),
@@ -101,7 +89,7 @@ class ReportService(
                 val allEntries = entries.map { (_, value) ->
                     TopFlowEntryRecord(
                         account = accountConverter.toReference(value.account),
-                        amount = value.amount,
+                        amount = value.amount.round(targetCurrencyScale),
                     )
                 }.sortedByDescending { it.amount }
 
@@ -121,15 +109,20 @@ class ReportService(
                 )
             }
             .sortedByDescending { it.date }
+            .let { TopFlowReportRecord(it) }
+    }
 
     fun incomeExpenseReport(filter: IncomeExpenseFilter): IncomeExpenseReportRecord {
-        val targetCurrency = settingService.load()
-            .operationDefaultCurrency
+        val settings = settingService.load()
+        val targetCurrency = settings.operationDefaultCurrency
             ?.name
             ?: BASE_CURRENCY
+        val targetCurrencyScale = settings.operationDefaultCurrencyScale ?: 0
 
-        val transactions = ((Transaction::date between filter.date.validHalfYear()) and
-                (Transaction::account accountTypes listOf(AccountType.INCOME, AccountType.EXPENSE)))
+        val transactions = ((Transaction::date between filter.date.validMonthRange()) and
+                (Transaction::account accountTypes listOf(AccountType.INCOME, AccountType.EXPENSE)) and
+                (Transaction::account accountsNot filter.exclude) and
+                (Transaction::account accounts filter.include))
             .let { transactionRepository.findAll(it) }
 
         if (transactions.isEmpty()) {
@@ -144,14 +137,8 @@ class ReportService(
 
         val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
 
-        val result = incomeExpenseData(transactions, rateIndex)
-        return IncomeExpenseReportRecord(result)
-    }
-
-    fun incomeExpenseData(transactions: List<Transaction>, rateIndex: ExchangeRateHistoryIndex): List<IncomeExpenseGroupRecord> =
-        transactions
+        return transactions
             .asSequence()
-            .filter { it.account.type in listOf(AccountType.INCOME, AccountType.EXPENSE) }
             .map {
                 IncomeExpenseAggregation(
                     date = it.date.withDayOfMonth(1),
@@ -176,12 +163,14 @@ class ReportService(
                     entries = entries.map { (_, value) ->
                         IncomeExpenseEntryRecord(
                             type = value.type,
-                            amount = value.amount,
+                            amount = value.amount.round(targetCurrencyScale),
                         )
                     }.sortedByDescending { it.amount }
                 )
             }
             .sortedByDescending { it.date }
+            .let { IncomeExpenseReportRecord(it) }
+    }
 
     private data class TopFlowKey(
         val date: LocalDate,
