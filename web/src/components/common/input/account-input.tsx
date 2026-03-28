@@ -2,17 +2,20 @@
 
 import * as React from 'react'
 
-import { ReferenceInput, ReferenceInputProps } from '@/components/common/input/reference-input'
+import {
+  ReferenceInput,
+  ReferenceInputMultiProps,
+  ReferenceInputSingleProps,
+} from '@/components/common/input/reference-input'
 import { AccountReference, AccountType } from '@/types/account'
 import { useRequest } from '@/hooks/use-request'
 import { accountUrls } from '@/api/account'
 
-export interface AccountInputProps extends Omit<
-  ReferenceInputProps<AccountReference>,
-  'loading' | 'data' | 'onSearch' | 'getLabel' | 'getId'
-> {
-  type?: AccountType
-}
+type OmitFetched<T> = Omit<T, 'loading' | 'data' | 'onSearch' | 'getLabel' | 'getId'>
+
+export type AccountInputProps =
+  | (OmitFetched<ReferenceInputSingleProps<AccountReference>> & { type?: AccountType })
+  | (OmitFetched<ReferenceInputMultiProps<AccountReference>> & { type?: AccountType })
 
 export function AccountInput({ type, ...props }: AccountInputProps) {
   const listReq = useRequest<AccountReference[], unknown, { type?: AccountType; mask?: string }>(
@@ -24,14 +27,16 @@ export function AccountInput({ type, ...props }: AccountInputProps) {
     void listReq.submit({ queryParams: { type, mask: val || undefined } })
   }
 
-  return (
-    <ReferenceInput
-      loading={listReq.loading}
-      data={listReq.data}
-      onSearch={handleSearch}
-      getLabel={(item) => item.name}
-      getId={(item) => item.id}
-      {...props}
-    />
-  )
+  const common = {
+    loading: listReq.loading,
+    data: listReq.data,
+    onSearch: handleSearch,
+    getLabel: (item: AccountReference) => item.name,
+    getId: (item: AccountReference) => item.id,
+  }
+
+  if (props.mode === 'multi') {
+    return <ReferenceInput<AccountReference> mode="multi" {...common} {...props} />
+  }
+  return <ReferenceInput<AccountReference> {...common} {...props} />
 }

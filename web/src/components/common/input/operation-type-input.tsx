@@ -10,25 +10,46 @@ const OPTIONS: Item[] = [
   { value: 'INCOME', label: 'Income' },
 ]
 
-export interface OperationTypeInputProps {
-  value?: OperationType
-  onChange?: (value: OperationType) => void
+type OperationTypeInputBaseProps = {
   placeholder?: string
   disabled?: boolean
   className?: string
 }
 
-export function OperationTypeInput({ value, onChange, ...props }: OperationTypeInputProps) {
-  const selectedItem = OPTIONS.find((o) => o.value === value)
+export type OperationTypeInputProps =
+  | (OperationTypeInputBaseProps & { mode?: 'single'; value?: OperationType; onChange?: (value: OperationType) => void })
+  | (OperationTypeInputBaseProps & { mode: 'multi'; value?: OperationType[]; onChange?: (value: OperationType[]) => void })
 
+export function OperationTypeInput(props: OperationTypeInputProps) {
+  const { placeholder, disabled, className } = props
+
+  const common = {
+    data: OPTIONS,
+    getLabel: (o: Item) => o.label,
+    getId: (o: Item) => o.value,
+    placeholder,
+    disabled,
+    className,
+  }
+
+  if (props.mode === 'multi') {
+    const selected = OPTIONS.filter((o) => props.value?.includes(o.value))
+    return (
+      <ReferenceInput<Item>
+        mode="multi"
+        {...common}
+        value={selected}
+        onChange={(items) => props.onChange?.(items.map((i) => i.value))}
+      />
+    )
+  }
+
+  const selected = OPTIONS.find((o) => o.value === props.value)
   return (
     <ReferenceInput<Item>
-      data={OPTIONS}
-      getLabel={(o) => o.label}
-      getId={(o) => o.value}
-      value={selectedItem}
-      onChange={(o) => onChange?.(o.value)}
-      {...props}
+      {...common}
+      value={selected}
+      onChange={(o) => props.onChange?.(o.value)}
     />
   )
 }
