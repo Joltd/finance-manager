@@ -6,15 +6,9 @@ import com.evgenltd.financemanager.operation.record.OperationRecord
 
 data class DashboardRecord(
     val totalBalance: Amount,
-    val groupBalances: List<DashboardGroupBalanceRecord>,
     val avgMonthly: DashboardMonthlyAvgRecord,
     val topExpenses: List<DashboardTopExpenseRecord>,
     val recentOperations: List<OperationRecord>,
-)
-
-data class DashboardGroupBalanceRecord(
-    val group: Reference?,
-    val balance: Amount,
 )
 
 data class DashboardMonthlyAvgRecord(

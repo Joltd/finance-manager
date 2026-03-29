@@ -11,8 +11,8 @@ import { Stack } from '@/components/common/layout/stack'
 import { Typography } from '@/components/common/typography/typography'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { accountUrls, currencyUrls, groupUrls } from '@/api/account'
-import type { Account, AccountGroup, Currency } from '@/types/account'
+import { accountUrls, currencyUrls } from '@/api/account'
+import type { Account, Currency } from '@/types/account'
 import { AccountType } from '@/types/account'
 import { AccountDialog, openAccountDialog } from './account-dialog'
 
@@ -21,7 +21,6 @@ export default function ReferencePage() {
     <Layout scrollable>
       <AccountDialog />
       <CurrencySection />
-      <AccountGroupSection />
       <AccountSection title="Expense accounts" accountType={AccountType.EXPENSE} />
       <AccountSection title="Income accounts" accountType={AccountType.INCOME} />
     </Layout>
@@ -130,59 +129,6 @@ function CurrencySection() {
   )
 }
 
-function AccountGroupSection() {
-  const listReq = useRequest<AccountGroup[]>(groupUrls.root, { method: 'GET' })
-  const updateReq = useRequest<AccountGroup, AccountGroup>(groupUrls.root)
-  const deleteReq = useRequest<void, void, void, { id: string }>(groupUrls.id, {
-    method: 'DELETE',
-  })
-
-  useEffect(() => {
-    void listReq.submit()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const handleAdd = async () => {
-    const name = await ask({ type: 'string', label: 'Group name' })
-    if (!name.trim()) return
-    await updateReq.submit({ body: { name: name.trim(), deleted: false } })
-    void listReq.submit()
-  }
-
-  const handleEdit = async (item: AccountGroup) => {
-    const name = await ask({ type: 'string', label: 'Group name', initialValue: item.name })
-    if (!name.trim()) return
-    await updateReq.submit({ body: { ...item, name: name.trim() } })
-    void listReq.submit()
-  }
-
-  const handleDelete = async (item: AccountGroup) => {
-    if (!item.id) return
-    await deleteReq.submit({ pathParams: { id: item.id } })
-    void listReq.submit()
-  }
-
-  return (
-    <EntityList
-      data={listReq.data}
-      loading={listReq.loading}
-      error={listReq.error ?? null}
-      title="Account groups"
-      subtitle="Logical groups for organizing accounts on the balance sheet"
-      getId={(item) => item.id!}
-      onAdd={handleAdd}
-      renderRow={(item) => (
-        <ReferenceRow
-          label={item.name}
-          deleted={item.deleted}
-          onEdit={() => handleEdit(item)}
-          onDelete={() => handleDelete(item)}
-        />
-      )}
-    />
-  )
-}
-
 function AccountSection({ title, accountType }: { title: string; accountType: AccountType }) {
   const listReq = useRequest<Account[]>(accountUrls.root, { method: 'GET' })
   const updateReq = useRequest<Account, Account>(accountUrls.root)
@@ -234,7 +180,6 @@ function AccountSection({ title, accountType }: { title: string; accountType: Ac
         <ReferenceRow
           label={item.name}
           deleted={item.deleted}
-          badge={item.group?.name}
           onEdit={() => handleEdit(item)}
           onDelete={() => handleDelete(item)}
         />

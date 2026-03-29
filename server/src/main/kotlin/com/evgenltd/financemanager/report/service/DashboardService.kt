@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.report.service
 
 import com.evgenltd.financemanager.account.converter.AccountConverter
-import com.evgenltd.financemanager.account.converter.AccountGroupConverter
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.repository.BalanceRepository
@@ -20,7 +19,6 @@ import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Transaction
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
-import com.evgenltd.financemanager.report.record.DashboardGroupBalanceRecord
 import com.evgenltd.financemanager.report.record.DashboardMonthlyAvgRecord
 import com.evgenltd.financemanager.report.record.DashboardRecord
 import com.evgenltd.financemanager.report.record.DashboardTopExpenseRecord
@@ -34,7 +32,6 @@ import java.time.LocalDate
 class DashboardService(
     private val settingService: SettingService,
     private val accountConverter: AccountConverter,
-    private val accountGroupConverter: AccountGroupConverter,
     private val balanceRepository: BalanceRepository,
     private val operationRepository: OperationRepository,
     private val operationConverter: OperationConverter,
@@ -53,22 +50,9 @@ class DashboardService(
 
         val actualRateIndex = exchangeRateService.actualRateIndex(targetCurrency)
 
-        val groupBalances = balanceRepository.findAll()
+        val totalBalance = balanceRepository.findAll()
             .filter { it.account.type == AccountType.ACCOUNT && !it.account.deleted }
-            .groupBy { it.account.group }
-            .map { (group, entries) ->
-                val balance = entries
-                    .map { actualRateIndex.toTarget(it.amount) }
-                    .reduce { a, b -> a + b }
-                DashboardGroupBalanceRecord(
-                    group = group?.let { accountGroupConverter.toReference(it) },
-                    balance = balance.round(targetCurrencyScale),
-                )
-            }
-            .sortedByDescending { it.balance.value }
-
-        val totalBalance = groupBalances
-            .map { it.balance }
+            .map { actualRateIndex.toTarget(it.amount) }
             .reduceOrNull { a, b -> a + b }
             ?.round(targetCurrencyScale)
             ?: empty
@@ -89,7 +73,6 @@ class DashboardService(
         if (transactions.isEmpty()) {
             return DashboardRecord(
                 totalBalance = totalBalance,
-                groupBalances = groupBalances,
                 avgMonthly = DashboardMonthlyAvgRecord(income = empty, expense = empty, net = empty),
                 topExpenses = emptyList(),
                 recentOperations = emptyList(),
@@ -163,7 +146,6 @@ class DashboardService(
 
         return DashboardRecord(
             totalBalance = totalBalance,
-            groupBalances = groupBalances,
             avgMonthly = avgMonthly,
             topExpenses = topExpenses,
             recentOperations = recentOperations,

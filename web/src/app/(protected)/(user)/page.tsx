@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toDisplayString } from '@/types/common/amount'
-import type { Dashboard, DashboardGroupBalance, DashboardMonthlyAvg, DashboardTopExpense } from '@/types/report'
+import type { Dashboard, DashboardMonthlyAvg, DashboardTopExpense } from '@/types/report'
 import type { Operation } from '@/types/operation'
 import { useDashboardStore } from '@/store/report'
 
@@ -70,9 +70,8 @@ function DashboardContent({ data }: { data: Dashboard }) {
           <TopExpensesCard items={data.topExpenses} />
         </div>
 
-        {/* ── Right: current state + recent activity ── */}
+        {/* ── Right: recent activity ── */}
         <div className="flex flex-col gap-4">
-          <GroupBalanceCard groups={data.groupBalances} />
           <RecentOpsCard ops={data.recentOperations} />
         </div>
 
@@ -158,31 +157,6 @@ function TopExpensesCard({ items }: { items: DashboardTopExpense[] }) {
               </React.Fragment>
             )
           })}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function GroupBalanceCard({ groups }: { groups: DashboardGroupBalance[] }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">Balance by Group</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col">
-          {groups.length === 0 ? (
-            <Typography variant="muted" className="py-3">No accounts</Typography>
-          ) : groups.map((g, i) => (
-            <React.Fragment key={g.group?.id ?? 'ungrouped'}>
-              {i > 0 && <Separator />}
-              <Stack orientation="horizontal" align="center" justify="between" gap={2} className="py-2.5">
-                <Typography as="span" variant="small">{g.group?.name ?? 'Ungrouped'}</Typography>
-                <AmountLabel amount={g.balance} />
-              </Stack>
-            </React.Fragment>
-          ))}
         </div>
       </CardContent>
     </Card>

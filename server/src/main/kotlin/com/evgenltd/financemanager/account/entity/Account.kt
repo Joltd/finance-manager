@@ -6,8 +6,6 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.TenantId
 import java.time.LocalDate
@@ -38,10 +36,6 @@ class Account(
     var reportExclude: Boolean = false,
 
     var externalId: String? = null,
-
-    @ManyToOne
-    @JoinColumn(name = "group_id")
-    var group: AccountGroup? = null,
 
 ) {
 

@@ -10,11 +10,6 @@ export interface ReportPreset {
 
 // dashboard
 
-export interface DashboardGroupBalance {
-  group?: Reference
-  balance: Amount
-}
-
 export interface DashboardMonthlyAvg {
   income: Amount
   expense: Amount
@@ -28,7 +23,6 @@ export interface DashboardTopExpense {
 
 export interface Dashboard {
   totalBalance: Amount
-  groupBalances: DashboardGroupBalance[]
   avgMonthly: DashboardMonthlyAvg
   topExpenses: DashboardTopExpense[]
   recentOperations: Operation[]

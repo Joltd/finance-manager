@@ -5,7 +5,6 @@ import { create } from 'zustand'
 
 import { accountUrls } from '@/api/account'
 import { DateInput } from '@/components/common/input/date-input'
-import { AccountGroupInput } from '@/components/common/input/account-group-input'
 import { AccountTypeInput } from '@/components/common/input/account-type-input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -17,7 +16,6 @@ import { Stack } from '@/components/common/layout/stack'
 import { useRequest } from '@/hooks/use-request'
 import { useAccountBalanceStore, useAccountStore } from '@/store/account'
 import { AccountType } from '@/types/account'
-import type { Reference } from '@/types/common/reference'
 import { format } from 'date-fns'
 
 interface AccountSheetState {
@@ -41,7 +39,6 @@ export function openAccountSheet(accountId?: string) {
 type AccountFormState = {
   name: string
   type: AccountType
-  group?: Reference
   parser: string
   deleted: boolean
   reviseDate?: Date
@@ -51,7 +48,6 @@ type AccountFormState = {
 const defaultFormState: AccountFormState = {
   name: '',
   type: AccountType.ACCOUNT,
-  group: undefined,
   parser: '',
   deleted: false,
   reviseDate: undefined,
@@ -83,7 +79,6 @@ export function AccountSheet() {
     setForm({
       name: account.name,
       type: account.type,
-      group: account.group,
       parser: account.parser ?? '',
       deleted: account.deleted,
       reviseDate: account.reviseDate ? new Date(account.reviseDate) : undefined,
@@ -97,7 +92,6 @@ export function AccountSheet() {
         id: accountId,
         name: form.name,
         type: form.type,
-        group: form.group,
         parser: form.parser || undefined,
         deleted: form.deleted,
         reviseDate: form.reviseDate ? format(form.reviseDate, 'd MMM yyyy') : undefined,
@@ -140,15 +134,6 @@ export function AccountSheet() {
               <AccountTypeInput
                 value={form.type}
                 onChange={(type) => setForm((f) => ({ ...f, type }))}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel>Group</FieldLabel>
-              <AccountGroupInput
-                value={form.group}
-                onChange={(group) => setForm((f) => ({ ...f, group }))}
-                placeholder="No group"
               />
             </Field>
 

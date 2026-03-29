@@ -3,7 +3,7 @@ package com.evgenltd.financemanager.account.controller
 import com.evgenltd.financemanager.common.component.DataResponse
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.record.AccountBalanceFilter
-import com.evgenltd.financemanager.account.record.AccountBalanceGroupRecord
+import com.evgenltd.financemanager.account.record.AccountBalanceRecord
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.account.service.AccountService
@@ -38,7 +38,7 @@ class AccountController(
 
     @GetMapping("/api/v1/account/balance")
     @PreAuthorize("hasRole('USER')")
-    fun listBalance(filter: AccountBalanceFilter): List<AccountBalanceGroupRecord> = accountService.listBalances(filter)
+    fun listBalance(filter: AccountBalanceFilter): List<AccountBalanceRecord> = accountService.listBalances(filter)
 
     @GetMapping("/api/v1/account/{id}")
     @PreAuthorize("hasRole('USER')")

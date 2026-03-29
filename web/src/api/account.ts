@@ -5,12 +5,6 @@ export const accountUrls = {
   balance: '/api/v1/account/balance',
 }
 
-export const groupUrls = {
-  root: '/api/v1/account-group',
-  id: '/api/v1/account-group/:id',
-  reference: '/api/v1/account-group/reference',
-}
-
 export const currencyUrls = {
   root: '/api/v1/currency',
   id: '/api/v1/currency/:id',

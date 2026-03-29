@@ -39,7 +39,7 @@ class AccountService(
     fun list(type: AccountType?): List<AccountRecord> = accountRepository.findAll((Account::type eq type), Sort.by(Account::name.name))
         .map { accountConverter.toRecord(it) }
 
-    fun listBalances(filter: AccountBalanceFilter): List<AccountBalanceGroupRecord> {
+    fun listBalances(filter: AccountBalanceFilter): List<AccountBalanceRecord> {
         val balances = balanceRepository.findAll()
             .groupBy { it.account }
             .mapValues {
@@ -48,23 +48,14 @@ class AccountService(
                     .filter { balance -> balance.isNotZero() }
             }
 
-        return accountRepository.findAll((Account::type eq AccountType.ACCOUNT))
-            .groupBy { it.group }
-            .map { (group, accounts) ->
-                AccountBalanceGroupRecord(
-                    id = group?.id,
-                    name = group?.name,
-                    accounts = accounts.map {
-                        AccountBalanceRecord(
-                            account = accountConverter.toAccountReference(it),
-                            balances = balances[it] ?: emptyList(),
-                        )
-                    }.filter { !filter.hideZeroBalances || it.balances.isNotEmpty() }
-                        .sortedBy { it.account.name }
+        return accountRepository.findAll((Account::type eq AccountType.ACCOUNT), Sort.by(Account::name.name))
+            .map {
+                AccountBalanceRecord(
+                    account = accountConverter.toAccountReference(it),
+                    balances = balances[it] ?: emptyList(),
                 )
             }
-            .filter { it.accounts.isNotEmpty() }
-            .sortedWith(compareBy({ if (it.id == null) 1 else 0 }, { it.name }))
+            .filter { !filter.hideZeroBalances || it.balances.isNotEmpty() }
     }
 
     fun byId(id: UUID): AccountRecord = accountRepository.find(id).let { accountConverter.toRecord(it) }

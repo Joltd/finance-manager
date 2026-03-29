@@ -18,18 +18,11 @@ export const accountReferenceSchema = referenceSchema.extend({
   reviseDate: z.string().optional(),
 })
 
-export interface AccountGroup {
-  id?: string
-  name: string
-  deleted: boolean
-}
-
 export interface Account {
   id?: string
   name: string
   type: AccountType
   parser?: string
-  group?: Reference
   deleted: boolean
   reviseDate?: string
   reportExclude: boolean
@@ -45,10 +38,4 @@ export interface Currency {
 export interface AccountBalance {
   account: AccountReference
   balances: Amount[]
-}
-
-export interface AccountBalanceGroup {
-  id?: string
-  name?: string
-  accounts: AccountBalance[]
 }

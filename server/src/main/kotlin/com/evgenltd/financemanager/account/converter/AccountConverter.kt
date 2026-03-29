@@ -4,7 +4,6 @@ import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.account.record.AccountReferenceRecord
-import com.evgenltd.financemanager.account.repository.AccountGroupRepository
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.repository.find
@@ -14,8 +13,6 @@ import java.util.*
 @Service
 class AccountConverter(
     private val accountRepository: AccountRepository,
-    private val accountGroupRepository: AccountGroupRepository,
-    private val accountGroupConverter: AccountGroupConverter,
 ) {
 
     fun toRecord(id: UUID): AccountRecord = toRecord(accountRepository.find(id))
@@ -25,7 +22,6 @@ class AccountConverter(
         name = entity.name,
         type = entity.type,
         parser = entity.parser,
-        group = entity.group?.let { accountGroupConverter.toRecord(it) },
         deleted = entity.deleted,
         reviseDate = entity.reviseDate,
         reportExclude = entity.reportExclude,
@@ -52,7 +48,6 @@ class AccountConverter(
         it.name = record.name
         it.type = record.type
         it.parser = record.parser
-        it.group = record.group?.id?.let { id -> accountGroupRepository.find(id) }
         it.deleted = record.deleted
         it.reviseDate = record.reviseDate
         it.reportExclude = record.reportExclude
@@ -62,7 +57,6 @@ class AccountConverter(
         name = record.name,
         type = record.type,
         parser = record.parser,
-        group = record.group?.id?.let { id -> accountGroupRepository.find(id) },
         deleted = record.deleted,
         reviseDate = record.reviseDate,
         reportExclude = record.reportExclude,

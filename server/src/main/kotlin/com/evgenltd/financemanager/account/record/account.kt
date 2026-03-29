@@ -5,18 +5,11 @@ import com.evgenltd.financemanager.common.util.Amount
 import java.time.LocalDate
 import java.util.*
 
-data class AccountGroupRecord(
-    val id: UUID?,
-    val name: String,
-    val deleted: Boolean,
-)
-
 data class AccountRecord(
     val id: UUID?,
     val name: String,
     val type: AccountType,
     val parser: String?,
-    val group: AccountGroupRecord?,
     val deleted: Boolean,
     val reviseDate: LocalDate?,
     val reportExclude: Boolean = false,
@@ -33,12 +26,6 @@ data class AccountReferenceRecord(
 
 data class AccountBalanceFilter(
     val hideZeroBalances: Boolean = false,
-)
-
-data class AccountBalanceGroupRecord(
-    val id: UUID?,
-    val name: String?,
-    val accounts: List<AccountBalanceRecord>,
 )
 
 data class AccountBalanceRecord(
