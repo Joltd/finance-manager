@@ -163,8 +163,8 @@ function TitleSection({
   onRecalculate: () => void
 }) {
   return (
-    <Stack orientation="horizontal" align="center" gap={3}>
-      {data && (
+    data && (
+      <Stack orientation="horizontal" align="center" gap={3}>
         <Flow align="center" gap={2}>
           <Typography variant="large">{data.account.name}</Typography>
           {data.account.group && (
@@ -173,9 +173,7 @@ function TitleSection({
             </Typography>
           )}
         </Flow>
-      )}
 
-      {data && (
         <Flow align="center" gap={2} className="ml-auto">
           <ValidityStatus data={data} />
           <Tooltip disableHoverableContent>
@@ -187,8 +185,8 @@ function TitleSection({
             <TooltipContent>Recalculate totals</TooltipContent>
           </Tooltip>
         </Flow>
-      )}
-    </Stack>
+      </Stack>
+    )
   )
 }
 

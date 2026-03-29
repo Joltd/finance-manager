@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Layout } from '@/components/common/layout/layout'
 import { ImportDataHeader } from './import-data-header'
 import {
@@ -10,10 +11,19 @@ import {
 import { useParams } from 'next/navigation'
 import { useImportDataStore } from '@/store/import-data'
 import { ImportDataParsingStatus } from '@/types/import-data'
+import { useOperationPresetStore } from '@/store/operation-preset'
 
 export default function ImportDataPage() {
   const { id } = useParams<{ id: string }>()
   const { data } = useImportDataStore()
+  const presetStore = useOperationPresetStore()
+
+  useEffect(() => {
+    if (!data) return
+    presetStore.reset()
+    presetStore.setAccount(data.account)
+    presetStore.setCurrency(data.currency)
+  }, [data?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Layout>

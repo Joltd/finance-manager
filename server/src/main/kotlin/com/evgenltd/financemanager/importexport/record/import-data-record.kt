@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.importexport.record
 
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.record.AccountRecord
+import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.ai.record.EmbeddingRecord
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.record.SeekDirection
@@ -29,7 +30,8 @@ data class ImportDataUnlinkRequest(
 
 data class ImportDataRecord(
     val id: UUID,
-    val account: AccountRecord,
+    val account: AccountReferenceRecord,
+    val currency: String?,
     val dateRange: Range<LocalDate>?,
     val parsingStatus: ImportDataParsingStatus,
     val message: String?,

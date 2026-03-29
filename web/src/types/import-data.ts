@@ -1,5 +1,5 @@
 import { Amount } from '@/types/common/amount'
-import { Account, AccountReference } from '@/types/account'
+import { AccountReference } from '@/types/account'
 import { Operation, OperationType } from '@/types/operation'
 import { DateRange, Embedding } from '@/types/common/common'
 
@@ -31,7 +31,8 @@ export interface ImportDataTotal {
 
 export interface ImportData {
   id: string
-  account: Account
+  account: AccountReference
+  currency?: string
   dateRange?: DateRange
   parsingStatus: ImportDataParsingStatus
   message?: string

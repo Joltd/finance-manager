@@ -23,6 +23,7 @@ interface OperationPresetActions {
   setAccount: (account: AccountReference | undefined) => void
   setCategory: (category: AccountReference | undefined) => void
   setCurrency: (currency: string | undefined) => void
+  reset: () => void
   registerAccountUsage: (account: AccountReference) => void
 }
 
@@ -40,6 +41,7 @@ export const useOperationPresetStore = create<OperationPresetState & OperationPr
     setAccount: (account) => set({ account }),
     setCategory: (category) => set({ category }),
     setCurrency: (currency) => set({ currency }),
+    reset: () => set({ date: undefined, type: undefined, account: undefined, category: undefined, currency: undefined }),
 
     registerAccountUsage: (account) =>
       set((state) => {

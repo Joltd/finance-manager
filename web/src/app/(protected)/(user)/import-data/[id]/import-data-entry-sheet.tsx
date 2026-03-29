@@ -18,10 +18,15 @@ import { Operation, OperationType } from '@/types/operation'
 import type { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import {
   defaultFormState,
+  FROM_ACCOUNT_TYPE,
   OperationFormState,
+  TO_ACCOUNT_TYPE,
   transitType,
 } from '@/app/(protected)/(user)/operation/operation-form'
 import { useImportDataStore } from '@/store/import-data'
+import { useOperationPresetStore } from '@/store/operation-preset'
+import { useUserStore } from '@/store/user'
+import { FrequentAccounts } from '@/app/(protected)/(user)/operation/frequent-accounts'
 import { cn } from '@/lib/utils'
 import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from '@/app/(protected)/(user)/import-data/[id]/import-data-actions'
@@ -76,6 +81,8 @@ export function ImportDataEntrySheet() {
   const { open, entry, closeSheet } = useImportDataEntrySheetStore()
   const { data: importData } = useImportDataStore()
   const { loading, saveOperation, link } = useImportDataActions()
+  const presetStore = useOperationPresetStore()
+  const userStore = useUserStore()
   const mainAccountId = importData?.account.id
   const [form, setForm] = useState<OperationFormState>(defaultFormState)
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
@@ -108,7 +115,30 @@ export function ImportDataEntrySheet() {
         setForm(suggestionToForm(entry.parsed))
       } else {
         setSelectedSuggestionIdx(null)
-        setForm(defaultFormState)
+        let state = defaultFormState
+        if (presetStore.type) {
+          state = transitType(state, presetStore.type)
+        }
+        if (presetStore.date) {
+          state = { ...state, date: new Date(presetStore.date + 'T00:00:00') }
+        }
+        const fromConstraint = FROM_ACCOUNT_TYPE[state.type]
+        if (presetStore.account && (!fromConstraint || presetStore.account.type === fromConstraint)) {
+          state = { ...state, accountFrom: presetStore.account }
+        }
+        const toConstraint = TO_ACCOUNT_TYPE[state.type]
+        if (presetStore.category && (!toConstraint || presetStore.category.type === toConstraint)) {
+          state = { ...state, accountTo: presetStore.category }
+        }
+        const currency = presetStore.currency ?? userStore.data?.settings?.operationDefaultCurrency
+        if (currency) {
+          if (state.type === OperationType.EXCHANGE) {
+            state = { ...state, amountFrom: { value: 0, currency }, amountTo: { value: 0, currency } }
+          } else {
+            state = { ...state, amount: { value: 0, currency } }
+          }
+        }
+        setForm(state)
       }
     }
   }, [open, entry]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -146,10 +176,17 @@ export function ImportDataEntrySheet() {
 
   const handleAction = async () => {
     if (!entry) return
+    const body = buildOperationBody()
     if (hasOperation) {
-      await saveOperation(buildOperationBody())
+      await saveOperation(body)
     } else {
-      await link(importData!.id, entry.id!, buildOperationBody())
+      await link(importData!.id, entry.id!, body)
+    }
+    if (body.accountFrom) {
+      presetStore.registerAccountUsage(body.accountFrom)
+    }
+    if (body.accountTo && body.accountTo.id !== body.accountFrom?.id) {
+      presetStore.registerAccountUsage(body.accountTo)
     }
     closeSheet()
   }
@@ -215,6 +252,10 @@ export function ImportDataEntrySheet() {
                 <>
                   <Field>
                     <FieldLabel>From</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
+                    />
                     <AccountInput
                       type={AccountType.ACCOUNT}
                       value={form.accountFrom}
@@ -230,6 +271,10 @@ export function ImportDataEntrySheet() {
                   </Field>
                   <Field>
                     <FieldLabel>To</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
+                    />
                     <AccountInput
                       type={AccountType.ACCOUNT}
                       value={form.accountTo}
@@ -250,6 +295,11 @@ export function ImportDataEntrySheet() {
                 <>
                   <Field>
                     <FieldLabel>From</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      accountType={AccountType.ACCOUNT}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
+                    />
                     <AccountInput
                       type={AccountType.ACCOUNT}
                       value={form.accountFrom}
@@ -258,6 +308,11 @@ export function ImportDataEntrySheet() {
                   </Field>
                   <Field>
                     <FieldLabel>To</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      accountType={AccountType.ACCOUNT}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
+                    />
                     <AccountInput
                       type={AccountType.ACCOUNT}
                       value={form.accountTo}
@@ -278,6 +333,11 @@ export function ImportDataEntrySheet() {
                 <>
                   <Field>
                     <FieldLabel>Account</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      accountType={AccountType.ACCOUNT}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
+                    />
                     <AccountInput
                       type={AccountType.ACCOUNT}
                       value={form.accountFrom}
@@ -286,6 +346,11 @@ export function ImportDataEntrySheet() {
                   </Field>
                   <Field>
                     <FieldLabel>Category</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      accountType={AccountType.EXPENSE}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
+                    />
                     <AccountInput
                       type={AccountType.EXPENSE}
                       value={form.accountTo}
@@ -306,6 +371,11 @@ export function ImportDataEntrySheet() {
                 <>
                   <Field>
                     <FieldLabel>Account</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      accountType={AccountType.ACCOUNT}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
+                    />
                     <AccountInput
                       type={AccountType.ACCOUNT}
                       value={form.accountTo}
@@ -314,6 +384,11 @@ export function ImportDataEntrySheet() {
                   </Field>
                   <Field>
                     <FieldLabel>Category</FieldLabel>
+                    <FrequentAccounts
+                      usages={presetStore.accountUsages}
+                      accountType={AccountType.INCOME}
+                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
+                    />
                     <AccountInput
                       type={AccountType.INCOME}
                       value={form.accountFrom}

@@ -31,7 +31,8 @@ class ImportDataConverter(
 
     fun toRecord(importData: ImportData, dateRange: ImportDataDateRange, balances: Map<String, Amount>): ImportDataRecord = ImportDataRecord(
         id = importData.id!!,
-        account = accountConverter.toRecord(importData.account),
+        account = accountConverter.toAccountReference(importData.account),
+        currency = importData.currency,
         dateRange = dateRange.takeIf { it.min != null && it.max != null }
             ?.let { Range(from = it.min, to = it.max) },
         parsingStatus = importData.parsingStatus,

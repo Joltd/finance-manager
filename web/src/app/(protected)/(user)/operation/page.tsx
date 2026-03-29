@@ -49,7 +49,7 @@ function toQuery(filterValue: Record<string, unknown>): OperationFilter {
 
 export default function OperationPage() {
   const store = useOperationSeekStore()
-  const preset = useOperationPresetStore()
+  const operationPreset = useOperationPresetStore()
   const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
   const {
@@ -68,6 +68,7 @@ export default function OperationPage() {
   } = store
 
   useEffect(() => {
+    operationPreset.reset()
     setPointer(format(addDays(new Date(), 1), 'yyyy-MM-dd'))
   }, [])
 
@@ -76,26 +77,33 @@ export default function OperationPage() {
       setFilterValue(value)
       resetData()
       setQueryParams(toQuery(value))
-      preset.setType(value.type as OperationType | undefined)
-      preset.setAccount(value.account as AccountReference | undefined)
-      preset.setCategory(value.category as AccountReference | undefined)
-      preset.setCurrency(value.currency as string | undefined)
+      operationPreset.setType(value.type as OperationType | undefined)
+      operationPreset.setAccount(value.account as AccountReference | undefined)
+      operationPreset.setCategory(value.category as AccountReference | undefined)
+      operationPreset.setCurrency(value.currency as string | undefined)
     },
-    [resetData, setQueryParams, preset.setType, preset.setAccount, preset.setCategory, preset.setCurrency],
+    [
+      resetData,
+      setQueryParams,
+      operationPreset.setType,
+      operationPreset.setAccount,
+      operationPreset.setCategory,
+      operationPreset.setCurrency,
+    ],
   )
 
   const handleSeekForward = useCallback(async () => {
     await seekForward()
     const first = store.data?.[0]
-    if (first) preset.setDate(first.date)
-  }, [seekForward, preset.setDate])
+    if (first) operationPreset.setDate(first.date)
+  }, [seekForward, operationPreset.setDate])
 
   const handleSeekBackward = useCallback(async () => {
     await seekBackward()
     const data = store.data
     const last = data?.[data.length - 1]
-    if (last) preset.setDate(last.date)
-  }, [seekBackward, preset.setDate])
+    if (last) operationPreset.setDate(last.date)
+  }, [seekBackward, operationPreset.setDate])
 
   const handleToDate = useCallback(async () => {
     const date = await ask({ type: 'date', label: 'Select date' })
