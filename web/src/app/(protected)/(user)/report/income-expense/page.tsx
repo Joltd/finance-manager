@@ -17,18 +17,20 @@ import { formatMonth, getDefaultMonthRange } from '@/lib/utils'
 import { Amount, emptyAmount, subtract, toDecimal } from '@/types/common/amount'
 import { IncomeExpenseGroup, ReportPreset } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
-import { AccountReference } from '@/types/account'
+import { AccountReference, AccountType } from '@/types/account'
 import { useRequest } from '@/hooks/use-request'
 import { reportUrls } from '@/api/report'
-import { OperationType } from '@/types/operation'
 
-function getEntry(group: IncomeExpenseGroup, type: OperationType.INCOME | OperationType.EXPENSE): Amount | undefined {
+function getEntry(
+  group: IncomeExpenseGroup,
+  type: AccountType.INCOME | AccountType.EXPENSE,
+): Amount | undefined {
   return group.entries.find((e) => e.type === type)?.amount
 }
 
 function getBalance(group: IncomeExpenseGroup): Amount | undefined {
-  const income = getEntry(group, OperationType.INCOME)
-  const expense = getEntry(group, OperationType.EXPENSE)
+  const income = getEntry(group, AccountType.INCOME)
+  const expense = getEntry(group, AccountType.EXPENSE)
   if (!income && !expense) return undefined
   const currency = income?.currency ?? expense!.currency
   return subtract(income ?? emptyAmount(currency), expense ?? emptyAmount(currency))
@@ -62,15 +64,18 @@ export default function IncomeExpensePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const initial: Record<string, unknown> = { period: getDefaultMonthRange() satisfies MonthRange }
-    presetReq.submit().then((preset) => {
-      if (preset.exclude.length > 0) {
-        initial.exclude = preset.exclude
-        setFilterValue(initial)
-      }
-      applyFilter(initial)
-    }).catch(() => {
-      applyFilter(initial)
-    })
+    presetReq
+      .submit()
+      .then((preset) => {
+        if (preset.exclude.length > 0) {
+          initial.exclude = preset.exclude
+          setFilterValue(initial)
+        }
+        applyFilter(initial)
+      })
+      .catch(() => {
+        applyFilter(initial)
+      })
   }, [])
 
   const handleFilterChange = useCallback(
@@ -85,8 +90,8 @@ export default function IncomeExpensePage() {
 
   const globalMax = Math.max(
     ...groups.flatMap((g) => [
-      getEntry(g, OperationType.INCOME) ? Math.abs(toDecimal(getEntry(g, OperationType.INCOME)!)) : 0,
-      getEntry(g, OperationType.EXPENSE) ? Math.abs(toDecimal(getEntry(g, OperationType.EXPENSE)!)) : 0,
+      getEntry(g, AccountType.INCOME) ? Math.abs(toDecimal(getEntry(g, AccountType.INCOME)!)) : 0,
+      getEntry(g, AccountType.EXPENSE) ? Math.abs(toDecimal(getEntry(g, AccountType.EXPENSE)!)) : 0,
     ]),
     0,
   )
@@ -115,8 +120,8 @@ export default function IncomeExpensePage() {
       ) : (
         <Stack gap={4}>
           {groups.map((group) => {
-            const income = getEntry(group, OperationType.INCOME)
-            const expense = getEntry(group, OperationType.EXPENSE)
+            const income = getEntry(group, AccountType.INCOME)
+            const expense = getEntry(group, AccountType.EXPENSE)
             const balance = getBalance(group)
             const incomeBar =
               income && globalMax > 0 ? (Math.abs(toDecimal(income)) / globalMax) * 100 : 0
