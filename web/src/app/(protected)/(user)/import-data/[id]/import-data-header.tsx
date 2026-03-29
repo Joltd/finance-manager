@@ -165,14 +165,7 @@ function TitleSection({
   return (
     data && (
       <Stack orientation="horizontal" align="center" gap={3}>
-        <Flow align="center" gap={2}>
-          <Typography variant="large">{data.account.name}</Typography>
-          {data.account.group && (
-            <Typography variant="muted" as="span">
-              {data.account.group.name}
-            </Typography>
-          )}
-        </Flow>
+        <Typography variant="large">{data.account.name}</Typography>
 
         <Flow align="center" gap={2} className="ml-auto">
           <ValidityStatus data={data} />
