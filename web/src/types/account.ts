@@ -33,6 +33,7 @@ export interface Account {
   deleted: boolean
   reviseDate?: string
   reportExclude: boolean
+  externalId?: string
 }
 
 export interface Currency {

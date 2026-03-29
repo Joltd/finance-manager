@@ -37,6 +37,8 @@ class Account(
 
     var reportExclude: Boolean = false,
 
+    var externalId: String? = null,
+
     @ManyToOne
     @JoinColumn(name = "group_id")
     var group: AccountGroup? = null,

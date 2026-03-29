@@ -13,10 +13,12 @@ import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
+import { Stack } from '@/components/common/layout/stack'
 import { useRequest } from '@/hooks/use-request'
 import { useAccountBalanceStore, useAccountStore } from '@/store/account'
 import { AccountType } from '@/types/account'
 import type { Reference } from '@/types/common/reference'
+import { format } from 'date-fns'
 
 interface AccountSheetState {
   open: boolean
@@ -43,6 +45,7 @@ type AccountFormState = {
   parser: string
   deleted: boolean
   reviseDate?: Date
+  externalId: string
 }
 
 const defaultFormState: AccountFormState = {
@@ -52,6 +55,7 @@ const defaultFormState: AccountFormState = {
   parser: '',
   deleted: false,
   reviseDate: undefined,
+  externalId: '',
 }
 
 export function AccountSheet() {
@@ -83,6 +87,7 @@ export function AccountSheet() {
       parser: account.parser ?? '',
       deleted: account.deleted,
       reviseDate: account.reviseDate ? new Date(account.reviseDate) : undefined,
+      externalId: account.externalId ?? '',
     })
   }, [accountStore.data])
 
@@ -95,7 +100,8 @@ export function AccountSheet() {
         group: form.group,
         parser: form.parser || undefined,
         deleted: form.deleted,
-        reviseDate: form.reviseDate ? form.reviseDate.toISOString().split('T')[0] : undefined,
+        reviseDate: form.reviseDate ? format(form.reviseDate, 'd MMM yyyy') : undefined,
+        externalId: form.type === AccountType.ACCOUNT ? form.externalId || undefined : undefined,
       },
     })
     void balanceStore.fetch()
@@ -116,11 +122,11 @@ export function AccountSheet() {
         </SheetHeader>
 
         {loading ? (
-          <div className="flex flex-1 items-center justify-center">
+          <Stack align="center" justify="center" className="flex-1">
             <Spinner />
-          </div>
+          </Stack>
         ) : (
-          <div className="flex flex-col gap-4 px-4 flex-1 overflow-y-auto">
+          <Stack gap={4} scrollable className="px-4 flex-1">
             <Field>
               <FieldLabel>Name</FieldLabel>
               <Input
@@ -151,8 +157,20 @@ export function AccountSheet() {
               <Input
                 value={form.parser}
                 onChange={(e) => setForm((f) => ({ ...f, parser: e.target.value }))}
+                placeholder="Not set"
               />
             </Field>
+
+            {form.type === AccountType.ACCOUNT && (
+              <Field>
+                <FieldLabel>External ID</FieldLabel>
+                <Input
+                  value={form.externalId}
+                  onChange={(e) => setForm((f) => ({ ...f, externalId: e.target.value }))}
+                  placeholder="Not set"
+                />
+              </Field>
+            )}
 
             <Field>
               <FieldLabel>Revise Date</FieldLabel>
@@ -172,7 +190,7 @@ export function AccountSheet() {
               />
               <FieldLabel htmlFor="deleted">Deleted</FieldLabel>
             </Field>
-          </div>
+          </Stack>
         )}
 
         <SheetFooter>

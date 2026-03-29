@@ -1,6 +1,7 @@
 package com.evgenltd.financemanager.account.converter
 
 import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.account.repository.AccountGroupRepository
@@ -28,6 +29,7 @@ class AccountConverter(
         deleted = entity.deleted,
         reviseDate = entity.reviseDate,
         reportExclude = entity.reportExclude,
+        externalId = entity.externalId,
     )
 
     fun toReference(entity: Account): Reference = Reference(
@@ -54,6 +56,7 @@ class AccountConverter(
         it.deleted = record.deleted
         it.reviseDate = record.reviseDate
         it.reportExclude = record.reportExclude
+        it.externalId = if (it.type == AccountType.ACCOUNT) record.externalId else null
     } ?: Account(
         id = record.id,
         name = record.name,
@@ -63,6 +66,7 @@ class AccountConverter(
         deleted = record.deleted,
         reviseDate = record.reviseDate,
         reportExclude = record.reportExclude,
+        externalId = if (record.type == AccountType.ACCOUNT) record.externalId else null,
     )
 
 }

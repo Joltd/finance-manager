@@ -20,6 +20,7 @@ data class AccountRecord(
     val deleted: Boolean,
     val reviseDate: LocalDate?,
     val reportExclude: Boolean = false,
+    val externalId: String? = null,
 )
 
 data class AccountReferenceRecord(
