@@ -23,27 +23,23 @@ import { CurrencyFilter } from '@/components/common/filter/currency-filter'
 import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { useRequest } from '@/hooks/use-request'
 import { Operation, OperationFilter, OperationType } from '@/types/operation'
-import { AccountReference } from '@/types/account'
+import { AccountReference, AccountType } from '@/types/account'
 import { addDays, format } from 'date-fns'
+import { formatDateCommon } from '@/lib/utils'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { openOperationSheet, openOperationSheetForCopy, OperationSheet } from './operation-sheet'
 import { AmountRangeFilter } from '@/components/common/filter/amount-range-filter'
 import { Range } from '@/types/common/common'
+import { useOperationPresetStore } from '@/store/operation-preset'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
     type: filterValue.type as OperationType | undefined,
     account: (filterValue.account as AccountReference | undefined)?.id,
+    category: (filterValue.category as AccountReference | undefined)?.id,
     currency: filterValue.currency as string | undefined,
     // amount: filterValue.amount as Range<string> | undefined,
     'amount.from': (filterValue.amount as Range<string> | undefined)?.from,
@@ -51,23 +47,9 @@ function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   }
 }
 
-function formatGroupDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00')
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const diff = today.getTime() - date.getTime()
-  const day = 86_400_000
-  if (diff === 0) return 'Today'
-  if (diff === day) return 'Yesterday'
-  const opts: Intl.DateTimeFormatOptions =
-    date.getFullYear() === today.getFullYear()
-      ? { weekday: 'short', month: 'short', day: 'numeric' }
-      : { month: 'short', day: 'numeric', year: 'numeric' }
-  return date.toLocaleDateString('en', opts)
-}
-
 export default function OperationPage() {
   const store = useOperationSeekStore()
+  const preset = useOperationPresetStore()
   const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
   const {
@@ -94,9 +76,26 @@ export default function OperationPage() {
       setFilterValue(value)
       resetData()
       setQueryParams(toQuery(value))
+      preset.setType(value.type as OperationType | undefined)
+      preset.setAccount(value.account as AccountReference | undefined)
+      preset.setCategory(value.category as AccountReference | undefined)
+      preset.setCurrency(value.currency as string | undefined)
     },
-    [resetData, setQueryParams],
+    [resetData, setQueryParams, preset.setType, preset.setAccount, preset.setCategory, preset.setCurrency],
   )
+
+  const handleSeekForward = useCallback(async () => {
+    await seekForward()
+    const first = store.data?.[0]
+    if (first) preset.setDate(first.date)
+  }, [seekForward, preset.setDate])
+
+  const handleSeekBackward = useCallback(async () => {
+    await seekBackward()
+    const data = store.data
+    const last = data?.[data.length - 1]
+    if (last) preset.setDate(last.date)
+  }, [seekBackward, preset.setDate])
 
   const handleToDate = useCallback(async () => {
     const date = await ask({ type: 'date', label: 'Select date' })
@@ -119,12 +118,10 @@ export default function OperationPage() {
   const handleDelete = async (operationId?: string) => {
     if (!operationId) return
     await deleteOperation.submit({ pathParams: { id: operationId } })
-    resetData()
     void refresh()
   }
 
   const handleSaved = () => {
-    resetData()
     void refresh()
   }
 
@@ -149,14 +146,15 @@ export default function OperationPage() {
       <Filter value={filterValue} onChange={handleFilterChange}>
         {/*<DateFilter id="date" label="Date" />*/}
         <OperationTypeFilter id="type" label="Type" />
-        <AccountFilter id="account" label="Account" />
+        <AccountFilter id="account" label="Account" type={AccountType.ACCOUNT} />
+        <AccountFilter id="category" label="Category" />
         <CurrencyFilter id="currency" label="Currency" />
         <AmountRangeFilter id="amount" label="Amount" />
       </Filter>
 
       <Seek
-        seekForward={seekForward}
-        seekBackward={seekBackward}
+        seekForward={handleSeekForward}
+        seekBackward={handleSeekBackward}
         error={error}
         loadingForward={loadingForward}
         loadingBackward={loadingBackward}
@@ -164,7 +162,7 @@ export default function OperationPage() {
         exhaustedBackward={exhaustedBackward}
       >
         {data.map((group) => (
-          <Group key={group.date} title={formatGroupDate(group.date)}>
+          <Group key={group.date} title={formatDateCommon(group.date)}>
             {group.operations.map((operation, i) => (
               <OperationRow
                 key={operation.id ?? i}
@@ -197,55 +195,54 @@ function OperationRow({
     amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Stack
-          orientation="horizontal"
-          align="center"
-          gap={3}
-          className="py-2.5 rounded-sm hover:bg-muted/40 transition-colors cursor-pointer focus-visible:outline-none"
+    <Stack orientation="horizontal" align="center" gap={3} className="group py-2.5">
+      <OperationIcon type={type} size={16} colored className="shrink-0" />
+      <Stack orientation="horizontal" align="center" gap={1} className="min-w-0">
+        <Typography as="span" variant="small" className="truncate font-medium">
+          {accountFrom.name}
+        </Typography>
+        <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
+        <Typography as="span" variant="small" className="truncate text-muted-foreground">
+          {accountTo.name}
+        </Typography>
+      </Stack>
+      <Stack orientation="horizontal" align="center" gap={1} className="min-w-0">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="opacity-0 w-5 h-5 group-hover:opacity-100 transition-opacity shrink-0"
+          onClick={onEdit}
         >
-          <OperationIcon type={type} size={16} colored className="shrink-0" />
+          <PencilIcon className="w-3! h-3!" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="opacity-0 w-5 h-5 group-hover:opacity-100 transition-opacity shrink-0"
+          onClick={onCopy}
+        >
+          <CopyIcon className="w-3! h-3!" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="opacity-0 w-5 h-5 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive shrink-0"
+          onClick={onDelete}
+        >
+          <Trash2Icon className="w-3! h-3!" />
+        </Button>
+      </Stack>
 
-          <Stack
-            orientation="horizontal"
-            align="center"
-            justify="between"
-            gap={4}
-            className="flex-1 min-w-0"
-          >
-            <Stack orientation="horizontal" align="center" gap={1} className="min-w-0">
-              <Typography as="span" variant="small" className="truncate font-medium">
-                {accountFrom.name}
-              </Typography>
-              <ArrowRight className="size-3 shrink-0 text-muted-foreground" />
-              <Typography as="span" variant="small" className="truncate text-muted-foreground">
-                {accountTo.name}
-              </Typography>
-            </Stack>
-
-            <Stack orientation="horizontal" align="end" gap={1} className="shrink-0">
-              <AmountLabel amount={amountFrom} />
-              {showBothAmounts && <AmountLabel amount={amountTo} />}
-            </Stack>
-          </Stack>
-        </Stack>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuItem onClick={onEdit}>
-          <PencilIcon />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onCopy}>
-          <CopyIcon />
-          Copy
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={onDelete}>
-          <Trash2Icon />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <Stack
+        orientation="horizontal"
+        align="center"
+        justify="end"
+        gap={1}
+        className="flex-1 min-w-0"
+      >
+        <AmountLabel amount={amountFrom} />
+        {showBothAmounts && <AmountLabel amount={amountTo} />}
+      </Stack>
+    </Stack>
   )
 }

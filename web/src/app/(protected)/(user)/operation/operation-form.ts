@@ -1,7 +1,8 @@
-import type { AccountReference } from '@/types/account'
-import { AccountType } from '@/types/account'
-import type { Amount } from '@/types/common/amount'
-import type { OperationType } from '@/types/operation'
+import { z } from 'zod'
+
+import { accountReferenceSchema, AccountType } from '@/types/account'
+import { amountSchema } from '@/types/common/amount'
+import { OperationType } from '@/types/operation'
 
 export const FROM_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
   EXPENSE: AccountType.ACCOUNT,
@@ -15,19 +16,42 @@ export const TO_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
   TRANSFER: AccountType.ACCOUNT,
 }
 
-export type OperationFormState = {
-  type: OperationType
-  date: Date
-  accountFrom?: AccountReference
-  accountTo?: AccountReference
-  amount?: Amount
-  amountFrom?: Amount
-  amountTo?: Amount
-  description: string
-}
+export const operationFormSchema = z
+  .object({
+    type: z.enum(OperationType),
+    date: z.date(),
+    accountFrom: accountReferenceSchema.optional(),
+    accountTo: accountReferenceSchema.optional(),
+    amount: amountSchema.optional(),
+    amountFrom: amountSchema.optional(),
+    amountTo: amountSchema.optional(),
+    description: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.accountFrom) {
+      ctx.addIssue({ code: 'custom', path: ['accountFrom'], message: 'Required' })
+    }
+    if (!data.accountTo) {
+      ctx.addIssue({ code: 'custom', path: ['accountTo'], message: 'Required' })
+    }
+    if (data.type === OperationType.EXCHANGE) {
+      if (!data.amountFrom) {
+        ctx.addIssue({ code: 'custom', path: ['amountFrom'], message: 'Required' })
+      }
+      if (!data.amountTo) {
+        ctx.addIssue({ code: 'custom', path: ['amountTo'], message: 'Required' })
+      }
+    } else {
+      if (!data.amount) {
+        ctx.addIssue({ code: 'custom', path: ['amount'], message: 'Required' })
+      }
+    }
+  })
+
+export type OperationFormState = z.infer<typeof operationFormSchema>
 
 export const defaultFormState: OperationFormState = {
-  type: 'EXCHANGE',
+  type: OperationType.EXCHANGE,
   date: new Date(),
   accountFrom: undefined,
   accountTo: undefined,
@@ -46,13 +70,22 @@ export function transitType(form: OperationFormState, newType: OperationType): O
   const fromConstraint = FROM_ACCOUNT_TYPE[newType]
   const toConstraint = TO_ACCOUNT_TYPE[newType]
 
-  const accountFrom =
-    !fromConstraint || form.accountFrom?.type === fromConstraint ? form.accountFrom : undefined
-  const accountTo =
-    !toConstraint || form.accountTo?.type === toConstraint ? form.accountTo : undefined
+  let rawFrom = form.accountFrom
+  let rawTo = form.accountTo
 
-  const wasExchange = form.type === 'EXCHANGE'
-  const isExchange = newType === 'EXCHANGE'
+  if (form.type === OperationType.INCOME && newType === OperationType.EXPENSE) {
+    rawFrom = form.accountTo
+    rawTo = undefined
+  } else if (form.type === OperationType.EXPENSE && newType === OperationType.INCOME) {
+    rawFrom = undefined
+    rawTo = form.accountFrom
+  }
+
+  const accountFrom = !fromConstraint || rawFrom?.type === fromConstraint ? rawFrom : undefined
+  const accountTo = !toConstraint || rawTo?.type === toConstraint ? rawTo : undefined
+
+  const wasExchange = form.type === OperationType.EXCHANGE
+  const isExchange = newType === OperationType.EXCHANGE
 
   let { amount, amountFrom, amountTo } = form
 
@@ -70,4 +103,3 @@ export function transitType(form: OperationFormState, newType: OperationType): O
 
   return { ...form, type: newType, accountFrom, accountTo, amount, amountFrom, amountTo }
 }
-

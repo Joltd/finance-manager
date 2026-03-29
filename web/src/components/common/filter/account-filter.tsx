@@ -22,6 +22,7 @@ export function AccountFilter({ id, label, type, mode = 'single' }: AccountFilte
           value={getValue(id) as AccountReference[] | undefined}
           onChange={(v) => handleChange(id, v)}
           type={type}
+          className="min-w-48"
         />
       </FilterItem>
     )
@@ -33,6 +34,7 @@ export function AccountFilter({ id, label, type, mode = 'single' }: AccountFilte
         value={getValue(id) as AccountReference | undefined}
         onChange={(v) => handleChange(id, v)}
         type={type}
+        className="min-w-48"
       />
     </FilterItem>
   )

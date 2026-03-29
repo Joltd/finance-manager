@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 import { ReferenceInput } from '@/components/common/input/reference-input'
+import { cn } from '@/lib/utils'
 import { useCurrencyListStore } from '@/store/account'
 import { Currency } from '@/types/account'
 
@@ -29,7 +30,7 @@ export function CurrencyInput(props: CurrencyInputProps) {
     getId: (c: Currency) => c.name,
     placeholder,
     disabled,
-    className,
+    className: cn('min-w-[5.5rem]', className),
     'aria-invalid': ariaInvalid,
   }
 

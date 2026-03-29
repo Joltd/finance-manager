@@ -28,8 +28,8 @@ class OperationService(
 ) {
 
     fun list(filter: OperationFilter): List<OperationGroupRecord> {
-        val pointer = filter.pointer
-        val direction = filter.direction
+        val pointer = filter.pointer ?: return emptyList()
+        val direction = filter.direction ?: return emptyList()
 
         val baseSpecification = (
 //            (Operation::date between filter.date) and

@@ -12,8 +12,8 @@ import java.time.LocalDate
 import java.util.*
 
 data class OperationFilter(
-    val pointer: LocalDate,
-    val direction: SeekDirection,
+    val pointer: LocalDate? = null,
+    val direction: SeekDirection? = null,
     val date: DateRange? = null,
     val type: OperationType? = null,
     val account: UUID? = null,

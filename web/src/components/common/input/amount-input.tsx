@@ -43,10 +43,11 @@ function AmountInput({
     setDisplay(raw)
 
     const num = parseFloat(raw.replace(',', '.'))
-    if (raw === '' || isNaN(num)) {
+    const currency = value?.currency ?? ''
+    if (raw === '' || isNaN(num) || !currency) {
       onChange?.(undefined)
     } else {
-      onChange?.(amountFromDecimal(num, value?.currency ?? ''))
+      onChange?.(amountFromDecimal(num, currency))
     }
   }
 

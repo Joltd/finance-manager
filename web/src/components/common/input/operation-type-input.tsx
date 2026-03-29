@@ -4,10 +4,10 @@ import { OperationType } from '@/types/operation'
 type Item = { value: OperationType; label: string }
 
 const OPTIONS: Item[] = [
-  { value: 'EXCHANGE', label: 'Exchange' },
-  { value: 'TRANSFER', label: 'Transfer' },
-  { value: 'EXPENSE', label: 'Expense' },
-  { value: 'INCOME', label: 'Income' },
+  { value: OperationType.EXCHANGE, label: 'Exchange' },
+  { value: OperationType.TRANSFER, label: 'Transfer' },
+  { value: OperationType.EXPENSE, label: 'Expense' },
+  { value: OperationType.INCOME, label: 'Income' },
 ]
 
 type OperationTypeInputBaseProps = {

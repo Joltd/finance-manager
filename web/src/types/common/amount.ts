@@ -1,10 +1,17 @@
 // value is stored as integer with 4 decimal places (SCALE=4)
 // e.g. 1.5 USD → { value: 15000, currency: "USD" }
 
+import { z } from 'zod'
+
 export interface Amount {
   value: number
   currency: string
 }
+
+export const amountSchema = z.object({
+  value: z.number(),
+  currency: z.string().min(1, 'Currency is required'),
+})
 
 const SCALE = 4
 const SCALE_FACTOR = 10 ** SCALE

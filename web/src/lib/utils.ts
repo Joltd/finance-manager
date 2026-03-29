@@ -1,14 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import {
-  format,
-  isSameYear,
-  isToday,
-  isYesterday,
-  parseISO,
-  startOfMonth,
-  subMonths,
-} from 'date-fns'
+import { format, isSameYear, parseISO, startOfMonth, subMonths } from 'date-fns'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,10 +8,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDateCommon(dateStr: string): string {
   const date = parseISO(dateStr)
-  if (isToday(date)) return 'Today'
-  if (isYesterday(date)) return 'Yesterday'
-  if (isSameYear(date, new Date())) return format(date, 'EEE, MMM d')
-  return format(date, 'MMM d, yyyy')
+  // if (isToday(date)) return 'Today'
+  // if (isYesterday(date)) return 'Yesterday'
+  if (isSameYear(date, new Date())) return format(date, 'd MMM')
+  return format(date, 'd MMM yyyy')
 }
 
 export function formatMonth(dateStr: string): string {

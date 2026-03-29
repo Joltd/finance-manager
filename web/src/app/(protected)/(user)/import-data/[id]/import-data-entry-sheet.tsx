@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { AccountType } from '@/types/account'
-import type { Operation, OperationType } from '@/types/operation'
+import { Operation, OperationType } from '@/types/operation'
 import type { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
 import {
   defaultFormState,
@@ -55,7 +55,7 @@ export function openImportDataEntrySheet(entry: ImportDataEntry) {
 
 function suggestionToForm(source: ImportDataOperation): OperationFormState {
   const type = source.type
-  const isExchange = type === 'EXCHANGE'
+  const isExchange = type === OperationType.EXCHANGE
   return {
     type,
     date: new Date(source.date + 'T00:00:00'),
@@ -87,7 +87,7 @@ export function ImportDataEntrySheet() {
       setSelectedSuggestionIdx(null)
       const op = entry.operation
       const type = op.type
-      const isExchange = type === 'EXCHANGE'
+      const isExchange = type === OperationType.EXCHANGE
       setForm({
         type,
         date: new Date(op.date + 'T00:00:00'),
@@ -131,7 +131,7 @@ export function ImportDataEntrySheet() {
   const hasSuggestions = (entry?.suggestions.length ?? 0) > 0
 
   const buildOperationBody = (): Omit<Operation, 'raw'> => {
-    const isExchange = form.type === 'EXCHANGE'
+    const isExchange = form.type === OperationType.EXCHANGE
     return {
       id: entry?.operation?.id,
       date: formatDate(form.date, 'yyyy-MM-dd'),
@@ -211,7 +211,7 @@ export function ImportDataEntrySheet() {
                 />
               </Field>
 
-              {form.type === 'EXCHANGE' && (
+              {form.type === OperationType.EXCHANGE && (
                 <>
                   <Field>
                     <FieldLabel>From</FieldLabel>
@@ -246,7 +246,7 @@ export function ImportDataEntrySheet() {
                 </>
               )}
 
-              {form.type === 'TRANSFER' && (
+              {form.type === OperationType.TRANSFER && (
                 <>
                   <Field>
                     <FieldLabel>From</FieldLabel>
@@ -274,7 +274,7 @@ export function ImportDataEntrySheet() {
                 </>
               )}
 
-              {form.type === 'EXPENSE' && (
+              {form.type === OperationType.EXPENSE && (
                 <>
                   <Field>
                     <FieldLabel>Account</FieldLabel>
@@ -302,7 +302,7 @@ export function ImportDataEntrySheet() {
                 </>
               )}
 
-              {form.type === 'INCOME' && (
+              {form.type === OperationType.INCOME && (
                 <>
                   <Field>
                     <FieldLabel>Account</FieldLabel>

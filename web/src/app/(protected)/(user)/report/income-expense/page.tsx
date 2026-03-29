@@ -20,14 +20,15 @@ import { MonthRange } from '@/components/common/input/month-input'
 import { AccountReference } from '@/types/account'
 import { useRequest } from '@/hooks/use-request'
 import { reportUrls } from '@/api/report'
+import { OperationType } from '@/types/operation'
 
-function getEntry(group: IncomeExpenseGroup, type: 'INCOME' | 'EXPENSE'): Amount | undefined {
+function getEntry(group: IncomeExpenseGroup, type: OperationType.INCOME | OperationType.EXPENSE): Amount | undefined {
   return group.entries.find((e) => e.type === type)?.amount
 }
 
 function getBalance(group: IncomeExpenseGroup): Amount | undefined {
-  const income = getEntry(group, 'INCOME')
-  const expense = getEntry(group, 'EXPENSE')
+  const income = getEntry(group, OperationType.INCOME)
+  const expense = getEntry(group, OperationType.EXPENSE)
   if (!income && !expense) return undefined
   const currency = income?.currency ?? expense!.currency
   return subtract(income ?? emptyAmount(currency), expense ?? emptyAmount(currency))
@@ -84,8 +85,8 @@ export default function IncomeExpensePage() {
 
   const globalMax = Math.max(
     ...groups.flatMap((g) => [
-      getEntry(g, 'INCOME') ? Math.abs(toDecimal(getEntry(g, 'INCOME')!)) : 0,
-      getEntry(g, 'EXPENSE') ? Math.abs(toDecimal(getEntry(g, 'EXPENSE')!)) : 0,
+      getEntry(g, OperationType.INCOME) ? Math.abs(toDecimal(getEntry(g, OperationType.INCOME)!)) : 0,
+      getEntry(g, OperationType.EXPENSE) ? Math.abs(toDecimal(getEntry(g, OperationType.EXPENSE)!)) : 0,
     ]),
     0,
   )
@@ -114,8 +115,8 @@ export default function IncomeExpensePage() {
       ) : (
         <Stack gap={4}>
           {groups.map((group) => {
-            const income = getEntry(group, 'INCOME')
-            const expense = getEntry(group, 'EXPENSE')
+            const income = getEntry(group, OperationType.INCOME)
+            const expense = getEntry(group, OperationType.EXPENSE)
             const balance = getBalance(group)
             const incomeBar =
               income && globalMax > 0 ? (Math.abs(toDecimal(income)) / globalMax) * 100 : 0
