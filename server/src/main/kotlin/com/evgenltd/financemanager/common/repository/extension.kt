@@ -6,6 +6,8 @@ import com.evgenltd.financemanager.common.record.BigDecimalRange
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.badRequestException
+import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.tag.entity.Tag
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -174,6 +176,18 @@ infix fun <E : Any> KProperty1<E, Account?>.accountTypes(types: List<AccountType
     Specification { root, _, _ ->
         root.get<Account>(name)
             .get<AccountType>(Account::type.name)
+            .`in`(value)
+    }
+}
+
+//
+
+infix fun <E : Any> KProperty1<E, Operation>.tags(tags: List<UUID>?): Specification<E> = valueNonNull(tags) { value ->
+    Specification { root, query, _ ->
+        query.distinct(true)
+        root.join<E, Operation>(name)
+            .join<Operation, Tag>(Operation::tags.name)
+            .get<UUID>(Tag::id.name)
             .`in`(value)
     }
 }

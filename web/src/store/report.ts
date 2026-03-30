@@ -4,6 +4,8 @@ import {
   Dashboard,
   IncomeExpenseFilter,
   IncomeExpenseReport,
+  TaggedFlowFilter,
+  TaggedFlowReport,
   TopFlowFilter,
   TopFlowReport,
 } from '@/types/report'
@@ -12,6 +14,11 @@ export const useDashboardStore = createFetchStore<Dashboard>(reportUrls.dashboar
 
 export const useTopFlowReportStore = createFetchStore<TopFlowReport, TopFlowFilter>(
   reportUrls.topFlow,
+  'POST',
+)
+
+export const useTaggedFlowReportStore = createFetchStore<TaggedFlowReport, TaggedFlowFilter>(
+  reportUrls.taggedFlow,
   'POST',
 )
 

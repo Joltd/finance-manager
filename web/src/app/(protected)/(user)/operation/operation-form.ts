@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { accountReferenceSchema, AccountType } from '@/types/account'
 import { amountSchema } from '@/types/common/amount'
 import { OperationType } from '@/types/operation'
+import { tagSchema } from '@/types/tag'
 
 export const FROM_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
   EXPENSE: AccountType.ACCOUNT,
@@ -26,6 +27,7 @@ export const operationFormSchema = z
     amountFrom: amountSchema.optional(),
     amountTo: amountSchema.optional(),
     description: z.string(),
+    tags: z.array(tagSchema),
   })
   .superRefine((data, ctx) => {
     if (!data.accountFrom) {
@@ -59,6 +61,7 @@ export const defaultFormState: OperationFormState = {
   amountFrom: undefined,
   amountTo: undefined,
   description: '',
+  tags: [],
 }
 
 /**

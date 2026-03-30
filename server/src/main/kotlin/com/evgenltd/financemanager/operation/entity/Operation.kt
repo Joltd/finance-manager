@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.operation.entity
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.ai.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.tag.entity.Tag
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.TenantId
@@ -58,7 +59,15 @@ class Operation(
     var hint: Embedding? = null,
 
     @OneToMany(mappedBy = "operation", cascade = [CascadeType.REMOVE], orphanRemoval = true)
-    var transactions: MutableList<Transaction> = mutableListOf()
+    var transactions: MutableList<Transaction> = mutableListOf(),
+
+    @ManyToMany
+    @JoinTable(
+        name = "operation_tags",
+        joinColumns = [JoinColumn(name = "operation_id")],
+        inverseJoinColumns = [JoinColumn(name = "tag_id")],
+    )
+    var tags: MutableList<Tag> = mutableListOf(),
 ) : Operational {
 
     override fun equals(other: Any?): Boolean {

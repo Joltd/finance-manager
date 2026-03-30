@@ -15,6 +15,7 @@ import com.evgenltd.financemanager.common.util.round
 import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.exchangerate.service.ExchangeRateService
 import com.evgenltd.financemanager.operation.entity.Transaction
+import com.evgenltd.financemanager.operation.entity.TransactionType
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.report.record.*
 import com.evgenltd.financemanager.settings.service.SettingService
@@ -112,6 +113,56 @@ class ReportService(
             .let { TopFlowReportRecord(it) }
     }
 
+    fun taggedFlowReport(filter: TaggedFlowFilter): TaggedFlowReportRecord {
+        val settings = settingService.load()
+        val targetCurrency = settings.operationDefaultCurrency?.name ?: BASE_CURRENCY
+        val targetCurrencyScale = settings.operationDefaultCurrencyScale ?: 0
+
+        val transactions = ((Transaction::account accountTypes listOf(AccountType.EXPENSE, AccountType.INCOME)) and
+                (Transaction::operation tags listOf(filter.tag)))
+            .let { transactionRepository.findAll(it) }
+
+        if (transactions.isEmpty()) {
+            return TaggedFlowReportRecord()
+        }
+
+        val currencies = transactions.map { it.amount.currency }.distinct()
+        val actualRange = Range(
+            transactions.minOf { it.date },
+            transactions.maxOf { it.date },
+        )
+
+        val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
+
+        return transactions
+            .asSequence()
+            .map {
+                TaggedFlowAggregation(
+                    account = it.account,
+                    amount = rateIndex.toTarget(it.date.withMonday(), it.amount)
+                        .let { amount -> if (it.type == TransactionType.IN) -amount else amount },
+                )
+            }
+            .groupingBy { it.account }
+            .aggregate { _, accumulator: TaggedFlowAggregation?, element, _ ->
+                TaggedFlowAggregation(
+                    account = accumulator?.account ?: element.account,
+                    amount = element.amount + accumulator?.amount,
+                )
+            }
+            .asSequence()
+            .filter { (_, value) -> value.amount.isNotZero() }
+            .map { (_, value) ->
+                TaggedFlowEntryRecord(
+                    category = accountConverter.toReference(value.account),
+                    amount = value.amount.round(targetCurrencyScale),
+                )
+            }
+            .sortedByDescending { it.amount }
+            .toList()
+            .let { TaggedFlowReportRecord(it) }
+    }
+
     fun incomeExpenseReport(filter: IncomeExpenseFilter): IncomeExpenseReportRecord {
         val settings = settingService.load()
         val targetCurrency = settings.operationDefaultCurrency
@@ -191,6 +242,11 @@ class ReportService(
     private data class IncomeExpenseAggregation(
         val date: LocalDate,
         val type: AccountType,
+        val amount: Amount,
+    )
+
+    private data class TaggedFlowAggregation(
+        val account: Account,
         val amount: Amount,
     )
 

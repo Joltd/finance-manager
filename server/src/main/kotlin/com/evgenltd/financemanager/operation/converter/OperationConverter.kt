@@ -7,6 +7,8 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationChangeStateRecord
 import com.evgenltd.financemanager.operation.record.OperationRecord
+import com.evgenltd.financemanager.tag.converter.TagConverter
+import com.evgenltd.financemanager.tag.repository.TagRepository
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,6 +16,8 @@ class OperationConverter(
     private val accountRepository: AccountRepository,
     private val accountConverter: AccountConverter,
     private val embeddingConverter: EmbeddingConverter,
+    private val tagConverter: TagConverter,
+    private val tagRepository: TagRepository,
 ) {
 
     fun toRecord(entity: Operation): OperationRecord = OperationRecord(
@@ -27,6 +31,7 @@ class OperationConverter(
         description = entity.description,
         raw = entity.raw,
         hint = entity.hint?.let { embeddingConverter.toRecord(it) },
+        tags = entity.tags.map { tagConverter.toRecord(it) },
     )
 
     fun fillEntity(entity: Operation?, record: OperationRecord): Operation = entity?.also {
@@ -37,6 +42,7 @@ class OperationConverter(
         it.amountTo = record.amountTo
         it.accountTo = record.accountTo.id.let { id -> accountRepository.find(id!!) }
         it.description = record.description
+        it.tags = record.tags.mapNotNull { tag -> tag.id }.mapNotNull { id -> tagRepository.find(id) }.toMutableList()
     } ?: Operation(
         date = record.date,
         type = record.type,
@@ -45,6 +51,7 @@ class OperationConverter(
         amountTo = record.amountTo,
         accountTo = record.accountTo.id.let { accountRepository.find(it!!) },
         description = record.description,
+        tags = record.tags.mapNotNull { tag -> tag.id }.mapNotNull { id -> tagRepository.find(id) }.toMutableList(),
     )
     
     fun toChangeRecord(entity: Operation): OperationChangeStateRecord = OperationChangeStateRecord(

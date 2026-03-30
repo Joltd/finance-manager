@@ -12,8 +12,10 @@ import { Typography } from '@/components/common/typography/typography'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { accountUrls, currencyUrls } from '@/api/account'
+import { tagUrls } from '@/api/tag'
 import type { Account, Currency } from '@/types/account'
 import { AccountType } from '@/types/account'
+import type { Tag } from '@/types/tag'
 import { AccountDialog, openAccountDialog } from './account-dialog'
 
 export default function ReferencePage() {
@@ -21,6 +23,7 @@ export default function ReferencePage() {
     <Layout scrollable>
       <AccountDialog />
       <CurrencySection />
+      <TagSection />
       <AccountSection title="Expense accounts" accountType={AccountType.EXPENSE} />
       <AccountSection title="Income accounts" accountType={AccountType.INCOME} />
     </Layout>
@@ -121,6 +124,57 @@ function CurrencySection() {
         <ReferenceRow
           label={item.name}
           badge={item.crypto ? 'crypto' : undefined}
+          onEdit={() => handleEdit(item)}
+          onDelete={() => handleDelete(item)}
+        />
+      )}
+    />
+  )
+}
+
+function TagSection() {
+  const listReq = useRequest<Tag[]>(tagUrls.root, { method: 'GET' })
+  const updateReq = useRequest<Tag, Tag>(tagUrls.root)
+  const deleteReq = useRequest<void, void, void, { id: string }>(tagUrls.id, { method: 'DELETE' })
+
+  useEffect(() => {
+    void listReq.submit()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleAdd = async () => {
+    const name = await ask({ type: 'string', label: 'Tag name' })
+    if (!name.trim()) return
+    await updateReq.submit({ body: { name: name.trim(), deleted: false } })
+    void listReq.submit()
+  }
+
+  const handleEdit = async (item: Tag) => {
+    const name = await ask({ type: 'string', label: 'Tag name', initialValue: item.name })
+    if (!name.trim()) return
+    await updateReq.submit({ body: { ...item, name: name.trim() } })
+    void listReq.submit()
+  }
+
+  const handleDelete = async (item: Tag) => {
+    if (!item.id) return
+    await deleteReq.submit({ pathParams: { id: item.id } })
+    void listReq.submit()
+  }
+
+  return (
+    <EntityList
+      data={listReq.data}
+      loading={listReq.loading}
+      error={listReq.error ?? null}
+      title="Tags"
+      subtitle="Labels for grouping and filtering operations"
+      getId={(item) => item.id!}
+      onAdd={handleAdd}
+      renderRow={(item) => (
+        <ReferenceRow
+          label={item.name}
+          deleted={item.deleted}
           onEdit={() => handleEdit(item)}
           onDelete={() => handleDelete(item)}
         />

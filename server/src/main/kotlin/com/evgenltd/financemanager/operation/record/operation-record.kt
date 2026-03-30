@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.record.SeekDirection
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.tag.record.TagRecord
 import java.time.LocalDate
 import java.util.*
 
@@ -38,6 +39,7 @@ data class OperationRecord(
     val description: String?,
     val raw: List<String> = emptyList(),
     val hint: EmbeddingRecord? = null,
+    val tags: List<TagRecord> = emptyList(),
 )
 
 data class OperationChangeRecord(

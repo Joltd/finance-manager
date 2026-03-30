@@ -1,6 +1,7 @@
 import { AccountReference } from '@/types/account'
 import { Amount } from '@/types/common/amount'
 import { Range } from '@/types/common/common'
+import { Tag } from '@/types/tag'
 
 export enum OperationType {
   EXPENSE = 'EXPENSE',
@@ -19,6 +20,7 @@ export interface Operation {
   accountTo: AccountReference
   description?: string
   raw: string[]
+  tags: Tag[]
 }
 
 export interface OperationGroup {

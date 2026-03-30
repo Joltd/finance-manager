@@ -35,6 +35,19 @@ data class TopFlowEntryRecord(
     val amount: Amount,
 )
 
+data class TaggedFlowFilter(
+    val tag: UUID,
+)
+
+data class TaggedFlowReportRecord(
+    val entries: List<TaggedFlowEntryRecord> = emptyList(),
+)
+
+data class TaggedFlowEntryRecord(
+    val category: Reference,
+    val amount: Amount,
+)
+
 data class IncomeExpenseFilter(
     val date: DateRange,
     val exclude: List<UUID>? = null,
@@ -52,22 +65,5 @@ data class IncomeExpenseGroupRecord(
 
 data class IncomeExpenseEntryRecord(
     val type: AccountType,
-    val amount: Amount,
-)
-
-data class BalanceChartRecord(
-    val groups: List<BalanceGroupRecord>,
-    val otherGroups: List<BalanceGroupRecord>,
-)
-
-data class BalanceGroupRecord(
-    val other: Boolean = false,
-    val group: Reference? = null,
-    val amount: Amount,
-    val entries: List<BalanceAccountRecord> = emptyList(),
-)
-
-data class BalanceAccountRecord(
-    val account: Reference,
     val amount: Amount,
 )

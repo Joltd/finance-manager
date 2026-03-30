@@ -22,6 +22,10 @@ class ReportController(
     @PreAuthorize("hasRole('USER')")
     fun topFlowReport(@RequestBody filter: TopFlowFilter): TopFlowReportRecord = reportService.topFlowReport(filter)
 
+    @PostMapping("/api/v1/report/tagged-flow")
+    @PreAuthorize("hasRole('USER')")
+    fun taggedFlowReport(@RequestBody filter: TaggedFlowFilter): TaggedFlowReportRecord = reportService.taggedFlowReport(filter)
+
     @PostMapping("/api/v1/report/income-expense")
     @PreAuthorize("hasRole('USER')")
     fun incomeExpenseReport(@RequestBody filter: IncomeExpenseFilter): IncomeExpenseReportRecord = reportService.incomeExpenseReport(filter)

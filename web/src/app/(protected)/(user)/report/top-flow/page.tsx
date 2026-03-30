@@ -126,11 +126,14 @@ function EntryRow({
       onClick={onClick}
     >
       <div
-        className="absolute inset-y-0 left-0 bg-destructive/10 pointer-events-none transition-all"
+        className={cn(
+          'absolute inset-y-0 pointer-events-none transition-all',
+          toDecimal(amount) < 0 ? 'right-0 bg-green-500/10' : 'left-0 bg-destructive/10',
+        )}
         style={{ width: `${barWidth}%` }}
       />
       <Typography variant="small">{label}</Typography>
-      <AmountLabel amount={amount} variant="expense" />
+      <AmountLabel amount={amount} variant="balance" />
     </Stack>
   )
 }

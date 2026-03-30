@@ -54,6 +54,21 @@ export interface TopFlowReport {
   groups: TopFlowGroup[]
 }
 
+// tagged-flow
+
+export interface TaggedFlowFilter {
+  tag: string
+}
+
+export interface TaggedFlowEntry {
+  category: Reference
+  amount: Amount
+}
+
+export interface TaggedFlowReport {
+  entries: TaggedFlowEntry[]
+}
+
 // income-expense
 
 export interface IncomeExpenseFilter {

@@ -8,6 +8,7 @@ import { formatDate, parseISO } from 'date-fns'
 
 import { operationUrls } from '@/api/operation'
 import { AccountInput } from '@/components/common/input/account-input'
+import { TagInput } from '@/components/common/input/tag-input'
 import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
 import { OperationTypeInput } from '@/components/common/input/operation-type-input'
@@ -141,6 +142,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
       amountFrom: isExchange ? operation.amountFrom : undefined,
       amountTo: isExchange ? operation.amountTo : undefined,
       description: operation.description ?? '',
+      tags: operation.tags ?? [],
     })
   }, [operationStore.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -161,6 +163,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
         amountTo: isExchange ? data.amountTo : data.amount,
         description: data.description || undefined,
         raw: [],
+        tags: data.tags,
       },
     })
     if (data.accountFrom) {
@@ -483,6 +486,17 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
                   </Field>
                 </>
               )}
+
+              <Field>
+                <FieldLabel>Tags</FieldLabel>
+                <Controller
+                  name="tags"
+                  control={control}
+                  render={({ field }) => (
+                    <TagInput mode="multi" value={field.value} onChange={field.onChange} />
+                  )}
+                />
+              </Field>
 
               <Field>
                 <FieldLabel>Description</FieldLabel>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { create } from 'zustand'
 
 import { AccountInput } from '@/components/common/input/account-input'
+import { TagInput } from '@/components/common/input/tag-input'
 import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
 import { Stack } from '@/components/common/layout/stack'
@@ -70,6 +71,7 @@ function suggestionToForm(source: ImportDataOperation): OperationFormState {
     amountFrom: isExchange ? source.amountFrom : undefined,
     amountTo: isExchange ? source.amountTo : undefined,
     description: source.description ?? '',
+    tags: [],
   }
 }
 
@@ -104,6 +106,7 @@ export function ImportDataEntrySheet() {
         amountFrom: isExchange ? op.amountFrom : undefined,
         amountTo: isExchange ? op.amountTo : undefined,
         description: op.description ?? '',
+        tags: op.tags ?? [],
       })
     } else {
       const idx = entry.suggestions.findIndex((s) => s.selected)
@@ -123,7 +126,10 @@ export function ImportDataEntrySheet() {
           state = { ...state, date: new Date(presetStore.date + 'T00:00:00') }
         }
         const fromConstraint = FROM_ACCOUNT_TYPE[state.type]
-        if (presetStore.account && (!fromConstraint || presetStore.account.type === fromConstraint)) {
+        if (
+          presetStore.account &&
+          (!fromConstraint || presetStore.account.type === fromConstraint)
+        ) {
           state = { ...state, accountFrom: presetStore.account }
         }
         const toConstraint = TO_ACCOUNT_TYPE[state.type]
@@ -133,7 +139,11 @@ export function ImportDataEntrySheet() {
         const currency = presetStore.currency ?? userStore.data?.settings?.operationDefaultCurrency
         if (currency) {
           if (state.type === OperationType.EXCHANGE) {
-            state = { ...state, amountFrom: { value: 0, currency }, amountTo: { value: 0, currency } }
+            state = {
+              ...state,
+              amountFrom: { value: 0, currency },
+              amountTo: { value: 0, currency },
+            }
           } else {
             state = { ...state, amount: { value: 0, currency } }
           }
@@ -171,6 +181,7 @@ export function ImportDataEntrySheet() {
       amountFrom: isExchange ? form.amountFrom! : form.amount!,
       amountTo: isExchange ? form.amountTo! : form.amount!,
       description: form.description || undefined,
+      tags: form.tags ?? [],
     }
   }
 
@@ -404,6 +415,15 @@ export function ImportDataEntrySheet() {
                   </Field>
                 </>
               )}
+
+              <Field>
+                <FieldLabel>Tags</FieldLabel>
+                <TagInput
+                  mode="multi"
+                  value={form.tags ?? []}
+                  onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+                />
+              </Field>
 
               <Field>
                 <FieldLabel>Description</FieldLabel>
