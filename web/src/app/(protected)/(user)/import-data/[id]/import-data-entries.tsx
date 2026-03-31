@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { addDays, format } from 'date-fns'
 import { Check, Link2, Link2Off, Loader2Icon, X, XCircleIcon } from 'lucide-react'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
@@ -47,7 +47,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
   const [linkingEntry, setLinkingEntry] = useState<ImportDataEntry | null>(null)
 
   useEffect(() => {
-    setPointer(format(addDays(new Date(), 1), 'yyyy-MM-dd'))
+    setPointer(format(addDays(importData?.dateRange?.from ?? new Date(), 1), 'yyyy-MM-dd'))
   }, [])
 
   useEffect(() => {
@@ -253,7 +253,7 @@ function ImportEntryRow({
   const hasActions = showUnlink || showApprove || showLink
 
   const isLinkingMode = !!linkingEntry
-  const isLinkSource = isLinkingMode && linkingEntry?.id === entry.id
+  const isLinkSource = isLinkingMode && linkingEntry?.operation?.id === entry.operation?.id
   const isLinkTarget = isLinkingMode && !!entry.parsed && !entry.operation
   const isIrrelevant = isLinkingMode && !isLinkSource && !isLinkTarget
 
@@ -437,6 +437,7 @@ function ParsedEntryCard({
       accountFrom={parsed.accountFrom}
       accountTo={parsed.accountTo}
       description={parsed.description}
+      raw={parsed.raw}
       mainAccountId={mainAccountId}
       variant="parsed"
       action={action}

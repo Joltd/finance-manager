@@ -116,7 +116,7 @@ data class ImportDataParsed(
 )
 
 data class ImportDataParsedEntry(
-    val rawEntries: List<String> = emptyList(),
+    val raw: List<String> = emptyList(),
     val date: LocalDate,
     val type: OperationType,
     val accountFrom: Account? = null,

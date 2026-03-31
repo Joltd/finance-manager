@@ -40,7 +40,7 @@ class SberImportParser : ImportParser {
             val description = if (secondLine.size > 2) secondLine[2] else secondLine[1]
             result.add(
                 ImportDataParsedEntry(
-                rawEntries = listOf(lines[index].toString(), lines[index + 1].toString()),
+                raw = listOf(lines[index].toString(), lines[index + 1].toString()),
                 date = date.date("dd.MM.yyyy"),
                 type = if (amount.contains("+")) OperationType.INCOME else OperationType.EXPENSE,
                 accountFrom = null,

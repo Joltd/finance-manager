@@ -1,10 +1,11 @@
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, ScrollText, Sparkles } from 'lucide-react'
 
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { AccountReference } from '@/types/account'
 import type { Amount } from '@/types/common/amount'
 import type { OperationType } from '@/types/operation'
@@ -46,6 +47,9 @@ export interface ImportEntryCardProps {
   recommended?: boolean
   onClick?: () => void
   className?: string
+
+  /** Raw source data from the parsed file row */
+  raw?: string[]
 
   /** Icon button to show on the right edge of the card */
   action?: React.ReactNode
@@ -90,6 +94,7 @@ export function ImportDataEntryCard({
   description,
   date,
   rating,
+  raw,
   mainAccountId,
   variant = 'operation',
   active = false,
@@ -165,6 +170,20 @@ export function ImportDataEntryCard({
               <span className="italic text-muted-foreground">unknown</span>
             )}
           </Typography>
+        )}
+
+        {/* Raw source data indicator */}
+        {raw && raw.length > 0 && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex items-center gap-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors cursor-default w-fit">
+                <ScrollText className="size-3" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-sm font-mono text-xs whitespace-pre-wrap break-all">
+              {raw.join('\n')}
+            </TooltipContent>
+          </Tooltip>
         )}
       </Stack>
 

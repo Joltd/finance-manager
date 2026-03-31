@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { create } from 'zustand'
 
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { AccountInput } from '@/components/common/input/account-input'
 import { TagInput } from '@/components/common/input/tag-input'
 import { AmountInput } from '@/components/common/input/amount-input'
@@ -88,9 +89,12 @@ export function ImportDataEntrySheet() {
   const mainAccountId = importData?.account.id
   const [form, setForm] = useState<OperationFormState>(defaultFormState)
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
+  const [rawExpanded, setRawExpanded] = useState(false)
 
   useEffect(() => {
     if (!open || !entry) return
+
+    setRawExpanded(false)
 
     if (entry.operation) {
       setSelectedSuggestionIdx(null)
@@ -433,6 +437,28 @@ export function ImportDataEntrySheet() {
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 />
               </Field>
+
+              {entry?.parsed?.raw && entry.parsed.raw.length > 0 && (
+                <div>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setRawExpanded((v) => !v)}
+                  >
+                    {rawExpanded ? (
+                      <ChevronDown className="size-3.5" />
+                    ) : (
+                      <ChevronRight className="size-3.5" />
+                    )}
+                    Raw source data
+                  </button>
+                  {rawExpanded && (
+                    <pre className="mt-2 rounded-md bg-muted px-3 py-2 font-mono text-xs text-muted-foreground whitespace-pre-wrap break-all">
+                      {entry.parsed.raw.join('\n')}
+                    </pre>
+                  )}
+                </div>
+              )}
             </Stack>
 
             <SheetFooter>

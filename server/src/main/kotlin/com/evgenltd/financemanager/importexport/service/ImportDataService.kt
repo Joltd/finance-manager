@@ -57,7 +57,11 @@ class ImportDataService(
 
         var dates = request.pointers
         if (dates == null && request.pointer != null && request.direction != null) {
-            dates = findNearDates(request.pointer, request.direction, importData)
+            val direction = when (request.direction) {
+                SeekDirection.FORWARD -> SeekDirection.BACKWARD
+                SeekDirection.BACKWARD -> SeekDirection.FORWARD
+            }
+            dates = findNearDates(request.pointer, direction, importData)
         }
 
         if (dates == null) {
@@ -76,9 +80,7 @@ class ImportDataService(
             .mapNotNull { it.operation }
             .mapNotNull { it.id }
 
-        val actualDates = days.map { it.date }
-
-        val freeOperations = ((Operation::date contains actualDates) and
+        val freeOperations = ((Operation::date contains dates) and
                 byAccount(importData.account) and
                 byCurrency(importData.currency) and
                 (Operation::id containsNot linkedOperations))
@@ -97,7 +99,7 @@ class ImportDataService(
                 totals = day.totals.map { importDataConverter.toRecord(it) },
                 entries = entries + operations,
             )
-        }.sortedByDescending { it.date }
+        }.sortedBy { it.date }
     }
 
     private fun findNearDates(

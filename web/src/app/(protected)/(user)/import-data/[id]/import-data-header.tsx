@@ -13,7 +13,12 @@ import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
 import { useImportDataStore } from '@/store/import-data'
-import { ImportData, ImportDataParsedFailedEntry, ImportDataTotal } from '@/types/import-data'
+import {
+  ImportData,
+  ImportDataParsedFailedEntry,
+  ImportDataParsingStatus,
+  ImportDataTotal,
+} from '@/types/import-data'
 import { abs, add, isZero, subtract } from '@/types/common/amount'
 import { ask } from '@/store/common/ask-dialog'
 import { Filler } from '@/components/common/layout/filler'
@@ -167,17 +172,19 @@ function TitleSection({
       <Stack orientation="horizontal" align="center" gap={3}>
         <Typography variant="large">{data.account.name}</Typography>
 
-        <Flow align="center" gap={2} className="ml-auto">
-          <ValidityStatus data={data} />
-          <Tooltip disableHoverableContent>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-xs" onClick={onRecalculate} disabled={loading}>
-                <RefreshCwIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Recalculate totals</TooltipContent>
-          </Tooltip>
-        </Flow>
+        {data?.parsingStatus === ImportDataParsingStatus.DONE && (
+          <Flow align="center" gap={2} className="ml-auto">
+            <ValidityStatus data={data} />
+            <Tooltip disableHoverableContent>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon-xs" onClick={onRecalculate} disabled={loading}>
+                  <RefreshCwIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Recalculate totals</TooltipContent>
+            </Tooltip>
+          </Flow>
+        )}
       </Stack>
     )
   )

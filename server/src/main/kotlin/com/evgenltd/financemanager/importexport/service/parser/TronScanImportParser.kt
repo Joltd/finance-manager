@@ -27,7 +27,7 @@ class TronScanImportParser : ImportParser {
                     return@mapNotNull null
                 }
                 ImportDataParsedEntry(
-                    rawEntries = listOf(it.toString()),
+                    raw = listOf(it.toString()),
                     date = it["Time(UTC)"].dateTime("yyyy-MM-dd HH:mm:ss"),
                     type = OperationType.EXCHANGE,
                     accountFrom = null,

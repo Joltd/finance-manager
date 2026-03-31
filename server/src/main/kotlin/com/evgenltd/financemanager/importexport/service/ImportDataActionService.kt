@@ -111,7 +111,7 @@ class ImportDataActionService(
             amountTo = entry.amountTo,
             accountTo = entry.accountTo ?: importData.account.takeIf { entry.type == OperationType.INCOME },
             description = entry.description,
-            raw = entry.rawEntries,
+            raw = entry.raw,
             hintInput = entry.hint,
         ).let { importDataOperationRepository.save(it) }
     }

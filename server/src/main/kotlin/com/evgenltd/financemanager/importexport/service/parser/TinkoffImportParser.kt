@@ -25,7 +25,7 @@ class TinkoffImportParser : ImportParser {
                 val type = if (amount.value < 0) OperationType.EXPENSE else OperationType.INCOME
                 val hint = type.hint()?.let { typeHint -> "$typeHint $description - $category$mcc" }
                 ImportDataParsedEntry(
-                    rawEntries = listOf(cells.toString()),
+                    raw = listOf(cells.toString()),
                     date = date,
                     type = type,
                     amountFrom = amount.abs(),
