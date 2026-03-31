@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   ArrowUpDown,
   BookOpen,
+  Tags,
   PlusIcon,
   Trash2Icon,
   TrendingUp,
@@ -42,6 +43,7 @@ const mainNav = [
 const reportsNav = [
   { href: '/report/income-expense', label: 'Income & Expense', icon: TrendingUp },
   { href: '/report/top-flow', label: 'Top Flow', icon: ArrowUpDown },
+  { href: '/report/tagged-flow', label: 'Tagged Flow', icon: Tags },
 ]
 
 export function UserAppSidebar() {

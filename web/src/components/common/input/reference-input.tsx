@@ -55,6 +55,14 @@ export function ReferenceInput<T>(props: ReferenceInputProps<T>) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next)
+    if (next) {
+      setSearch('')
+      onSearch?.('')
+    }
+  }
+
   const debouncedSearch = useDebounce((val: string) => {
     onSearch?.(val)
   }, 300)
@@ -111,7 +119,7 @@ export function ReferenceInput<T>(props: ReferenceInputProps<T>) {
   const hasValue = isMulti ? (props.value?.length ?? 0) > 0 : props.value != null
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           data-slot="input"

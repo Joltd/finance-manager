@@ -420,6 +420,7 @@ export function ImportDataEntrySheet() {
                 <FieldLabel>Tags</FieldLabel>
                 <TagInput
                   mode="multi"
+                  allowCreate
                   value={form.tags ?? []}
                   onChange={(tags) => setForm((f) => ({ ...f, tags }))}
                 />

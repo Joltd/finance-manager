@@ -7,13 +7,14 @@ import { FilterItem, useFilterContext } from './filter'
 interface OperationTypeFilterProps {
   id: string
   label: string
+  required?: boolean
 }
 
-export function OperationTypeFilter({ id, label }: OperationTypeFilterProps) {
+export function OperationTypeFilter({ id, label, required }: OperationTypeFilterProps) {
   const { getValue, handleChange } = useFilterContext()
 
   return (
-    <FilterItem id={id} label={label}>
+    <FilterItem id={id} label={label} required={required}>
       <OperationTypeInput
         value={getValue(id) as OperationType | undefined}
         onChange={(v) => handleChange(id, v)}

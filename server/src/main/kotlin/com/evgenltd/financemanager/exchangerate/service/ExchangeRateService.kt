@@ -51,7 +51,8 @@ class ExchangeRateService(
     }
 
     fun historyRateIndex(targetCurrency: String, range: Range<LocalDate>, currencies: List<String>): ExchangeRateHistoryIndex {
-        val rates = historyRates(range, currencies)
+        val actualCurrencies = currencies + listOf(targetCurrency)
+        val rates = historyRates(range, actualCurrencies.distinct())
         return ExchangeRateHistoryIndex(targetCurrency, rates)
     }
 

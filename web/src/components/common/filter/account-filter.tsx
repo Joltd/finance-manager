@@ -9,14 +9,15 @@ interface AccountFilterProps {
   label: string
   type?: AccountType
   mode?: 'single' | 'multi'
+  required?: boolean
 }
 
-export function AccountFilter({ id, label, type, mode = 'single' }: AccountFilterProps) {
+export function AccountFilter({ id, label, type, mode = 'single', required }: AccountFilterProps) {
   const { getValue, handleChange } = useFilterContext()
 
   if (mode === 'multi') {
     return (
-      <FilterItem id={id} label={label}>
+      <FilterItem id={id} label={label} required={required}>
         <AccountInput
           mode="multi"
           value={getValue(id) as AccountReference[] | undefined}
@@ -29,7 +30,7 @@ export function AccountFilter({ id, label, type, mode = 'single' }: AccountFilte
   }
 
   return (
-    <FilterItem id={id} label={label}>
+    <FilterItem id={id} label={label} required={required}>
       <AccountInput
         value={getValue(id) as AccountReference | undefined}
         onChange={(v) => handleChange(id, v)}

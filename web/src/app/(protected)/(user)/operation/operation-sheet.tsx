@@ -493,7 +493,12 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
                   name="tags"
                   control={control}
                   render={({ field }) => (
-                    <TagInput mode="multi" value={field.value} onChange={field.onChange} />
+                    <TagInput
+                      mode="multi"
+                      allowCreate
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                   )}
                 />
               </Field>

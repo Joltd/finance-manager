@@ -46,11 +46,12 @@ function AmountRangeInput({
 export interface AmountRangeFilterProps {
   id: string
   label: string
+  required?: boolean
 }
 
 const DEBOUNCE_MS = 400
 
-export function AmountRangeFilter({ id, label }: AmountRangeFilterProps) {
+export function AmountRangeFilter({ id, label, required }: AmountRangeFilterProps) {
   const { getValue, handleChange } = useFilterContext()
   const contextRange = (getValue(id) ?? {}) as AmountRange
   const [pending, setPending] = useState<AmountRange>(contextRange)
@@ -79,7 +80,7 @@ export function AmountRangeFilter({ id, label }: AmountRangeFilterProps) {
   const setTo = (to: number | undefined) => setPending((prev) => ({ ...prev, to }))
 
   return (
-    <FilterItem id={id} label={label}>
+    <FilterItem id={id} label={label} required={required}>
       <AmountRangeInput value={pending.from} onChange={setFrom} placeholder="from" />
       <span className="text-muted-foreground self-center text-xs">—</span>
       <AmountRangeInput value={pending.to} onChange={setTo} placeholder="to" />

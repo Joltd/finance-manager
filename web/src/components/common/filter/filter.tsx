@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils'
 interface FilterRegistration {
   id: string
   label: string
+  required?: boolean
 }
 
 interface FilterContextValue {
@@ -49,15 +50,16 @@ export interface FilterItemProps {
   label: string
   children: React.ReactNode
   className?: string
+  required?: boolean
 }
 
-export function FilterItem({ id, label, children, className }: FilterItemProps) {
+export function FilterItem({ id, label, children, className, required }: FilterItemProps) {
   const { register, unregister, isActive, removeFilter } = useFilterContext()
 
   useLayoutEffect(() => {
-    register({ id, label })
+    register({ id, label, required })
     return () => unregister(id)
-  }, [id, label, register, unregister])
+  }, [id, label, required, register, unregister])
 
   if (!isActive(id)) return null
 
@@ -66,17 +68,19 @@ export function FilterItem({ id, label, children, className }: FilterItemProps) 
       <ButtonGroupText className="px-2.5 font-normal text-muted-foreground shadow-none whitespace-nowrap shrink-0">
         {label}
       </ButtonGroupText>
-      <div className="flex flex-1 items-center border border-input **:data-[slot=input]:h-full **:data-[slot=input]:rounded-none **:data-[slot=input]:border-0 **:data-[slot=input]:shadow-none">
+      <div className={cn('flex flex-1 items-center border border-input **:data-[slot=input]:h-full **:data-[slot=input]:rounded-none **:data-[slot=input]:border-0 **:data-[slot=input]:shadow-none', required && 'rounded-r-md')}>
         {children}
       </div>
-      <Button
-        variant="outline"
-        size="icon-xs"
-        onClick={() => removeFilter(id)}
-        className="shrink-0 h-full w-8"
-      >
-        <X />
-      </Button>
+      {!required && (
+        <Button
+          variant="outline"
+          size="icon-xs"
+          onClick={() => removeFilter(id)}
+          className="shrink-0 h-full w-8"
+        >
+          <X />
+        </Button>
+      )}
     </ButtonGroup>
   )
 }
@@ -111,7 +115,11 @@ export function Filter({ value = {}, onChange, children }: FilterProps) {
     setRegistrations((prev) => prev.filter((r) => r.id !== id))
   }, [])
 
-  const isActive = useCallback((id: string) => activeIds.includes(id), [activeIds])
+  const isActive = useCallback(
+    (id: string) =>
+      activeIds.includes(id) || registrations.some((r) => r.id === id && r.required),
+    [activeIds, registrations],
+  )
 
   const getValue = useCallback((id: string) => valueRef.current[id], [])
 
@@ -139,7 +147,7 @@ export function Filter({ value = {}, onChange, children }: FilterProps) {
     [register, unregister, isActive, getValue, handleChange, removeFilter],
   )
 
-  const inactiveRegistrations = registrations.filter((r) => !activeIds.includes(r.id))
+  const inactiveRegistrations = registrations.filter((r) => !r.required && !activeIds.includes(r.id))
 
   return (
     <FilterContext.Provider value={ctx}>

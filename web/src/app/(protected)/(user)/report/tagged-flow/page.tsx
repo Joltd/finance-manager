@@ -39,10 +39,7 @@ export default function TaggedFlowPage() {
   const tag = filterValue.tag as Tag | undefined
   const entries = data?.entries ?? []
 
-  const maxAmount = entries.reduce(
-    (max, e) => Math.max(max, Math.abs(toDecimal(e.amount))),
-    0,
-  )
+  const maxAmount = entries.reduce((max, e) => Math.max(max, Math.abs(toDecimal(e.amount))), 0)
 
   return (
     <Layout scrollable>
@@ -51,7 +48,7 @@ export default function TaggedFlowPage() {
       </Stack>
 
       <Filter value={filterValue} onChange={handleFilterChange}>
-        <TagFilter id="tag" label="Tag" />
+        <TagFilter id="tag" label="Tag" required />
       </Filter>
 
       {loading ? (
@@ -70,7 +67,7 @@ export default function TaggedFlowPage() {
       ) : (
         <Group title={tag.name}>
           {entries.map((entry) => {
-            const negative = toDecimal(entry.amount) < 0
+            const positive = toDecimal(entry.amount) > 0
             const barWidth =
               maxAmount > 0 ? (Math.abs(toDecimal(entry.amount)) / maxAmount) * 100 : 0
             return (
@@ -83,7 +80,7 @@ export default function TaggedFlowPage() {
                 className="relative py-2"
               >
                 <div
-                  className={`absolute inset-y-0 pointer-events-none transition-all ${negative ? 'right-0 bg-green-500/10' : 'left-0 bg-destructive/10'}`}
+                  className={`absolute inset-y-0 pointer-events-none transition-all ${positive ? 'right-0 bg-green-500/10' : 'left-0 bg-destructive/10'}`}
                   style={{ width: `${barWidth}%` }}
                 />
                 <Typography variant="small">{entry.category.name}</Typography>

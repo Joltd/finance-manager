@@ -7,13 +7,14 @@ import { FilterItem, useFilterContext } from './filter'
 interface AccountTypeFilterProps {
   id: string
   label: string
+  required?: boolean
 }
 
-export function AccountTypeFilter({ id, label }: AccountTypeFilterProps) {
+export function AccountTypeFilter({ id, label, required }: AccountTypeFilterProps) {
   const { getValue, handleChange } = useFilterContext()
 
   return (
-    <FilterItem id={id} label={label}>
+    <FilterItem id={id} label={label} required={required}>
       <AccountTypeInput
         value={getValue(id) as AccountType | undefined}
         onChange={(v) => handleChange(id, v)}

@@ -8,14 +8,15 @@ interface MonthFilterProps {
   label: string
   mode?: 'single' | 'range'
   placeholder?: string
+  required?: boolean
 }
 
-export function MonthFilter({ id, label, mode = 'single', placeholder }: MonthFilterProps) {
+export function MonthFilter({ id, label, mode = 'single', placeholder, required }: MonthFilterProps) {
   const { getValue, handleChange } = useFilterContext()
 
   if (mode === 'range') {
     return (
-      <FilterItem id={id} label={label}>
+      <FilterItem id={id} label={label} required={required}>
         <MonthInput
           mode="range"
           value={getValue(id) as MonthRange | undefined}
@@ -27,7 +28,7 @@ export function MonthFilter({ id, label, mode = 'single', placeholder }: MonthFi
   }
 
   return (
-    <FilterItem id={id} label={label}>
+    <FilterItem id={id} label={label} required={required}>
       <MonthInput
         value={getValue(id) as Date | undefined}
         onChange={(v) => handleChange(id, v)}

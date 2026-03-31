@@ -14,7 +14,7 @@ class ExchangeRateIndex(private val targetCurrency: String, private val rates: M
         }
 
         if (amount.currency == BASE_CURRENCY) {
-            return rates[targetCurrency]
+            return rates[BASE_CURRENCY]
                 ?.let { amount.convert(it, targetCurrency) }
                 ?: Amount(0, targetCurrency)
         }

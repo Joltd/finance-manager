@@ -7,13 +7,14 @@ interface DateFilterProps {
   id: string
   label: string
   placeholder?: string
+  required?: boolean
 }
 
-export function DateFilter({ id, label, placeholder }: DateFilterProps) {
+export function DateFilter({ id, label, placeholder, required }: DateFilterProps) {
   const { getValue, handleChange } = useFilterContext()
 
   return (
-    <FilterItem id={id} label={label}>
+    <FilterItem id={id} label={label} required={required}>
       <DateInput
         value={getValue(id) as Date | undefined}
         onChange={(v) => handleChange(id, v)}

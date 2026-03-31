@@ -11,13 +11,18 @@ import { Tag } from '@/types/tag'
 import { tagUrls } from '@/api/tag'
 import { useRequest } from '@/hooks/use-request'
 
-type OmitFetched<T> = Omit<T, 'loading' | 'data' | 'onSearch' | 'getLabel' | 'getId' | 'onNew' | 'newLabel'>
+type OmitFetched<T> = Omit<
+  T,
+  'loading' | 'data' | 'onSearch' | 'getLabel' | 'getId' | 'onNew' | 'newLabel'
+>
+
+type TagInputOwnProps = { allowCreate?: boolean }
 
 export type TagInputProps =
-  | OmitFetched<ReferenceInputSingleProps<Tag>>
-  | OmitFetched<ReferenceInputMultiProps<Tag>>
+  | (OmitFetched<ReferenceInputSingleProps<Tag>> & TagInputOwnProps)
+  | (OmitFetched<ReferenceInputMultiProps<Tag>> & TagInputOwnProps)
 
-export function TagInput(props: TagInputProps) {
+export function TagInput({ allowCreate, ...props }: TagInputProps) {
   const listReq = useRequest<Tag[], unknown, { mask?: string }>(tagUrls.root, { method: 'GET' })
   const createReq = useRequest<Tag, Tag>(tagUrls.root, { method: 'POST' })
 
@@ -36,7 +41,7 @@ export function TagInput(props: TagInputProps) {
       onSearch={handleSearch}
       getLabel={(item) => item.name}
       getId={(item) => item.id!}
-      onNew={handleNew}
+      onNew={allowCreate ? handleNew : undefined}
       newLabel="New tag"
       {...props}
     />

@@ -7,13 +7,14 @@ import { FilterItem, useFilterContext } from './filter'
 interface TagFilterProps {
   id: string
   label: string
+  required?: boolean
 }
 
-export function TagFilter({ id, label }: TagFilterProps) {
+export function TagFilter({ id, label, required }: TagFilterProps) {
   const { getValue, handleChange } = useFilterContext()
 
   return (
-    <FilterItem id={id} label={label}>
+    <FilterItem id={id} label={label} required={required}>
       <TagInput
         value={getValue(id) as Tag | undefined}
         onChange={(v) => handleChange(id, v)}
