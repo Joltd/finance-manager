@@ -27,7 +27,7 @@ class BccImportParser : ImportParser {
             }
             val amount = it[3][0][3].toString().trim().cleanAmount()
             ImportDataParsedEntry(
-                listOf(it.toString()),
+                it.toString(),
                 descriptionNode[1][0].toString().date("dd.MM.yyyy"),
                 if (sign == "-") OperationType.EXPENSE else OperationType.INCOME,
                 null,

@@ -197,7 +197,7 @@ class ImportDataActionService(
     @Transactional
     fun linkExistedOperations(id: UUID) {
         val importData = importDataRepository.find(id)
-        val range = importDataDayRepository.findImportDataDateRange(importData) ?: return
+        val range = importDataDayRepository.findImportDataDateRange(importData)
 
         generateSequence(range.min) { it.plusWeeks(1L) }
             .takeWhile { it <= range.max }
@@ -324,7 +324,7 @@ class ImportDataActionService(
         importDataEntryRepository.findAllById(entryIds)
             .flatMap {
                 val operationDate = it.operation?.date
-                it.operation?.raw = emptyList()
+                it.operation?.raw = ""
                 it.operation?.hint = null
                 it.operation = null
                 listOf(operationDate, it.importDataDay.date)

@@ -19,7 +19,7 @@ export interface Operation {
   amountTo: Amount
   accountTo: AccountReference
   description?: string
-  raw: string[]
+  raw: string
   tags: Tag[]
 }
 

@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { create } from 'zustand'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { formatDate, parseISO } from 'date-fns'
 
 import { operationUrls } from '@/api/operation'
@@ -67,6 +68,7 @@ interface OperationSheetProps {
 export function OperationSheet({ onSaved }: OperationSheetProps) {
   const { open, copy, operationId, closeSheet } = useOperationSheetStore()
   const operationStore = useOperationStore()
+  const [rawExpanded, setRawExpanded] = useState(false)
   const userStore = useUserStore()
   const presetStore = useOperationPresetStore()
   const saveOperation = useRequest(operationUrls.root)
@@ -85,6 +87,10 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
   })
 
   const type = watch('type')
+
+  useEffect(() => {
+    setRawExpanded(false)
+  }, [open])
 
   useEffect(() => {
     if (open) {
@@ -162,7 +168,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
         amountFrom: isExchange ? data.amountFrom : data.amount,
         amountTo: isExchange ? data.amountTo : data.amount,
         description: data.description || undefined,
-        raw: [],
+        raw: '',
         tags: data.tags,
       },
     })
@@ -511,6 +517,28 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
                   render={({ field }) => <Input value={field.value} onChange={field.onChange} />}
                 />
               </Field>
+
+              {operationStore.data?.raw && (
+                <div>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setRawExpanded((v) => !v)}
+                  >
+                    {rawExpanded ? (
+                      <ChevronDown className="size-3.5" />
+                    ) : (
+                      <ChevronRight className="size-3.5" />
+                    )}
+                    Raw source data
+                  </button>
+                  {rawExpanded && (
+                    <pre className="mt-2 rounded-md bg-muted px-3 py-2 font-mono text-xs text-muted-foreground whitespace-pre-wrap break-all">
+                      {operationStore.data.raw}
+                    </pre>
+                  )}
+                </div>
+              )}
             </Stack>
           )}
 

@@ -55,7 +55,7 @@ export interface ImportDataOperation {
   amountTo: Amount
   accountTo?: AccountReference
   description?: string
-  raw: string[]
+  raw: string
   hint?: Embedding
   selected: boolean
   distance?: number

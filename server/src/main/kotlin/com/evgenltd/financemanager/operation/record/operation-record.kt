@@ -37,7 +37,7 @@ data class OperationRecord(
     val amountTo: Amount,
     val accountTo: AccountRecord,
     val description: String?,
-    val raw: List<String> = emptyList(),
+    val raw: String = "",
     val hint: EmbeddingRecord? = null,
     val tags: List<TagRecord> = emptyList(),
 )

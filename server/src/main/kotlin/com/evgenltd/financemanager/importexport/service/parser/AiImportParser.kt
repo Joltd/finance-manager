@@ -50,7 +50,7 @@ class AiImportParser(
 
                 entries.add(
                     ImportDataParsedEntry(
-                        raw = listOf(it.raw),
+                        raw = it.raw,
                         date = date,
                         type = type,
                         accountFrom = accountFrom,

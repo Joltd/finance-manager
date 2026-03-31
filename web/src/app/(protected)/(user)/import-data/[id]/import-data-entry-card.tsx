@@ -49,7 +49,7 @@ export interface ImportEntryCardProps {
   className?: string
 
   /** Raw source data from the parsed file row */
-  raw?: string[]
+  raw?: string
 
   /** Icon button to show on the right edge of the card */
   action?: React.ReactNode
@@ -173,7 +173,7 @@ export function ImportDataEntryCard({
         )}
 
         {/* Raw source data indicator */}
-        {raw && raw.length > 0 && (
+        {raw && (
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="inline-flex items-center gap-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors cursor-default w-fit">
@@ -181,7 +181,7 @@ export function ImportDataEntryCard({
               </span>
             </TooltipTrigger>
             <TooltipContent className="max-w-sm font-mono text-xs whitespace-pre-wrap break-all">
-              {raw.join('\n')}
+              {raw}
             </TooltipContent>
           </Tooltip>
         )}

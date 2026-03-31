@@ -87,7 +87,7 @@ data class ImportDataOperationRecord(
     val amountTo: Amount,
     val accountTo: AccountRecord?,
     val description: String?,
-    val raw: List<String> = emptyList(),
+    val raw: String = "",
     val hint: EmbeddingRecord? = null,
     val selected: Boolean,
     val distance: Double?,
@@ -116,7 +116,7 @@ data class ImportDataParsed(
 )
 
 data class ImportDataParsedEntry(
-    val raw: List<String> = emptyList(),
+    val raw: String = "",
     val date: LocalDate,
     val type: OperationType,
     val accountFrom: Account? = null,

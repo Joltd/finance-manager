@@ -57,7 +57,7 @@ class TbcImportParser : ImportParser {
             }
 
             ImportDataParsedEntry(
-                raw = listOf(row.toString()),
+                raw = row.toString(),
                 date = row.date!!.date("dd/MM/yyyy"),
                 type = type,
                 accountFrom = accountFrom,

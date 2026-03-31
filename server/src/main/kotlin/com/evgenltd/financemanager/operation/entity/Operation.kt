@@ -5,9 +5,7 @@ import com.evgenltd.financemanager.ai.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.tag.entity.Tag
 import jakarta.persistence.*
-import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.TenantId
-import org.hibernate.type.SqlTypes
 import java.time.LocalDate
 import java.util.*
 
@@ -51,8 +49,7 @@ class Operation(
 
     var description: String?,
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    var raw: List<String> = emptyList(),
+    var raw: String = "",
 
     @ManyToOne
     @JoinColumn(name = "hint_id")

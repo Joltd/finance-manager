@@ -438,7 +438,7 @@ export function ImportDataEntrySheet() {
                 />
               </Field>
 
-              {entry?.parsed?.raw && entry.parsed.raw.length > 0 && (
+              {entry?.parsed?.raw && (
                 <div>
                   <button
                     type="button"
@@ -454,7 +454,7 @@ export function ImportDataEntrySheet() {
                   </button>
                   {rawExpanded && (
                     <pre className="mt-2 rounded-md bg-muted px-3 py-2 font-mono text-xs text-muted-foreground whitespace-pre-wrap break-all">
-                      {entry.parsed.raw.join('\n')}
+                      {entry.parsed.raw}
                     </pre>
                   )}
                 </div>

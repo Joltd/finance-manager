@@ -6,8 +6,6 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.entity.Operational
 import jakarta.persistence.*
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 import java.time.LocalDate
 import java.util.*
 
@@ -55,8 +53,7 @@ class ImportDataOperation(
 
     var description: String? = null,
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    var raw: List<String> = emptyList(),
+    var raw: String = "",
 
     var hintInput: String? = null,
 
