@@ -13,18 +13,6 @@ class ExchangeRateIndex(private val targetCurrency: String, private val rates: M
             return amount
         }
 
-        if (amount.currency == BASE_CURRENCY) {
-            return rates[BASE_CURRENCY]
-                ?.let { amount.convert(it, targetCurrency) }
-                ?: Amount(0, targetCurrency)
-        }
-
-        if (targetCurrency == BASE_CURRENCY) {
-            return rates[amount.currency]
-                ?.let { amount.convert(it.oppositeRate(), targetCurrency) }
-                ?: Amount(0, targetCurrency)
-        }
-
         val sourceToBaseRate = rates[amount.currency] ?: return Amount(0, targetCurrency)
         val baseToTargetRate = rates[targetCurrency] ?: return Amount(0, targetCurrency)
 
