@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { addDays, format } from 'date-fns'
+import { addDays, format, subDays } from 'date-fns'
 import { Check, Link2, Link2Off, Loader2Icon, X, XCircleIcon } from 'lucide-react'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
 import { Seek } from '@/components/common/layout/seek'
@@ -47,7 +47,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
   const [linkingEntry, setLinkingEntry] = useState<ImportDataEntry | null>(null)
 
   useEffect(() => {
-    setPointer(format(addDays(importData?.dateRange?.from ?? new Date(), 1), 'yyyy-MM-dd'))
+    setPointer(format(subDays(importData?.dateRange?.from ?? new Date(), 1), 'yyyy-MM-dd'))
   }, [])
 
   useEffect(() => {

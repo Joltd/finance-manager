@@ -368,7 +368,6 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
         name = account.name,
         type = account.type,
         parser = null,
-        group = null,
         deleted = false,
         reviseDate = null,
     )
