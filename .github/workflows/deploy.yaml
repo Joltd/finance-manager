@@ -63,7 +63,6 @@ jobs:
       - name: Prepare Docker Compose
         run: |
           sed -e 's|3.0.0-SNAPSHOT|${{ env.PROJECT_VERSION }}|' \
-          -e 's|localhost:5432|${{ secrets.DB_HOST }}|' \
           -e 's|root_user|${{ secrets.DB_USER }}|' \
           -e 's|root_password|${{ secrets.DB_PASSWORD }}|' \
           -e 's|security_secret|${{ secrets.SECURITY_SECRET }}|' \

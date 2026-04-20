@@ -4,13 +4,16 @@ services:
 
   server:
     image: joltd/finance-manager:server-3.0.0-SNAPSHOT
+    networks:
+      - internal
+      - db-external
     ports:
       - "9500:8080"
     volumes:
       - ./files:/app/files
     environment:
       APP_VERSION: 3.0.0-SNAPSHOT
-      DB_HOST: localhost:5432
+      DB_HOST: db:5432
       DB_USER: root_user
       DB_PASSWORD: root_password
       SECURITY_SECRET: security_secret
@@ -22,7 +25,15 @@ services:
 
   web:
     image: joltd/finance-manager:web-3.0.0-SNAPSHOT
+    networks:
+      - internal
     ports:
       - "9300:3000"
     environment:
       BACKEND_HOST: http://server:8080
+
+networks:
+  db-external:
+    external: true
+    name: db
+  internal:
