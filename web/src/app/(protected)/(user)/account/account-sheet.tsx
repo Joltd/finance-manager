@@ -94,7 +94,7 @@ export function AccountSheet() {
         type: form.type,
         parser: form.parser || undefined,
         deleted: form.deleted,
-        reviseDate: form.reviseDate ? format(form.reviseDate, 'd MMM yyyy') : undefined,
+        reviseDate: form.reviseDate ? format(form.reviseDate, 'yyyy-MM-dd') : undefined,
         externalId: form.type === AccountType.ACCOUNT ? form.externalId || undefined : undefined,
       },
     })

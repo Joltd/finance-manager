@@ -20,6 +20,6 @@ spring:
 security:
   secret: ${SECURITY_SECRET}
   access-token-expiration-minutes: 15
-  refresh-token-expiration-minutes: 10080 # 7 days
+  refresh-token-expiration-minutes: 43200 # 30 days
 
 files: /app/files
