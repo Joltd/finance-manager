@@ -41,7 +41,9 @@ class ReportService(
         val transactions = ((Transaction::date between filter.date.validMonthRange()) and
                 (Transaction::account accountTypes listOf(AccountType.EXPENSE)) and
                 (Transaction::account accountsNot filter.exclude) and
-                (Transaction::account accounts filter.include))
+                (Transaction::account accounts filter.include) and
+                (Transaction::operation tagsNot filter.excludeTags) and
+                (Transaction::operation tags filter.includeTags))
             .let { transactionRepository.findAll(it) }
 
         if (transactions.isEmpty()) {
@@ -170,7 +172,9 @@ class ReportService(
         val transactions = ((Transaction::date between filter.date.validMonthRange()) and
                 (Transaction::account accountTypes listOf(AccountType.INCOME, AccountType.EXPENSE)) and
                 (Transaction::account accountsNot filter.exclude) and
-                (Transaction::account accounts filter.include))
+                (Transaction::account accounts filter.include) and
+                (Transaction::operation tagsNot filter.excludeTags) and
+                (Transaction::operation tags filter.includeTags))
             .let { transactionRepository.findAll(it) }
 
         if (transactions.isEmpty()) {

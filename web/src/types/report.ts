@@ -31,6 +31,8 @@ export interface TopFlowFilter {
   type?: AccountType
   exclude?: string[]
   include?: string[]
+  excludeTags?: string[]
+  includeTags?: string[]
 }
 
 export interface TopFlowEntry {
@@ -72,6 +74,8 @@ export interface IncomeExpenseFilter {
   date: DateRange
   exclude?: string[]
   include?: string[]
+  excludeTags?: string[]
+  includeTags?: string[]
 }
 
 export interface IncomeExpenseEntry {

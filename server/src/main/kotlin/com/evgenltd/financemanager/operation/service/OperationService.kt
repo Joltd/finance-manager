@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.operation.service
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.record.SeekDirection
 import com.evgenltd.financemanager.common.repository.*
+import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.record.OperationChangeRecord
@@ -28,9 +29,6 @@ class OperationService(
 ) {
 
     fun list(filter: OperationFilter): List<OperationGroupRecord> {
-        val pointer = filter.pointer ?: return emptyList()
-        val direction = filter.direction ?: return emptyList()
-
         val baseSpecification = (
 //            (Operation::date between filter.date) and
                 (Operation::type eq filter.type) and
@@ -40,7 +38,14 @@ class OperationService(
                 ((Operation::amountFrom amountBetween filter.amount) or (Operation::amountTo amountBetween filter.amount))
         )
 
-        val dates = findNearDates(pointer, direction, baseSpecification)
+        var dates = filter.pointers
+        if (dates == null && filter.pointer != null && filter.direction != null) {
+            dates = findNearDates(filter.pointer, filter.direction, baseSpecification)
+        }
+
+        if (dates == null) {
+            throw badRequestException("Either pointers or pointer with direction should be provided")
+        }
 
         if (dates.isEmpty()) {
             return emptyList()

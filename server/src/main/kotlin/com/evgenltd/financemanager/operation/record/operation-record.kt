@@ -15,6 +15,7 @@ import java.util.*
 data class OperationFilter(
     val pointer: LocalDate? = null,
     val direction: SeekDirection? = null,
+    val pointers: List<LocalDate>? = null,
     val date: DateRange? = null,
     val type: OperationType? = null,
     val account: UUID? = null,

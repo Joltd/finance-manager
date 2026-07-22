@@ -18,6 +18,8 @@ import { Amount, toDecimal } from '@/types/common/amount'
 import { IncomeExpenseGroup } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
 import { AccountReference, AccountType } from '@/types/account'
+import { TagFilter } from '@/components/common/filter/tag-filter'
+import { Tag } from '@/types/tag'
 
 function getEntry(
   group: IncomeExpenseGroup,
@@ -40,10 +42,14 @@ export default function IncomeExpensePage() {
       const to = period?.to
       if (!from || !to) return
       const ids = (key: string) => (value[key] as AccountReference[] | undefined)?.map((a) => a.id)
+      const tagIds = (key: string) =>
+        (value[key] as Tag[] | undefined)?.map((t) => t.id).filter((id): id is string => !!id)
       setBody({
         date: { from: format(from, 'yyyy-MM-dd'), to: format(to, 'yyyy-MM-dd') },
         include: ids('include'),
         exclude: ids('exclude'),
+        includeTags: tagIds('includeTags'),
+        excludeTags: tagIds('excludeTags'),
       })
       void fetch()
     },
@@ -84,6 +90,8 @@ export default function IncomeExpensePage() {
         <MonthFilter id="period" label="Period" mode="range" />
         <AccountFilter id="include" label="Include" mode="multi" />
         <AccountFilter id="exclude" label="Exclude" mode="multi" />
+        <TagFilter id="includeTags" label="Include tags" mode="multi" />
+        <TagFilter id="excludeTags" label="Exclude tags" mode="multi" />
       </Filter>
 
       {loading ? (

@@ -11,6 +11,8 @@ data class TopFlowFilter(
     val date: DateRange,
     val exclude: List<UUID>? = null,
     val include: List<UUID>? = null,
+    val excludeTags: List<UUID>? = null,
+    val includeTags: List<UUID>? = null,
 )
 
 data class TopFlowReportRecord(
@@ -48,6 +50,8 @@ data class IncomeExpenseFilter(
     val date: DateRange,
     val exclude: List<UUID>? = null,
     val include: List<UUID>? = null,
+    val excludeTags: List<UUID>? = null,
+    val includeTags: List<UUID>? = null,
 )
 
 data class IncomeExpenseReportRecord(

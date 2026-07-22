@@ -191,3 +191,17 @@ infix fun <E : Any> KProperty1<E, Operation>.tags(tags: List<UUID>?): Specificat
             .`in`(value)
     }
 }
+
+infix fun <E : Any> KProperty1<E, Operation>.tagsNot(tags: List<UUID>?): Specification<E> = valueNonNull(tags) { value ->
+    Specification { root, query, builder ->
+        val subquery = query.subquery(UUID::class.java)
+        val subRoot = subquery.from(Operation::class.java)
+        val tagJoin = subRoot.join<Operation, Tag>(Operation::tags.name)
+        subquery.select(subRoot.get(Operation::id.name))
+            .where(
+                builder.equal(subRoot.get<UUID>(Operation::id.name), root.get<Operation>(name).get<UUID>(Operation::id.name)),
+                tagJoin.get<UUID>(Tag::id.name).`in`(value),
+            )
+        builder.not(builder.exists(subquery))
+    }
+}
