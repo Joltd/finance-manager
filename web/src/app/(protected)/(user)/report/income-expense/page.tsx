@@ -14,7 +14,7 @@ import { AccountFilter } from '@/components/common/filter/account-filter'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Spinner } from '@/components/ui/spinner'
 import { formatMonth, getDefaultMonthRange } from '@/lib/utils'
-import { Amount, emptyAmount, subtract, toDecimal } from '@/types/common/amount'
+import { Amount, toDecimal } from '@/types/common/amount'
 import { IncomeExpenseGroup } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
 import { AccountReference, AccountType } from '@/types/account'
@@ -24,14 +24,6 @@ function getEntry(
   type: AccountType.INCOME | AccountType.EXPENSE,
 ): Amount | undefined {
   return group.entries.find((e) => e.type === type)?.amount
-}
-
-function getBalance(group: IncomeExpenseGroup): Amount | undefined {
-  const income = getEntry(group, AccountType.INCOME)
-  const expense = getEntry(group, AccountType.EXPENSE)
-  if (!income && !expense) return undefined
-  const currency = income?.currency ?? expense!.currency
-  return subtract(income ?? emptyAmount(currency), expense ?? emptyAmount(currency))
 }
 
 export default function IncomeExpensePage() {
@@ -108,14 +100,17 @@ export default function IncomeExpensePage() {
           {groups.map((group) => {
             const income = getEntry(group, AccountType.INCOME)
             const expense = getEntry(group, AccountType.EXPENSE)
-            const balance = getBalance(group)
             const incomeBar =
               income && globalMax > 0 ? (Math.abs(toDecimal(income)) / globalMax) * 100 : 0
             const expenseBar =
               expense && globalMax > 0 ? (Math.abs(toDecimal(expense)) / globalMax) * 100 : 0
 
             return (
-              <Group key={group.date} title={formatMonth(group.date)}>
+              <Group
+                key={group.date}
+                title={formatMonth(group.date)}
+                endContent={<AmountLabel amount={group.balance} />}
+              >
                 {/* Income row */}
                 <Stack
                   orientation="horizontal"
@@ -131,7 +126,7 @@ export default function IncomeExpensePage() {
                   <Typography variant="small" className="text-green-600 dark:text-green-400">
                     Income
                   </Typography>
-                  <AmountLabel amount={income} variant="income" />
+                  <AmountLabel amount={income} />
                 </Stack>
 
                 {/* Expense row */}
@@ -149,7 +144,7 @@ export default function IncomeExpensePage() {
                   <Typography variant="small" className="text-destructive">
                     Expense
                   </Typography>
-                  <AmountLabel amount={expense} variant="expense" />
+                  <AmountLabel amount={expense} />
                 </Stack>
 
                 {/* Balance row */}
@@ -161,7 +156,7 @@ export default function IncomeExpensePage() {
                   className="py-2"
                 >
                   <Typography variant="muted">Balance</Typography>
-                  <AmountLabel amount={balance} variant="balance" />
+                  <AmountLabel amount={group.balance} />
                 </Stack>
               </Group>
             )

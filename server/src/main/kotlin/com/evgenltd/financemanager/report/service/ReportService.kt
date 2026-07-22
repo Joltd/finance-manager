@@ -150,7 +150,14 @@ class ReportService(
             }
             .sortedByDescending { it.amount }
             .toList()
-            .let { TaggedFlowReportRecord(it) }
+            .let { entries ->
+                TaggedFlowReportRecord(
+                    total = entries.map { it.amount }
+                        .reduceOrNull { acc, amount -> acc + amount }
+                        ?: emptyAmount(targetCurrency),
+                    entries = entries,
+                )
+            }
     }
 
     fun incomeExpenseReport(filter: IncomeExpenseFilter): IncomeExpenseReportRecord {
@@ -199,14 +206,20 @@ class ReportService(
             .filter { (_, value) -> value.amount.isNotZero() }
             .groupBy { (key, _) -> key.date }
             .map { (date, entries) ->
+                val groupEntries = entries.map { (_, value) ->
+                    IncomeExpenseEntryRecord(
+                        type = value.type,
+                        amount = value.amount.round(targetCurrencyScale),
+                    )
+                }.sortedByDescending { it.amount }
+
+                val income = groupEntries.find { it.type == AccountType.INCOME }?.amount
+                val expense = groupEntries.find { it.type == AccountType.EXPENSE }?.amount
+
                 IncomeExpenseGroupRecord(
                     date = date,
-                    entries = entries.map { (_, value) ->
-                        IncomeExpenseEntryRecord(
-                            type = value.type,
-                            amount = value.amount.round(targetCurrencyScale),
-                        )
-                    }.sortedByDescending { it.amount }
+                    balance = (income ?: emptyAmount(targetCurrency)) - expense,
+                    entries = groupEntries,
                 )
             }
             .sortedByDescending { it.date }

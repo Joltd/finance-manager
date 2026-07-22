@@ -62,6 +62,7 @@ export interface TaggedFlowEntry {
 }
 
 export interface TaggedFlowReport {
+  total?: Amount
   entries: TaggedFlowEntry[]
 }
 
@@ -80,6 +81,7 @@ export interface IncomeExpenseEntry {
 
 export interface IncomeExpenseGroup {
   date: string
+  balance: Amount
   entries: IncomeExpenseEntry[]
 }
 

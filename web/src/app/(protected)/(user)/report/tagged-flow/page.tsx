@@ -65,7 +65,7 @@ export default function TaggedFlowPage() {
           <Typography variant="muted">No data for selected tag</Typography>
         </Stack>
       ) : (
-        <Group title={tag.name}>
+        <Group title={tag.name} endContent={<AmountLabel amount={data?.total} />}>
           {entries.map((entry) => {
             const positive = toDecimal(entry.amount) > 0
             const barWidth =
@@ -84,7 +84,7 @@ export default function TaggedFlowPage() {
                   style={{ width: `${barWidth}%` }}
                 />
                 <Typography variant="small">{entry.category.name}</Typography>
-                <AmountLabel amount={entry.amount} variant="balance" />
+                <AmountLabel amount={entry.amount} />
               </Stack>
             )
           })}

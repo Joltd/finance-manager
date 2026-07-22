@@ -122,7 +122,7 @@ function EntryRow({
         style={{ width: `${barWidth}%` }}
       />
       <Typography variant="small">{label}</Typography>
-      <AmountLabel amount={amount} variant="balance" />
+      <AmountLabel amount={amount} />
     </Stack>
   )
 }
@@ -139,7 +139,10 @@ function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
     maxAmount > 0 ? (Math.abs(toDecimal(amount)) / maxAmount) * 100 : 0
 
   return (
-    <Group title={formatMonth(group.date)}>
+    <Group
+      title={formatMonth(group.date)}
+      endContent={<AmountLabel amount={group.amount} />}
+    >
       {group.entries.map((entry) => {
         const isOther = entry.other
 
@@ -184,11 +187,6 @@ function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
           </Stack>
         )
       })}
-
-      <Stack orientation="horizontal" align="center" justify="between" gap={2} className="py-2">
-        <Typography variant="muted">Total</Typography>
-        <AmountLabel amount={group.amount} variant="expense" />
-      </Stack>
     </Group>
   )
 }

@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.report.record
 
 import com.evgenltd.financemanager.account.entity.AccountType
-import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.common.record.DateRange
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.Amount
@@ -36,6 +35,7 @@ data class TaggedFlowFilter(
 )
 
 data class TaggedFlowReportRecord(
+    val total: Amount? = null,
     val entries: List<TaggedFlowEntryRecord> = emptyList(),
 )
 
@@ -56,6 +56,7 @@ data class IncomeExpenseReportRecord(
 
 data class IncomeExpenseGroupRecord(
     val date: LocalDate,
+    val balance: Amount,
     val entries: List<IncomeExpenseEntryRecord> = emptyList(),
 )
 

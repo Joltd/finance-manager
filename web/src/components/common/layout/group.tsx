@@ -7,10 +7,11 @@ import { Stack } from '@/components/common/layout/stack'
 interface GroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title: React.ReactNode
   actions?: React.ReactNode
+  endContent?: React.ReactNode
 }
 
 export const Group = forwardRef<HTMLDivElement, GroupProps>(
-  ({ title, actions, children, className, ...props }, ref) => (
+  ({ title, actions, endContent, children, className, ...props }, ref) => (
     <Stack ref={ref} className={cn('group/group', className)} {...props}>
       <Stack
         orientation="horizontal"
@@ -27,6 +28,7 @@ export const Group = forwardRef<HTMLDivElement, GroupProps>(
         </Typography>
         {actions}
         <Separator className="flex-1" />
+        {endContent}
       </Stack>
       {children}
     </Stack>
