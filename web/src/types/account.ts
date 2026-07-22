@@ -25,7 +25,6 @@ export interface Account {
   parser?: string
   deleted: boolean
   reviseDate?: string
-  reportExclude: boolean
   externalId?: string
 }
 

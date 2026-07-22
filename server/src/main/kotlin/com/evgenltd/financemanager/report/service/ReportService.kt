@@ -3,7 +3,6 @@ package com.evgenltd.financemanager.report.service
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
-import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.repository.*
 import com.evgenltd.financemanager.common.service.validMonthRange
@@ -28,16 +27,7 @@ class ReportService(
     private val settingService: SettingService,
     private val exchangeRateService: ExchangeRateService,
     private val accountConverter: AccountConverter,
-    private val accountRepository: AccountRepository,
 ) {
-
-    fun preset(): ReportPresetRecord {
-        val exclude = (Account::reportExclude eq true)
-            .let { accountRepository.findAll(it) }
-            .map { accountConverter.toAccountReference(it) }
-
-        return ReportPresetRecord(exclude)
-    }
 
     fun topFlowReport(filter: TopFlowFilter): TopFlowReportRecord {
         val groupLimit = 5

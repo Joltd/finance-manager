@@ -52,7 +52,6 @@ export function openAccountDialog(item: Account, onSuccess?: () => void) {
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   deleted: z.boolean(),
-  reportExclude: z.boolean(),
 })
 
 type AccountForm = z.infer<typeof schema>
@@ -71,7 +70,7 @@ export function AccountDialog() {
     formState: { errors },
   } = useForm<AccountForm>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', deleted: false, reportExclude: false },
+    defaultValues: { name: '', deleted: false },
   })
 
   useEffect(() => {
@@ -79,7 +78,6 @@ export function AccountDialog() {
       reset({
         name: item.name,
         deleted: item.deleted,
-        reportExclude: item.reportExclude ?? false,
       })
     }
   }, [open, item, reset])
@@ -123,16 +121,6 @@ export function AccountDialog() {
                 disabled={loading}
               />
               <FieldLabel htmlFor="account-deleted">Deleted</FieldLabel>
-            </Field>
-
-            <Field orientation="horizontal">
-              <Checkbox
-                id="account-report-exclude"
-                checked={watch('reportExclude')}
-                onCheckedChange={(checked) => setValue('reportExclude', !!checked)}
-                disabled={loading}
-              />
-              <FieldLabel htmlFor="account-report-exclude">Exclude from report</FieldLabel>
             </Field>
 
             {error && <FieldError>{error}</FieldError>}

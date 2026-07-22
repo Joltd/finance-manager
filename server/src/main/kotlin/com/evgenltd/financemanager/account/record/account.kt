@@ -12,7 +12,6 @@ data class AccountRecord(
     val parser: String?,
     val deleted: Boolean,
     val reviseDate: LocalDate?,
-    val reportExclude: Boolean = false,
     val externalId: String? = null,
 )
 

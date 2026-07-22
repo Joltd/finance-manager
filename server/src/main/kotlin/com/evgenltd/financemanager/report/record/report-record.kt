@@ -8,10 +8,6 @@ import com.evgenltd.financemanager.common.util.Amount
 import java.time.LocalDate
 import java.util.*
 
-data class ReportPresetRecord(
-    val exclude: List<AccountReferenceRecord> = emptyList(),
-)
-
 data class TopFlowFilter(
     val date: DateRange,
     val exclude: List<UUID>? = null,

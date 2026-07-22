@@ -88,7 +88,6 @@ class DashboardService(
         val rateIndex = exchangeRateService.historyRateIndex(targetCurrency, actualRange, currencies)
 
         val entries = transactions
-            .filter { !it.account.reportExclude }
             .map {
             Entry(
                 account = it.account,

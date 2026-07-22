@@ -201,7 +201,7 @@ function AccountSection({ title, accountType }: { title: string; accountType: Ac
     const name = await ask({ type: 'string', label: 'Account name' })
     if (!name.trim()) return
     await updateReq.submit({
-      body: { name: name.trim(), type: accountType, deleted: false, reportExclude: false },
+      body: { name: name.trim(), type: accountType, deleted: false },
     })
     void fetchList()
   }

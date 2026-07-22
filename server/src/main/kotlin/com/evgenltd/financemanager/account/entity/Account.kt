@@ -33,8 +33,6 @@ class Account(
 
     var parser: String? = null,
 
-    var reportExclude: Boolean = false,
-
     var externalId: String? = null,
 
 ) {

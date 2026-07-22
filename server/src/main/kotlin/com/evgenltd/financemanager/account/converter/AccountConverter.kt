@@ -24,7 +24,6 @@ class AccountConverter(
         parser = entity.parser,
         deleted = entity.deleted,
         reviseDate = entity.reviseDate,
-        reportExclude = entity.reportExclude,
         externalId = entity.externalId,
     )
 
@@ -50,7 +49,6 @@ class AccountConverter(
         it.parser = record.parser
         it.deleted = record.deleted
         it.reviseDate = record.reviseDate
-        it.reportExclude = record.reportExclude
         it.externalId = if (it.type == AccountType.ACCOUNT) record.externalId else null
     } ?: Account(
         id = record.id,
@@ -59,7 +57,6 @@ class AccountConverter(
         parser = record.parser,
         deleted = record.deleted,
         reviseDate = record.reviseDate,
-        reportExclude = record.reportExclude,
         externalId = if (record.type == AccountType.ACCOUNT) record.externalId else null,
     )
 

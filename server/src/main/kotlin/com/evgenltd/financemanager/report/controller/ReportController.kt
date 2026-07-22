@@ -15,9 +15,6 @@ class ReportController(
     private val reportService: ReportService,
 ) {
 
-    @GetMapping("/api/v1/report/preset")
-    fun preset(): ReportPresetRecord = reportService.preset()
-
     @PostMapping("/api/v1/report/top-flow")
     @PreAuthorize("hasRole('USER')")
     fun topFlowReport(@RequestBody filter: TopFlowFilter): TopFlowReportRecord = reportService.topFlowReport(filter)

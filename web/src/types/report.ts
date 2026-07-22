@@ -1,12 +1,8 @@
 import { Amount } from '@/types/common/amount'
 import { Reference } from '@/types/common/reference'
 import { DateRange } from '@/types/common/common'
-import { AccountReference, AccountType } from '@/types/account'
+import { AccountType } from '@/types/account'
 import { Operation } from '@/types/operation'
-
-export interface ReportPreset {
-  exclude: AccountReference[]
-}
 
 // dashboard
 
