@@ -1,6 +1,5 @@
 import { AccountReference } from '@/types/account'
 import { Amount } from '@/types/common/amount'
-import { Range } from '@/types/common/common'
 import { Tag } from '@/types/tag'
 
 export enum OperationType {
@@ -29,12 +28,14 @@ export interface OperationGroup {
 }
 
 export interface OperationFilter {
-  date?: Range<string>
+  'date.from'?: string
+  'date.to'?: string
   type?: OperationType
-  account?: string
-  category?: string
+  include?: string[]
+  exclude?: string[]
+  includeTags?: string[]
+  excludeTags?: string[]
   currency?: string
-  // amount?: Range<string>
   'amount.from'?: string
   'amount.to'?: string
 }

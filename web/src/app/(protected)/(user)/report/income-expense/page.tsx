@@ -90,8 +90,8 @@ export default function IncomeExpensePage() {
 
       <Filter value={filterValue} onChange={handleFilterChange} presetKey={PRESET_KEY}>
         <MonthFilter id="period" label="Period" mode="range" />
-        <AccountFilter id="include" label="Include" mode="multi" />
-        <AccountFilter id="exclude" label="Exclude" mode="multi" />
+        <AccountFilter id="include" label="Include accounts" mode="multi" />
+        <AccountFilter id="exclude" label="Exclude accounts" mode="multi" />
         <TagFilter id="includeTags" label="Include tags" mode="multi" />
         <TagFilter id="excludeTags" label="Exclude tags" mode="multi" />
       </Filter>

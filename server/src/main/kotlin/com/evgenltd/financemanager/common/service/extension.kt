@@ -13,9 +13,11 @@ fun DateRange?.validWeek(): Range<LocalDate> {
     return Range(actualFrom, actualTo)
 }
 
-fun DateRange?.validMonthRange(): Range<LocalDate> {
+fun DateRange?.validMonthRange(): Range<LocalDate> = validMonthRangeOrNull() ?: throw badRequestException("Date range is not valid")
+
+fun DateRange?.validMonthRangeOrNull(): Range<LocalDate>? {
     if (this == null || from == null || to == null) {
-        throw badRequestException("Date range is not valid")
+        return null
     }
 
     return Range(

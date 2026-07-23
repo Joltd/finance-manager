@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.operation.service
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.record.SeekDirection
 import com.evgenltd.financemanager.common.repository.*
+import com.evgenltd.financemanager.common.service.validMonthRangeOrNull
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.operation.converter.OperationConverter
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -30,10 +31,12 @@ class OperationService(
 
     fun list(filter: OperationFilter): List<OperationGroupRecord> {
         val baseSpecification = (
-//            (Operation::date between filter.date) and
+                (Operation::date between filter.date.validMonthRangeOrNull()) and
                 (Operation::type eq filter.type) and
-                byAccount(filter.account) and
-                byAccount(filter.category) and
+                byIncludeAccounts(filter.include) and
+                byExcludeAccounts(filter.exclude) and
+                byIncludeTags(filter.includeTags) and
+                byExcludeTags(filter.excludeTags) and
                 byCurrency(filter.currency) and
                 ((Operation::amountFrom amountBetween filter.amount) or (Operation::amountTo amountBetween filter.amount))
         )

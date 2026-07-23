@@ -20,30 +20,42 @@ import { Filter } from '@/components/common/filter/filter'
 import { AccountFilter } from '@/components/common/filter/account-filter'
 import { OperationTypeFilter } from '@/components/common/filter/operation-type-filter'
 import { CurrencyFilter } from '@/components/common/filter/currency-filter'
+import { MonthFilter } from '@/components/common/filter/month-filter'
+import { TagFilter } from '@/components/common/filter/tag-filter'
 import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Button } from '@/components/ui/button'
 import { useRequest } from '@/hooks/use-request'
 import { Operation, OperationFilter, OperationType } from '@/types/operation'
-import { AccountReference, AccountType } from '@/types/account'
+import { AccountReference } from '@/types/account'
 import { addDays, format } from 'date-fns'
-import { formatDateCommon } from '@/lib/utils'
+import { formatDateCommon, getDefaultMonthRange } from '@/lib/utils'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { openOperationSheet, openOperationSheetForCopy, OperationSheet } from './operation-sheet'
 import { AmountRangeFilter } from '@/components/common/filter/amount-range-filter'
 import { Range } from '@/types/common/common'
+import { MonthRange } from '@/components/common/input/month-input'
+import { Tag } from '@/types/tag'
 import { useOperationPresetStore } from '@/store/operation-preset'
 
 const PRESET_KEY = 'OPERATION'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
+  const period = filterValue.period as MonthRange | undefined
+  const ids = (key: string) => (filterValue[key] as AccountReference[] | undefined)?.map((a) => a.id)
+  const tagIds = (key: string) =>
+    (filterValue[key] as Tag[] | undefined)?.map((t) => t.id).filter((id): id is string => !!id)
+
   return {
+    'date.from': period?.from ? format(period.from, 'yyyy-MM-dd') : undefined,
+    'date.to': period?.to ? format(period.to, 'yyyy-MM-dd') : undefined,
     type: filterValue.type as OperationType | undefined,
-    account: (filterValue.account as AccountReference | undefined)?.id,
-    category: (filterValue.category as AccountReference | undefined)?.id,
+    include: ids('include'),
+    exclude: ids('exclude'),
+    includeTags: tagIds('includeTags'),
+    excludeTags: tagIds('excludeTags'),
     currency: filterValue.currency as string | undefined,
-    // amount: filterValue.amount as Range<string> | undefined,
     'amount.from': (filterValue.amount as Range<string> | undefined)?.from,
     'amount.to': (filterValue.amount as Range<string> | undefined)?.to,
   }
@@ -80,18 +92,9 @@ export default function OperationPage() {
       resetData()
       setQueryParams(toQuery(value))
       operationPreset.setType(value.type as OperationType | undefined)
-      operationPreset.setAccount(value.account as AccountReference | undefined)
-      operationPreset.setCategory(value.category as AccountReference | undefined)
       operationPreset.setCurrency(value.currency as string | undefined)
     },
-    [
-      resetData,
-      setQueryParams,
-      operationPreset.setType,
-      operationPreset.setAccount,
-      operationPreset.setCategory,
-      operationPreset.setCurrency,
-    ],
+    [resetData, setQueryParams, operationPreset.setType, operationPreset.setCurrency],
   )
 
   const handleSeekForward = useCallback(async () => {
@@ -154,10 +157,12 @@ export default function OperationPage() {
       </Stack>
 
       <Filter value={filterValue} onChange={handleFilterChange} presetKey={PRESET_KEY}>
-        {/*<DateFilter id="date" label="Date" />*/}
+        <MonthFilter id="period" label="Period" mode="range" />
         <OperationTypeFilter id="type" label="Type" />
-        <AccountFilter id="account" label="Account" type={AccountType.ACCOUNT} />
-        <AccountFilter id="category" label="Category" />
+        <AccountFilter id="include" label="Include accounts" mode="multi" />
+        <AccountFilter id="exclude" label="Exclude accounts" mode="multi" />
+        <TagFilter id="includeTags" label="Include tags" mode="multi" />
+        <TagFilter id="excludeTags" label="Exclude tags" mode="multi" />
         <CurrencyFilter id="currency" label="Currency" />
         <AmountRangeFilter id="amount" label="Amount" />
       </Filter>

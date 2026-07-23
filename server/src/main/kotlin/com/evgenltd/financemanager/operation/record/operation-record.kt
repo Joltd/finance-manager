@@ -18,8 +18,10 @@ data class OperationFilter(
     val pointers: List<LocalDate>? = null,
     val date: DateRange? = null,
     val type: OperationType? = null,
-    val account: UUID? = null,
-    val category: UUID? = null,
+    val include: List<UUID>? = null,
+    val exclude: List<UUID>? = null,
+    val includeTags: List<UUID>? = null,
+    val excludeTags: List<UUID>? = null,
     val currency: String? = null,
     val amount: BigDecimalRange? = null,
 )
