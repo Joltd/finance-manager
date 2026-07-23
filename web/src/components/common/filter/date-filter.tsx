@@ -14,7 +14,7 @@ export function DateFilter({ id, label, placeholder, required }: DateFilterProps
   const { getValue, handleChange } = useFilterContext()
 
   return (
-    <FilterItem id={id} label={label} required={required}>
+    <FilterItem id={id} label={label} required={required} excludeFromPreset>
       <DateInput
         value={getValue(id) as Date | undefined}
         onChange={(v) => handleChange(id, v)}

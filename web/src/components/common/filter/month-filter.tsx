@@ -16,7 +16,7 @@ export function MonthFilter({ id, label, mode = 'single', placeholder, required 
 
   if (mode === 'range') {
     return (
-      <FilterItem id={id} label={label} required={required}>
+      <FilterItem id={id} label={label} required={required} excludeFromPreset>
         <MonthInput
           mode="range"
           value={getValue(id) as MonthRange | undefined}
@@ -28,7 +28,7 @@ export function MonthFilter({ id, label, mode = 'single', placeholder, required 
   }
 
   return (
-    <FilterItem id={id} label={label} required={required}>
+    <FilterItem id={id} label={label} required={required} excludeFromPreset>
       <MonthInput
         value={getValue(id) as Date | undefined}
         onChange={(v) => handleChange(id, v)}

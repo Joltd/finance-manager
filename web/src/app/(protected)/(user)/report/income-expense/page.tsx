@@ -21,6 +21,8 @@ import { AccountReference, AccountType } from '@/types/account'
 import { TagFilter } from '@/components/common/filter/tag-filter'
 import { Tag } from '@/types/tag'
 
+const PRESET_KEY = 'REPORT_INCOME_EXPENSE'
+
 function getEntry(
   group: IncomeExpenseGroup,
   type: AccountType.INCOME | AccountType.EXPENSE,
@@ -86,7 +88,7 @@ export default function IncomeExpensePage() {
         <Typography variant="h3">Income &amp; Expense</Typography>
       </Stack>
 
-      <Filter value={filterValue} onChange={handleFilterChange}>
+      <Filter value={filterValue} onChange={handleFilterChange} presetKey={PRESET_KEY}>
         <MonthFilter id="period" label="Period" mode="range" />
         <AccountFilter id="include" label="Include" mode="multi" />
         <AccountFilter id="exclude" label="Exclude" mode="multi" />
@@ -153,18 +155,6 @@ export default function IncomeExpensePage() {
                     Expense
                   </Typography>
                   <AmountLabel amount={expense} />
-                </Stack>
-
-                {/* Balance row */}
-                <Stack
-                  orientation="horizontal"
-                  align="center"
-                  justify="between"
-                  gap={2}
-                  className="py-2"
-                >
-                  <Typography variant="muted">Balance</Typography>
-                  <AmountLabel amount={group.balance} />
                 </Stack>
               </Group>
             )

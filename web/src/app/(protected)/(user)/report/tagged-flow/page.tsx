@@ -14,6 +14,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tag } from '@/types/tag'
 import { toDecimal } from '@/types/common/amount'
 
+const PRESET_KEY = 'REPORT_TAGGED_FLOW'
+
 export default function TaggedFlowPage() {
   const { data, loading, fetch, setBody } = useTaggedFlowReportStore()
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
@@ -47,7 +49,7 @@ export default function TaggedFlowPage() {
         <Typography variant="h3">Tagged Flow</Typography>
       </Stack>
 
-      <Filter value={filterValue} onChange={handleFilterChange}>
+      <Filter value={filterValue} onChange={handleFilterChange} presetKey={PRESET_KEY}>
         <TagFilter id="tag" label="Tag" required />
       </Filter>
 

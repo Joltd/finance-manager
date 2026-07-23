@@ -10,22 +10,29 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { ListFilter, X } from 'lucide-react'
+import { Bookmark, ListFilter, Save, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Flow } from '@/components/common/layout/flow'
 import { cn } from '@/lib/utils'
+import { ask } from '@/store/common/ask-dialog'
+import { useRequest } from '@/hooks/use-request'
+import { useFilterPresetListStore } from '@/store/filter-preset'
+import { filterPresetUrls } from '@/api/filter-preset'
+import { FilterPreset } from '@/types/filter-preset'
 
 interface FilterRegistration {
   id: string
   label: string
   required?: boolean
+  excludeFromPreset?: boolean
 }
 
 interface FilterContextValue {
@@ -51,15 +58,17 @@ export interface FilterItemProps {
   children: React.ReactNode
   className?: string
   required?: boolean
+  /** Excludes this filter's value from being saved into or restored from a FilterPreset. */
+  excludeFromPreset?: boolean
 }
 
-export function FilterItem({ id, label, children, className, required }: FilterItemProps) {
+export function FilterItem({ id, label, children, className, required, excludeFromPreset }: FilterItemProps) {
   const { register, unregister, isActive, removeFilter } = useFilterContext()
 
   useLayoutEffect(() => {
-    register({ id, label, required })
+    register({ id, label, required, excludeFromPreset })
     return () => unregister(id)
-  }, [id, label, required, register, unregister])
+  }, [id, label, required, excludeFromPreset, register, unregister])
 
   if (!isActive(id)) return null
 
@@ -88,10 +97,11 @@ export function FilterItem({ id, label, children, className, required }: FilterI
 export interface FilterProps {
   value?: Record<string, unknown>
   onChange?: (value: Record<string, unknown>) => void
+  presetKey?: string
   children: React.ReactNode
 }
 
-export function Filter({ value = {}, onChange, children }: FilterProps) {
+export function Filter({ value = {}, onChange, presetKey, children }: FilterProps) {
   const [registrations, setRegistrations] = useState<FilterRegistration[]>([])
   const [activeIds, setActiveIds] = useState<string[]>([])
 
@@ -169,7 +179,114 @@ export function Filter({ value = {}, onChange, children }: FilterProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+        {presetKey && (
+          <FilterPresetMenu
+            presetKey={presetKey}
+            value={value}
+            onChange={onChange}
+            registrations={registrations}
+          />
+        )}
       </Flow>
     </FilterContext.Provider>
+  )
+}
+
+interface FilterPresetMenuProps {
+  presetKey: string
+  value: Record<string, unknown>
+  onChange?: (value: Record<string, unknown>) => void
+  registrations: FilterRegistration[]
+}
+
+function FilterPresetMenu({ presetKey, value, onChange, registrations }: FilterPresetMenuProps) {
+  const [open, setOpen] = useState(false)
+  const { data, fetch, setQueryParams } = useFilterPresetListStore()
+  const { submit: createPreset } = useRequest<FilterPreset, FilterPreset>(filterPresetUrls.root)
+  const { submit: deletePreset } = useRequest<void>(filterPresetUrls.id, { method: 'DELETE' })
+
+  const excludedIds = useMemo(
+    () => registrations.filter((r) => r.excludeFromPreset).map((r) => r.id),
+    [registrations],
+  )
+
+  const loadPresets = useCallback(() => {
+    setQueryParams({ presetKey })
+    void fetch()
+  }, [presetKey, setQueryParams, fetch])
+
+  useEffect(() => {
+    loadPresets()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presetKey])
+
+  const handleSave = async () => {
+    const name = await ask({ type: 'string', label: 'Preset name' })
+    if (!name.trim()) return
+    const filterToSave = Object.fromEntries(
+      Object.entries(value).filter(([key]) => !excludedIds.includes(key)),
+    )
+    await createPreset({ body: { presetKey, name: name.trim(), filter: filterToSave } })
+    loadPresets()
+  }
+
+  const handleApply = (preset: FilterPreset) => {
+    const merged = { ...preset.filter }
+    for (const id of excludedIds) {
+      if (value[id] != null) {
+        merged[id] = value[id]
+      } else {
+        delete merged[id]
+      }
+    }
+    onChange?.(merged)
+    setOpen(false)
+  }
+
+  const handleDelete = async (e: React.MouseEvent, id?: string) => {
+    e.stopPropagation()
+    if (!id) return
+    await deletePreset({ pathParams: { id } })
+    loadPresets()
+  }
+
+  const presets = data ?? []
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Bookmark />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem onSelect={() => void handleSave()}>
+          <Save />
+          Save current as preset...
+        </DropdownMenuItem>
+        {presets.length > 0 && <DropdownMenuSeparator />}
+        {presets.map((preset) => (
+          <div
+            key={preset.id}
+            className="flex items-center gap-1 rounded-sm pl-2 text-sm hover:bg-accent hover:text-accent-foreground"
+          >
+            <button
+              type="button"
+              className="flex-1 cursor-default py-1.5 text-left"
+              onClick={() => handleApply(preset)}
+            >
+              {preset.name}
+            </button>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={(e) => void handleDelete(e, preset.id)}
+            >
+              <Trash2 />
+            </Button>
+          </div>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

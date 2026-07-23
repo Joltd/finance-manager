@@ -21,6 +21,8 @@ import { AccountReference } from '@/types/account'
 import { TagFilter } from '@/components/common/filter/tag-filter'
 import { Tag } from '@/types/tag'
 
+const PRESET_KEY = 'REPORT_TOP_FLOW'
+
 export default function TopFlowPage() {
   const { data, loading, fetch, setBody } = useTopFlowReportStore()
 
@@ -71,7 +73,7 @@ export default function TopFlowPage() {
         <Typography variant="h3">Top Flow</Typography>
       </Stack>
 
-      <Filter value={filterValue} onChange={handleFilterChange}>
+      <Filter value={filterValue} onChange={handleFilterChange} presetKey={PRESET_KEY}>
         <MonthFilter id="period" label="Period" mode="range" />
         <AccountFilter id="include" label="Include" mode="multi" />
         <AccountFilter id="exclude" label="Exclude" mode="multi" />

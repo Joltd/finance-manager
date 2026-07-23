@@ -35,6 +35,8 @@ import { AmountRangeFilter } from '@/components/common/filter/amount-range-filte
 import { Range } from '@/types/common/common'
 import { useOperationPresetStore } from '@/store/operation-preset'
 
+const PRESET_KEY = 'OPERATION'
+
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   return {
     type: filterValue.type as OperationType | undefined,
@@ -151,7 +153,7 @@ export default function OperationPage() {
         </Button>
       </Stack>
 
-      <Filter value={filterValue} onChange={handleFilterChange}>
+      <Filter value={filterValue} onChange={handleFilterChange} presetKey={PRESET_KEY}>
         {/*<DateFilter id="date" label="Date" />*/}
         <OperationTypeFilter id="type" label="Type" />
         <AccountFilter id="account" label="Account" type={AccountType.ACCOUNT} />
