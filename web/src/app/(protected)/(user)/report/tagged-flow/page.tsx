@@ -12,6 +12,8 @@ import { Filter } from '@/components/common/filter/filter'
 import { TagFilter } from '@/components/common/filter/tag-filter'
 import { Spinner } from '@/components/ui/spinner'
 import { Tag } from '@/types/tag'
+import { tagUrls } from '@/api/tag'
+import { useReferenceCache } from '@/hooks/use-reference-cache'
 import { toDecimal } from '@/types/common/amount'
 
 const PRESET_KEY = 'REPORT_TAGGED_FLOW'
@@ -22,9 +24,9 @@ export default function TaggedFlowPage() {
 
   const applyFilter = useCallback(
     (value: Record<string, unknown>) => {
-      const tag = value.tag as Tag | undefined
-      if (!tag?.id) return
-      setBody({ tag: tag.id })
+      const tagId = value.tag as string | undefined
+      if (!tagId) return
+      setBody({ tag: tagId })
       void fetch()
     },
     [setBody, fetch],
@@ -38,7 +40,9 @@ export default function TaggedFlowPage() {
     [applyFilter],
   )
 
-  const tag = filterValue.tag as Tag | undefined
+  const tagId = filterValue.tag as string | undefined
+  const { resolved: resolvedTags } = useReferenceCache<Tag>(tagUrls.root, tagId ? [tagId] : [])
+  const tag = tagId ? resolvedTags[tagId] : undefined
   const entries = data?.entries ?? []
 
   const maxAmount = entries.reduce((max, e) => Math.max(max, Math.abs(toDecimal(e.amount))), 0)

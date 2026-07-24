@@ -1,6 +1,9 @@
 package com.evgenltd.financemanager.tag.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
+import com.evgenltd.financemanager.common.repository.and
+import com.evgenltd.financemanager.common.repository.contains
+import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.like
 import com.evgenltd.financemanager.tag.converter.TagConverter
@@ -20,9 +23,11 @@ class TagService(
     private val tagConverter: TagConverter,
 ) {
 
-    fun list(mask: String?): List<TagRecord> =
-        tagRepository.findAll(Tag::name like mask, Sort.by("name"))
+    fun list(mask: String?, ids: List<UUID>? = null): List<TagRecord> {
+        val filter = (Tag::name like mask) and (Tag::deleted eq false) and (Tag::id contains ids)
+        return tagRepository.findAll(filter, Sort.by("name"))
             .map { tagConverter.toRecord(it) }
+    }
 
     fun byId(id: UUID): TagRecord = tagRepository.find(id).let { tagConverter.toRecord(it) }
 

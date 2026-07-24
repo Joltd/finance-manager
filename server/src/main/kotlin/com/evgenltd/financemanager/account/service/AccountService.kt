@@ -8,6 +8,7 @@ import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.and
+import com.evgenltd.financemanager.common.repository.contains
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.like
@@ -28,11 +29,9 @@ class AccountService(
     private val balanceRepository: BalanceRepository,
 ) {
 
-    fun listReference(mask: String?, type: AccountType?): List<AccountReferenceRecord> {
-        val filter = (Account::type eq type) and (Account::name like mask) and (Account::deleted eq false)
-        val pageable = PageRequest.of(0, 10, Sort.by(Account::name.name))
-        return accountRepository.findAll(filter, pageable)
-            .content
+    fun listReference(mask: String?, type: AccountType?, ids: List<UUID>? = null): List<AccountReferenceRecord> {
+        val filter = (Account::type eq type) and (Account::name like mask) and (Account::deleted eq false) and (Account::id contains ids)
+        return accountRepository.findAll(filter, Sort.by(Account::name.name))
             .map { accountConverter.toAccountReference(it) }
     }
 

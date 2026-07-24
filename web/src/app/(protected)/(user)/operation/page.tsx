@@ -27,34 +27,29 @@ import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Button } from '@/components/ui/button'
 import { useRequest } from '@/hooks/use-request'
 import { Operation, OperationFilter, OperationType } from '@/types/operation'
-import { AccountReference } from '@/types/account'
 import { addDays, format } from 'date-fns'
-import { formatDateCommon, getDefaultMonthRange } from '@/lib/utils'
+import { formatDateCommon } from '@/lib/utils'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { openOperationSheet, openOperationSheetForCopy, OperationSheet } from './operation-sheet'
 import { AmountRangeFilter } from '@/components/common/filter/amount-range-filter'
 import { Range } from '@/types/common/common'
 import { MonthRange } from '@/components/common/input/month-input'
-import { Tag } from '@/types/tag'
 import { useOperationPresetStore } from '@/store/operation-preset'
 
 const PRESET_KEY = 'OPERATION'
 
 function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   const period = filterValue.period as MonthRange | undefined
-  const ids = (key: string) => (filterValue[key] as AccountReference[] | undefined)?.map((a) => a.id)
-  const tagIds = (key: string) =>
-    (filterValue[key] as Tag[] | undefined)?.map((t) => t.id).filter((id): id is string => !!id)
 
   return {
     'date.from': period?.from ? format(period.from, 'yyyy-MM-dd') : undefined,
     'date.to': period?.to ? format(period.to, 'yyyy-MM-dd') : undefined,
     type: filterValue.type as OperationType | undefined,
-    include: ids('include'),
-    exclude: ids('exclude'),
-    includeTags: tagIds('includeTags'),
-    excludeTags: tagIds('excludeTags'),
+    include: filterValue.include as string[] | undefined,
+    exclude: filterValue.exclude as string[] | undefined,
+    includeTags: filterValue.includeTags as string[] | undefined,
+    excludeTags: filterValue.excludeTags as string[] | undefined,
     currency: filterValue.currency as string | undefined,
     'amount.from': (filterValue.amount as Range<string> | undefined)?.from,
     'amount.to': (filterValue.amount as Range<string> | undefined)?.to,

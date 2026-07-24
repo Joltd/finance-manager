@@ -17,7 +17,10 @@ class TagController(
 
     @GetMapping("/api/v1/tag")
     @PreAuthorize("hasRole('USER')")
-    fun list(@RequestParam("mask", required = false) mask: String?): List<TagRecord> = tagService.list(mask)
+    fun list(
+        @RequestParam("mask", required = false) mask: String?,
+        @RequestParam("ids", required = false) ids: List<UUID>?,
+    ): List<TagRecord> = tagService.list(mask, ids)
 
     @GetMapping("/api/v1/tag/{id}")
     @PreAuthorize("hasRole('USER')")

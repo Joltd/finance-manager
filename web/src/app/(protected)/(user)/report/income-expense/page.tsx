@@ -17,9 +17,8 @@ import { formatMonth, getDefaultMonthRange } from '@/lib/utils'
 import { Amount, toDecimal } from '@/types/common/amount'
 import { IncomeExpenseGroup } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
-import { AccountReference, AccountType } from '@/types/account'
+import { AccountType } from '@/types/account'
 import { TagFilter } from '@/components/common/filter/tag-filter'
-import { Tag } from '@/types/tag'
 
 const PRESET_KEY = 'REPORT_INCOME_EXPENSE'
 
@@ -43,15 +42,12 @@ export default function IncomeExpensePage() {
       const from = period?.from
       const to = period?.to
       if (!from || !to) return
-      const ids = (key: string) => (value[key] as AccountReference[] | undefined)?.map((a) => a.id)
-      const tagIds = (key: string) =>
-        (value[key] as Tag[] | undefined)?.map((t) => t.id).filter((id): id is string => !!id)
       setBody({
         date: { from: format(from, 'yyyy-MM-dd'), to: format(to, 'yyyy-MM-dd') },
-        include: ids('include'),
-        exclude: ids('exclude'),
-        includeTags: tagIds('includeTags'),
-        excludeTags: tagIds('excludeTags'),
+        include: value.include as string[] | undefined,
+        exclude: value.exclude as string[] | undefined,
+        includeTags: value.includeTags as string[] | undefined,
+        excludeTags: value.excludeTags as string[] | undefined,
       })
       void fetch()
     },

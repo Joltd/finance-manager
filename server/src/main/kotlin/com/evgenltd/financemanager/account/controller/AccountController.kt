@@ -30,7 +30,8 @@ class AccountController(
     fun listReference(
         @RequestParam("mask", required = false) mask: String?,
         @RequestParam("type", required = false) type: AccountType?,
-    ): List<AccountReferenceRecord> = accountService.listReference(mask, type)
+        @RequestParam("ids", required = false) ids: List<UUID>?,
+    ): List<AccountReferenceRecord> = accountService.listReference(mask, type, ids)
 
     @GetMapping("/api/v1/account")
     @PreAuthorize("hasRole('USER')")
