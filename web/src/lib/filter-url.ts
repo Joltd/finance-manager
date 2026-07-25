@@ -4,63 +4,120 @@ import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 
-export function setNumberParam(params: URLSearchParams, key: string, value?: number) {
+export function readParam(params: URLSearchParams, key: string): Record<string, unknown> {
+  const value = params.get(key)
+  return !value
+    ? {}
+    : {
+        [key]: value,
+      }
+}
+
+export function readNumberRangeParam(params: URLSearchParams, key: string): Record<string, unknown> {
+  const from = params.get(`${key}From`)
+  const to = params.get(`${key}To`)
+  return !from && !to
+    ? {}
+    : {
+        [key]: {
+          from: from ? Number(from) : undefined,
+          to: to ? Number(to) : undefined,
+        },
+      }
+}
+
+export function readDateRangeParam(params: URLSearchParams, key: string): Record<string, unknown> {
+  const from = params.get(`${key}From`)
+  const to = params.get(`${key}To`)
+  return !from && !to
+    ? {}
+    : {
+        [key]: {
+          from: from ? parseISO(from) : undefined,
+          to: to ? parseISO(to) : undefined,
+        },
+      }
+}
+
+export function readIdsParam(params: URLSearchParams, key: string): Record<string, unknown> {
+  const value = params.get(key)
+  return !value
+    ? {}
+    : {
+        [key]: value.split(',').filter(Boolean),
+      }
+}
+
+//
+
+export function writeParam(values: Record<string, unknown>, params: URLSearchParams, key: string) {
+  const value = values[key] as string
   if (!value) {
     return
   }
 
-  params.set(key, value.toString())
+  params.set(key, value)
 }
 
-export function setDateParam(params: URLSearchParams, key: string, value?: Date) {
+export function writeNumberRangeParam(values: Record<string, unknown>, params: URLSearchParams, key: string) {
+  const value = values[key] as { from?: number, to?: number }
+
+  if (value.from) {
+    params.set(`${key}From`, value.from.toString())
+  }
+
+  if (value.to) {
+    params.set(`${key}To`, value.to.toString())
+  }
+}
+
+export function writeDateRangeParam(values: Record<string, unknown>, params: URLSearchParams, key: string) {
+  const value = values[key] as { from?: Date; to?: Date }
   if (!value) {
     return
   }
 
-  params.set(key, format(value, 'yyyy-MM-dd'))
+  if (value.from) {
+    params.set(`${key}From`, format(value.from, 'yyyy-MM-dd'))
+  }
+
+  if (value.to) {
+    params.set(`${key}To`, format(value.to, 'yyyy-MM-dd'))
+  }
 }
 
-export function setIdsParam(params: URLSearchParams, key: string, value?: unknown) {
+export function writeIdsParam(values: Record<string, unknown>, params: URLSearchParams, key: string) {
+  const value = values[key] as string[]
   if (!value) {
     return
   }
 
-  const ids = value as string[]
-  params.set(key, ids.join(','))
+  params.set(key, value.join(','))
 }
 
-export function setParam(params: URLSearchParams, key: string, value?: unknown) {
-  if (!value) {
-    return
-  }
+//
 
-  params.set(key, value as string)
+export function asSearchParams(
+  values: Record<string, unknown>,
+  paramsBuilder: (values: Record<string, unknown>, params: URLSearchParams) => void,
+): string {
+  const params = new URLSearchParams()
+  paramsBuilder(values, params)
+  const qs = params.toString()
+
+  return qs ? `?${qs}` : ''
 }
 
-export function paramToIds(raw: string | null): string[] | undefined {
-  if (!raw) return undefined
-  const ids = raw.split(',').filter(Boolean)
-  return ids.length > 0 ? ids : undefined
-}
-
-export function paramToDate(raw: string | null): Date | undefined {
-  return raw ? parseISO(raw) : undefined
-}
-
-/**
- * Keeps the current URL's query string in sync with filterValue, so a page's
- * filter state survives a remount (e.g. navigating away and back via browser history).
- */
 export function useFilterUrlSync(
-  filterValue: Record<string, unknown>,
-  toParams: (value: Record<string, unknown>) => URLSearchParams,
+  values: Record<string, unknown>,
+  paramsBuilder: (values: Record<string, unknown>, params: URLSearchParams) => void,
 ) {
   const pathname = usePathname()
   const router = useRouter()
 
   useEffect(() => {
-    const qs = toParams(filterValue).toString()
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    const searchParams = asSearchParams(values, paramsBuilder)
+    router.replace(`${pathname}${searchParams}`, { scroll: false })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(filterValue)])
+  }, [JSON.stringify(values)])
 }

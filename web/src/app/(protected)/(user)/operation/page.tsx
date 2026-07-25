@@ -38,13 +38,15 @@ import { Range } from '@/types/common/common'
 import { MonthRange } from '@/components/common/input/month-input'
 import { useOperationPresetStore } from '@/store/operation-preset'
 import {
-  paramToDate,
-  paramToIds,
-  setDateParam,
-  setIdsParam,
-  setNumberParam,
-  setParam,
+  readDateRangeParam,
+  readIdsParam,
+  readNumberRangeParam,
+  readParam,
   useFilterUrlSync,
+  writeDateRangeParam,
+  writeIdsParam,
+  writeNumberRangeParam,
+  writeParam,
 } from '@/lib/filter-url'
 
 const PRESET_KEY = 'OPERATION'
@@ -66,62 +68,6 @@ function toQuery(filterValue: Record<string, unknown>): OperationFilter {
   }
 }
 
-function toUrlParams(filterValue: Record<string, unknown>): URLSearchParams {
-  const period = filterValue.period as MonthRange | undefined
-  const amount = filterValue.amount as AmountRange | undefined
-  const params = new URLSearchParams()
-
-  setDateParam(params, 'dateFrom', period?.from)
-  setDateParam(params, 'dateTo', period?.to)
-  setParam(params, 'type', filterValue.type)
-  setIdsParam(params, 'include', filterValue.include)
-  setIdsParam(params, 'exclude', filterValue.exclude)
-  setIdsParam(params, 'includeTags', filterValue.includeTags)
-  setIdsParam(params, 'excludeTags', filterValue.excludeTags)
-  setParam(params, 'currency', filterValue.currency)
-  setNumberParam(params, 'amountFrom', amount?.from)
-  setNumberParam(params, 'amountTo', amount?.to)
-
-  return params
-}
-
-function fromUrlParams(params: URLSearchParams): Record<string, unknown> {
-  const value: Record<string, unknown> = {}
-
-  const from = paramToDate(params.get('dateFrom'))
-  const to = paramToDate(params.get('dateTo'))
-  if (from || to) value.period = { from, to } satisfies MonthRange
-
-  const type = params.get('type')
-  if (type) value.type = type as OperationType
-
-  const include = paramToIds(params.get('include'))
-  if (include) value.include = include
-
-  const exclude = paramToIds(params.get('exclude'))
-  if (exclude) value.exclude = exclude
-
-  const includeTags = paramToIds(params.get('includeTags'))
-  if (includeTags) value.includeTags = includeTags
-
-  const excludeTags = paramToIds(params.get('excludeTags'))
-  if (excludeTags) value.excludeTags = excludeTags
-
-  const currency = params.get('currency')
-  if (currency) value.currency = currency
-
-  const amountFrom = params.get('amountFrom')
-  const amountTo = params.get('amountTo')
-  if (amountFrom || amountTo) {
-    value.amount = {
-      from: amountFrom ? Number(amountFrom) : undefined,
-      to: amountTo ? Number(amountTo) : undefined,
-    } satisfies AmountRange
-  }
-
-  return value
-}
-
 export default function OperationPage() {
   return (
     <Suspense>
@@ -135,9 +81,16 @@ function OperationPageContent() {
   const operationPreset = useOperationPresetStore()
   const deleteOperation = useRequest(operationUrls.id, { method: 'DELETE' })
   const searchParams = useSearchParams()
-  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() =>
-    fromUrlParams(searchParams),
-  )
+  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() => ({
+    ...readDateRangeParam(searchParams, 'period'),
+    ...readParam(searchParams, 'type'),
+    ...readIdsParam(searchParams, 'include'),
+    ...readIdsParam(searchParams, 'exclude'),
+    ...readIdsParam(searchParams, 'includeTags'),
+    ...readIdsParam(searchParams, 'excludeTags'),
+    ...readParam(searchParams, 'currency'),
+    ...readNumberRangeParam(searchParams, 'amount')
+  }))
   const {
     data,
     loadingForward,
@@ -153,7 +106,16 @@ function OperationPageContent() {
     error,
   } = store
 
-  useFilterUrlSync(filterValue, toUrlParams)
+  useFilterUrlSync(filterValue, (values, params) => {
+    writeDateRangeParam(values, params, 'period')
+    writeParam(values, params, 'type')
+    writeIdsParam(values, params, 'include')
+    writeIdsParam(values, params, 'exclude')
+    writeIdsParam(values, params, 'includeTags')
+    writeIdsParam(values, params, 'excludeTags')
+    writeParam(values, params, 'currency')
+    writeNumberRangeParam(values, params, 'amount')
+  })
 
   useEffect(() => {
     operationPreset.reset()

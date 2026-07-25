@@ -16,23 +16,10 @@ import { Tag } from '@/types/tag'
 import { tagUrls } from '@/api/tag'
 import { useReferenceCache } from '@/hooks/use-reference-cache'
 import { toDecimal } from '@/types/common/amount'
-import { setParam, useFilterUrlSync } from '@/lib/filter-url'
+import { readParam, useFilterUrlSync, writeParam } from '@/lib/filter-url'
 import { buildOperationDrilldownUrl } from '@/lib/operation-drilldown'
 
 const PRESET_KEY = 'REPORT_TAGGED_FLOW'
-
-function toUrlParams(filterValue: Record<string, unknown>): URLSearchParams {
-  const params = new URLSearchParams()
-  setParam(params, 'tag', filterValue.tag as string | undefined)
-  return params
-}
-
-function fromUrlParams(params: URLSearchParams): Record<string, unknown> {
-  const value: Record<string, unknown> = {}
-  const tag = params.get('tag')
-  if (tag) value.tag = tag
-  return value
-}
 
 export default function TaggedFlowPage() {
   return (
@@ -47,9 +34,9 @@ function TaggedFlowPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() =>
-    fromUrlParams(searchParams),
-  )
+  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() => ({
+    ...readParam(searchParams, 'tag'),
+  }))
 
   const applyFilter = useCallback(
     (value: Record<string, unknown>) => {
@@ -61,7 +48,9 @@ function TaggedFlowPageContent() {
     [setBody, fetch],
   )
 
-  useFilterUrlSync(filterValue, toUrlParams)
+  useFilterUrlSync(filterValue, (values, params) => {
+    writeParam(values, params, 'tag')
+  })
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -85,7 +74,7 @@ function TaggedFlowPageContent() {
 
   const drilldown = (categoryId: string | undefined) => {
     if (!tagId || !categoryId) return
-    router.push(buildOperationDrilldownUrl({ tagId, accountId: categoryId }))
+    router.push(buildOperationDrilldownUrl({ include: [categoryId], includeTags: [tagId] }))
   }
 
   return (

@@ -22,11 +22,11 @@ import { AccountType } from '@/types/account'
 import { OperationType } from '@/types/operation'
 import { TagFilter } from '@/components/common/filter/tag-filter'
 import {
-  paramToDate,
-  paramToIds,
-  setDateParam,
-  setIdsParam,
+  readDateRangeParam,
+  readIdsParam,
   useFilterUrlSync,
+  writeDateRangeParam,
+  writeIdsParam,
 } from '@/lib/filter-url'
 import { buildOperationDrilldownUrl } from '@/lib/operation-drilldown'
 
@@ -37,42 +37,6 @@ function getEntry(
   type: AccountType.INCOME | AccountType.EXPENSE,
 ): Amount | undefined {
   return group.entries.find((e) => e.type === type)?.amount
-}
-
-function toUrlParams(filterValue: Record<string, unknown>): URLSearchParams {
-  const period = filterValue.period as MonthRange | undefined
-  const params = new URLSearchParams()
-
-  setDateParam(params, 'dateFrom', period?.from)
-  setDateParam(params, 'dateTo', period?.to)
-  setIdsParam(params, 'include', filterValue.include)
-  setIdsParam(params, 'exclude', filterValue.exclude)
-  setIdsParam(params, 'includeTags', filterValue.includeTags)
-  setIdsParam(params, 'excludeTags', filterValue.excludeTags)
-
-  return params
-}
-
-function fromUrlParams(params: URLSearchParams): Record<string, unknown> {
-  const value: Record<string, unknown> = {}
-
-  const from = paramToDate(params.get('dateFrom'))
-  const to = paramToDate(params.get('dateTo'))
-  value.period = (from || to ? { from, to } : getDefaultMonthRange()) satisfies MonthRange
-
-  const include = paramToIds(params.get('include'))
-  if (include) value.include = include
-
-  const exclude = paramToIds(params.get('exclude'))
-  if (exclude) value.exclude = exclude
-
-  const includeTags = paramToIds(params.get('includeTags'))
-  if (includeTags) value.includeTags = includeTags
-
-  const excludeTags = paramToIds(params.get('excludeTags'))
-  if (excludeTags) value.excludeTags = excludeTags
-
-  return value
 }
 
 export default function IncomeExpensePage() {
@@ -88,9 +52,14 @@ function IncomeExpensePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() =>
-    fromUrlParams(searchParams),
-  )
+  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() => ({
+    period: getDefaultMonthRange(),
+    ...readDateRangeParam(searchParams, 'period'),
+    ...readIdsParam(searchParams, 'include'),
+    ...readIdsParam(searchParams, 'exclude'),
+    ...readIdsParam(searchParams, 'includeTags'),
+    ...readIdsParam(searchParams, 'excludeTags'),
+  }))
 
   const applyFilter = useCallback(
     (value: Record<string, unknown>) => {
@@ -110,7 +79,13 @@ function IncomeExpensePageContent() {
     [setBody, fetch],
   )
 
-  useFilterUrlSync(filterValue, toUrlParams)
+  useFilterUrlSync(filterValue, (values, params) => {
+    writeDateRangeParam(values, params, 'period')
+    writeIdsParam(values, params, 'include')
+    writeIdsParam(values, params, 'exclude')
+    writeIdsParam(values, params, 'includeTags')
+    writeIdsParam(values, params, 'excludeTags')
+  })
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -126,9 +101,12 @@ function IncomeExpensePageContent() {
   )
 
   const drilldown = (group: IncomeExpenseGroup, type: OperationType) => {
-    const monthStart = parseISO(group.date)
-    const monthEnd = endOfMonth(monthStart)
-    router.push(buildOperationDrilldownUrl({ dateFrom: monthStart, dateTo: monthEnd, type }))
+    const date = parseISO(group.date)
+    const period = {
+      from: date,
+      to: endOfMonth(date),
+    }
+    router.push(buildOperationDrilldownUrl({ period, type }))
   }
 
   const groups = data?.groups ?? []

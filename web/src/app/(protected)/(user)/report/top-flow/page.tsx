@@ -20,51 +20,15 @@ import { MonthRange } from '@/components/common/input/month-input'
 import { AccountFilter } from '@/components/common/filter/account-filter'
 import { TagFilter } from '@/components/common/filter/tag-filter'
 import {
-  paramToDate,
-  paramToIds,
-  setDateParam,
-  setIdsParam,
+  readDateRangeParam,
+  readIdsParam,
   useFilterUrlSync,
+  writeDateRangeParam,
+  writeIdsParam,
 } from '@/lib/filter-url'
 import { buildOperationDrilldownUrl } from '@/lib/operation-drilldown'
 
 const PRESET_KEY = 'REPORT_TOP_FLOW'
-
-function toUrlParams(filterValue: Record<string, unknown>): URLSearchParams {
-  const period = filterValue.period as MonthRange | undefined
-  const params = new URLSearchParams()
-
-  setDateParam(params, 'dateFrom', period?.from)
-  setDateParam(params, 'dateTo', period?.to)
-  setIdsParam(params, 'include', filterValue.include)
-  setIdsParam(params, 'exclude', filterValue.exclude)
-  setIdsParam(params, 'includeTags', filterValue.includeTags)
-  setIdsParam(params, 'excludeTags', filterValue.excludeTags)
-
-  return params
-}
-
-function fromUrlParams(params: URLSearchParams): Record<string, unknown> {
-  const value: Record<string, unknown> = {}
-
-  const from = paramToDate(params.get('dateFrom'))
-  const to = paramToDate(params.get('dateTo'))
-  value.period = (from || to ? { from, to } : getDefaultMonthRange()) satisfies MonthRange
-
-  const include = paramToIds(params.get('include'))
-  if (include) value.include = include
-
-  const exclude = paramToIds(params.get('exclude'))
-  if (exclude) value.exclude = exclude
-
-  const includeTags = paramToIds(params.get('includeTags'))
-  if (includeTags) value.includeTags = includeTags
-
-  const excludeTags = paramToIds(params.get('excludeTags'))
-  if (excludeTags) value.excludeTags = excludeTags
-
-  return value
-}
 
 export default function TopFlowPage() {
   return (
@@ -78,9 +42,14 @@ function TopFlowPageContent() {
   const { data, loading, fetch, setBody } = useTopFlowReportStore()
   const searchParams = useSearchParams()
 
-  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() =>
-    fromUrlParams(searchParams),
-  )
+  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() => ({
+    period: getDefaultMonthRange(),
+    ...readDateRangeParam(searchParams, 'period'),
+    ...readIdsParam(searchParams, 'include'),
+    ...readIdsParam(searchParams, 'exclude'),
+    ...readIdsParam(searchParams, 'includeTags'),
+    ...readIdsParam(searchParams, 'excludeTags'),
+  }))
 
   const applyFilter = useCallback(
     (value: Record<string, unknown>) => {
@@ -100,7 +69,13 @@ function TopFlowPageContent() {
     [setBody, fetch],
   )
 
-  useFilterUrlSync(filterValue, toUrlParams)
+  useFilterUrlSync(filterValue, (values, params) => {
+    writeDateRangeParam(values, params, 'period')
+    writeIdsParam(values, params, 'include')
+    writeIdsParam(values, params, 'exclude')
+    writeIdsParam(values, params, 'includeTags')
+    writeIdsParam(values, params, 'excludeTags')
+  })
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -199,12 +174,15 @@ function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
   const barWidth = (amount: TopFlowGroup['amount']) =>
     maxAmount > 0 ? (Math.abs(toDecimal(amount)) / maxAmount) * 100 : 0
 
-  const monthStart = parseISO(group.date)
-  const monthEnd = endOfMonth(monthStart)
+  const date = parseISO(group.date)
+  const period = {
+    from: date,
+    to: endOfMonth(date),
+  }
 
   const drilldown = (accountId: string | undefined) => {
     if (!accountId) return
-    router.push(buildOperationDrilldownUrl({ dateFrom: monthStart, dateTo: monthEnd, accountId }))
+    router.push(buildOperationDrilldownUrl({ period, include: [accountId] }))
   }
 
   return (
