@@ -106,7 +106,16 @@ function IncomeExpensePageContent() {
       from: date,
       to: endOfMonth(date),
     }
-    router.push(buildOperationDrilldownUrl({ period, type }))
+    router.push(
+      buildOperationDrilldownUrl({
+        period,
+        type,
+        include: filterValue.include,
+        exclude: filterValue.exclude,
+        includeTags: filterValue.includeTags,
+        excludeTags: filterValue.excludeTags,
+      }),
+    )
   }
 
   const groups = data?.groups ?? []

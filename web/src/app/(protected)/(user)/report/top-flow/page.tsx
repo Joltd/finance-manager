@@ -118,7 +118,12 @@ function TopFlowPageContent() {
       ) : (
         <Stack gap={4}>
           {groups.map((group) => (
-            <TopFlowGroupCard key={group.date} group={group} />
+            <TopFlowGroupCard
+              key={group.date}
+              group={group}
+              includeTags={filterValue.includeTags as string[] | undefined}
+              excludeTags={filterValue.excludeTags as string[] | undefined}
+            />
           ))}
         </Stack>
       )}
@@ -162,7 +167,15 @@ function EntryRow({
   )
 }
 
-function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
+function TopFlowGroupCard({
+  group,
+  includeTags,
+  excludeTags,
+}: {
+  group: TopFlowGroup
+  includeTags?: string[]
+  excludeTags?: string[]
+}) {
   const [expanded, setExpanded] = useState(false)
   const router = useRouter()
 
@@ -182,7 +195,14 @@ function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
 
   const drilldown = (accountId: string | undefined) => {
     if (!accountId) return
-    router.push(buildOperationDrilldownUrl({ period, include: [accountId] }))
+    router.push(
+      buildOperationDrilldownUrl({
+        period,
+        include: [accountId],
+        includeTags,
+        excludeTags,
+      }),
+    )
   }
 
   return (

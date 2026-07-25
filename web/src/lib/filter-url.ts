@@ -61,6 +61,9 @@ export function writeParam(values: Record<string, unknown>, params: URLSearchPar
 
 export function writeNumberRangeParam(values: Record<string, unknown>, params: URLSearchParams, key: string) {
   const value = values[key] as { from?: number, to?: number }
+  if (!value) {
+    return
+  }
 
   if (value.from) {
     params.set(`${key}From`, value.from.toString())
