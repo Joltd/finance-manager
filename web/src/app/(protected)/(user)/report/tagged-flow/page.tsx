@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useTaggedFlowReportStore } from '@/store/report'
 import { Layout } from '@/components/common/layout/layout'
@@ -15,12 +16,40 @@ import { Tag } from '@/types/tag'
 import { tagUrls } from '@/api/tag'
 import { useReferenceCache } from '@/hooks/use-reference-cache'
 import { toDecimal } from '@/types/common/amount'
+import { setParam, useFilterUrlSync } from '@/lib/filter-url'
+import { buildOperationDrilldownUrl } from '@/lib/operation-drilldown'
 
 const PRESET_KEY = 'REPORT_TAGGED_FLOW'
 
+function toUrlParams(filterValue: Record<string, unknown>): URLSearchParams {
+  const params = new URLSearchParams()
+  setParam(params, 'tag', filterValue.tag as string | undefined)
+  return params
+}
+
+function fromUrlParams(params: URLSearchParams): Record<string, unknown> {
+  const value: Record<string, unknown> = {}
+  const tag = params.get('tag')
+  if (tag) value.tag = tag
+  return value
+}
+
 export default function TaggedFlowPage() {
+  return (
+    <Suspense>
+      <TaggedFlowPageContent />
+    </Suspense>
+  )
+}
+
+function TaggedFlowPageContent() {
   const { data, loading, fetch, setBody } = useTaggedFlowReportStore()
-  const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() =>
+    fromUrlParams(searchParams),
+  )
 
   const applyFilter = useCallback(
     (value: Record<string, unknown>) => {
@@ -31,6 +60,13 @@ export default function TaggedFlowPage() {
     },
     [setBody, fetch],
   )
+
+  useFilterUrlSync(filterValue, toUrlParams)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    applyFilter(filterValue)
+  }, [])
 
   const handleFilterChange = useCallback(
     (value: Record<string, unknown>) => {
@@ -46,6 +82,11 @@ export default function TaggedFlowPage() {
   const entries = data?.entries ?? []
 
   const maxAmount = entries.reduce((max, e) => Math.max(max, Math.abs(toDecimal(e.amount))), 0)
+
+  const drilldown = (categoryId: string | undefined) => {
+    if (!tagId || !categoryId) return
+    router.push(buildOperationDrilldownUrl({ tagId, accountId: categoryId }))
+  }
 
   return (
     <Layout scrollable>
@@ -83,7 +124,8 @@ export default function TaggedFlowPage() {
                 align="center"
                 justify="between"
                 gap={2}
-                className="relative py-2"
+                className="relative py-2 cursor-pointer select-none hover:bg-muted/30 transition-colors"
+                onClick={() => drilldown(entry.category.id)}
               >
                 <div
                   className={`absolute inset-y-0 pointer-events-none transition-all ${positive ? 'right-0 bg-green-500/10' : 'left-0 bg-destructive/10'}`}

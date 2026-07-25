@@ -1,7 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { format } from 'date-fns'
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { endOfMonth, format, parseISO } from 'date-fns'
 
 import { useTopFlowReportStore } from '@/store/report'
 import { Layout } from '@/components/common/layout/layout'
@@ -18,15 +19,68 @@ import { TopFlowGroup } from '@/types/report'
 import { MonthRange } from '@/components/common/input/month-input'
 import { AccountFilter } from '@/components/common/filter/account-filter'
 import { TagFilter } from '@/components/common/filter/tag-filter'
+import {
+  paramToDate,
+  paramToIds,
+  setDateParam,
+  setIdsParam,
+  useFilterUrlSync,
+} from '@/lib/filter-url'
+import { buildOperationDrilldownUrl } from '@/lib/operation-drilldown'
 
 const PRESET_KEY = 'REPORT_TOP_FLOW'
 
-export default function TopFlowPage() {
-  const { data, loading, fetch, setBody } = useTopFlowReportStore()
+function toUrlParams(filterValue: Record<string, unknown>): URLSearchParams {
+  const period = filterValue.period as MonthRange | undefined
+  const params = new URLSearchParams()
 
-  const [filterValue, setFilterValue] = useState<Record<string, unknown>>({
-    period: getDefaultMonthRange() satisfies MonthRange,
-  })
+  setDateParam(params, 'dateFrom', period?.from)
+  setDateParam(params, 'dateTo', period?.to)
+  setIdsParam(params, 'include', filterValue.include)
+  setIdsParam(params, 'exclude', filterValue.exclude)
+  setIdsParam(params, 'includeTags', filterValue.includeTags)
+  setIdsParam(params, 'excludeTags', filterValue.excludeTags)
+
+  return params
+}
+
+function fromUrlParams(params: URLSearchParams): Record<string, unknown> {
+  const value: Record<string, unknown> = {}
+
+  const from = paramToDate(params.get('dateFrom'))
+  const to = paramToDate(params.get('dateTo'))
+  value.period = (from || to ? { from, to } : getDefaultMonthRange()) satisfies MonthRange
+
+  const include = paramToIds(params.get('include'))
+  if (include) value.include = include
+
+  const exclude = paramToIds(params.get('exclude'))
+  if (exclude) value.exclude = exclude
+
+  const includeTags = paramToIds(params.get('includeTags'))
+  if (includeTags) value.includeTags = includeTags
+
+  const excludeTags = paramToIds(params.get('excludeTags'))
+  if (excludeTags) value.excludeTags = excludeTags
+
+  return value
+}
+
+export default function TopFlowPage() {
+  return (
+    <Suspense>
+      <TopFlowPageContent />
+    </Suspense>
+  )
+}
+
+function TopFlowPageContent() {
+  const { data, loading, fetch, setBody } = useTopFlowReportStore()
+  const searchParams = useSearchParams()
+
+  const [filterValue, setFilterValue] = useState<Record<string, unknown>>(() =>
+    fromUrlParams(searchParams),
+  )
 
   const applyFilter = useCallback(
     (value: Record<string, unknown>) => {
@@ -46,10 +100,11 @@ export default function TopFlowPage() {
     [setBody, fetch],
   )
 
+  useFilterUrlSync(filterValue, toUrlParams)
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const initial: Record<string, unknown> = { period: getDefaultMonthRange() satisfies MonthRange }
-    applyFilter(initial)
+    applyFilter(filterValue)
   }, [])
 
   const handleFilterChange = useCallback(
@@ -134,6 +189,7 @@ function EntryRow({
 
 function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
   const [expanded, setExpanded] = useState(false)
+  const router = useRouter()
 
   const maxAmount = group.entries.reduce(
     (max, e) => Math.max(max, Math.abs(toDecimal(e.amount))),
@@ -142,6 +198,14 @@ function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
 
   const barWidth = (amount: TopFlowGroup['amount']) =>
     maxAmount > 0 ? (Math.abs(toDecimal(amount)) / maxAmount) * 100 : 0
+
+  const monthStart = parseISO(group.date)
+  const monthEnd = endOfMonth(monthStart)
+
+  const drilldown = (accountId: string | undefined) => {
+    if (!accountId) return
+    router.push(buildOperationDrilldownUrl({ dateFrom: monthStart, dateTo: monthEnd, accountId }))
+  }
 
   return (
     <Group
@@ -158,6 +222,7 @@ function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
               label={entry.account?.name ?? '—'}
               amount={entry.amount}
               barWidth={barWidth(entry.amount)}
+              onClick={() => drilldown(entry.account?.id)}
             />
           )
         }
@@ -175,18 +240,14 @@ function TopFlowGroupCard({ group }: { group: TopFlowGroup }) {
         }
 
         return (
-          <Stack
-            key="__other__"
-            className="cursor-pointer select-none hover:bg-muted/30 transition-colors"
-            gap={2}
-            onClick={() => setExpanded(false)}
-          >
+          <Stack key="__other__" gap={2}>
             {group.otherEntries.map((other, j) => (
               <EntryRow
                 key={other.account?.id ?? j}
                 label={other.account?.name ?? '—'}
                 amount={other.amount}
                 barWidth={barWidth(other.amount)}
+                onClick={() => drilldown(other.account?.id)}
               />
             ))}
           </Stack>
