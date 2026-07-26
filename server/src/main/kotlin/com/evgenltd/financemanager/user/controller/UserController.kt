@@ -80,7 +80,8 @@ class UserController(
             throw badRequestException("Invalid refresh token")
         }
 
-        val user = userRepository.findByLoginAndDeletedIsFalse(jwt.subject)
+        val subject = jwt.subject ?: throw badRequestException("Invalid refresh token")
+        val user = userRepository.findByLoginAndDeletedIsFalse(subject)
             ?: throw badRequestException("User deleted or not found")
 
         val tenant = if (user.role == UserRole.ADMIN) {

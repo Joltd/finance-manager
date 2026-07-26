@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 import { Amount, amountFromDecimal, toDecimal } from '@/types/common/amount'
@@ -14,6 +14,12 @@ type AmountInputProps = {
   className?: string
   id?: string
   'aria-invalid'?: boolean | 'true' | 'false'
+}
+
+function parseLocal(display: string): number | null {
+  if (display === '') return null
+  const num = parseFloat(display.replace(',', '.'))
+  return Number.isNaN(num) ? null : num
 }
 
 function AmountInput({
@@ -30,13 +36,11 @@ function AmountInput({
   )
 
   // Sync display when value is reset externally (e.g. form reset)
-  useEffect(() => {
-    const external = value !== undefined ? toDecimal(value) : null
-    const local = display === '' ? null : parseFloat(display.replace(',', '.'))
-    if (external !== local) {
-      setDisplay(external !== null ? String(external) : '')
-    }
-  }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
+  const external = value !== undefined ? toDecimal(value) : null
+  const local = parseLocal(display)
+  if (external !== local) {
+    setDisplay(external !== null ? String(external) : '')
+  }
 
   const handleNumberChange = (raw: string) => {
     if (raw !== '' && !/^-?\d*[.,]?\d*$/.test(raw)) return

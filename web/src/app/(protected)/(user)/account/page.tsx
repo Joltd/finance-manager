@@ -107,7 +107,7 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
           variant="ghost"
           size="icon"
           className="opacity-0 w-5 h-5 group-hover/account:opacity-100 transition-opacity"
-          onClick={() => onEdit(account.id!!)}
+          onClick={() => onEdit(account.id!)}
         >
           <PencilIcon className="w-3! h-3!" />
         </Button>
@@ -116,7 +116,7 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
             variant="ghost"
             size="icon"
             className="opacity-0 w-5 h-5 group-hover/account:opacity-100 transition-opacity text-destructive hover:text-destructive"
-            onClick={() => onDelete(account.id!!)}
+            onClick={() => onDelete(account.id!)}
           >
             <Trash2Icon className="w-3! h-3!" />
           </Button>

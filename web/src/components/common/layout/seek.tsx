@@ -124,7 +124,7 @@ function SeekSentinel({ id, onIntersect }: SeekSentinelProps) {
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [onIntersect, ref.current])
+  }, [onIntersect])
 
   return <div ref={ref} className="flex h-full w-full" />
 }

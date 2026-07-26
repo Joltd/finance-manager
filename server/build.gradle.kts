@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "2.3.20"
-    kotlin("plugin.spring") version "2.3.20"
-    id("org.springframework.boot") version "4.0.5"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.spring") version "2.3.21"
+    id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("plugin.jpa") version "2.3.20"
-    kotlin("plugin.allopen") version "2.3.20"
+    kotlin("plugin.jpa") version "2.3.21"
+    kotlin("plugin.allopen") version "2.3.21"
 }
 
 group = "com.evgenltd"
@@ -36,12 +36,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.postgresql:postgresql")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    implementation("org.hibernate.orm:hibernate-vector:7.3.0.Final")
+    implementation("org.hibernate.orm:hibernate-vector")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("tools.jackson.dataformat:jackson-dataformat-csv")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jsoup:jsoup:1.22.1")
+    implementation("org.jsoup:jsoup:1.22.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

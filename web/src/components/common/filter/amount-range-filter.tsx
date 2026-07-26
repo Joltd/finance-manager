@@ -18,12 +18,13 @@ function AmountRangeInput({
   onChange: (v: number | undefined) => void
   placeholder?: string
 }) {
-  const [display, setDisplay] = useState(() => value !== undefined ? String(scaledToDecimal(value)) : '')
+  const [display, setDisplay] = useState(() =>
+    value !== undefined ? String(scaledToDecimal(value)) : '',
+  )
 
-  useEffect(() => {
-    const external = value !== undefined ? String(scaledToDecimal(value)) : ''
-    if (decimalToScaled(display) !== value) setDisplay(external)
-  }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
+  if (decimalToScaled(display) !== value) {
+    setDisplay(value !== undefined ? String(scaledToDecimal(value)) : '')
+  }
 
   const handleChange = (raw: string) => {
     if (raw !== '' && !/^-?\d*[.,]?\d*$/.test(raw)) return
@@ -55,14 +56,19 @@ export function AmountRangeFilter({ id, label, required }: AmountRangeFilterProp
   const { getValue, handleChange } = useFilterContext()
   const contextRange = (getValue(id) ?? {}) as AmountRange
   const [pending, setPending] = useState<AmountRange>(contextRange)
+  const [prevContextRange, setPrevContextRange] = useState({
+    from: contextRange.from,
+    to: contextRange.to,
+  })
   const mounted = useRef(false)
 
   // Sync from external (e.g. filter reset) — only when values actually differ
-  useEffect(() => {
+  if (contextRange.from !== prevContextRange.from || contextRange.to !== prevContextRange.to) {
+    setPrevContextRange({ from: contextRange.from, to: contextRange.to })
     if (pending.from !== contextRange.from || pending.to !== contextRange.to) {
       setPending({ from: contextRange.from, to: contextRange.to })
     }
-  }, [contextRange.from, contextRange.to]) // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   // Debounced write to filter context
   useEffect(() => {

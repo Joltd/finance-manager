@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { useEffect } from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 
@@ -39,18 +38,19 @@ export function MonthInput(props: MonthInputProps) {
   const [open, setOpen] = React.useState(false)
   const [year, setYear] = React.useState(() => new Date().getFullYear())
 
-  // Sync displayed year to value when picker opens
-  useEffect(() => {
-    if (!open) return
-    if (mode === 'single') {
-      const v = (props as SingleProps).value
-      if (v) setYear(v.getFullYear())
-    } else {
-      const rv = (props as RangeProps).value
-      if (rv?.to) setYear(rv.to.getFullYear())
-      else if (rv?.from) setYear(rv.from.getFullYear())
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      if (mode === 'single') {
+        const v = (props as SingleProps).value
+        if (v) setYear(v.getFullYear())
+      } else {
+        const rv = (props as RangeProps).value
+        if (rv?.to) setYear(rv.to.getFullYear())
+        else if (rv?.from) setYear(rv.from.getFullYear())
+      }
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+    setOpen(nextOpen)
+  }
 
   const handleSelect = (month: number) => {
     const clicked = new Date(year, month, 1)
@@ -119,7 +119,7 @@ export function MonthInput(props: MonthInputProps) {
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           data-slot="input"
