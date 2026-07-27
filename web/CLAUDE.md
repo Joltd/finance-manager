@@ -136,6 +136,13 @@ const { submit, loading } = useRequest<ResponseType, BodyType>(
 await submit({ body: data, pathParams: { id } })
 ```
 
+## Forms
+
+react-hook-form + zod + shadcn/ui `Field` components. See `web/forms-guide.md` for the
+canonical pattern (schema/helper file layout, `Controller`-driven `Field`/`FieldError`
+rendering, Sheet/Dialog hydration on `open`, type-conditional field groups) before
+implementing or refactoring any form.
+
 ## API conventions
 
 - URL constants live in `src/api/<domain>.ts`, exported as `<domain>Urls`

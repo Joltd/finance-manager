@@ -17,12 +17,12 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { AccountType } from '@/types/account'
 import { Operation, OperationType } from '@/types/operation'
-import type { ImportDataEntry, ImportDataOperation } from '@/types/import-data'
+import type { ImportDataEntry } from '@/types/import-data'
 import {
-  defaultFormState,
-  FROM_ACCOUNT_TYPE,
+  createDefaultFormState,
+  createPresetFormState,
   OperationFormState,
-  TO_ACCOUNT_TYPE,
+  operationToFormState,
   transitType,
 } from '@/app/(protected)/(user)/operation/operation-form'
 import { useImportDataStore } from '@/store/import-data'
@@ -57,26 +57,6 @@ export function openImportDataEntrySheet(entry: ImportDataEntry) {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function suggestionToForm(source: ImportDataOperation): OperationFormState {
-  const type = source.type
-  const isExchange = type === OperationType.EXCHANGE
-  return {
-    type,
-    date: new Date(source.date + 'T00:00:00'),
-    accountFrom: source.accountFrom,
-    accountTo: source.accountTo,
-    amount: !isExchange ? source.amountFrom : undefined,
-    amountFrom: isExchange ? source.amountFrom : undefined,
-    amountTo: isExchange ? source.amountTo : undefined,
-    description: source.description ?? '',
-    tags: [],
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -87,7 +67,7 @@ export function ImportDataEntrySheet() {
   const presetStore = useOperationPresetStore()
   const userStore = useUserStore()
   const mainAccountId = importData?.account.id
-  const [form, setForm] = useState<OperationFormState>(defaultFormState)
+  const [form, setForm] = useState<OperationFormState>(createDefaultFormState)
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
   const [rawExpanded, setRawExpanded] = useState(false)
 
@@ -98,61 +78,18 @@ export function ImportDataEntrySheet() {
 
     if (entry.operation) {
       setSelectedSuggestionIdx(null)
-      const op = entry.operation
-      const type = op.type
-      const isExchange = type === OperationType.EXCHANGE
-      setForm({
-        type,
-        date: new Date(op.date + 'T00:00:00'),
-        accountFrom: op.accountFrom,
-        accountTo: op.accountTo,
-        amount: !isExchange ? op.amountFrom : undefined,
-        amountFrom: isExchange ? op.amountFrom : undefined,
-        amountTo: isExchange ? op.amountTo : undefined,
-        description: op.description ?? '',
-        tags: op.tags ?? [],
-      })
+      setForm(operationToFormState(entry.operation))
     } else {
       const idx = entry.suggestions.findIndex((s) => s.selected)
       if (idx >= 0) {
         setSelectedSuggestionIdx(idx)
-        setForm(suggestionToForm(entry.suggestions[idx]))
+        setForm(operationToFormState(entry.suggestions[idx]))
       } else if (entry.parsed) {
         setSelectedSuggestionIdx(null)
-        setForm(suggestionToForm(entry.parsed))
+        setForm(operationToFormState(entry.parsed))
       } else {
         setSelectedSuggestionIdx(null)
-        let state = defaultFormState
-        if (presetStore.type) {
-          state = transitType(state, presetStore.type)
-        }
-        if (presetStore.date) {
-          state = { ...state, date: new Date(presetStore.date + 'T00:00:00') }
-        }
-        const fromConstraint = FROM_ACCOUNT_TYPE[state.type]
-        if (
-          presetStore.account &&
-          (!fromConstraint || presetStore.account.type === fromConstraint)
-        ) {
-          state = { ...state, accountFrom: presetStore.account }
-        }
-        const toConstraint = TO_ACCOUNT_TYPE[state.type]
-        if (presetStore.category && (!toConstraint || presetStore.category.type === toConstraint)) {
-          state = { ...state, accountTo: presetStore.category }
-        }
-        const currency = presetStore.currency ?? userStore.data?.settings?.operationDefaultCurrency
-        if (currency) {
-          if (state.type === OperationType.EXCHANGE) {
-            state = {
-              ...state,
-              amountFrom: { value: 0, currency },
-              amountTo: { value: 0, currency },
-            }
-          } else {
-            state = { ...state, amount: { value: 0, currency } }
-          }
-        }
-        setForm(state)
+        setForm(createPresetFormState(presetStore, userStore.data?.settings?.operationDefaultCurrency))
       }
     }
   }, [open, entry]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -168,7 +105,7 @@ export function ImportDataEntrySheet() {
   const handleSuggestionClick = (idx: number) => {
     if (!entry) return
     setSelectedSuggestionIdx(idx)
-    setForm(suggestionToForm(entry.suggestions[idx]))
+    setForm(operationToFormState(entry.suggestions[idx]))
   }
 
   const hasOperation = !!entry?.operation

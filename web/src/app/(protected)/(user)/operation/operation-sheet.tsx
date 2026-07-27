@@ -1,11 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { Control, Controller, useForm } from 'react-hook-form'
 import { create } from 'zustand'
 import { ChevronDown, ChevronRight } from 'lucide-react'
-import { formatDate, parseISO } from 'date-fns'
+import { formatDate } from 'date-fns'
 
 import { operationUrls } from '@/api/operation'
 import { AccountInput } from '@/components/common/input/account-input'
@@ -24,14 +23,14 @@ import { useOperationStore } from '@/store/operation'
 import { AccountType } from '@/types/account'
 import { OperationType } from '@/types/operation'
 import {
-  defaultFormState,
-  FROM_ACCOUNT_TYPE,
-  operationFormSchema,
+  createDefaultFormState,
+  createPresetFormState,
+  operationFormResolver,
   OperationFormState,
-  TO_ACCOUNT_TYPE,
+  operationToFormState,
   transitType,
 } from '@/app/(protected)/(user)/operation/operation-form'
-import { useOperationPresetStore } from '@/store/operation-preset'
+import { AccountUsage, useOperationPresetStore } from '@/store/operation-preset'
 import { useUserStore } from '@/store/user'
 import { FrequentAccounts } from '@/app/(protected)/(user)/operation/frequent-accounts'
 
@@ -61,6 +60,318 @@ export function openOperationSheetForCopy(operationId?: string) {
   useOperationSheetStore.getState().openSheetForCopy(operationId)
 }
 
+// The amount schema nests currency errors under `.currency` while a missing
+// amount is reported directly on the field itself — surface whichever applies.
+function amountFieldErrors(error?: { message?: string; currency?: { message?: string } }) {
+  return [error, error?.currency].filter((e): e is { message?: string } => Boolean(e?.message))
+}
+
+// ---------------------------------------------------------------------------
+// Type-specific field groups
+// ---------------------------------------------------------------------------
+
+interface TypeFieldsProps {
+  control: Control<OperationFormState>
+  accountUsages: AccountUsage[]
+}
+
+function ExchangeFields({ control, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>From</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="amountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount From</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>To</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="amountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount To</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
+    </>
+  )
+}
+
+function TransferFields({ control, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>From</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>To</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="amount"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
+    </>
+  )
+}
+
+function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Account</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Category</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.EXPENSE}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.EXPENSE}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="amount"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
+    </>
+  )
+}
+
+function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Account</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Category</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.INCOME}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.INCOME}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="amount"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 interface OperationSheetProps {
   onSaved: () => void
 }
@@ -78,12 +389,10 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
     handleSubmit,
     reset,
     getValues,
-    setValue,
     watch,
-    formState: { errors },
   } = useForm<OperationFormState>({
-    resolver: zodResolver(operationFormSchema),
-    defaultValues: defaultFormState,
+    resolver: operationFormResolver,
+    defaultValues: createDefaultFormState(),
   })
 
   const type = watch('type')
@@ -99,37 +408,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
         void operationStore.fetch()
       } else {
         operationStore.reset()
-        let state = defaultFormState
-        if (presetStore.type) {
-          state = transitType(state, presetStore.type)
-        }
-        if (presetStore.date) {
-          state = { ...state, date: parseISO(presetStore.date) }
-        }
-        const fromConstraint = FROM_ACCOUNT_TYPE[state.type]
-        if (
-          presetStore.account &&
-          (!fromConstraint || presetStore.account.type === fromConstraint)
-        ) {
-          state = { ...state, accountFrom: presetStore.account }
-        }
-        const toConstraint = TO_ACCOUNT_TYPE[state.type]
-        if (presetStore.category && (!toConstraint || presetStore.category.type === toConstraint)) {
-          state = { ...state, accountTo: presetStore.category }
-        }
-        const currency = presetStore.currency ?? userStore.data?.settings?.operationDefaultCurrency
-        if (currency) {
-          if (state.type === OperationType.EXCHANGE) {
-            state = {
-              ...state,
-              amountFrom: { value: 0, currency },
-              amountTo: { value: 0, currency },
-            }
-          } else {
-            state = { ...state, amount: { value: 0, currency } }
-          }
-        }
-        reset(state)
+        reset(createPresetFormState(presetStore, userStore.data?.settings?.operationDefaultCurrency))
       }
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -137,19 +416,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
   useEffect(() => {
     const operation = operationStore.data
     if (!operation) return
-    const opType = operation.type
-    const isExchange = opType === OperationType.EXCHANGE
-    reset({
-      type: opType,
-      date: new Date(operation.date + 'T00:00:00'),
-      accountFrom: operation.accountFrom,
-      accountTo: operation.accountTo,
-      amount: !isExchange ? operation.amountFrom : undefined,
-      amountFrom: isExchange ? operation.amountFrom : undefined,
-      amountTo: isExchange ? operation.amountTo : undefined,
-      description: operation.description ?? '',
-      tags: operation.tags ?? [],
-    })
+    reset(operationToFormState(operation))
   }, [operationStore.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTypeChange = (newType: OperationType) => {
@@ -202,321 +469,82 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
             </Stack>
           ) : (
             <Stack gap={4} scrollable className="flex-1 px-4">
-              <Field>
-                <FieldLabel>Type</FieldLabel>
-                <Controller
-                  name="type"
-                  control={control}
-                  render={({ field }) => (
-                    <OperationTypeInput value={field.value} onChange={handleTypeChange} />
-                  )}
-                />
-              </Field>
+              <Controller
+                name="type"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Type</FieldLabel>
+                    <OperationTypeInput id={field.name} value={field.value} onChange={handleTypeChange} />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
 
-              <Field>
-                <FieldLabel>Date</FieldLabel>
-                <Controller
-                  name="date"
-                  control={control}
-                  render={({ field }) => (
+              <Controller
+                name="date"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Date</FieldLabel>
                     <DateInput
+                      id={field.name}
                       value={field.value}
                       onChange={(date) => date && field.onChange(date)}
+                      aria-invalid={fieldState.invalid}
                     />
-                  )}
-                />
-              </Field>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
 
               {type === OperationType.EXCHANGE && (
-                <>
-                  <Field data-invalid={errors.accountFrom ? 'true' : undefined}>
-                    <FieldLabel>From</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setValue('accountFrom', a)}
-                    />
-                    <Controller
-                      name="accountFrom"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput value={field.value} onChange={field.onChange} />
-                      )}
-                    />
-                    <FieldError>{errors.accountFrom?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.amountFrom ? 'true' : undefined}>
-                    <FieldLabel>Amount From</FieldLabel>
-                    <Controller
-                      name="amountFrom"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <AmountInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      )}
-                    />
-                    <FieldError>
-                      {errors.amountFrom?.message ?? errors.amountFrom?.currency?.message}
-                    </FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.accountTo ? 'true' : undefined}>
-                    <FieldLabel>To</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setValue('accountTo', a)}
-                    />
-                    <Controller
-                      name="accountTo"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput value={field.value} onChange={field.onChange} />
-                      )}
-                    />
-                    <FieldError>{errors.accountTo?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.amountTo ? 'true' : undefined}>
-                    <FieldLabel>Amount To</FieldLabel>
-                    <Controller
-                      name="amountTo"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <AmountInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      )}
-                    />
-                    <FieldError>
-                      {errors.amountTo?.message ?? errors.amountTo?.currency?.message}
-                    </FieldError>
-                  </Field>
-                </>
+                <ExchangeFields control={control} accountUsages={presetStore.accountUsages} />
               )}
-
               {type === OperationType.TRANSFER && (
-                <>
-                  <Field data-invalid={errors.accountFrom ? 'true' : undefined}>
-                    <FieldLabel>From</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setValue('accountFrom', a)}
-                    />
-                    <Controller
-                      name="accountFrom"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput
-                          type={AccountType.ACCOUNT}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                    <FieldError>{errors.accountFrom?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.accountTo ? 'true' : undefined}>
-                    <FieldLabel>To</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setValue('accountTo', a)}
-                    />
-                    <Controller
-                      name="accountTo"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput
-                          type={AccountType.ACCOUNT}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                    <FieldError>{errors.accountTo?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.amount ? 'true' : undefined}>
-                    <FieldLabel>Amount</FieldLabel>
-                    <Controller
-                      name="amount"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <AmountInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      )}
-                    />
-                    <FieldError>
-                      {errors.amount?.message ?? errors.amount?.currency?.message}
-                    </FieldError>
-                  </Field>
-                </>
+                <TransferFields control={control} accountUsages={presetStore.accountUsages} />
               )}
-
               {type === OperationType.EXPENSE && (
-                <>
-                  <Field data-invalid={errors.accountFrom ? 'true' : undefined}>
-                    <FieldLabel>Account</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setValue('accountFrom', a)}
-                    />
-                    <Controller
-                      name="accountFrom"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput
-                          type={AccountType.ACCOUNT}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                    <FieldError>{errors.accountFrom?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.accountTo ? 'true' : undefined}>
-                    <FieldLabel>Category</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.EXPENSE}
-                      onSelect={(a) => setValue('accountTo', a)}
-                    />
-                    <Controller
-                      name="accountTo"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput
-                          type={AccountType.EXPENSE}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                    <FieldError>{errors.accountTo?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.amount ? 'true' : undefined}>
-                    <FieldLabel>Amount</FieldLabel>
-                    <Controller
-                      name="amount"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <AmountInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      )}
-                    />
-                    <FieldError>
-                      {errors.amount?.message ?? errors.amount?.currency?.message}
-                    </FieldError>
-                  </Field>
-                </>
+                <ExpenseFields control={control} accountUsages={presetStore.accountUsages} />
               )}
-
               {type === OperationType.INCOME && (
-                <>
-                  <Field data-invalid={errors.accountTo ? 'true' : undefined}>
-                    <FieldLabel>Account</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setValue('accountTo', a)}
-                    />
-                    <Controller
-                      name="accountTo"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput
-                          type={AccountType.ACCOUNT}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                    <FieldError>{errors.accountTo?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.accountFrom ? 'true' : undefined}>
-                    <FieldLabel>Category</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.INCOME}
-                      onSelect={(a) => setValue('accountFrom', a)}
-                    />
-                    <Controller
-                      name="accountFrom"
-                      control={control}
-                      render={({ field }) => (
-                        <AccountInput
-                          type={AccountType.INCOME}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      )}
-                    />
-                    <FieldError>{errors.accountFrom?.message}</FieldError>
-                  </Field>
-
-                  <Field data-invalid={errors.amount ? 'true' : undefined}>
-                    <FieldLabel>Amount</FieldLabel>
-                    <Controller
-                      name="amount"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <AmountInput
-                          value={field.value}
-                          onChange={field.onChange}
-                          aria-invalid={fieldState.invalid}
-                        />
-                      )}
-                    />
-                    <FieldError>
-                      {errors.amount?.message ?? errors.amount?.currency?.message}
-                    </FieldError>
-                  </Field>
-                </>
+                <IncomeFields control={control} accountUsages={presetStore.accountUsages} />
               )}
 
-              <Field>
-                <FieldLabel>Tags</FieldLabel>
-                <Controller
-                  name="tags"
-                  control={control}
-                  render={({ field }) => (
+              <Controller
+                name="tags"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Tags</FieldLabel>
                     <TagInput
+                      id={field.name}
                       mode="multi"
                       allowCreate
                       value={field.value}
                       onChange={field.onChange}
                     />
-                  )}
-                />
-              </Field>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
 
-              <Field>
-                <FieldLabel>Description</FieldLabel>
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field }) => <Input value={field.value} onChange={field.onChange} />}
-                />
-              </Field>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                    <Input
+                      id={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
 
               {operationStore.data?.raw && (
                 <div>

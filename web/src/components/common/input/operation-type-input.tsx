@@ -14,6 +14,7 @@ type OperationTypeInputBaseProps = {
   placeholder?: string
   disabled?: boolean
   className?: string
+  id?: string
 }
 
 export type OperationTypeInputProps =
@@ -21,7 +22,7 @@ export type OperationTypeInputProps =
   | (OperationTypeInputBaseProps & { mode: 'multi'; value?: OperationType[]; onChange?: (value: OperationType[]) => void })
 
 export function OperationTypeInput(props: OperationTypeInputProps) {
-  const { placeholder, disabled, className } = props
+  const { placeholder, disabled, className, id } = props
 
   const common = {
     data: OPTIONS,
@@ -30,6 +31,7 @@ export function OperationTypeInput(props: OperationTypeInputProps) {
     placeholder,
     disabled,
     className,
+    id,
   }
 
   if (props.mode === 'multi') {

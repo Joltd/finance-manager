@@ -18,6 +18,7 @@ type ReferenceInputBaseProps<T> = {
   placeholder?: string
   disabled?: boolean
   className?: string
+  id?: string
   'aria-invalid'?: boolean | 'true' | 'false'
   onNew?: (name: string) => Promise<T>
   newLabel?: string
@@ -47,6 +48,7 @@ export function ReferenceInput<T>(props: ReferenceInputProps<T>) {
     placeholder = 'Select...',
     disabled = false,
     className,
+    id,
     'aria-invalid': ariaInvalid,
     onNew,
     newLabel = 'New',
@@ -122,6 +124,7 @@ export function ReferenceInput<T>(props: ReferenceInputProps<T>) {
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
           data-slot="input"
           variant="outline"
           disabled={disabled}

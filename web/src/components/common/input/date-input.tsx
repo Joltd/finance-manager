@@ -15,6 +15,8 @@ export interface DateInputProps {
   disabled?: boolean
   clearable?: boolean
   className?: string
+  id?: string
+  'aria-invalid'?: boolean | 'true' | 'false'
   calendarProps?: Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect'>
 }
 
@@ -25,6 +27,8 @@ export function DateInput({
   disabled = false,
   clearable = false,
   className,
+  id,
+  'aria-invalid': ariaInvalid,
   calendarProps,
 }: DateInputProps) {
   const [open, setOpen] = React.useState(false)
@@ -39,10 +43,12 @@ export function DateInput({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            id={id}
             data-slot="input"
             variant="outline"
             disabled={disabled}
             aria-haspopup="dialog"
+            aria-invalid={ariaInvalid}
             className={cn(
               'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
               'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
