@@ -14,5 +14,5 @@ finance-manager/
 ## Modules
 
 Each module has its own CLAUDE.md with stack-specific conventions:
-- `web/CLAUDE.md` — Next.js, components, state, layout patterns
-- `server/CLAUDE.md` — Kotlin, Spring Boot, domain architecture
+- `@web/CLAUDE.md` — Next.js, components, state, layout patterns
+- `@server/CLAUDE.md` — Kotlin, Spring Boot, domain architecture

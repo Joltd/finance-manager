@@ -1,18 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { create } from 'zustand'
 
 import { userUrls } from '@/api/user'
 import { Stack } from '@/components/common/layout/stack'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useRequest } from '@/hooks/use-request'
 import { useAdminUserListStore, useAdminUserStore } from '@/store/user'
+import { AdminUser } from '@/types/user'
 
 interface UserSheetState {
   open: boolean
@@ -32,18 +36,33 @@ export function openUserSheet(userId?: string) {
   useUserSheetStore.getState().openSheet(userId)
 }
 
-type UserFormState = {
-  name: string
-  login: string
-  password: string
-  deleted: boolean
+const userFormSchema = z.object({
+  name: z.string().min(1, 'Required'),
+  login: z.string().min(1, 'Required'),
+  password: z.string(),
+  deleted: z.boolean(),
+})
+
+type UserFormState = z.infer<typeof userFormSchema>
+
+const userFormResolver = zodResolver(userFormSchema)
+
+function createDefaultFormState(): UserFormState {
+  return {
+    name: '',
+    login: '',
+    password: '',
+    deleted: false,
+  }
 }
 
-const defaultFormState: UserFormState = {
-  name: '',
-  login: '',
-  password: '',
-  deleted: false,
+function userToFormState(user: AdminUser): UserFormState {
+  return {
+    name: user.name,
+    login: user.login,
+    password: '',
+    deleted: user.deleted,
+  }
 }
 
 export function UserSheet() {
@@ -51,7 +70,11 @@ export function UserSheet() {
   const userStore = useAdminUserStore()
   const listStore = useAdminUserListStore()
   const saveUser = useRequest(userUrls.adminRoot)
-  const [form, setForm] = useState<UserFormState>(defaultFormState)
+
+  const { control, handleSubmit, reset } = useForm<UserFormState>({
+    resolver: userFormResolver,
+    defaultValues: createDefaultFormState(),
+  })
 
   useEffect(() => {
     if (open) {
@@ -60,7 +83,7 @@ export function UserSheet() {
         void userStore.fetch()
       } else {
         userStore.reset()
-        setForm(defaultFormState)
+        reset(createDefaultFormState())
       }
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -68,22 +91,17 @@ export function UserSheet() {
   useEffect(() => {
     const user = userStore.data
     if (!user) return
-    setForm({
-      name: user.name,
-      login: user.login,
-      password: '',
-      deleted: user.deleted,
-    })
-  }, [userStore.data])
+    reset(userToFormState(user))
+  }, [userStore.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSubmit = async () => {
+  const onSubmit = async (data: UserFormState) => {
     await saveUser.submit({
       body: {
         id: userId,
-        name: form.name,
-        login: form.login,
-        password: form.password || undefined,
-        deleted: form.deleted,
+        name: data.name,
+        login: data.login,
+        password: data.password || undefined,
+        deleted: data.deleted,
       },
     })
     void listStore.fetch()
@@ -103,58 +121,82 @@ export function UserSheet() {
           <SheetTitle>{userId ? 'Edit User' : 'New User'}</SheetTitle>
         </SheetHeader>
 
-        {loading ? (
-          <Stack align="center" justify="center" className="flex-1">
-            <Spinner />
-          </Stack>
-        ) : (
-          <Stack gap={4} className="px-4 flex-1 overflow-y-auto">
-            <Field>
-              <FieldLabel>Name</FieldLabel>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+        <form onSubmit={handleSubmit(onSubmit)} className="contents">
+          {loading ? (
+            <Stack align="center" justify="center" className="flex-1">
+              <Spinner />
+            </Stack>
+          ) : (
+            <Stack gap={4} scrollable className="px-4 flex-1">
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                    <Input id={field.name} aria-invalid={fieldState.invalid} {...field} />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
               />
-            </Field>
 
-            <Field>
-              <FieldLabel>Login</FieldLabel>
-              <Input
-                value={form.login}
-                onChange={(e) => setForm((f) => ({ ...f, login: e.target.value }))}
+              <Controller
+                name="login"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Login</FieldLabel>
+                    <Input id={field.name} aria-invalid={fieldState.invalid} {...field} />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
               />
-            </Field>
 
-            <Field>
-              <FieldLabel>{userId ? 'New Password' : 'Password'}</FieldLabel>
-              <Input
-                type="password"
-                value={form.password}
-                placeholder={userId ? 'Leave empty to keep current' : ''}
-                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              <Controller
+                name="password"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      {userId ? 'New Password' : 'Password'}
+                    </FieldLabel>
+                    <Input
+                      id={field.name}
+                      type="password"
+                      aria-invalid={fieldState.invalid}
+                      placeholder={userId ? 'Leave empty to keep current' : ''}
+                      {...field}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
               />
-            </Field>
 
-            {userId && (
-              <Field orientation="horizontal">
-                <Checkbox
-                  id="deleted"
-                  checked={form.deleted}
-                  onCheckedChange={(checked) =>
-                    setForm((f) => ({ ...f, deleted: checked === true }))
-                  }
+              {userId && (
+                <Controller
+                  name="deleted"
+                  control={control}
+                  render={({ field }) => (
+                    <Field orientation="horizontal">
+                      <Checkbox
+                        id={field.name}
+                        checked={field.value}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                      <FieldLabel htmlFor={field.name}>Deleted</FieldLabel>
+                    </Field>
+                  )}
                 />
-                <FieldLabel htmlFor="deleted">Deleted</FieldLabel>
-              </Field>
-            )}
-          </Stack>
-        )}
+              )}
+            </Stack>
+          )}
 
-        <SheetFooter>
-          <Button onClick={() => void handleSubmit()} disabled={saveUser.loading || loading}>
-            Save
-          </Button>
-        </SheetFooter>
+          <SheetFooter>
+            <Button type="submit" disabled={saveUser.loading || loading}>
+              Save
+            </Button>
+          </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   )

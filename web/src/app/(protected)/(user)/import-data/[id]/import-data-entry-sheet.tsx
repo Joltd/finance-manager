@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { create } from 'zustand'
 
-import { ChevronDown, ChevronRight } from 'lucide-react'
 import { AccountInput } from '@/components/common/input/account-input'
 import { TagInput } from '@/components/common/input/tag-input'
 import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
 import { Stack } from '@/components/common/layout/stack'
+import { RawDataDisclosure } from '@/components/common/raw-data-disclosure'
 import { Typography } from '@/components/common/typography/typography'
 import { OperationTypeInput } from '@/components/common/input/operation-type-input'
 import { Field, FieldLabel } from '@/components/ui/field'
@@ -26,13 +26,203 @@ import {
   transitType,
 } from '@/app/(protected)/(user)/operation/operation-form'
 import { useImportDataStore } from '@/store/import-data'
-import { useOperationPresetStore } from '@/store/operation-preset'
+import { AccountUsage, useOperationPresetStore } from '@/store/operation-preset'
 import { useUserStore } from '@/store/user'
 import { FrequentAccounts } from '@/app/(protected)/(user)/operation/frequent-accounts'
 import { cn } from '@/lib/utils'
 import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from '@/app/(protected)/(user)/import-data/[id]/import-data-actions'
 import { formatDate } from 'date-fns'
+
+// ---------------------------------------------------------------------------
+// Type-specific field groups
+// ---------------------------------------------------------------------------
+
+interface TypeFieldsProps {
+  form: OperationFormState
+  setForm: Dispatch<SetStateAction<OperationFormState>>
+  accountUsages: AccountUsage[]
+}
+
+function ExchangeFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Field>
+        <FieldLabel htmlFor="accountFrom">From</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.ACCOUNT}
+          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+        <AccountInput
+          id="accountFrom"
+          type={AccountType.ACCOUNT}
+          value={form.accountFrom}
+          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="amountFrom">Amount From</FieldLabel>
+        <AmountInput
+          id="amountFrom"
+          value={form.amountFrom}
+          onChange={(amountFrom) => setForm((f) => ({ ...f, amountFrom }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="accountTo">To</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.ACCOUNT}
+          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+        <AccountInput
+          id="accountTo"
+          type={AccountType.ACCOUNT}
+          value={form.accountTo}
+          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="amountTo">Amount To</FieldLabel>
+        <AmountInput
+          id="amountTo"
+          value={form.amountTo}
+          onChange={(amountTo) => setForm((f) => ({ ...f, amountTo }))}
+        />
+      </Field>
+    </>
+  )
+}
+
+function TransferFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Field>
+        <FieldLabel htmlFor="accountFrom">From</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.ACCOUNT}
+          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+        <AccountInput
+          id="accountFrom"
+          type={AccountType.ACCOUNT}
+          value={form.accountFrom}
+          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="accountTo">To</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.ACCOUNT}
+          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+        <AccountInput
+          id="accountTo"
+          type={AccountType.ACCOUNT}
+          value={form.accountTo}
+          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="amount">Amount</FieldLabel>
+        <AmountInput
+          id="amount"
+          value={form.amount}
+          onChange={(amount) => setForm((f) => ({ ...f, amount }))}
+        />
+      </Field>
+    </>
+  )
+}
+
+function ExpenseFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Field>
+        <FieldLabel htmlFor="accountFrom">Account</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.ACCOUNT}
+          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+        <AccountInput
+          id="accountFrom"
+          type={AccountType.ACCOUNT}
+          value={form.accountFrom}
+          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="accountTo">Category</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.EXPENSE}
+          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+        <AccountInput
+          id="accountTo"
+          type={AccountType.EXPENSE}
+          value={form.accountTo}
+          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="amount">Amount</FieldLabel>
+        <AmountInput
+          id="amount"
+          value={form.amount}
+          onChange={(amount) => setForm((f) => ({ ...f, amount }))}
+        />
+      </Field>
+    </>
+  )
+}
+
+function IncomeFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+  return (
+    <>
+      <Field>
+        <FieldLabel htmlFor="accountTo">Account</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.ACCOUNT}
+          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+        <AccountInput
+          id="accountTo"
+          type={AccountType.ACCOUNT}
+          value={form.accountTo}
+          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="accountFrom">Category</FieldLabel>
+        <FrequentAccounts
+          usages={accountUsages}
+          accountType={AccountType.INCOME}
+          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+        <AccountInput
+          id="accountFrom"
+          type={AccountType.INCOME}
+          value={form.accountFrom}
+          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="amount">Amount</FieldLabel>
+        <AmountInput
+          id="amount"
+          value={form.amount}
+          onChange={(amount) => setForm((f) => ({ ...f, amount }))}
+        />
+      </Field>
+    </>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Store
@@ -69,12 +259,9 @@ export function ImportDataEntrySheet() {
   const mainAccountId = importData?.account.id
   const [form, setForm] = useState<OperationFormState>(createDefaultFormState)
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
-  const [rawExpanded, setRawExpanded] = useState(false)
 
   useEffect(() => {
     if (!open || !entry) return
-
-    setRawExpanded(false)
 
     if (entry.operation) {
       setSelectedSuggestionIdx(null)
@@ -188,178 +375,36 @@ export function ImportDataEntrySheet() {
           <Stack gap={0} className="flex-1 min-h-0">
             <Stack gap={4} scrollable className="flex-1 px-4 pb-4">
               <Field>
-                <FieldLabel>Type</FieldLabel>
-                <OperationTypeInput value={form.type} onChange={handleTypeChange} />
+                <FieldLabel htmlFor="type">Type</FieldLabel>
+                <OperationTypeInput id="type" value={form.type} onChange={handleTypeChange} />
               </Field>
 
               <Field>
-                <FieldLabel>Date</FieldLabel>
+                <FieldLabel htmlFor="date">Date</FieldLabel>
                 <DateInput
+                  id="date"
                   value={form.date}
                   onChange={(date) => date && setForm((f) => ({ ...f, date }))}
                 />
               </Field>
 
               {form.type === OperationType.EXCHANGE && (
-                <>
-                  <Field>
-                    <FieldLabel>From</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.ACCOUNT}
-                      value={form.accountFrom}
-                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Amount From</FieldLabel>
-                    <AmountInput
-                      value={form.amountFrom}
-                      onChange={(amountFrom) => setForm((f) => ({ ...f, amountFrom }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>To</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.ACCOUNT}
-                      value={form.accountTo}
-                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Amount To</FieldLabel>
-                    <AmountInput
-                      value={form.amountTo}
-                      onChange={(amountTo) => setForm((f) => ({ ...f, amountTo }))}
-                    />
-                  </Field>
-                </>
+                <ExchangeFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
               )}
-
               {form.type === OperationType.TRANSFER && (
-                <>
-                  <Field>
-                    <FieldLabel>From</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.ACCOUNT}
-                      value={form.accountFrom}
-                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>To</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.ACCOUNT}
-                      value={form.accountTo}
-                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Amount</FieldLabel>
-                    <AmountInput
-                      value={form.amount}
-                      onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-                    />
-                  </Field>
-                </>
+                <TransferFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
               )}
-
               {form.type === OperationType.EXPENSE && (
-                <>
-                  <Field>
-                    <FieldLabel>Account</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.ACCOUNT}
-                      value={form.accountFrom}
-                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Category</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.EXPENSE}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.EXPENSE}
-                      value={form.accountTo}
-                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Amount</FieldLabel>
-                    <AmountInput
-                      value={form.amount}
-                      onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-                    />
-                  </Field>
-                </>
+                <ExpenseFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
               )}
-
               {form.type === OperationType.INCOME && (
-                <>
-                  <Field>
-                    <FieldLabel>Account</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.ACCOUNT}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountTo: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.ACCOUNT}
-                      value={form.accountTo}
-                      onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Category</FieldLabel>
-                    <FrequentAccounts
-                      usages={presetStore.accountUsages}
-                      accountType={AccountType.INCOME}
-                      onSelect={(a) => setForm((f) => ({ ...f, accountFrom: a }))}
-                    />
-                    <AccountInput
-                      type={AccountType.INCOME}
-                      value={form.accountFrom}
-                      onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Amount</FieldLabel>
-                    <AmountInput
-                      value={form.amount}
-                      onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-                    />
-                  </Field>
-                </>
+                <IncomeFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
               )}
 
               <Field>
-                <FieldLabel>Tags</FieldLabel>
+                <FieldLabel htmlFor="tags">Tags</FieldLabel>
                 <TagInput
+                  id="tags"
                   mode="multi"
                   allowCreate
                   value={form.tags ?? []}
@@ -368,34 +413,15 @@ export function ImportDataEntrySheet() {
               </Field>
 
               <Field>
-                <FieldLabel>Description</FieldLabel>
+                <FieldLabel htmlFor="description">Description</FieldLabel>
                 <Input
+                  id="description"
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 />
               </Field>
 
-              {entry?.parsed?.raw && (
-                <div>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setRawExpanded((v) => !v)}
-                  >
-                    {rawExpanded ? (
-                      <ChevronDown className="size-3.5" />
-                    ) : (
-                      <ChevronRight className="size-3.5" />
-                    )}
-                    Raw source data
-                  </button>
-                  {rawExpanded && (
-                    <pre className="mt-2 rounded-md bg-muted px-3 py-2 font-mono text-xs text-muted-foreground whitespace-pre-wrap break-all">
-                      {entry.parsed.raw}
-                    </pre>
-                  )}
-                </div>
-              )}
+              <RawDataDisclosure raw={entry?.parsed?.raw} />
             </Stack>
 
             <SheetFooter>

@@ -7,7 +7,6 @@ import React, {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 import { Bookmark, ListFilter, Save, Trash2, X } from 'lucide-react'
@@ -105,17 +104,10 @@ export function Filter({ value = {}, onChange, presetKey, children }: FilterProp
   const [registrations, setRegistrations] = useState<FilterRegistration[]>([])
   const [activeIds, setActiveIds] = useState<string[]>([])
 
-  // Sync activeIds when value prop gains new non-null keys (e.g. after preset load)
-  useEffect(() => {
-    setActiveIds((prev) => {
-      const newKeys = Object.keys(value).filter((k) => value[k] != null && !prev.includes(k))
-      return newKeys.length > 0 ? [...prev, ...newKeys] : prev
-    })
-  }, [value])
-
-  // Ref keeps the latest value to avoid stale closures in callbacks
-  const valueRef = useRef(value)
-  valueRef.current = value
+  const valueActiveIds = useMemo(
+    () => Object.keys(value).filter((id) => value[id] != null),
+    [value],
+  )
 
   const register = useCallback((entry: FilterRegistration) => {
     setRegistrations((prev) => (prev.some((r) => r.id === entry.id) ? prev : [...prev, entry]))
@@ -127,37 +119,41 @@ export function Filter({ value = {}, onChange, presetKey, children }: FilterProp
 
   const isActive = useCallback(
     (id: string) =>
-      activeIds.includes(id) || registrations.some((r) => r.id === id && r.required),
-    [activeIds, registrations],
+      valueActiveIds.includes(id) ||
+      activeIds.includes(id) ||
+      registrations.some((r) => r.id === id && r.required),
+    [valueActiveIds, activeIds, registrations],
   )
 
-  const getValue = useCallback((id: string) => valueRef.current[id], [])
+  const getValue = useCallback((id: string) => value[id], [value])
 
   const handleChange = useCallback(
     (id: string, val: unknown) => {
-      onChange?.({ ...valueRef.current, [id]: val })
+      setActiveIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
+      onChange?.({ ...value, [id]: val })
     },
-    [onChange],
+    [value, onChange],
   )
 
   const removeFilter = useCallback(
     (id: string) => {
       setActiveIds((prev) => prev.filter((i) => i !== id))
-      const next = { ...valueRef.current }
+      const next = { ...value }
       delete next[id]
       onChange?.(next)
     },
-    [onChange],
+    [value, onChange],
   )
 
-  const addFilter = (id: string) => setActiveIds((prev) => [...prev, id])
+  const addFilter = (id: string) =>
+    setActiveIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
 
   const ctx = useMemo<FilterContextValue>(
     () => ({ register, unregister, isActive, getValue, handleChange, removeFilter }),
     [register, unregister, isActive, getValue, handleChange, removeFilter],
   )
 
-  const inactiveRegistrations = registrations.filter((r) => !r.required && !activeIds.includes(r.id))
+  const inactiveRegistrations = registrations.filter((r) => !r.required && !isActive(r.id))
 
   return (
     <FilterContext.Provider value={ctx}>

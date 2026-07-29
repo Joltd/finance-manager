@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Control, Controller, useForm } from 'react-hook-form'
 import { create } from 'zustand'
-import { ChevronDown, ChevronRight } from 'lucide-react'
 import { formatDate } from 'date-fns'
 
 import { operationUrls } from '@/api/operation'
@@ -13,6 +12,7 @@ import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
 import { OperationTypeInput } from '@/components/common/input/operation-type-input'
 import { Stack } from '@/components/common/layout/stack'
+import { RawDataDisclosure } from '@/components/common/raw-data-disclosure'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -379,7 +379,6 @@ interface OperationSheetProps {
 export function OperationSheet({ onSaved }: OperationSheetProps) {
   const { open, copy, operationId, closeSheet } = useOperationSheetStore()
   const operationStore = useOperationStore()
-  const [rawExpanded, setRawExpanded] = useState(false)
   const userStore = useUserStore()
   const presetStore = useOperationPresetStore()
   const saveOperation = useRequest(operationUrls.root)
@@ -396,10 +395,6 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
   })
 
   const type = watch('type')
-
-  useEffect(() => {
-    setRawExpanded(false)
-  }, [open])
 
   useEffect(() => {
     if (open) {
@@ -546,27 +541,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
                 )}
               />
 
-              {operationStore.data?.raw && (
-                <div>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setRawExpanded((v) => !v)}
-                  >
-                    {rawExpanded ? (
-                      <ChevronDown className="size-3.5" />
-                    ) : (
-                      <ChevronRight className="size-3.5" />
-                    )}
-                    Raw source data
-                  </button>
-                  {rawExpanded && (
-                    <pre className="mt-2 rounded-md bg-muted px-3 py-2 font-mono text-xs text-muted-foreground whitespace-pre-wrap break-all">
-                      {operationStore.data.raw}
-                    </pre>
-                  )}
-                </div>
-              )}
+              <RawDataDisclosure raw={operationStore.data?.raw} />
             </Stack>
           )}
 
