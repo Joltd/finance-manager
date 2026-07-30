@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Control, Controller, useForm } from 'react-hook-form'
+import { Control, Controller, useForm, useWatch } from 'react-hook-form'
 import { create } from 'zustand'
 import { formatDate } from 'date-fns'
 
@@ -388,13 +388,12 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
     handleSubmit,
     reset,
     getValues,
-    watch,
   } = useForm<OperationFormState>({
     resolver: operationFormResolver,
     defaultValues: createDefaultFormState(),
   })
 
-  const type = watch('type')
+  const type = useWatch({ control, name: 'type' })
 
   useEffect(() => {
     if (open) {

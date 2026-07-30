@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { create } from 'zustand'
@@ -63,15 +63,17 @@ export function AccountDialog() {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<AccountForm>({
     resolver: zodResolver(schema),
     defaultValues: { name: '', deleted: false },
   })
+
+  const deleted = useWatch({ control, name: 'deleted' })
 
   useEffect(() => {
     if (open && item) {
@@ -116,7 +118,7 @@ export function AccountDialog() {
             <Field orientation="horizontal">
               <Checkbox
                 id="account-deleted"
-                checked={watch('deleted')}
+                checked={deleted}
                 onCheckedChange={(checked) => setValue('deleted', !!checked)}
                 disabled={loading}
               />
@@ -140,4 +142,3 @@ export function AccountDialog() {
     </Dialog>
   )
 }
-

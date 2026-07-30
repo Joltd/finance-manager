@@ -1,6 +1,7 @@
 'use client'
 
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Control, Controller, useForm, useWatch } from 'react-hook-form'
 import { create } from 'zustand'
 
 import { AccountInput } from '@/components/common/input/account-input'
@@ -11,7 +12,7 @@ import { Stack } from '@/components/common/layout/stack'
 import { RawDataDisclosure } from '@/components/common/raw-data-disclosure'
 import { Typography } from '@/components/common/typography/typography'
 import { OperationTypeInput } from '@/components/common/input/operation-type-input'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -21,6 +22,7 @@ import type { ImportDataEntry } from '@/types/import-data'
 import {
   createDefaultFormState,
   createPresetFormState,
+  operationFormResolver,
   OperationFormState,
   operationToFormState,
   transitType,
@@ -39,187 +41,294 @@ import { formatDate } from 'date-fns'
 // ---------------------------------------------------------------------------
 
 interface TypeFieldsProps {
-  form: OperationFormState
-  setForm: Dispatch<SetStateAction<OperationFormState>>
+  control: Control<OperationFormState>
   accountUsages: AccountUsage[]
 }
 
-function ExchangeFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+function amountFieldErrors(error?: { message?: string; currency?: { message?: string } }) {
+  return [error, error?.currency].filter((e): e is { message?: string } => Boolean(e?.message))
+}
+
+function ExchangeFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
-      <Field>
-        <FieldLabel htmlFor="accountFrom">From</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.ACCOUNT}
-          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-        <AccountInput
-          id="accountFrom"
-          type={AccountType.ACCOUNT}
-          value={form.accountFrom}
-          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="amountFrom">Amount From</FieldLabel>
-        <AmountInput
-          id="amountFrom"
-          value={form.amountFrom}
-          onChange={(amountFrom) => setForm((f) => ({ ...f, amountFrom }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="accountTo">To</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.ACCOUNT}
-          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-        <AccountInput
-          id="accountTo"
-          type={AccountType.ACCOUNT}
-          value={form.accountTo}
-          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="amountTo">Amount To</FieldLabel>
-        <AmountInput
-          id="amountTo"
-          value={form.amountTo}
-          onChange={(amountTo) => setForm((f) => ({ ...f, amountTo }))}
-        />
-      </Field>
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>From</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="amountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount From</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>To</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="amountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount To</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
     </>
   )
 }
 
-function TransferFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+function TransferFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
-      <Field>
-        <FieldLabel htmlFor="accountFrom">From</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.ACCOUNT}
-          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-        <AccountInput
-          id="accountFrom"
-          type={AccountType.ACCOUNT}
-          value={form.accountFrom}
-          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="accountTo">To</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.ACCOUNT}
-          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-        <AccountInput
-          id="accountTo"
-          type={AccountType.ACCOUNT}
-          value={form.accountTo}
-          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="amount">Amount</FieldLabel>
-        <AmountInput
-          id="amount"
-          value={form.amount}
-          onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-        />
-      </Field>
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>From</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>To</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="amount"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
     </>
   )
 }
 
-function ExpenseFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
-      <Field>
-        <FieldLabel htmlFor="accountFrom">Account</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.ACCOUNT}
-          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-        <AccountInput
-          id="accountFrom"
-          type={AccountType.ACCOUNT}
-          value={form.accountFrom}
-          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="accountTo">Category</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.EXPENSE}
-          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-        <AccountInput
-          id="accountTo"
-          type={AccountType.EXPENSE}
-          value={form.accountTo}
-          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="amount">Amount</FieldLabel>
-        <AmountInput
-          id="amount"
-          value={form.amount}
-          onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-        />
-      </Field>
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Account</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Category</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.EXPENSE}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.EXPENSE}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="amount"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
     </>
   )
 }
 
-function IncomeFields({ form, setForm, accountUsages }: TypeFieldsProps) {
+function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
-      <Field>
-        <FieldLabel htmlFor="accountTo">Account</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.ACCOUNT}
-          onSelect={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-        <AccountInput
-          id="accountTo"
-          type={AccountType.ACCOUNT}
-          value={form.accountTo}
-          onChange={(accountTo) => setForm((f) => ({ ...f, accountTo }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="accountFrom">Category</FieldLabel>
-        <FrequentAccounts
-          usages={accountUsages}
-          accountType={AccountType.INCOME}
-          onSelect={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-        <AccountInput
-          id="accountFrom"
-          type={AccountType.INCOME}
-          value={form.accountFrom}
-          onChange={(accountFrom) => setForm((f) => ({ ...f, accountFrom }))}
-        />
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="amount">Amount</FieldLabel>
-        <AmountInput
-          id="amount"
-          value={form.amount}
-          onChange={(amount) => setForm((f) => ({ ...f, amount }))}
-        />
-      </Field>
+      <Controller
+        name="accountTo"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Account</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.ACCOUNT}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.ACCOUNT}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="accountFrom"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Category</FieldLabel>
+            <FrequentAccounts
+              usages={accountUsages}
+              accountType={AccountType.INCOME}
+              onSelect={field.onChange}
+            />
+            <AccountInput
+              id={field.name}
+              type={AccountType.INCOME}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <Controller
+        name="amount"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+            <AmountInput
+              id={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              aria-invalid={fieldState.invalid}
+            />
+            <FieldError errors={amountFieldErrors(fieldState.error)} />
+          </Field>
+        )}
+      />
     </>
   )
 }
@@ -257,32 +366,34 @@ export function ImportDataEntrySheet() {
   const presetStore = useOperationPresetStore()
   const userStore = useUserStore()
   const mainAccountId = importData?.account.id
-  const [form, setForm] = useState<OperationFormState>(createDefaultFormState)
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
+  const { control, getValues, handleSubmit, reset } = useForm<OperationFormState>({
+    resolver: operationFormResolver,
+    defaultValues: createDefaultFormState(),
+  })
+  const type = useWatch({ control, name: 'type' })
 
   useEffect(() => {
     if (!open || !entry) return
 
     if (entry.operation) {
-      setSelectedSuggestionIdx(null)
-      setForm(operationToFormState(entry.operation))
+      reset(operationToFormState(entry.operation))
     } else {
       const idx = entry.suggestions.findIndex((s) => s.selected)
       if (idx >= 0) {
-        setSelectedSuggestionIdx(idx)
-        setForm(operationToFormState(entry.suggestions[idx]))
+        reset(operationToFormState(entry.suggestions[idx]))
       } else if (entry.parsed) {
-        setSelectedSuggestionIdx(null)
-        setForm(operationToFormState(entry.parsed))
+        reset(operationToFormState(entry.parsed))
       } else {
-        setSelectedSuggestionIdx(null)
-        setForm(createPresetFormState(presetStore, userStore.data?.settings?.operationDefaultCurrency))
+        reset(
+          createPresetFormState(presetStore, userStore.data?.settings?.operationDefaultCurrency),
+        )
       }
     }
   }, [open, entry]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTypeChange = (newType: OperationType) => {
-    setForm((f) => transitType(f, newType))
+    reset(transitType(getValues(), newType))
   }
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -292,30 +403,30 @@ export function ImportDataEntrySheet() {
   const handleSuggestionClick = (idx: number) => {
     if (!entry) return
     setSelectedSuggestionIdx(idx)
-    setForm(operationToFormState(entry.suggestions[idx]))
+    reset(operationToFormState(entry.suggestions[idx]))
   }
 
   const hasOperation = !!entry?.operation
   const hasSuggestions = (entry?.suggestions.length ?? 0) > 0
 
-  const buildOperationBody = (): Omit<Operation, 'raw'> => {
-    const isExchange = form.type === OperationType.EXCHANGE
+  const buildOperationBody = (data: OperationFormState): Omit<Operation, 'raw'> => {
+    const isExchange = data.type === OperationType.EXCHANGE
     return {
       id: entry?.operation?.id,
-      date: formatDate(form.date, 'yyyy-MM-dd'),
-      type: form.type,
-      accountFrom: form.accountFrom!,
-      accountTo: form.accountTo!,
-      amountFrom: isExchange ? form.amountFrom! : form.amount!,
-      amountTo: isExchange ? form.amountTo! : form.amount!,
-      description: form.description || undefined,
-      tags: form.tags ?? [],
+      date: formatDate(data.date, 'yyyy-MM-dd'),
+      type: data.type,
+      accountFrom: data.accountFrom!,
+      accountTo: data.accountTo!,
+      amountFrom: isExchange ? data.amountFrom! : data.amount!,
+      amountTo: isExchange ? data.amountTo! : data.amount!,
+      description: data.description || undefined,
+      tags: data.tags,
     }
   }
 
-  const handleAction = async () => {
+  const onSubmit = async (data: OperationFormState) => {
     if (!entry) return
-    const body = buildOperationBody()
+    const body = buildOperationBody(data)
     if (hasOperation) {
       await saveOperation(body)
     } else {
@@ -342,100 +453,137 @@ export function ImportDataEntrySheet() {
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
 
-        <Stack orientation="horizontal" gap={0} className="flex-1 min-h-0 overflow-hidden">
-          {/* Suggestions panel */}
-          {hasSuggestions && (
-            <Stack gap={2} scrollable className="w-64 shrink-0 border-r px-4 pb-4">
-              <Typography
-                variant="muted"
-                className="text-xs font-medium uppercase tracking-wide shrink-0 sticky top-0 bg-background pt-1 pb-1"
-              >
-                Suggestions
-              </Typography>
-              {entry!.suggestions.map((suggestion, idx) => (
-                <ImportDataEntryCard
-                  key={idx}
-                  type={suggestion.type}
-                  amountFrom={suggestion.amountFrom}
-                  amountTo={suggestion.amountTo}
-                  accountFrom={suggestion.accountFrom}
-                  accountTo={suggestion.accountTo}
-                  description={suggestion.description}
-                  rating={suggestion.rating}
-                  mainAccountId={mainAccountId}
-                  active={selectedSuggestionIdx === idx}
-                  recommended={suggestion.selected}
-                  onClick={() => handleSuggestionClick(idx)}
+        <form onSubmit={handleSubmit(onSubmit)} className="contents">
+          <Stack orientation="horizontal" gap={0} className="flex-1 min-h-0 overflow-hidden">
+            {/* Suggestions panel */}
+            {hasSuggestions && (
+              <Stack gap={2} scrollable className="w-64 shrink-0 border-r px-4 pb-4">
+                <Typography
+                  variant="muted"
+                  className="text-xs font-medium uppercase tracking-wide shrink-0 sticky top-0 bg-background pt-1 pb-1"
+                >
+                  Suggestions
+                </Typography>
+                {entry!.suggestions.map((suggestion, idx) => (
+                  <ImportDataEntryCard
+                    key={idx}
+                    type={suggestion.type}
+                    amountFrom={suggestion.amountFrom}
+                    amountTo={suggestion.amountTo}
+                    accountFrom={suggestion.accountFrom}
+                    accountTo={suggestion.accountTo}
+                    description={suggestion.description}
+                    rating={suggestion.rating}
+                    mainAccountId={mainAccountId}
+                    active={(selectedSuggestionIdx === null && suggestion.selected) || selectedSuggestionIdx === idx}
+                    recommended={suggestion.selected}
+                    onClick={() => handleSuggestionClick(idx)}
+                  />
+                ))}
+              </Stack>
+            )}
+
+            {/* Form column + footer buttons */}
+            <Stack gap={0} className="flex-1 min-h-0">
+              <Stack gap={4} scrollable className="flex-1 px-4 pb-4">
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Type</FieldLabel>
+                      <OperationTypeInput
+                        id={field.name}
+                        value={field.value}
+                        onChange={handleTypeChange}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
                 />
-              ))}
-            </Stack>
-          )}
 
-          {/* Form column + footer buttons */}
-          <Stack gap={0} className="flex-1 min-h-0">
-            <Stack gap={4} scrollable className="flex-1 px-4 pb-4">
-              <Field>
-                <FieldLabel htmlFor="type">Type</FieldLabel>
-                <OperationTypeInput id="type" value={form.type} onChange={handleTypeChange} />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="date">Date</FieldLabel>
-                <DateInput
-                  id="date"
-                  value={form.date}
-                  onChange={(date) => date && setForm((f) => ({ ...f, date }))}
+                <Controller
+                  name="date"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Date</FieldLabel>
+                      <DateInput
+                        id={field.name}
+                        value={field.value}
+                        onChange={(date) => date && field.onChange(date)}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
                 />
-              </Field>
 
-              {form.type === OperationType.EXCHANGE && (
-                <ExchangeFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
-              )}
-              {form.type === OperationType.TRANSFER && (
-                <TransferFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
-              )}
-              {form.type === OperationType.EXPENSE && (
-                <ExpenseFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
-              )}
-              {form.type === OperationType.INCOME && (
-                <IncomeFields form={form} setForm={setForm} accountUsages={presetStore.accountUsages} />
-              )}
+                {type === OperationType.EXCHANGE && (
+                  <ExchangeFields control={control} accountUsages={presetStore.accountUsages} />
+                )}
+                {type === OperationType.TRANSFER && (
+                  <TransferFields control={control} accountUsages={presetStore.accountUsages} />
+                )}
+                {type === OperationType.EXPENSE && (
+                  <ExpenseFields control={control} accountUsages={presetStore.accountUsages} />
+                )}
+                {type === OperationType.INCOME && (
+                  <IncomeFields control={control} accountUsages={presetStore.accountUsages} />
+                )}
 
-              <Field>
-                <FieldLabel htmlFor="tags">Tags</FieldLabel>
-                <TagInput
-                  id="tags"
-                  mode="multi"
-                  allowCreate
-                  value={form.tags ?? []}
-                  onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+                <Controller
+                  name="tags"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Tags</FieldLabel>
+                      <TagInput
+                        id={field.name}
+                        mode="multi"
+                        allowCreate
+                        value={field.value}
+                        onChange={field.onChange}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
                 />
-              </Field>
 
-              <Field>
-                <FieldLabel htmlFor="description">Description</FieldLabel>
-                <Input
-                  id="description"
-                  value={form.description}
-                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                      <Input
+                        id={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
                 />
-              </Field>
 
-              <RawDataDisclosure raw={entry?.parsed?.raw} />
-            </Stack>
+                <RawDataDisclosure raw={entry?.parsed?.raw} />
+              </Stack>
 
-            <SheetFooter>
-              {showUnlink && (
-                <Button variant="outline" disabled={loading}>
-                  Unlink
+              <SheetFooter>
+                {showUnlink && (
+                  <Button type="button" variant="outline" disabled={loading}>
+                    Unlink
+                  </Button>
+                )}
+                <Button type="submit" disabled={loading}>
+                  {actionLabel}
                 </Button>
-              )}
-              <Button onClick={handleAction} disabled={loading}>
-                {actionLabel}
-              </Button>
-            </SheetFooter>
+              </SheetFooter>
+            </Stack>
           </Stack>
-        </Stack>
+        </form>
       </SheetContent>
     </Sheet>
   )
