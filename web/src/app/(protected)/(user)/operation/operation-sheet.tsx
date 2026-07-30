@@ -62,20 +62,24 @@ export function openOperationSheetForCopy(operationId?: string) {
 
 // The amount schema nests currency errors under `.currency` while a missing
 // amount is reported directly on the field itself — surface whichever applies.
-function amountFieldErrors(error?: { message?: string; currency?: { message?: string } }) {
+export function amountFieldErrors(error?: { message?: string; currency?: { message?: string } }) {
   return [error, error?.currency].filter((e): e is { message?: string } => Boolean(e?.message))
 }
 
 // ---------------------------------------------------------------------------
 // Type-specific field groups
+//
+// Exported so other operation-editing forms sharing OperationFormState (e.g.
+// ImportDataEntrySheet) can reuse the same field groups instead of
+// duplicating them.
 // ---------------------------------------------------------------------------
 
-interface TypeFieldsProps {
+export interface TypeFieldsProps {
   control: Control<OperationFormState>
   accountUsages: AccountUsage[]
 }
 
-function ExchangeFields({ control, accountUsages }: TypeFieldsProps) {
+export function ExchangeFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
       <Controller
@@ -161,7 +165,7 @@ function ExchangeFields({ control, accountUsages }: TypeFieldsProps) {
   )
 }
 
-function TransferFields({ control, accountUsages }: TypeFieldsProps) {
+export function TransferFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
       <Controller
@@ -230,7 +234,7 @@ function TransferFields({ control, accountUsages }: TypeFieldsProps) {
   )
 }
 
-function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
+export function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
       <Controller
@@ -299,7 +303,7 @@ function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
   )
 }
 
-function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
+export function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
       <Controller
@@ -469,7 +473,12 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Type</FieldLabel>
-                    <OperationTypeInput id={field.name} value={field.value} onChange={handleTypeChange} />
+                    <OperationTypeInput
+                      id={field.name}
+                      value={field.value}
+                      onChange={handleTypeChange}
+                      aria-invalid={fieldState.invalid}
+                    />
                     <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
@@ -517,6 +526,7 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
                       allowCreate
                       value={field.value}
                       onChange={field.onChange}
+                      aria-invalid={fieldState.invalid}
                     />
                     <FieldError errors={[fieldState.error]} />
                   </Field>

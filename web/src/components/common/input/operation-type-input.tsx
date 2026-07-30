@@ -15,6 +15,7 @@ type OperationTypeInputBaseProps = {
   disabled?: boolean
   className?: string
   id?: string
+  'aria-invalid'?: boolean | 'true' | 'false'
 }
 
 export type OperationTypeInputProps =
@@ -23,6 +24,7 @@ export type OperationTypeInputProps =
 
 export function OperationTypeInput(props: OperationTypeInputProps) {
   const { placeholder, disabled, className, id } = props
+  const ariaInvalid = props['aria-invalid']
 
   const common = {
     data: OPTIONS,
@@ -32,6 +34,7 @@ export function OperationTypeInput(props: OperationTypeInputProps) {
     disabled,
     className,
     id,
+    'aria-invalid': ariaInvalid,
   }
 
   if (props.mode === 'multi') {

@@ -110,9 +110,9 @@ className?: string
 
 This lets it be spread as `{...field}` (or wired individually) plus `id`/`aria-invalid` from the
 surrounding `Field`, with no adapter layer in the form component. See `AmountInput`,
-`ReferenceInput` (and its `AccountInput`/`TagInput` wrappers), `DateInput` for the pattern. When
-adding a new input component, match this signature even if the first caller doesn't use every
-prop yet.
+`ReferenceInput` (and its `AccountInput`/`TagInput`/`OperationTypeInput` wrappers), `DateInput`
+for the pattern. When adding a new input component, match this signature even if the first caller
+doesn't use every prop yet.
 
 ## 6. Sheets & Dialogs: open-state store + hydration
 
@@ -155,25 +155,32 @@ prop yet.
    Put the two things that vary per-branch — "convert a fetched domain object into form state"
    and "build default form state from presets" — into the sibling `*-form.ts` file as **pure**
    functions that take plain data as parameters (not hooks or store reads). That's what lets the
-   exact same hydration logic be reused by a full RHF sheet and by a plain-`useState` sheet alike
+   exact same hydration logic be reused across multiple sheets built on the same `FormState`
    (`operationToFormState`, `createPresetFormState` are used by both `operation-sheet.tsx` and
    `import-data-entry-sheet.tsx`).
 
 - Default to full RHF (`useForm` + `zodResolver` + `reset()`) for the form — it gives
-  validation and dirty-tracking for free and fits the `Controller` pattern in §3 directly.
-- Fall back to a bare `useState<FormState>` (no RHF, no validation) only when the sheet's actual
-  job is picking among several pre-built states with no independent client-side validation of
-  its own (e.g. choosing between import suggestions) — see `import-data-entry-sheet.tsx`. Even
-  then, reuse the same `*-form.ts` conversion/preset helpers so the two hydration paths can't
-  drift apart.
+  validation and dirty-tracking for free and fits the `Controller` pattern in §3 directly. Both
+  `operation-sheet.tsx` and `import-data-entry-sheet.tsx` use this, even though the latter also
+  lets the user pick among several pre-built suggestion states — RHF's `reset()` handles loading
+  a picked suggestion into the form just as well as loading a fetched entity.
+- A bare `useState<FormState>` (no RHF, no validation) is only appropriate when there is no
+  schema/`Controller` rendering involved at all — e.g. a component that just holds which of
+  several pre-built states is currently selected for display, with the actual form living
+  elsewhere. Don't reach for this once the component renders `Controller`-based fields — use full
+  RHF instead so validation doesn't silently disappear.
 
 ## 7. Type-conditional field groups
 
 When a discriminator field (e.g. `type`) changes which other fields are shown/required:
 
 - Split each variant into its own small component taking `{ control, ...auxData }` props (see
-  `ExchangeFields` / `TransferFields` / `ExpenseFields` / `IncomeFields` in
-  `operation-sheet.tsx`), and switch between them in JSX based on `watch('type')`.
+  `ExchangeFields` / `TransferFields` / `ExpenseFields` / `IncomeFields`, exported from
+  `operation-sheet.tsx`), and switch between them in JSX based on `watch('type')`. When another
+  form shares the same `FormState` (e.g. `import-data-entry-sheet.tsx` sharing
+  `OperationFormState` with `operation-sheet.tsx`), import and reuse these components instead of
+  recreating them — same rationale as §1's "same schema/state-shaping logic needed by more than
+  one component" rule, just applied to the field-group JSX instead of the schema.
 - Keep the "which account type is valid for which operation type" mapping in one place in the
   `*-form.ts` file (`FROM_ACCOUNT_TYPE` / `TO_ACCOUNT_TYPE`) and reuse it from both the zod
   schema's `superRefine` and the type-transition helper — don't duplicate the mapping.

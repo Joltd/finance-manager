@@ -1,22 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Control, Controller, useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { create } from 'zustand'
 
-import { AccountInput } from '@/components/common/input/account-input'
-import { TagInput } from '@/components/common/input/tag-input'
-import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
 import { Stack } from '@/components/common/layout/stack'
 import { RawDataDisclosure } from '@/components/common/raw-data-disclosure'
 import { Typography } from '@/components/common/typography/typography'
 import { OperationTypeInput } from '@/components/common/input/operation-type-input'
+import { TagInput } from '@/components/common/input/tag-input'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { AccountType } from '@/types/account'
 import { Operation, OperationType } from '@/types/operation'
 import type { ImportDataEntry } from '@/types/import-data'
 import {
@@ -27,311 +24,19 @@ import {
   operationToFormState,
   transitType,
 } from '@/app/(protected)/(user)/operation/operation-form'
+import {
+  ExchangeFields,
+  ExpenseFields,
+  IncomeFields,
+  TransferFields,
+} from '@/app/(protected)/(user)/operation/operation-sheet'
 import { useImportDataStore } from '@/store/import-data'
-import { AccountUsage, useOperationPresetStore } from '@/store/operation-preset'
+import { useOperationPresetStore } from '@/store/operation-preset'
 import { useUserStore } from '@/store/user'
-import { FrequentAccounts } from '@/app/(protected)/(user)/operation/frequent-accounts'
 import { cn } from '@/lib/utils'
 import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from '@/app/(protected)/(user)/import-data/[id]/import-data-actions'
 import { formatDate } from 'date-fns'
-
-// ---------------------------------------------------------------------------
-// Type-specific field groups
-// ---------------------------------------------------------------------------
-
-interface TypeFieldsProps {
-  control: Control<OperationFormState>
-  accountUsages: AccountUsage[]
-}
-
-function amountFieldErrors(error?: { message?: string; currency?: { message?: string } }) {
-  return [error, error?.currency].filter((e): e is { message?: string } => Boolean(e?.message))
-}
-
-function ExchangeFields({ control, accountUsages }: TypeFieldsProps) {
-  return (
-    <>
-      <Controller
-        name="accountFrom"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>From</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="amountFrom"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Amount From</FieldLabel>
-            <AmountInput
-              id={field.name}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={amountFieldErrors(fieldState.error)} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="accountTo"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>To</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="amountTo"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Amount To</FieldLabel>
-            <AmountInput
-              id={field.name}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={amountFieldErrors(fieldState.error)} />
-          </Field>
-        )}
-      />
-    </>
-  )
-}
-
-function TransferFields({ control, accountUsages }: TypeFieldsProps) {
-  return (
-    <>
-      <Controller
-        name="accountFrom"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>From</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="accountTo"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>To</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="amount"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
-            <AmountInput
-              id={field.name}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={amountFieldErrors(fieldState.error)} />
-          </Field>
-        )}
-      />
-    </>
-  )
-}
-
-function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
-  return (
-    <>
-      <Controller
-        name="accountFrom"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Account</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="accountTo"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Category</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.EXPENSE}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.EXPENSE}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="amount"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
-            <AmountInput
-              id={field.name}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={amountFieldErrors(fieldState.error)} />
-          </Field>
-        )}
-      />
-    </>
-  )
-}
-
-function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
-  return (
-    <>
-      <Controller
-        name="accountTo"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Account</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="accountFrom"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Category</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.INCOME}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.INCOME}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
-      <Controller
-        name="amount"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
-            <AmountInput
-              id={field.name}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={amountFieldErrors(fieldState.error)} />
-          </Field>
-        )}
-      />
-    </>
-  )
-}
 
 // ---------------------------------------------------------------------------
 // Store
@@ -496,6 +201,7 @@ export function ImportDataEntrySheet() {
                         id={field.name}
                         value={field.value}
                         onChange={handleTypeChange}
+                        aria-invalid={fieldState.invalid}
                       />
                       <FieldError errors={[fieldState.error]} />
                     </Field>
