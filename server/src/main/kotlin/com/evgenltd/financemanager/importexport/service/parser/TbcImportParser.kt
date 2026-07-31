@@ -41,32 +41,33 @@ class TbcImportParser : ImportParser {
 
         return ImportDataParsed(
             entries = rows.map { row ->
-            val paidOut = row.paidOut?.trim().orEmpty()
-            val paidIn = row.paidIn?.trim().orEmpty()
+                val paidOut = row.paidOut?.trim().orEmpty()
+                val paidIn = row.paidIn?.trim().orEmpty()
 
-            val (amount, type) = when {
-                paidOut.isNotEmpty() -> fromFractionalString(paidOut, currency) to OperationType.EXPENSE
-                paidIn.isNotEmpty() -> fromFractionalString(paidIn, currency) to OperationType.INCOME
-                else -> throw IllegalStateException("Unable to parse amount from row $row")
-            }
+                val (amount, type) = when {
+                    paidOut.isNotEmpty() -> fromFractionalString(paidOut, currency) to OperationType.EXPENSE
+                    paidIn.isNotEmpty() -> fromFractionalString(paidIn, currency) to OperationType.INCOME
+                    else -> throw IllegalStateException("Unable to parse amount from row $row")
+                }
 
-            val (accountFrom, accountTo) = when (type) {
-                OperationType.EXPENSE -> account to null
-                OperationType.INCOME -> null to account
-                else -> null to null
-            }
+                val (accountFrom, accountTo) = when (type) {
+                    OperationType.EXPENSE -> account to null
+                    OperationType.INCOME -> null to account
+                    else -> null to null
+                }
 
-            ImportDataParsedEntry(
-                raw = row.toString(),
-                date = row.date!!.date("dd/MM/yyyy"),
-                type = type,
-                accountFrom = accountFrom,
-                amountFrom = amount,
-                accountTo = accountTo,
-                amountTo = amount,
-                description = row.description?.trim().orEmpty(),
-            )
-        },
+                ImportDataParsedEntry(
+                    raw = row.toString(),
+                    date = row.date!!.date("dd/MM/yyyy"),
+                    type = type,
+                    accountFrom = accountFrom,
+                    amountFrom = amount,
+                    accountTo = accountTo,
+                    amountTo = amount,
+                    description = row.description?.trim().orEmpty(),
+                    hint = row.description?.trim().orEmpty(),
+                )
+            },
             failed = emptyList(),
         )
     }
