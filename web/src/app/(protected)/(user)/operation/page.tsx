@@ -25,6 +25,8 @@ import { MonthFilter } from '@/components/common/filter/month-filter'
 import { TagFilter } from '@/components/common/filter/tag-filter'
 import { Typography } from '@/components/common/typography/typography'
 import { AmountLabel } from '@/components/common/typography/amount-label'
+import { TagList } from '@/components/common/typography/tag-list'
+import { DescriptionLabel } from '@/components/common/typography/description-label'
 import { Button } from '@/components/ui/button'
 import { useRequest } from '@/hooks/use-request'
 import { Operation, OperationFilter, OperationType } from '@/types/operation'
@@ -33,7 +35,7 @@ import { formatDateCommon } from '@/lib/utils'
 import { operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { openOperationSheet, openOperationSheetForCopy, OperationSheet } from './operation-sheet'
-import { AmountRangeFilter, AmountRange } from '@/components/common/filter/amount-range-filter'
+import { AmountRangeFilter } from '@/components/common/filter/amount-range-filter'
 import { Range } from '@/types/common/common'
 import { MonthRange } from '@/components/common/input/month-input'
 import { useOperationPresetStore } from '@/store/operation-preset'
@@ -135,27 +137,27 @@ function OperationPageContent() {
       operationPreset.setType(value.type as OperationType | undefined)
       operationPreset.setCurrency(value.currency as string | undefined)
     },
-    [resetData, setQueryParams, operationPreset.setType, operationPreset.setCurrency],
+    [resetData, setQueryParams, operationPreset],
   )
 
   const handleSeekForward = useCallback(async () => {
     await seekForward()
     const first = store.data?.[0]
     if (first) operationPreset.setDate(first.date)
-  }, [seekForward, operationPreset.setDate])
+  }, [seekForward, operationPreset, store.data])
 
   const handleSeekBackward = useCallback(async () => {
     await seekBackward()
     const data = store.data
     const last = data?.[data.length - 1]
     if (last) operationPreset.setDate(last.date)
-  }, [seekBackward, operationPreset.setDate])
+  }, [seekBackward, operationPreset, store.data])
 
   const handleToDate = useCallback(async () => {
     const date = await ask({ type: 'date', label: 'Select date' })
     resetData()
     setPointer(format(addDays(date, 1), 'yyyy-MM-dd'))
-  }, [resetData, setQueryParams, filterValue, setPointer])
+  }, [resetData, setPointer])
 
   const handleNew = () => {
     openOperationSheet()
@@ -246,7 +248,7 @@ function OperationRow({
   onCopy: () => void
   onDelete: () => void
 }) {
-  const { type, amountFrom, accountFrom, amountTo, accountTo } = operation
+  const { type, amountFrom, accountFrom, amountTo, accountTo, description, tags } = operation
   const showBothAmounts =
     amountFrom.value !== amountTo.value || amountFrom.currency !== amountTo.currency
 
@@ -262,7 +264,12 @@ function OperationRow({
           {accountTo.name}
         </Typography>
       </Stack>
-      <Stack orientation="horizontal" align="center" gap={1} className="min-w-0">
+      <Stack orientation="horizontal" align="center" gap={2} className="flex-1 min-w-0">
+        <DescriptionLabel description={description} className="min-w-0" />
+        <TagList tags={tags} />
+      </Stack>
+
+      <Stack orientation="horizontal" align="center" gap={1} className="shrink-0">
         <Button
           size="icon"
           variant="ghost"
@@ -289,13 +296,7 @@ function OperationRow({
         </Button>
       </Stack>
 
-      <Stack
-        orientation="horizontal"
-        align="center"
-        justify="end"
-        gap={1}
-        className="flex-1 min-w-0"
-      >
+      <Stack orientation="horizontal" align="center" justify="end" gap={1} className="shrink-0">
         <AmountLabel amount={amountFrom} />
         {showBothAmounts && <AmountLabel amount={amountTo} />}
       </Stack>
