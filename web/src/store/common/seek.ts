@@ -195,6 +195,7 @@ export function createSeekSlice<
     setQueryParams: (params: TQuery) => set({ queryParams: params }),
     setPathParams: (params: TPath) => set({ pathParams: params }),
 
+    // deprecated
     refresh: async (): Promise<void> => {
       const { data, body, queryParams, pathParams } = get()
       const pointers = data.map(getPointer)

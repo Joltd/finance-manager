@@ -372,20 +372,22 @@ class ImportDataActionService(
     }
 
     @Transactional
-    fun calculateTotal(id: UUID, dates: List<LocalDate>? = null) {
+    fun calculateTotal(id: UUID, dates: List<LocalDate>? = null): List<LocalDate> {
         val importData = importDataRepository.find(id)
         val account = importData.account
         val currency = importData.currency
 
         val freeOperations = loadFreeOperations(importData)
 
-        importData.days
+        val affectedDays = importData.days
             .filter { dates == null || it.date in dates }
-            .onEach { calculateDayTotal(it, account, currency, freeOperations[it.date]) }
+        affectedDays.onEach { calculateDayTotal(it, account, currency, freeOperations[it.date]) }
 
         calculateGrandTotal(importData)
 
         importData.valid = importData.totals.all { it.valid }
+
+        return affectedDays.map { it.date }
     }
 
     private fun loadFreeOperations(importData: ImportData, dates: List<LocalDate>? = null): Map<LocalDate, List<Operation>> {

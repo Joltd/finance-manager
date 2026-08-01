@@ -13,6 +13,8 @@ import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
 import { useImportDataStore } from '@/store/import-data'
+import { useSse } from '@/hooks/use-sse'
+import { importDataChannels } from '@/api/import-data'
 import {
   ImportData,
   ImportDataParsedFailedEntry,
@@ -48,6 +50,11 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
     void fetch()
   }, [id, setPathParams, fetch])
 
+  useSse(importDataChannels.data(id), () => void fetch(), {
+    debounceMs: 400,
+    merge: (_, next) => next,
+  })
+
   const handleEditActual = async (total: ImportDataTotal) => {
     const balance = await ask<'amount'>({
       type: 'amount',
@@ -55,12 +62,10 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
       initialValue: total.actual,
     })
     await actualBalance(id, balance)
-    void fetch()
   }
 
   const handleRecalculate = async () => {
     await calculateTotal(id)
-    void fetch()
   }
 
   return (

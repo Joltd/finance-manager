@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { addDays, format, subDays } from 'date-fns'
+import { format, subDays } from 'date-fns'
 import { Check, Link2, Link2Off, Loader2Icon, X, XCircleIcon } from 'lucide-react'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
 import { Seek } from '@/components/common/layout/seek'
@@ -18,6 +18,8 @@ import { abs, add, subtract } from '@/types/common/amount'
 import { ValidIcon } from '@/components/common/icon/valid-icon'
 import { cn, formatDateCommon } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
+import { useSse } from '@/hooks/use-sse'
+import { importDataChannels } from '@/api/import-data'
 import { ImportDataEntrySheet, openImportDataEntrySheet } from './import-data-entry-sheet'
 import { ImportDataEntryCard } from './import-data-entry-card'
 import { useImportDataActions } from './import-data-actions'
@@ -32,12 +34,14 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     loadingForward,
     loadingBackward,
     loadingRefresh,
+    loadingLoad,
     exhaustedForward,
     exhaustedBackward,
     setPointer,
     seekForward,
     seekBackward,
     setPathParams,
+    load,
     error,
   } = useImportDataEntrySeekStore()
   const { data: importData } = useImportDataStore()
@@ -54,6 +58,11 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     setPathParams({ id })
   }, [id, setPathParams])
 
+  useSse<string[]>(importDataChannels.entry(id), (dates) => void load(dates), {
+    debounceMs: 400,
+    merge: (acc, next) => acc.concat(next),
+  })
+
   const handleLinkTarget = (targetEntry: ImportDataEntry) => {
     if (!linkingEntry?.operation?.id || !targetEntry.id) return
     actions
@@ -68,7 +77,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
   return (
     <div className="relative flex-1 min-h-0">
       <ImportDataEntrySheet />
-      {loadingRefresh && (
+      {(loadingRefresh || loadingLoad) && (
         <Progress className="absolute top-0 inset-x-0 z-20 rounded-none bg-transparent h-0.5" />
       )}
       <Seek

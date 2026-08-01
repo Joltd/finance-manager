@@ -102,7 +102,6 @@ function OperationPageContent() {
     exhaustedBackward,
     seekForward,
     seekBackward,
-    refresh,
     resetData,
     setQueryParams,
     setPointer,

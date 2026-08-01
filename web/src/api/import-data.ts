@@ -1,3 +1,5 @@
+import { buildPath } from '@/lib/api'
+
 export const importDataUrls = {
   root: '/api/v1/import-data',
   id: '/api/v1/import-data/:id',
@@ -10,4 +12,9 @@ export const importDataUrls = {
   approve: '/api/v1/import-data/:id/entry/approve',
   link: '/api/v1/import-data/:id/entry/link',
   linkById: '/api/v1/import-data/:id/entry/:entryId/link',
+}
+
+export const importDataChannels = {
+  data: (id: string) => buildPath(importDataUrls.id, { id }),
+  entry: (id: string) => buildPath(importDataUrls.entry, { id }),
 }

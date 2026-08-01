@@ -23,6 +23,7 @@ class ImportDataProcessService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataActionService: ImportDataActionService,
+    private val importDataEventService: ImportDataEventService,
     private val operationProcessService: OperationProcessService,
     private val fileService: FileService,
     private val publisher: ApplicationEventPublisher,
@@ -34,17 +35,17 @@ class ImportDataProcessService(
     fun beginNewImport(id: UUID, filename: String) {
         importDataActionService.withTryLock(id) {
             try {
-                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.PARSING)
+                updateParsingStatus(id, ImportDataParsingStatus.PARSING)
                 val result = fileService.load(filename) {
                     importDataActionService.parseImportData(id, it)
                 }
                 importDataActionService.prepareImportData(id, result)
                 if (result.entries.isEmpty()) {
-                    importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.FAILED)
+                    updateParsingStatus(id, ImportDataParsingStatus.FAILED)
                     return@withTryLock
                 }
 
-                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.INTERPRETATION)
+                updateParsingStatus(id, ImportDataParsingStatus.INTERPRETATION)
                 importDataEntryRepository.findByImportDataId(id)
                     .chunked(50)
                     .onEach { ids ->
@@ -52,24 +53,30 @@ class ImportDataProcessService(
                         importDataActionService.interpretImportDataEntries(ids)
                     }
 
-                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.LINKING)
+                updateParsingStatus(id, ImportDataParsingStatus.LINKING)
                 importDataActionService.linkExistedOperations(id)
 
-                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.CALCULATION)
-                importDataActionService.calculateTotal(id)
+                updateParsingStatus(id, ImportDataParsingStatus.CALCULATION)
+                calculateTotal(id)
 
-                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.DONE)
+                updateParsingStatus(id, ImportDataParsingStatus.DONE)
             } catch (e: Exception) {
-                importDataActionService.updateParsingStatus(id, ImportDataParsingStatus.FAILED, e.message)
+                updateParsingStatus(id, ImportDataParsingStatus.FAILED, e.message)
                 log.error("Unable to parse data", e)
             }
         }
+    }
+
+    private fun updateParsingStatus(id: UUID, status: ImportDataParsingStatus, message: String? = null) {
+        importDataActionService.updateParsingStatus(id, status, message)
+        importDataEventService.importData(id)
     }
 
     fun saveActualBalance(id: UUID, balance: Amount) {
         importDataActionService.withLock(id) {
             importDataActionService.saveActualBalance(id, balance)
         }
+        importDataEventService.importData(id)
     }
 
     fun finish(id: UUID) {
@@ -150,7 +157,11 @@ class ImportDataProcessService(
 
     private fun calculateTotal(id: UUID, dates: List<LocalDate>?) {
         importDataActionService.withLock(id) {
-            importDataActionService.calculateTotal(id, dates)
+            val affectedDates = importDataActionService.calculateTotal(id, dates)
+            importDataEventService.importData(id)
+            if (affectedDates.isNotEmpty()) {
+                importDataEventService.importDataEntry(id, affectedDates)
+            }
         }
     }
 

@@ -47,6 +47,7 @@ export function useImportDataActions() {
     importData.loading ||
     importData.data?.parsingStatus !== ImportDataParsingStatus.DONE ||
     importDataEntries.loadingRefresh ||
+    importDataEntries.loadingLoad ||
     actualBalanceRequest.loading ||
     finishRequest.loading ||
     calculateTotalRequest.loading ||
@@ -74,27 +75,19 @@ export function useImportDataActions() {
   const calculateTotal = (id: string) => calculateTotalRequest.submit({ pathParams: { id } })
 
   const unlink = (id: string, entryIds: string[]) =>
-    unlinkRequest
-      .submit({ pathParams: { id }, body: { entryIds } })
-      .then(() => importDataEntries.refresh())
+    unlinkRequest.submit({ pathParams: { id }, body: { entryIds } })
 
   const approve = (id: string, entryIds: string[]) =>
-    approveRequest
-      .submit({ pathParams: { id }, body: { entryIds } })
-      .then(() => importDataEntries.refresh())
+    approveRequest.submit({ pathParams: { id }, body: { entryIds } })
 
   const linkById = (id: string, entryId: string, operationId: string) =>
-    linkByIdRequest
-      .submit({ pathParams: { id }, body: { entryId, operationId } })
-      .then(() => importDataEntries.refresh())
+    linkByIdRequest.submit({ pathParams: { id }, body: { entryId, operationId } })
 
   const link = (id: string, entryId: string, operation: Omit<Operation, 'raw'>) =>
-    linkRequest
-      .submit({ pathParams: { id, entryId }, body: operation })
-      .then(() => importDataEntries.refresh())
+    linkRequest.submit({ pathParams: { id, entryId }, body: operation })
 
   const saveOperation = (body: Omit<Operation, 'raw'>) =>
-    operation.submit({ body }).then(() => importDataEntries.refresh())
+    operation.submit({ body })
 
   return {
     loading,
