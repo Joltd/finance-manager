@@ -17,3 +17,6 @@ exchange:
 ai:
   open-ai:
     api-key: ${OPEN_AI_API_KEY}
+
+sse:
+  connection-timeout-ms: 3600000

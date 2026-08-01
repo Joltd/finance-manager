@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { useRequest } from '@/hooks/use-request'
-import { accountUrls } from '@/api/account'
+import { useSse } from '@/hooks/use-sse'
+import { accountUrls, balanceChannels } from '@/api/account'
 import { AccountSheet, openAccountSheet } from './account-sheet'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
@@ -26,7 +27,11 @@ export default function AccountPage() {
 
   useEffect(() => {
     void store.fetch()
-  }, [store.fetch])
+  }, [store])
+
+  useSse(balanceChannels.balance, () => {
+    void store.fetch()
+  })
 
   const handleAddAccount = () => {
     openAccountSheet()

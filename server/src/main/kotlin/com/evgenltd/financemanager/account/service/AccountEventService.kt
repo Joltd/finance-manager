@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service
 @Service
 class AccountEventService {
 
-    @SseEventMapping("/api/v1/account/balance")
-    fun balance() {}
+//    @SseEventMapping("/api/v1/account/balance")
+//    fun balance() {}
 
 //    @SseEventMapping("/api/v1/account")
 //    fun account() {}
