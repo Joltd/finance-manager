@@ -356,12 +356,11 @@ class ImportDataActionService(
         return affectedEntryDates + affectedOperationDates
     }
 
-    @Transactional
     fun approveSuggestion(id: UUID, entryIds: List<UUID>): List<Pair<UUID, UUID>> {
         importDataRepository.find(id)
         return importDataEntryRepository.findAllById(entryIds)
             .mapNotNull { entry ->
-                entry.suggested()
+                entry.suggested() // possibly lazy exception
                     .firstOrNull { it.selected }
                     ?.let { entry.id!! to it }
             }

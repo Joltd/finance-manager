@@ -29,10 +29,11 @@ import { TagList } from '@/components/common/typography/tag-list'
 import { DescriptionLabel } from '@/components/common/typography/description-label'
 import { Button } from '@/components/ui/button'
 import { useRequest } from '@/hooks/use-request'
+import { useSse } from '@/hooks/use-sse'
 import { Operation, OperationFilter, OperationType } from '@/types/operation'
 import { addDays, format } from 'date-fns'
 import { formatDateCommon } from '@/lib/utils'
-import { operationUrls } from '@/api/operation'
+import { operationChannels, operationUrls } from '@/api/operation'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { openOperationSheet, openOperationSheetForCopy, OperationSheet } from './operation-sheet'
 import { AmountRangeFilter } from '@/components/common/filter/amount-range-filter'
@@ -108,6 +109,12 @@ function OperationPageContent() {
     error,
   } = store
 
+  useSse<string[]>(
+    operationChannels.date,
+    (dates) => void store.load(dates),
+    { debounceMs: 400, merge: (acc, next) => acc.concat(next) },
+  )
+
   useFilterUrlSync(filterValue, (values, params) => {
     writeDateRangeParam(values, params, 'period')
     writeParam(values, params, 'type')
@@ -142,15 +149,15 @@ function OperationPageContent() {
 
   const handleSeekForward = useCallback(async () => {
     await seekForward()
-    const first = store.data?.[0]
-    if (first) operationPreset.setDate(first.date)
+    // const first = store.data?.[0]
+    // if (first) operationPreset.setDate(first.date)
   }, [seekForward, operationPreset, store.data])
 
   const handleSeekBackward = useCallback(async () => {
     await seekBackward()
-    const data = store.data
-    const last = data?.[data.length - 1]
-    if (last) operationPreset.setDate(last.date)
+    // const data = store.data
+    // const last = data?.[data.length - 1]
+    // if (last) operationPreset.setDate(last.date)
   }, [seekBackward, operationPreset, store.data])
 
   const handleToDate = useCallback(async () => {
@@ -174,16 +181,11 @@ function OperationPageContent() {
   const handleDelete = async (operationId?: string) => {
     if (!operationId) return
     await deleteOperation.submit({ pathParams: { id: operationId } })
-    void refresh()
-  }
-
-  const handleSaved = () => {
-    void refresh()
   }
 
   return (
     <Layout>
-      <OperationSheet onSaved={handleSaved} />
+      <OperationSheet />
 
       <Stack orientation="horizontal" align="center" gap={2}>
         <Typography variant="h3" className="grow">

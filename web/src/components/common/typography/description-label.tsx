@@ -17,7 +17,7 @@ export function DescriptionLabel({ description, className }: DescriptionLabelPro
           as="span"
           variant="small"
           className={cn(
-            'truncate text-muted-foreground italic cursor-default font-normal',
+            'truncate text-slate-500 dark:text-slate-400 italic cursor-default font-normal',
             className,
           )}
         >

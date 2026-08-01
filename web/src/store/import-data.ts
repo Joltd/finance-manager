@@ -16,4 +16,8 @@ export const useImportDataEntrySeekStore = createSeekStore<
   unknown,
   unknown,
   { id: string }
->(importDataUrls.entry, (day) => day.date)
+>(
+  importDataUrls.entry,
+  (day) => day.date,
+  (a, b) => (a < b ? -1 : a > b ? 1 : 0),
+)

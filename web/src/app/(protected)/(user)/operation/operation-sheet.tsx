@@ -376,11 +376,7 @@ export function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
 // Component
 // ---------------------------------------------------------------------------
 
-interface OperationSheetProps {
-  onSaved: () => void
-}
-
-export function OperationSheet({ onSaved }: OperationSheetProps) {
+export function OperationSheet() {
   const { open, copy, operationId, closeSheet } = useOperationSheetStore()
   const operationStore = useOperationStore()
   const userStore = useUserStore()
@@ -443,7 +439,6 @@ export function OperationSheet({ onSaved }: OperationSheetProps) {
     if (data.accountTo && data.accountTo.id !== data.accountFrom?.id) {
       presetStore.registerAccountUsage(data.accountTo)
     }
-    onSaved()
     closeSheet()
   }
 

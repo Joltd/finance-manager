@@ -23,9 +23,11 @@ export interface SeekState<TData, TBody, TQuery, TPath, TPointer> {
   exhaustedForward: boolean
   exhaustedBackward: boolean
   loadingRefresh: boolean
+  loadingLoad: boolean
+  version: number
 }
 
-export interface SeekActions<TData, TBody, TQuery, TPath, TPointer> {
+export interface SeekActions<TBody, TQuery, TPath, TPointer> {
   seekForward: () => Promise<void>
   seekBackward: () => Promise<void>
   setPointer: (pointer: TPointer) => void
@@ -33,6 +35,7 @@ export interface SeekActions<TData, TBody, TQuery, TPath, TPointer> {
   setQueryParams: (params: TQuery) => void
   setPathParams: (params: TPath) => void
   refresh: () => Promise<void>
+  load: (pointers: TPointer[]) => Promise<void>
   resetData: () => void
   reset: () => void
 }
@@ -44,7 +47,7 @@ export type SeekSlice<
   TQuery = unknown,
   TPath extends Record<string, string> = Record<string, string>,
 > = SeekState<TData, TBody, TQuery, TPath, TPointer> &
-  SeekActions<TData, TBody, TQuery, TPath, TPointer>
+  SeekActions<TBody, TQuery, TPath, TPointer>
 
 export function createSeekSlice<
   TData,
@@ -55,6 +58,7 @@ export function createSeekSlice<
 >(
   path: string,
   getPointer: (item: TData) => TPointer,
+  comparePointer: (a: TPointer, b: TPointer) => number,
   method: Method = 'GET',
 ): StateCreator<SeekSlice<TData, TPointer, TBody, TQuery, TPath>> {
   const executeRequest = async (
@@ -89,6 +93,8 @@ export function createSeekSlice<
     exhaustedForward: false,
     exhaustedBackward: false,
     loadingRefresh: false,
+    loadingLoad: false,
+    version: 0,
 
     seekForward: async (): Promise<void> => {
       const {
@@ -217,18 +223,99 @@ export function createSeekSlice<
       }
     },
 
+    load: async (pointers: TPointer[]): Promise<void> => {
+      const { data, exhaustedForward, exhaustedBackward, body, queryParams, pathParams, version } =
+        get()
+
+      const oldest = data.length > 0 ? getPointer(data[data.length - 1]) : undefined
+      const newest = data.length > 0 ? getPointer(data[0]) : undefined
+
+      const accepted = new Set<TPointer>()
+      for (const p of pointers) {
+        const accept =
+          data.length === 0
+            ? exhaustedForward || exhaustedBackward
+            : (comparePointer(p, oldest as TPointer) >= 0 && comparePointer(p, newest as TPointer) <= 0) ||
+              (comparePointer(p, newest as TPointer) > 0 && exhaustedForward) ||
+              (comparePointer(p, oldest as TPointer) < 0 && exhaustedBackward)
+        if (accept) accepted.add(p)
+      }
+      const acceptedPointers = Array.from(accepted)
+      if (acceptedPointers.length === 0) return
+
+      set({ loadingLoad: true, error: undefined })
+
+      try {
+        const items = await executeRequest(
+          path,
+          method,
+          pathParams as Record<string, string> | undefined,
+          { ...queryParams, pointers: acceptedPointers },
+          method !== 'GET' ? body : undefined,
+        )
+
+        set((state) => {
+          if (state.version !== version) return { loadingLoad: false }
+
+          const preOldest =
+            state.data.length > 0 ? getPointer(state.data[state.data.length - 1]) : undefined
+          const preNewest = state.data.length > 0 ? getPointer(state.data[0]) : undefined
+          const wasEmpty = state.data.length === 0
+
+          const acceptedSet = new Set(acceptedPointers)
+          const kept = state.data.filter((existing) => !acceptedSet.has(getPointer(existing)))
+          const upserts = acceptedPointers
+            .map((p) => items.find((item) => getPointer(item) === p))
+            .filter((item): item is TData => item !== undefined)
+
+          const next = [...kept, ...upserts].sort((a, b) =>
+            comparePointer(getPointer(b), getPointer(a)),
+          )
+
+          const postOldest = next.length > 0 ? getPointer(next[next.length - 1]) : undefined
+          const postNewest = next.length > 0 ? getPointer(next[0]) : undefined
+          const becameNonEmpty = wasEmpty && next.length > 0
+
+          return {
+            loadingLoad: false,
+            data: next,
+            exhaustedForward:
+              becameNonEmpty ||
+              (preNewest !== undefined &&
+                postNewest !== undefined &&
+                comparePointer(postNewest, preNewest) > 0)
+                ? false
+                : state.exhaustedForward,
+            exhaustedBackward:
+              becameNonEmpty ||
+              (preOldest !== undefined &&
+                postOldest !== undefined &&
+                comparePointer(postOldest, preOldest) < 0)
+                ? false
+                : state.exhaustedBackward,
+          }
+        })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        set({ error: message, loadingLoad: false })
+        throw err
+      }
+    },
+
     resetData: () =>
-      set({
+      set((state) => ({
         data: [],
         loadingForward: false,
         loadingBackward: false,
         error: undefined,
         exhaustedForward: false,
         exhaustedBackward: false,
-      }),
+        loadingLoad: false,
+        version: state.version + 1,
+      })),
 
     reset: () =>
-      set({
+      set((state) => ({
         data: [],
         loadingForward: false,
         loadingBackward: false,
@@ -239,7 +326,9 @@ export function createSeekSlice<
         pathParams: undefined,
         exhaustedForward: false,
         exhaustedBackward: false,
-      }),
+        loadingLoad: false,
+        version: state.version + 1,
+      })),
   })
 }
 
@@ -249,8 +338,13 @@ export function createSeekStore<
   TBody = unknown,
   TQuery = unknown,
   TPath extends Record<string, string> = Record<string, string>,
->(path: string, getPointer: (item: TData) => TPointer, method: Method = 'GET') {
+>(
+  path: string,
+  getPointer: (item: TData) => TPointer,
+  comparePointer: (a: TPointer, b: TPointer) => number,
+  method: Method = 'GET',
+) {
   return create<SeekSlice<TData, TPointer, TBody, TQuery, TPath>>(
-    createSeekSlice(path, getPointer, method),
+    createSeekSlice(path, getPointer, comparePointer, method),
   )
 }

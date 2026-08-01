@@ -44,11 +44,14 @@ class OperationProcessService(
     }
 
     private fun notifyChanges(changes: List<OperationChangeRecord>) {
-//        operationEventService.operation()
         changes.asSequence()
             .filter { (old, new) -> isOperationChanged(old, new) }
             .flatMap { (old, new) -> listOf(old, new) }
             .filterNotNull()
+            .also { operations ->
+                val dates = operations.map { it.date }.toList()
+                operationEventService.operationDate(dates)
+            }
             .flatMap {
                 listOf(
                     it.accountFromChange(),
@@ -66,7 +69,7 @@ class OperationProcessService(
     private fun isOperationChanged(old: OperationChangeStateRecord?, new: OperationChangeStateRecord?): Boolean =
         old == null || new == null
                 || !old.date.isEqual(new.date)
-                || old.type == new.type
+                || old.type != new.type
                 || old.amountFrom != new.amountFrom
                 || old.accountFrom != new.accountFrom
                 || old.amountTo != new.amountTo
