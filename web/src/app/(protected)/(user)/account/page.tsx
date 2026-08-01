@@ -27,7 +27,10 @@ export default function AccountPage() {
 
   useEffect(() => {
     void store.fetch()
-  }, [store])
+    // store itself is a new object reference on every set() inside fetch() (Zustand
+    // whole-state subscription) — depending on it here would re-trigger this effect
+    // after every fetch() call and loop forever. store.fetch is the stable action ref.
+  }, [store.fetch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useSse(balanceChannels.balance, () => {
     void store.fetch()
