@@ -12,6 +12,7 @@ data class PricingOrderDefaults(
     val country: String,
     val city: String,
     val store: String,
+    val comment: String?,
 )
 
 data class PricingOrderRecord(

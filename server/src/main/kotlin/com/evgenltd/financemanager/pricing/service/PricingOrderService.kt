@@ -30,14 +30,15 @@ class PricingOrderService(
 ) {
 
     fun loadDefaults(): PricingOrderDefaults {
-        val defaultCurrency = settingService.operationDefaultCurrency()
+        val settings = settingService.load()
         val lastOrder = pricingOrderRepository.findFirstByOrderByCreatedAtDesc()
         return PricingOrderDefaults(
             date = lastOrder?.date ?: LocalDate.now(),
-            currency = defaultCurrency,
+            currency = settings.operationDefaultCurrency?.name,
             country = lastOrder?.country ?: "",
             city = lastOrder?.city ?: "",
             store = lastOrder?.store ?: "",
+            comment = lastOrder?.comment,
         )
     }
 

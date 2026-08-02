@@ -61,12 +61,6 @@ class SettingService(
         update(settings)
     }
 
-    fun operationDefaultCurrency(): String? = throw NotSupportedException()
-
-    fun operationDefaultAccount(): Account? = throw NotSupportedException()
-
-    fun operationCashAccount(): Account? = throw NotSupportedException()
-
     //
 
     private inline fun <reified T : Any> List<Setting>.read(): T {

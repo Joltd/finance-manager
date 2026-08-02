@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { addMonths, format, startOfMonth } from 'date-fns'
-import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
+import { PencilIcon, PlusIcon, Trash2Icon, ZapIcon } from 'lucide-react'
 
 import { usePricingOrderListStore } from '@/store/pricing-order'
 import { Layout } from '@/components/common/layout/layout'
@@ -41,6 +42,7 @@ function toQuery(filterValue: Record<string, unknown>, page: number): PricingOrd
 }
 
 export default function PricingOrderPage() {
+  const router = useRouter()
   const store = usePricingOrderListStore()
   const deletePricingOrder = useRequest(pricingOrderUrls.id, { method: 'DELETE' })
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
@@ -61,6 +63,10 @@ export default function PricingOrderPage() {
     openPricingOrderSheet()
   }
 
+  const handleQuickAdd = () => {
+    router.push('/pricing-order/new')
+  }
+
   const handleEdit = (id: string) => {
     openPricingOrderSheet(id)
   }
@@ -78,6 +84,10 @@ export default function PricingOrderPage() {
         <Typography variant="h3" className="grow">
           Pricing Orders
         </Typography>
+        <Button size="sm" variant="outline" onClick={handleQuickAdd}>
+          <ZapIcon />
+          Quick Add
+        </Button>
         <Button size="sm" onClick={handleAdd}>
           <PlusIcon />
           Order

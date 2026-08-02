@@ -32,4 +32,5 @@ export interface PricingOrderDefaults {
   country: string
   city: string
   store: string
+  comment?: string
 }
