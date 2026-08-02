@@ -157,6 +157,8 @@ implementing or refactoring any form.
 | `/` | Dashboard | scrollable Layout |
 | `/account` | AccountPage | scrollable Layout, EntityList |
 | `/operation` | OperationPage | Seek-based |
+| `/pricing-item` | PricingItemPage | scrollable Layout, page-based pagination |
+| `/pricing-order` | PricingOrderPage | scrollable Layout, page-based pagination |
 | `/reference` | ReferencePage | scrollable Layout, EntityList |
 | `/report/income-expense` | IncomeExpensePage | scrollable Layout |
 | `/report/top-flow` | TopFlowPage | scrollable Layout |

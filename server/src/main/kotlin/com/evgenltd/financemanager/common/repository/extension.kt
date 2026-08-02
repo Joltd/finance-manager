@@ -7,6 +7,7 @@ import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.pricing.entity.PricingItem
 import com.evgenltd.financemanager.tag.entity.Tag
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.CrudRepository
@@ -177,6 +178,16 @@ infix fun <E : Any> KProperty1<E, Account?>.accountTypes(types: List<AccountType
         root.get<Account>(name)
             .get<AccountType>(Account::type.name)
             .`in`(value)
+    }
+}
+
+// pricing item
+
+infix fun <E : Any> KProperty1<E, PricingItem?>.itemEq(id: UUID?): Specification<E> = valueNonNull(id) { value ->
+    Specification { root, _, builder ->
+        root.get<PricingItem>(name)
+            .get<UUID>(PricingItem::id.name)
+            .let { builder.equal(it, value) }
     }
 }
 

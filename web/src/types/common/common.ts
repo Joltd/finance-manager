@@ -23,3 +23,10 @@ export interface Embedding {
   id: string
   input?: string
 }
+
+export interface PageResponse<T> {
+  page: number
+  size: number
+  records: T[]
+  total: number
+}

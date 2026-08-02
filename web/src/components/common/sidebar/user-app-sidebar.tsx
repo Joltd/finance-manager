@@ -8,6 +8,8 @@ import {
   BookOpen,
   Tags,
   PlusIcon,
+  Receipt,
+  ShoppingCart,
   Trash2Icon,
   TrendingUp,
   Wallet,
@@ -38,6 +40,11 @@ const mainNav = [
   { href: '/operation', label: 'Operations', icon: ArrowLeftRight },
   { href: '/account', label: 'Accounts', icon: Wallet },
   { href: '/reference', label: 'Reference', icon: BookOpen },
+]
+
+const pricingNav = [
+  { href: '/pricing-item', label: 'Pricing Items', icon: Receipt },
+  { href: '/pricing-order', label: 'Pricing Orders', icon: ShoppingCart },
 ]
 
 const reportsNav = [
@@ -77,6 +84,24 @@ export function UserAppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map(({ href, label, icon: Icon }) => (
+                <SidebarMenuItem key={href}>
+                  <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
+                    <Link href={href}>
+                      <Icon />
+                      <span>{label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Pricing</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {pricingNav.map(({ href, label, icon: Icon }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
                     <Link href={href}>
