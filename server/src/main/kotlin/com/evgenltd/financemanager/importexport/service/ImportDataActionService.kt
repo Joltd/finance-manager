@@ -356,11 +356,12 @@ class ImportDataActionService(
         return affectedEntryDates + affectedOperationDates
     }
 
+    // without transaction since operationProcessService.save() contains notify logic
     fun approveSuggestion(id: UUID, entryIds: List<UUID>): List<Pair<UUID, UUID>> {
         importDataRepository.find(id)
-        return importDataEntryRepository.findAllById(entryIds)
+        return importDataEntryRepository.findAllByIdIn(entryIds)
             .mapNotNull { entry ->
-                entry.suggested() // possibly lazy exception
+                entry.suggested()
                     .firstOrNull { it.selected }
                     ?.let { entry.id!! to it }
             }

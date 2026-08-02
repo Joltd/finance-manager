@@ -15,10 +15,13 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.*
 
 @Service
+@Transactional(propagation = Propagation.NEVER)
 class ImportDataProcessService(
     private val importDataRepository: ImportDataRepository,
     private val importDataEntryRepository: ImportDataEntryRepository,

@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.importexport.repository
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.record.ImportDataDateRange
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
@@ -18,5 +19,8 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>, JpaSp
     fun existsByImportDataDayImportDataAndOperationId(importData: ImportData, operationId: UUID): Boolean
 
     fun findByIdInAndVisible(ids: List<UUID>, visible: Boolean): List<ImportDataEntry>
+
+    @EntityGraph(attributePaths = ["operations"])
+    fun findAllByIdIn(ids: List<UUID>): List<ImportDataEntry>
 
 }

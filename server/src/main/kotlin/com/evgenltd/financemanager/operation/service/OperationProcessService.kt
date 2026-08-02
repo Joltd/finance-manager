@@ -8,9 +8,12 @@ import com.evgenltd.financemanager.operation.record.OperationChangeRecord
 import com.evgenltd.financemanager.operation.record.OperationChangeStateRecord
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
+@Transactional(propagation = Propagation.NEVER)
 class OperationProcessService(
     private val operationService: OperationService,
     private val operationEventService: OperationEventService,

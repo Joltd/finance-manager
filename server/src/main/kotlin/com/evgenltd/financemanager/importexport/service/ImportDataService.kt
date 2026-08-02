@@ -23,6 +23,7 @@ import com.evgenltd.financemanager.operation.service.byCurrency
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.*
 
@@ -43,6 +44,7 @@ class ImportDataService(
         .map { importDataConverter.toReference(it) }
 
     @SkipLogging
+    @Transactional
     fun get(id: UUID): ImportDataRecord {
         val importData = importDataRepository.find(id)
         val dateRange = importDataDayRepository.findImportDataDateRange(importData)
@@ -52,6 +54,7 @@ class ImportDataService(
     }
 
     @SkipLogging
+    @Transactional
     fun entryList(id: UUID, request: EntryFilter): List<ImportDataDayRecord> {
         val importData = importDataRepository.find(id)
 
