@@ -24,6 +24,8 @@ data class AccountReferenceRecord(
 )
 
 data class AccountBalanceFilter(
+    val name: String? = null,
+    val showDeleted: Boolean = false,
     val hideZeroBalances: Boolean = false,
 )
 

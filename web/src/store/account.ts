@@ -3,6 +3,7 @@ import { accountUrls, currencyUrls } from '@/api/account'
 import {
   Account,
   AccountBalance,
+  AccountBalanceFilter,
   AccountReference,
   AccountType,
   Currency,
@@ -22,8 +23,10 @@ export const useAccountReferenceStore = createFetchStore<
   { mask?: string; type?: AccountType }
 >(accountUrls.reference)
 
-export const useAccountBalanceStore = createFetchStore<AccountBalance[], unknown>(
-  accountUrls.balance,
-)
+export const useAccountBalanceStore = createFetchStore<
+  AccountBalance[],
+  unknown,
+  AccountBalanceFilter
+>(accountUrls.balance)
 
 export const useCurrencyListStore = createFetchStore<Currency[]>(currencyUrls.root)

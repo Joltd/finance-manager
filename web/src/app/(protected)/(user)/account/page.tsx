@@ -1,16 +1,19 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { format, isBefore, parseISO, subWeeks } from 'date-fns'
 import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
 import { AmountLabel } from '@/components/common/typography/amount-label'
-import type { AccountBalance } from '@/types/account'
+import type { AccountBalance, AccountBalanceFilter } from '@/types/account'
 import { Layout } from '@/components/common/layout/layout'
 import { Typography } from '@/components/common/typography/typography'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Filter } from '@/components/common/filter/filter'
+import { TextFilter } from '@/components/common/filter/text-filter'
+import { BoolFilter } from '@/components/common/filter/bool-filter'
 import { cn } from '@/lib/utils'
 import { useRequest } from '@/hooks/use-request'
 import { useSse } from '@/hooks/use-sse'
@@ -21,16 +24,23 @@ import { Flow } from '@/components/common/layout/flow'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 
+function toQuery(filterValue: Record<string, unknown>): AccountBalanceFilter {
+  return {
+    name: filterValue.name as string | undefined,
+    showDeleted: Boolean(filterValue.showDeleted),
+  }
+}
+
 export default function AccountPage() {
   const store = useAccountBalanceStore()
   const deleteAccount = useRequest(accountUrls.id, { method: 'DELETE' })
+  const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
+    store.setQueryParams(toQuery(filterValue))
     void store.fetch()
-    // store itself is a new object reference on every set() inside fetch() (Zustand
-    // whole-state subscription) — depending on it here would re-trigger this effect
-    // after every fetch() call and loop forever. store.fetch is the stable action ref.
-  }, [store.fetch]) // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterValue])
 
   useSse(balanceChannels.balance, () => {
     void store.fetch()
@@ -50,7 +60,7 @@ export default function AccountPage() {
   }
 
   return (
-    <Layout>
+    <Layout scrollable>
       <AccountSheet />
 
       <Stack orientation="horizontal" gap={2}>
@@ -63,20 +73,29 @@ export default function AccountPage() {
         </Button>
       </Stack>
 
-      {store.loading ? (
-        <LoadingSkeleton />
-      ) : (
-        <Stack scrollable gap={0}>
-          {store.data?.map((entry) => (
-            <AccountRow
-              key={entry.account.id}
-              entry={entry}
-              onEdit={handleEditAccount}
-              onDelete={(a) => void handleDeleteAccount(a)}
-            />
-          ))}
-        </Stack>
-      )}
+      <Filter value={filterValue} onChange={setFilterValue}>
+        <TextFilter id="name" label="Name" />
+        <BoolFilter id="showDeleted" label="Show deleted" />
+      </Filter>
+
+      <Stack gap={3} className="w-full max-w-2xl self-center">
+        {store.loading && !store.data ? (
+          <LoadingSkeleton />
+        ) : store.data?.length ? (
+          <Stack gap={0}>
+            {store.data.map((entry) => (
+              <AccountRow
+                key={entry.account.id}
+                entry={entry}
+                onEdit={handleEditAccount}
+                onDelete={(a) => void handleDeleteAccount(a)}
+              />
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="muted">No accounts found</Typography>
+        )}
+      </Stack>
     </Layout>
   )
 }
@@ -98,9 +117,8 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
     <Stack
       orientation="horizontal"
       align="center"
-      justify="between"
       gap={1}
-      className="group/account py-2.5"
+      className="group/account flex-wrap py-2.5"
     >
       <Typography
         as="span"
@@ -144,7 +162,11 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
         </Tooltip>
       )}
 
-      <Flow gap={2} className="justify-end">
+      <Flow
+        gap={2}
+        keepWhenEmpty
+        className="basis-full justify-end min-h-5 md:basis-auto md:min-h-0"
+      >
         {balances.map((a) => (
           <AmountLabel key={a.currency} amount={a} />
         ))}

@@ -9,6 +9,7 @@ import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.contains
+import com.evgenltd.financemanager.common.repository.emptySpecification
 import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.repository.like
@@ -47,7 +48,11 @@ class AccountService(
                     .filter { balance -> balance.isNotZero() }
             }
 
-        return accountRepository.findAll((Account::type eq AccountType.ACCOUNT), Sort.by(Account::name.name))
+        val spec = (Account::type eq AccountType.ACCOUNT) and
+            (Account::name like filter.name) and
+            (if (filter.showDeleted) emptySpecification() else (Account::deleted eq false))
+
+        return accountRepository.findAll(spec, Sort.by(Account::name.name))
             .map {
                 AccountBalanceRecord(
                     account = accountConverter.toAccountReference(it),

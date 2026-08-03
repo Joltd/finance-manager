@@ -29,11 +29,13 @@ const flowVariants = cva('flex flex-wrap', {
 
 export interface FlowProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof flowVariants> {}
+    VariantProps<typeof flowVariants> {
+  keepWhenEmpty?: boolean
+}
 
 export const Flow = forwardRef<HTMLDivElement, FlowProps>(
-  ({ align, gap, scrollable, className, children, ...props }, ref) => {
-    if (!React.Children.toArray(children).length) return null
+  ({ align, gap, scrollable, className, children, keepWhenEmpty, ...props }, ref) => {
+    if (!keepWhenEmpty && !React.Children.toArray(children).length) return null
     return (
       <div
         ref={ref}

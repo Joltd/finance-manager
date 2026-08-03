@@ -38,3 +38,8 @@ export interface AccountBalance {
   account: AccountReference
   balances: Amount[]
 }
+
+export interface AccountBalanceFilter {
+  name?: string
+  showDeleted?: boolean
+}
