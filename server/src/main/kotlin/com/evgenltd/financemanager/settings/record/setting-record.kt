@@ -8,4 +8,5 @@ data class SettingsRecord(
     val operationDefaultCurrency: String?,
     val operationDefaultAccount: AccountReferenceRecord?,
     val operationCashAccount: AccountReferenceRecord?,
+    val pricingFeature: Boolean?,
 )

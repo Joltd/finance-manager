@@ -8,6 +8,7 @@ export interface Settings {
   operationDefaultCurrencyScale: number | undefined
   operationDefaultAccount: AccountReference | undefined
   operationCashAccount: AccountReference | undefined
+  pricingFeature: boolean | undefined
 }
 
 export interface User {

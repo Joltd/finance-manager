@@ -32,6 +32,7 @@ import { SidebarAppHeader } from './sidebar-app-header'
 import { SidebarUserFooter } from './sidebar-user-footer'
 import { useImportDataListStore } from '@/store/import-data'
 import { useRequest } from '@/hooks/use-request'
+import { useSettingsFlag } from '@/hooks/use-settings-flag'
 import { importDataUrls } from '@/api/import-data'
 import { openImportDataBeginDialog } from '@/app/(protected)/(user)/import-data/[id]/import-data-begin-dialog'
 import { Reference } from '@/types/common/reference'
@@ -57,6 +58,7 @@ export function UserAppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { setOpenMobile } = useSidebar()
+  const pricingEnabled = useSettingsFlag('pricingFeature')
   const importDataList = useImportDataListStore()
   const deleteImport = useRequest(importDataUrls.id, { method: 'DELETE' })
 
@@ -97,23 +99,25 @@ export function UserAppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Pricing</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {pricingNav.map(({ href, label, icon: Icon }) => (
-                <SidebarMenuItem key={href}>
-                  <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
-                    <Link href={href}>
-                      <Icon />
-                      <span>{label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {pricingEnabled && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Pricing</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {pricingNav.map(({ href, label, icon: Icon }) => (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
+                      <Link href={href}>
+                        <Icon />
+                        <span>{label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarGroup>
           <SidebarGroupLabel>Reports</SidebarGroupLabel>

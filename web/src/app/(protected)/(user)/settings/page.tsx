@@ -66,7 +66,7 @@ export default function SettingsPage() {
         ...store.data,
         name: data.name,
         settings: {
-          version: store.data.settings.version,
+          ...store.data.settings,
           operationDefaultCurrency: data.operationDefaultCurrency,
           operationDefaultCurrencyScale: data.operationDefaultCurrencyScale,
           operationDefaultAccount: data.operationDefaultAccount,

@@ -15,6 +15,8 @@ data class Settings(
     var operationDefaultAccount: Account? = null,
     @property:SettingName("operation.cash.account")
     var operationCashAccount: Account? = null,
+    @property:SettingName("pricing.feature")
+    var pricingFeature: Boolean? = null,
 )
 
 data class SystemSettings(
