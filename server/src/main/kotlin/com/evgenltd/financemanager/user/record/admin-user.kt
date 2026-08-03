@@ -9,4 +9,5 @@ data class AdminUserRecord(
     val login: String,
     val password: String? = null,
     val deleted: Boolean = false,
+    val pricingFeature: Boolean? = null,
 )

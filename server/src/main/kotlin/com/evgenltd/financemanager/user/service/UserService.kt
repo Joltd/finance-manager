@@ -7,6 +7,7 @@ import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.unauthorizedException
 import com.evgenltd.financemanager.settings.service.SettingService
 import com.evgenltd.financemanager.user.converter.UserConverter
+import com.evgenltd.financemanager.user.component.withTenant
 import com.evgenltd.financemanager.user.entity.User
 import com.evgenltd.financemanager.user.record.AdminUserRecord
 import com.evgenltd.financemanager.user.record.ApplicationUser
@@ -33,8 +34,11 @@ class UserService(
     fun adminList(): List<AdminUserRecord> = userRepository.findAll()
         .map { userConverter.toAdminRecord(it)}
 
-    fun adminById(id: UUID): AdminUserRecord = userRepository.find(id)
-        .let { userConverter.toAdminRecord(it) }
+    fun adminById(id: UUID): AdminUserRecord {
+        val user = userRepository.find(id)
+        val pricingFeature = withTenant(user.tenant) { settingService.load().pricingFeature }
+        return userConverter.toAdminRecord(user, pricingFeature)
+    }
 
     fun byIdOrNull(id: UUID): UserRecord? {
         val user = userRepository.findByIdOrNull(id) ?: return null
@@ -55,7 +59,6 @@ class UserService(
         val user = record.id
             ?.let { userRepository.findByIdOrNull(it) }
             ?.also {
-                it.tenant = record.tenant
                 it.name = record.name
                 it.login = record.login
                 it.deleted = record.deleted
@@ -75,6 +78,12 @@ class UserService(
         }
 
         userRepository.save(user)
+
+        withTenant(user.tenant) {
+            val settings = settingService.load()
+            settings.pricingFeature = record.pricingFeature
+            settingService.update(settings)
+        }
     }
 
     @Transactional

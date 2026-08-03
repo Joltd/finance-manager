@@ -26,4 +26,5 @@ export interface AdminUser {
   login: string
   password?: string
   deleted: boolean
+  pricingFeature?: boolean
 }
