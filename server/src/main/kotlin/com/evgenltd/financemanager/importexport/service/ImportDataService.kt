@@ -60,11 +60,7 @@ class ImportDataService(
 
         var dates = request.pointers
         if (dates == null && request.pointer != null && request.direction != null) {
-            val direction = when (request.direction) {
-                SeekDirection.FORWARD -> SeekDirection.BACKWARD
-                SeekDirection.BACKWARD -> SeekDirection.FORWARD
-            }
-            dates = findNearDates(request.pointer, direction, importData)
+            dates = findNearDates(request.pointer, request.direction, importData)
         }
 
         if (dates == null) {
@@ -102,7 +98,7 @@ class ImportDataService(
                 totals = day.totals.map { importDataConverter.toRecord(it) },
                 entries = entries + operations,
             )
-        }.sortedBy { it.date }
+        }.sortedByDescending { it.date }
     }
 
     private fun findNearDates(

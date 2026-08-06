@@ -31,7 +31,7 @@ export function SidebarAppHeader({ homeHref }: SidebarAppHeaderProps) {
     <SidebarHeader>
       <div className="flex items-center gap-1">
         <SidebarMenuButton asChild size="lg" className="flex-1" tooltip="Expand">
-          <Link href={homeHref} onClick={handleClick}>
+          <Link href={homeHref} onClick={handleClick} prefetch={false}>
             <img
               src={iconSrc}
               alt={currency ?? 'USD'}

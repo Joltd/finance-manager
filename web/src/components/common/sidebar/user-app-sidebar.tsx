@@ -88,7 +88,7 @@ export function UserAppSidebar() {
               {mainNav.map(({ href, label, icon: Icon }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
-                    <Link href={href}>
+                    <Link href={href} prefetch={false}>
                       <Icon />
                       <span>{label}</span>
                     </Link>
@@ -107,7 +107,7 @@ export function UserAppSidebar() {
                 {pricingNav.map(({ href, label, icon: Icon }) => (
                   <SidebarMenuItem key={href}>
                     <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
-                      <Link href={href}>
+                      <Link href={href} prefetch={false}>
                         <Icon />
                         <span>{label}</span>
                       </Link>
@@ -126,7 +126,7 @@ export function UserAppSidebar() {
               {reportsNav.map(({ href, label, icon: Icon }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
-                    <Link href={href}>
+                    <Link href={href} prefetch={false}>
                       <Icon />
                       <span>{label}</span>
                     </Link>
@@ -151,7 +151,7 @@ export function UserAppSidebar() {
                     isActive={pathname === `/import-data/${item.id}`}
                     tooltip={item.name}
                   >
-                    <Link href={`/import-data/${item.id}`}>
+                    <Link href={`/import-data/${item.id}`} prefetch={false}>
                       <span>{item.name}</span>
                     </Link>
                   </SidebarMenuButton>

@@ -15,6 +15,7 @@ interface SeekProps {
   exhaustedBackward: boolean
   children: React.ReactNode
   className?: string
+  reverse?: boolean
 }
 
 export function Seek({
@@ -27,27 +28,43 @@ export function Seek({
   children,
   className,
   error,
+  reverse = false,
 }: SeekProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const handleSeekForward = useCallback(async () => {
+  const handleAnchoredSeek = useCallback(async (seek: () => Promise<void>) => {
     const container = containerRef.current
-    const children = Array.from(container?.children ?? []) as HTMLDivElement[]
-    const child = children.find((it) => it.dataset.id !== 'seek-sentinel')
+    const items = Array.from(container?.children ?? []) as HTMLDivElement[]
+    const child = items.find((it) => it.dataset.id !== 'seek-sentinel')
     const childOffsetTop = child?.offsetTop ?? 0
 
-    await seekForward()
+    await seek()
 
     if (child && container) {
       requestAnimationFrame(() => {
         container.scrollTop = child.offsetTop - childOffsetTop
       })
     }
-  }, [seekForward])
+  }, [])
 
-  const handleSeekBackward = useCallback(async () => {
-    await seekBackward()
-  }, [seekBackward])
+  // The top sentinel always inserts content above the current viewport, so it
+  // always gets the anchor treatment; the bottom one never needs it.
+  const handleTop = useCallback(
+    () => handleAnchoredSeek(reverse ? seekBackward : seekForward),
+    [handleAnchoredSeek, reverse, seekBackward, seekForward],
+  )
+
+  const handleBottom = useCallback(async () => {
+    await (reverse ? seekForward() : seekBackward())
+  }, [reverse, seekForward, seekBackward])
+
+  const topSentinel = reverse
+    ? { id: 'backward', loading: loadingBackward, exhausted: exhaustedBackward }
+    : { id: 'forward', loading: loadingForward, exhausted: exhaustedForward }
+
+  const bottomSentinel = reverse
+    ? { id: 'forward', loading: loadingForward, exhausted: exhaustedForward }
+    : { id: 'backward', loading: loadingBackward, exhausted: exhaustedBackward }
 
   if (error) {
     return (
@@ -62,17 +79,17 @@ export function Seek({
   return (
     <Stack ref={containerRef} scrollable gap={0} className={className}>
       <SeekSentinelBlock
-        id="forward"
-        onIntersect={handleSeekForward}
-        loading={loadingForward}
-        exhausted={exhaustedForward}
+        id={topSentinel.id}
+        onIntersect={handleTop}
+        loading={topSentinel.loading}
+        exhausted={topSentinel.exhausted}
       />
       {children}
       <SeekSentinelBlock
-        id="backward"
-        onIntersect={handleSeekBackward}
-        loading={loadingBackward}
-        exhausted={exhaustedBackward}
+        id={bottomSentinel.id}
+        onIntersect={handleBottom}
+        loading={bottomSentinel.loading}
+        exhausted={bottomSentinel.exhausted}
       />
     </Stack>
   )

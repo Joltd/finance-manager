@@ -44,6 +44,8 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     load,
     error,
   } = useImportDataEntrySeekStore()
+
+  const displayData = [...data].reverse()
   const { data: importData } = useImportDataStore()
   const mainAccountId = importData?.account.id
   const actions = useImportDataActions()
@@ -88,9 +90,10 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
         loadingBackward={loadingBackward}
         exhaustedForward={exhaustedForward}
         exhaustedBackward={exhaustedBackward}
+        reverse
         className="h-full"
       >
-        {data.map((day) => (
+        {displayData.map((day) => (
           <Group
             key={day.date}
             title={formatDateCommon(day.date)}
