@@ -3,12 +3,14 @@
 import { useEffect } from 'react'
 import {
   AlertTriangleIcon,
+  CalendarCheckIcon,
   CheckCircle2Icon,
   PencilIcon,
   RefreshCwIcon,
   XCircleIcon,
 } from 'lucide-react'
 import { AmountLabel } from '@/components/common/typography/amount-label'
+import { ReviseBadge } from '@/components/common/typography/revise-badge'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
@@ -43,7 +45,7 @@ export interface ImportDataHeaderProps {
 
 export function ImportDataHeader({ id }: ImportDataHeaderProps) {
   const { data, fetch, setPathParams } = useImportDataStore()
-  const { loading, actualBalance, calculateTotal } = useImportDataActions()
+  const { loading, actualBalance, calculateTotal, resetRevision } = useImportDataActions()
 
   useEffect(() => {
     setPathParams({ id })
@@ -68,9 +70,18 @@ export function ImportDataHeader({ id }: ImportDataHeaderProps) {
     await calculateTotal(id)
   }
 
+  const handleResetRevision = async () => {
+    await resetRevision(id)
+  }
+
   return (
     <Stack gap={4}>
-      <TitleSection data={data} loading={loading} onRecalculate={handleRecalculate} />
+      <TitleSection
+        data={data}
+        loading={loading}
+        onRecalculate={handleRecalculate}
+        onResetRevision={handleResetRevision}
+      />
 
       {data && data.totals.length > 0 && (
         <Stack gap={1}>
@@ -167,15 +178,19 @@ function TitleSection({
   data,
   loading,
   onRecalculate,
+  onResetRevision,
 }: {
   data: ImportData | undefined
   loading: boolean
   onRecalculate: () => void
+  onResetRevision: () => void
 }) {
   return (
     data && (
       <Stack orientation="horizontal" align="center" gap={3}>
         <Typography variant="large">{data.account.name}</Typography>
+
+        <ReviseBadge reviseDate={data.account.reviseDate} />
 
         {data?.parsingStatus === ImportDataParsingStatus.DONE && (
           <Flow align="center" gap={2} className="ml-auto">
@@ -187,6 +202,14 @@ function TitleSection({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Recalculate totals</TooltipContent>
+            </Tooltip>
+            <Tooltip disableHoverableContent>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon-xs" onClick={onResetRevision} disabled={loading}>
+                  <CalendarCheckIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Mark account as revised today</TooltipContent>
             </Tooltip>
           </Flow>
         )}

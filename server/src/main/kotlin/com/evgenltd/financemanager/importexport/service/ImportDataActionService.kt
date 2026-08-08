@@ -281,10 +281,9 @@ class ImportDataActionService(
     }
 
     @Transactional
-    fun finish(id: UUID) {
+    fun resetRevision(id: UUID) {
         val importData = importDataRepository.find(id)
         importData.account.reviseDate = LocalDate.now()
-        importDataRepository.delete(importData)
     }
 
     @Transactional
@@ -360,6 +359,7 @@ class ImportDataActionService(
     fun approveSuggestion(id: UUID, entryIds: List<UUID>): List<Pair<UUID, UUID>> {
         importDataRepository.find(id)
         return importDataEntryRepository.findAllByIdIn(entryIds)
+            .filter { it.operation == null }
             .mapNotNull { entry ->
                 entry.suggested()
                     .firstOrNull { it.selected }

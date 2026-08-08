@@ -82,10 +82,11 @@ class ImportDataProcessService(
         importDataEventService.importData(id)
     }
 
-    fun finish(id: UUID) {
+    fun resetRevision(id: UUID) {
         importDataActionService.withLock(id) {
-            importDataActionService.finish(id)
+            importDataActionService.resetRevision(id)
         }
+        importDataEventService.importData(id)
     }
 
     fun delete(id: UUID) {

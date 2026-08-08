@@ -57,10 +57,10 @@ class ImportDataController(
         importDataProcessService.saveActualBalance(id, balance)
     }
 
-    @PostMapping("/api/v1/import-data/{id}/finish")
+    @PostMapping("/api/v1/import-data/{id}/reset-revision")
     @PreAuthorize("hasRole('USER')")
-    fun finish(@PathVariable id: UUID) {
-        importDataProcessService.finish(id)
+    fun resetRevision(@PathVariable id: UUID) {
+        importDataProcessService.resetRevision(id)
     }
 
     @PostMapping("/api/v1/import-data/{id}/entry/link")

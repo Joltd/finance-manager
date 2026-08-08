@@ -15,7 +15,9 @@ export function useImportDataActions() {
     importDataUrls.actualBalance,
   )
 
-  const finishRequest = useRequest<void, never, never, { id: string }>(importDataUrls.finish)
+  const resetRevisionRequest = useRequest<void, never, never, { id: string }>(
+    importDataUrls.resetRevision,
+  )
 
   const calculateTotalRequest = useRequest<void, never, never, { id: string }>(
     importDataUrls.calculateTotal,
@@ -49,7 +51,7 @@ export function useImportDataActions() {
     importDataEntries.loadingRefresh ||
     importDataEntries.loadingLoad ||
     actualBalanceRequest.loading ||
-    finishRequest.loading ||
+    resetRevisionRequest.loading ||
     calculateTotalRequest.loading ||
     unlinkRequest.loading ||
     approveRequest.loading ||
@@ -59,7 +61,7 @@ export function useImportDataActions() {
 
   const error =
     actualBalanceRequest.error ??
-    finishRequest.error ??
+    resetRevisionRequest.error ??
     calculateTotalRequest.error ??
     unlinkRequest.error ??
     approveRequest.error ??
@@ -70,7 +72,7 @@ export function useImportDataActions() {
   const actualBalance = (id: string, balance: Amount) =>
     actualBalanceRequest.submit({ pathParams: { id }, body: balance })
 
-  const finish = (id: string) => finishRequest.submit({ pathParams: { id } })
+  const resetRevision = (id: string) => resetRevisionRequest.submit({ pathParams: { id } })
 
   const calculateTotal = (id: string) => calculateTotalRequest.submit({ pathParams: { id } })
 
@@ -93,7 +95,7 @@ export function useImportDataActions() {
     loading,
     error,
     actualBalance,
-    finish,
+    resetRevision,
     calculateTotal,
     unlink,
     approve,

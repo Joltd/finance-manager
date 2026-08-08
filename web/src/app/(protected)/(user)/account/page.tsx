@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { format, isBefore, parseISO, subWeeks } from 'date-fns'
 import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
 import { AmountLabel } from '@/components/common/typography/amount-label'
+import { ReviseBadge } from '@/components/common/typography/revise-badge'
 import type { AccountBalance, AccountBalanceFilter } from '@/types/account'
 import { Layout } from '@/components/common/layout/layout'
 import { Typography } from '@/components/common/typography/typography'
@@ -21,8 +21,6 @@ import { accountUrls, balanceChannels } from '@/api/account'
 import { AccountSheet, openAccountSheet } from './account-sheet'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Badge } from '@/components/ui/badge'
 
 function toQuery(filterValue: Record<string, unknown>): AccountBalanceFilter {
   return {
@@ -110,9 +108,6 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
   const { account, balances } = entry
   const deleted = account.deleted
 
-  const overdueRevise =
-    account.reviseDate && isBefore(parseISO(account.reviseDate), subWeeks(new Date(), 2))
-
   return (
     <Stack
       orientation="horizontal"
@@ -151,16 +146,7 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
 
       <div className="grow" />
 
-      {overdueRevise && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant="outline">Revise</Badge>
-          </TooltipTrigger>
-          <TooltipContent>
-            Last revised: {format(parseISO(account.reviseDate!), 'dd MMM yyyy')}
-          </TooltipContent>
-        </Tooltip>
-      )}
+      <ReviseBadge reviseDate={account.reviseDate} />
 
       <Flow
         gap={2}

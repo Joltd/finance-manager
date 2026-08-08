@@ -6,7 +6,7 @@ export const importDataUrls = {
   entry: '/api/v1/import-data/:id/entry',
   begin: '/api/v1/import-data/begin',
   actualBalance: '/api/v1/import-data/:id/actual-balance',
-  finish: '/api/v1/import-data/:id/finish',
+  resetRevision: '/api/v1/import-data/:id/reset-revision',
   calculateTotal: '/api/v1/import-data/:id/calculate-total',
   unlink: '/api/v1/import-data/:id/entry/unlink',
   approve: '/api/v1/import-data/:id/entry/approve',

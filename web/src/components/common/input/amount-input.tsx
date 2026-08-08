@@ -80,6 +80,7 @@ function AmountInput({
         disabled={disabled}
         aria-invalid={ariaInvalid}
         onChange={(e) => handleNumberChange(e.target.value)}
+        onFocus={(e) => e.target.select()}
         className={cn(
           'placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent px-3 py-1 text-base outline-none md:text-sm',
           'disabled:cursor-not-allowed disabled:opacity-50',
