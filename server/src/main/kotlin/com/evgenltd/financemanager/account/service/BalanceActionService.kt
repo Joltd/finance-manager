@@ -31,6 +31,11 @@ class BalanceActionService(
         return balanceRepository.findByCalculationDateIsNotNull()
     }
 
+    fun findCurrencies(accountId: UUID): List<String> {
+        val account = accountRepository.find(accountId)
+        return balanceRepository.findByAccount(account).map { it.amount.currency }
+    }
+
     @Transactional
     fun calculationRequest(tenant: UUID, accountId: UUID, currency: String, date: LocalDate) {
         balanceRepository.calculationRequest(tenant, accountId, currency, date)

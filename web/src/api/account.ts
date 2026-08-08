@@ -5,6 +5,10 @@ export const accountUrls = {
   balance: '/api/v1/account/balance',
 }
 
+export const balanceUrls = {
+  recalculate: '/api/v1/balance/recalculate',
+}
+
 export const balanceChannels = {
   balance: '/api/v1/balance',
 }

@@ -35,3 +35,8 @@ data class BalanceCalculationCompleted(
     override fun getSource(): String = super.getSource() as String
 
 }
+
+data class BalanceRecalculationRequest(
+    val accountId: UUID,
+    val date: LocalDate,
+)

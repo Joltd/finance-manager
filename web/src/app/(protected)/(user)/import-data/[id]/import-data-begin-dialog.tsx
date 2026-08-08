@@ -22,6 +22,7 @@ import { useRequest } from '@/hooks/use-request'
 import { importDataUrls } from '@/api/import-data'
 import { accountReferenceSchema } from '@/types/account'
 import { createDialogStore } from '@/store/common/dialog'
+import { useImportDataListStore } from '@/store/import-data'
 
 const useImportDataBeginDialogStore = createDialogStore()
 
@@ -64,6 +65,7 @@ export function ImportDataBeginDialog() {
     )
 
     const result = await submit({ body: formData as unknown })
+    void useImportDataListStore.getState().fetch()
     closeDialog()
     router.push(`/import-data/${result}`)
   }

@@ -41,6 +41,7 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
     seekForward,
     seekBackward,
     setPathParams,
+    resetData,
     load,
     error,
   } = useImportDataEntrySeekStore()
@@ -51,14 +52,21 @@ export function ImportDataEntries({ id }: ImportDataEntriesProps) {
   const actions = useImportDataActions()
 
   const [linkingEntry, setLinkingEntry] = useState<ImportDataEntry | null>(null)
+  const [linkingEntryImportId, setLinkingEntryImportId] = useState(id)
+  if (id !== linkingEntryImportId) {
+    setLinkingEntryImportId(id)
+    setLinkingEntry(null)
+  }
 
   useEffect(() => {
-    setPointer(format(subDays(importData?.dateRange?.from ?? new Date(), 1), 'yyyy-MM-dd'))
-  }, [])
-
-  useEffect(() => {
+    resetData()
     setPathParams({ id })
-  }, [id, setPathParams])
+  }, [id, resetData, setPathParams])
+
+  useEffect(() => {
+    if (importData?.id !== id) return
+    setPointer(format(subDays(importData.dateRange?.from ?? new Date(), 1), 'yyyy-MM-dd'))
+  }, [id, importData?.id, importData?.dateRange?.from, setPointer])
 
   useSse<string[]>(importDataChannels.entry(id), (dates) => void load(dates), {
     debounceMs: 400,

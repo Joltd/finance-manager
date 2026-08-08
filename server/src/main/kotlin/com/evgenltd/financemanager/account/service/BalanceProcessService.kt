@@ -33,6 +33,12 @@ class BalanceProcessService(
         publisher.publishEvent(BalanceCalculationRequest(accountId, currency))
     }
 
+    fun requestCalculateBalance(accountId: UUID, date: LocalDate) {
+        balanceActionService.findCurrencies(accountId).forEach { currency ->
+            requestCalculateBalance(accountId, currency, date)
+        }
+    }
+
     @Async
     @EventListener
     fun requestCalculateBalance(event: BalanceCalculationRequest) {

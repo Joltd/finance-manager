@@ -72,6 +72,11 @@ export function ImportDataEntrySheet() {
   const userStore = useUserStore()
   const mainAccountId = importData?.account.id
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
+  const [selectionEntry, setSelectionEntry] = useState<ImportDataEntry | null>(null)
+  if (entry !== selectionEntry) {
+    setSelectionEntry(entry)
+    setSelectedSuggestionIdx(null)
+  }
   const { control, getValues, handleSubmit, reset } = useForm<OperationFormState>({
     resolver: operationFormResolver,
     defaultValues: createDefaultFormState(),

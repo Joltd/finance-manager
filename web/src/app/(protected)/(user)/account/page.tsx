@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { format } from 'date-fns'
+import { ArrowRightIcon, PencilIcon, PlusIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
 
 import { useAccountBalanceStore } from '@/store/account'
 import { AmountLabel } from '@/components/common/typography/amount-label'
@@ -17,7 +19,9 @@ import { BoolFilter } from '@/components/common/filter/bool-filter'
 import { cn } from '@/lib/utils'
 import { useRequest } from '@/hooks/use-request'
 import { useSse } from '@/hooks/use-sse'
-import { accountUrls, balanceChannels } from '@/api/account'
+import { ask } from '@/store/common/ask-dialog'
+import { buildOperationDrilldownUrl } from '@/lib/operation-drilldown'
+import { accountUrls, balanceChannels, balanceUrls } from '@/api/account'
 import { AccountSheet, openAccountSheet } from './account-sheet'
 import { Stack } from '@/components/common/layout/stack'
 import { Flow } from '@/components/common/layout/flow'
@@ -30,8 +34,10 @@ function toQuery(filterValue: Record<string, unknown>): AccountBalanceFilter {
 }
 
 export default function AccountPage() {
+  const router = useRouter()
   const store = useAccountBalanceStore()
   const deleteAccount = useRequest(accountUrls.id, { method: 'DELETE' })
+  const recalculateBalance = useRequest(balanceUrls.recalculate)
   const [filterValue, setFilterValue] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
@@ -55,6 +61,15 @@ export default function AccountPage() {
   const handleDeleteAccount = async (accountId: string) => {
     await deleteAccount.submit({ pathParams: { id: accountId } })
     void store.fetch()
+  }
+
+  const handleDrilldownAccount = (accountId: string) => {
+    router.push(buildOperationDrilldownUrl({ include: [accountId] }))
+  }
+
+  const handleRecalculateBalance = async (accountId: string) => {
+    const date = await ask({ type: 'date', label: 'Recalculate balance from' })
+    await recalculateBalance.submit({ body: { accountId, date: format(date, 'yyyy-MM-dd') } })
   }
 
   return (
@@ -87,6 +102,8 @@ export default function AccountPage() {
                 entry={entry}
                 onEdit={handleEditAccount}
                 onDelete={(a) => void handleDeleteAccount(a)}
+                onDrilldown={handleDrilldownAccount}
+                onRecalculate={(a) => void handleRecalculateBalance(a)}
               />
             ))}
           </Stack>
@@ -102,9 +119,11 @@ interface AccountRowProps {
   entry: AccountBalance
   onEdit: (accountId: string) => void
   onDelete: (accountId: string) => void
+  onDrilldown: (accountId: string) => void
+  onRecalculate: (accountId: string) => void
 }
 
-function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
+function AccountRow({ entry, onEdit, onDelete, onDrilldown, onRecalculate }: AccountRowProps) {
   const { account, balances } = entry
   const deleted = account.deleted
 
@@ -131,6 +150,22 @@ function AccountRow({ entry, onEdit, onDelete }: AccountRowProps) {
           onClick={() => onEdit(account.id!)}
         >
           <PencilIcon className="w-3! h-3!" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="opacity-0 w-5 h-5 group-hover/account:opacity-100 transition-opacity"
+          onClick={() => onDrilldown(account.id!)}
+        >
+          <ArrowRightIcon className="w-3! h-3!" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="opacity-0 w-5 h-5 group-hover/account:opacity-100 transition-opacity"
+          onClick={() => onRecalculate(account.id!)}
+        >
+          <RefreshCwIcon className="w-3! h-3!" />
         </Button>
         {!deleted && (
           <Button
