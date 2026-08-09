@@ -163,7 +163,12 @@ export function ReferenceInput<T>(props: ReferenceInputProps<T>) {
           {/* Selected items (shown when onSearch is used, so they're always visible) */}
           {onSearch && isMulti && (props.value?.length ?? 0) > 0 && (
             <>
-              <div className="max-h-32 overflow-y-auto">
+              <div
+                className="max-h-32 overflow-y-auto"
+                onWheel={(e) => {
+                  e.currentTarget.scrollTop += e.deltaY
+                }}
+              >
                 {props.value!.map((item) => {
                   const id = getId(item)
                   const label = getLabel(item)
@@ -185,7 +190,12 @@ export function ReferenceInput<T>(props: ReferenceInputProps<T>) {
           )}
 
           {/* List */}
-          <div className="max-h-60 overflow-y-auto">
+          <div
+            className="max-h-60 overflow-y-auto"
+            onWheel={(e) => {
+              e.currentTarget.scrollTop += e.deltaY
+            }}
+          >
             {loading && <div className="px-3 py-2 text-sm text-muted-foreground">Loading...</div>}
             {!loading && (!data || data.length === 0) && (
               <div className="px-3 py-2 text-sm text-muted-foreground">No data</div>

@@ -14,14 +14,19 @@ export function useReferenceCache<T extends ReferenceLike>(url: string, ids: str
     const missing = ids.filter((id) => !resolved[id] && !pendingRef.current.has(id))
     if (missing.length === 0) return
     missing.forEach((id) => pendingRef.current.add(id))
-    void resolveReq.submit({ queryParams: { ids: missing.join(',') } }).then((data) => {
-      setResolved((prev) => {
-        const next = { ...prev }
-        for (const item of data) if (item.id) next[item.id] = item
-        return next
+    void resolveReq
+      .submit({ queryParams: { ids: missing.join(',') } })
+      .then((data) => {
+        setResolved((prev) => {
+          const next = { ...prev }
+          for (const item of data) if (item.id) next[item.id] = item
+          return next
+        })
+        missing.forEach((id) => pendingRef.current.delete(id))
       })
-      missing.forEach((id) => pendingRef.current.delete(id))
-    })
+      .catch(() => {
+        missing.forEach((id) => pendingRef.current.delete(id))
+      })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ids.join(',')])
 
