@@ -1,15 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { create } from 'zustand'
 import { format } from 'date-fns'
+import { ArrowLeftIcon } from 'lucide-react'
 
 import { accountUrls } from '@/api/account'
 import { DateInput } from '@/components/common/input/date-input'
-import { AccountTypeInput } from '@/components/common/input/account-type-input'
+import { TypeTileItem, TypeTilePicker } from '@/components/common/input/type-tile-picker'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
@@ -20,6 +21,7 @@ import { Stack } from '@/components/common/layout/stack'
 import { useRequest } from '@/hooks/use-request'
 import { useAccountBalanceStore, useAccountStore } from '@/store/account'
 import { Account, AccountType } from '@/types/account'
+import { AccountIcon } from '@/components/common/icon/account-icon'
 
 interface AccountSheetState {
   open: boolean
@@ -74,6 +76,16 @@ function accountToFormState(account: Account): AccountFormState {
   }
 }
 
+const ACCOUNT_TYPE_TILE_ITEMS: TypeTileItem<AccountType>[] = [
+  { value: AccountType.ACCOUNT, label: 'Account', icon: <AccountIcon type={AccountType.ACCOUNT} colored className="size-10" /> },
+  { value: AccountType.EXPENSE, label: 'Expense', icon: <AccountIcon type={AccountType.EXPENSE} colored className="size-10" /> },
+  { value: AccountType.INCOME, label: 'Income', icon: <AccountIcon type={AccountType.INCOME} colored className="size-10" /> },
+]
+
+const ACCOUNT_TYPE_LABELS = Object.fromEntries(
+  ACCOUNT_TYPE_TILE_ITEMS.map((item) => [item.value, item.label]),
+) as Record<AccountType, string>
+
 export function AccountSheet() {
   const { open, accountId, closeSheet } = useAccountSheetStore()
   const accountStore = useAccountStore()
@@ -84,6 +96,7 @@ export function AccountSheet() {
     control,
     handleSubmit,
     reset,
+    getValues,
   } = useForm<AccountFormState>({
     resolver: accountFormResolver,
     defaultValues: createDefaultFormState(),
@@ -91,8 +104,13 @@ export function AccountSheet() {
 
   const type = useWatch({ control, name: 'type' })
 
+  const [step, setStep] = useState<'type' | 'details'>('type')
+  const isCreate = !accountId
+
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizes the step with the open-keyed hydration below, same intentional reset pattern as forms-guide.md §6/§7
+      setStep(accountId ? 'details' : 'type')
       if (accountId) {
         accountStore.setPathParams({ id: accountId })
         void accountStore.fetch()
@@ -109,15 +127,23 @@ export function AccountSheet() {
     reset(accountToFormState(account))
   }, [accountStore.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleTypeSelect = (newType: AccountType) => {
+    reset({ ...getValues(), type: newType })
+    setStep('details')
+  }
+
   const onSubmit = async (data: AccountFormState) => {
     await saveAccount.submit({
       body: {
         id: accountId,
         name: data.name,
         type: data.type,
-        parser: data.parser || undefined,
+        parser: data.type === AccountType.ACCOUNT ? data.parser || undefined : undefined,
         deleted: data.deleted,
-        reviseDate: data.reviseDate ? format(data.reviseDate, 'yyyy-MM-dd') : undefined,
+        reviseDate:
+          data.type === AccountType.ACCOUNT && data.reviseDate
+            ? format(data.reviseDate, 'yyyy-MM-dd')
+            : undefined,
         externalId: data.type === AccountType.ACCOUNT ? data.externalId || undefined : undefined,
       },
     })
@@ -135,13 +161,31 @@ export function AccountSheet() {
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{accountId ? 'Edit Account' : 'New Account'}</SheetTitle>
+          <Stack orientation="horizontal" align="center" gap={2}>
+            {step === 'details' && isCreate && (
+              <Button type="button" variant="ghost" size="icon" onClick={() => setStep('type')}>
+                <ArrowLeftIcon />
+              </Button>
+            )}
+            <SheetTitle>
+              {accountId ? 'Edit' : 'New'}{' '}
+              {step === 'details' ? ACCOUNT_TYPE_LABELS[type] : ''}
+            </SheetTitle>
+          </Stack>
         </SheetHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="contents">
           {loading ? (
             <Stack align="center" justify="center" className="flex-1">
               <Spinner />
+            </Stack>
+          ) : step === 'type' ? (
+            <Stack gap={4} className="px-4 flex-1">
+              <TypeTilePicker
+                items={ACCOUNT_TYPE_TILE_ITEMS}
+                value={type}
+                onChange={handleTypeSelect}
+              />
             </Stack>
           ) : (
             <Stack gap={4} scrollable className="px-4 flex-1">
@@ -157,34 +201,24 @@ export function AccountSheet() {
                 )}
               />
 
-              <Controller
-                name="type"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Type</FieldLabel>
-                    <AccountTypeInput value={field.value} onChange={field.onChange} />
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                )}
-              />
-
-              <Controller
-                name="parser"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Parser</FieldLabel>
-                    <Input
-                      id={field.name}
-                      aria-invalid={fieldState.invalid}
-                      placeholder="Not set"
-                      {...field}
-                    />
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                )}
-              />
+              {type === AccountType.ACCOUNT && (
+                <Controller
+                  name="parser"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Parser</FieldLabel>
+                      <Input
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Not set"
+                        {...field}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+              )}
 
               {type === AccountType.ACCOUNT && (
                 <Controller
@@ -205,24 +239,26 @@ export function AccountSheet() {
                 />
               )}
 
-              <Controller
-                name="reviseDate"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Revise Date</FieldLabel>
-                    <DateInput
-                      id={field.name}
-                      value={field.value}
-                      onChange={field.onChange}
-                      aria-invalid={fieldState.invalid}
-                      clearable
-                      placeholder="Not set"
-                    />
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                )}
-              />
+              {type === AccountType.ACCOUNT && (
+                <Controller
+                  name="reviseDate"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Revise Date</FieldLabel>
+                      <DateInput
+                        id={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        aria-invalid={fieldState.invalid}
+                        clearable
+                        placeholder="Not set"
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+              )}
 
               <Controller
                 name="deleted"
@@ -241,11 +277,13 @@ export function AccountSheet() {
             </Stack>
           )}
 
-          <SheetFooter>
-            <Button type="submit" disabled={saveAccount.loading || loading}>
-              Save
-            </Button>
-          </SheetFooter>
+          {step === 'details' && (
+            <SheetFooter>
+              <Button type="submit" disabled={saveAccount.loading || loading}>
+                Save
+              </Button>
+            </SheetFooter>
+          )}
         </form>
       </SheetContent>
     </Sheet>

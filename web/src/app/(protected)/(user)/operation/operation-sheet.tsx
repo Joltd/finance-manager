@@ -1,16 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Control, Controller, useForm, useWatch } from 'react-hook-form'
 import { create } from 'zustand'
 import { formatDate } from 'date-fns'
+import { ArrowLeftIcon } from 'lucide-react'
 
 import { operationUrls } from '@/api/operation'
 import { AccountInput } from '@/components/common/input/account-input'
 import { TagInput } from '@/components/common/input/tag-input'
 import { AmountInput } from '@/components/common/input/amount-input'
 import { DateInput } from '@/components/common/input/date-input'
-import { OperationTypeInput } from '@/components/common/input/operation-type-input'
+import { TypeTileItem, TypeTilePicker } from '@/components/common/input/type-tile-picker'
 import { Stack } from '@/components/common/layout/stack'
 import { RawDataDisclosure } from '@/components/common/raw-data-disclosure'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ import { useRequest } from '@/hooks/use-request'
 import { useOperationStore } from '@/store/operation'
 import { AccountType } from '@/types/account'
 import { OperationType } from '@/types/operation'
+import { OperationIcon } from '@/components/common/icon/operation-icon'
 import {
   createDefaultFormState,
   createPresetFormState,
@@ -65,6 +67,18 @@ export function openOperationSheetForCopy(operationId?: string) {
 export function amountFieldErrors(error?: { message?: string; currency?: { message?: string } }) {
   return [error, error?.currency].filter((e): e is { message?: string } => Boolean(e?.message))
 }
+
+// Exported so ImportDataEntrySheet's type tile step can reuse the same items.
+export const OPERATION_TYPE_TILE_ITEMS: TypeTileItem<OperationType>[] = [
+  { value: OperationType.EXCHANGE, label: 'Exchange', icon: <OperationIcon type={OperationType.EXCHANGE} colored className="size-10" /> },
+  { value: OperationType.TRANSFER, label: 'Transfer', icon: <OperationIcon type={OperationType.TRANSFER} colored className="size-10" /> },
+  { value: OperationType.EXPENSE, label: 'Expense', icon: <OperationIcon type={OperationType.EXPENSE} colored className="size-10" /> },
+  { value: OperationType.INCOME, label: 'Income', icon: <OperationIcon type={OperationType.INCOME} colored className="size-10" /> },
+]
+
+export const OPERATION_TYPE_LABELS = Object.fromEntries(
+  OPERATION_TYPE_TILE_ITEMS.map((item) => [item.value, item.label]),
+) as Record<OperationType, string>
 
 // ---------------------------------------------------------------------------
 // Type-specific field groups
@@ -395,8 +409,13 @@ export function OperationSheet() {
 
   const type = useWatch({ control, name: 'type' })
 
+  const [step, setStep] = useState<'type' | 'details'>('type')
+  const isCreate = !operationId || copy
+
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizes the step with the open-keyed hydration below, same intentional reset pattern as forms-guide.md §6/§7
+      setStep(operationId ? 'details' : 'type')
       if (operationId) {
         operationStore.setPathParams({ id: operationId })
         void operationStore.fetch()
@@ -413,8 +432,9 @@ export function OperationSheet() {
     reset(operationToFormState(operation))
   }, [operationStore.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleTypeChange = (newType: OperationType) => {
+  const handleTypeSelect = (newType: OperationType) => {
     reset(transitType(getValues(), newType))
+    setStep('details')
   }
 
   const onSubmit = async (data: OperationFormState) => {
@@ -452,7 +472,17 @@ export function OperationSheet() {
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{operationId ? 'Edit Operation' : 'New Operation'}</SheetTitle>
+          <Stack orientation="horizontal" align="center" gap={2}>
+            {step === 'details' && isCreate && (
+              <Button type="button" variant="ghost" size="icon" onClick={() => setStep('type')}>
+                <ArrowLeftIcon />
+              </Button>
+            )}
+            <SheetTitle>
+              {operationId ? 'Edit' : 'New'}{' '}
+              {step === 'details' ? OPERATION_TYPE_LABELS[type] : ''}
+            </SheetTitle>
+          </Stack>
         </SheetHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="contents">
@@ -460,25 +490,17 @@ export function OperationSheet() {
             <Stack align="center" justify="center" className="flex-1">
               <Spinner />
             </Stack>
+          ) : step === 'type' ? (
+            <Stack gap={4} className="flex-1 px-4">
+              <TypeTilePicker
+                items={OPERATION_TYPE_TILE_ITEMS}
+                value={type}
+                onChange={handleTypeSelect}
+                columns={2}
+              />
+            </Stack>
           ) : (
             <Stack gap={4} scrollable className="flex-1 px-4">
-              <Controller
-                name="type"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Type</FieldLabel>
-                    <OperationTypeInput
-                      id={field.name}
-                      value={field.value}
-                      onChange={handleTypeChange}
-                      aria-invalid={fieldState.invalid}
-                    />
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                )}
-              />
-
               <Controller
                 name="date"
                 control={control}
@@ -549,11 +571,13 @@ export function OperationSheet() {
             </Stack>
           )}
 
-          <SheetFooter>
-            <Button type="submit" disabled={saveOperation.loading || loading}>
-              Save
-            </Button>
-          </SheetFooter>
+          {step === 'details' && (
+            <SheetFooter>
+              <Button type="submit" disabled={saveOperation.loading || loading}>
+                Save
+              </Button>
+            </SheetFooter>
+          )}
         </form>
       </SheetContent>
     </Sheet>

@@ -8,12 +8,13 @@ import { DateInput } from '@/components/common/input/date-input'
 import { Stack } from '@/components/common/layout/stack'
 import { RawDataDisclosure } from '@/components/common/raw-data-disclosure'
 import { Typography } from '@/components/common/typography/typography'
-import { OperationTypeInput } from '@/components/common/input/operation-type-input'
+import { TypeTilePicker } from '@/components/common/input/type-tile-picker'
 import { TagInput } from '@/components/common/input/tag-input'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { ArrowLeftIcon } from 'lucide-react'
 import { Operation, OperationType } from '@/types/operation'
 import type { ImportDataEntry } from '@/types/import-data'
 import {
@@ -28,6 +29,8 @@ import {
   ExchangeFields,
   ExpenseFields,
   IncomeFields,
+  OPERATION_TYPE_LABELS,
+  OPERATION_TYPE_TILE_ITEMS,
   TransferFields,
 } from '@/app/(protected)/(user)/operation/operation-sheet'
 import { useImportDataStore } from '@/store/import-data'
@@ -83,27 +86,35 @@ export function ImportDataEntrySheet() {
   })
   const type = useWatch({ control, name: 'type' })
 
+  const [step, setStep] = useState<'type' | 'details'>('details')
+
   useEffect(() => {
     if (!open || !entry) return
 
     if (entry.operation) {
       reset(operationToFormState(entry.operation))
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizes the step with the open/entry-keyed hydration in this same effect, same intentional reset pattern as forms-guide.md §6/§7
+      setStep('details')
     } else {
       const idx = entry.suggestions.findIndex((s) => s.selected)
       if (idx >= 0) {
         reset(operationToFormState(entry.suggestions[idx]))
+        setStep('details')
       } else if (entry.parsed) {
         reset(operationToFormState(entry.parsed))
+        setStep('details')
       } else {
         reset(
           createPresetFormState(presetStore, userStore.data?.settings?.operationDefaultCurrency),
         )
+        setStep('type')
       }
     }
   }, [open, entry]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleTypeChange = (newType: OperationType) => {
+  const handleTypeSelect = (newType: OperationType) => {
     reset(transitType(getValues(), newType))
+    setStep('details')
   }
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -114,10 +125,12 @@ export function ImportDataEntrySheet() {
     if (!entry) return
     setSelectedSuggestionIdx(idx)
     reset(operationToFormState(entry.suggestions[idx]))
+    setStep('details')
   }
 
   const hasOperation = !!entry?.operation
   const hasSuggestions = (entry?.suggestions.length ?? 0) > 0
+  const isCreate = !hasOperation
 
   const buildOperationBody = (data: OperationFormState): Omit<Operation, 'raw'> => {
     const isExchange = data.type === OperationType.EXCHANGE
@@ -150,7 +163,7 @@ export function ImportDataEntrySheet() {
     }
     closeSheet()
   }
-  const title = hasOperation ? 'Edit Operation' : 'New Operation'
+  const title = `${hasOperation ? 'Edit' : 'New'} ${step === 'details' ? OPERATION_TYPE_LABELS[type] : ''}`
 
   const actionLabel: string = hasOperation ? 'Save' : 'Commit'
 
@@ -160,7 +173,14 @@ export function ImportDataEntrySheet() {
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className={cn(hasSuggestions && 'sm:max-w-160')}>
         <SheetHeader>
-          <SheetTitle>{title}</SheetTitle>
+          <Stack orientation="horizontal" align="center" gap={2}>
+            {step === 'details' && isCreate && (
+              <Button type="button" variant="ghost" size="icon" onClick={() => setStep('type')}>
+                <ArrowLeftIcon />
+              </Button>
+            )}
+            <SheetTitle>{title}</SheetTitle>
+          </Stack>
         </SheetHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="contents">
@@ -195,24 +215,17 @@ export function ImportDataEntrySheet() {
 
             {/* Form column + footer buttons */}
             <Stack gap={0} className="flex-1 min-h-0">
+              {step === 'type' ? (
+                <Stack gap={4} className="flex-1 px-4 pb-4">
+                  <TypeTilePicker
+                    items={OPERATION_TYPE_TILE_ITEMS}
+                    value={type}
+                    onChange={handleTypeSelect}
+                    columns={2}
+                  />
+                </Stack>
+              ) : (
               <Stack gap={4} scrollable className="flex-1 px-4 pb-4">
-                <Controller
-                  name="type"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>Type</FieldLabel>
-                      <OperationTypeInput
-                        id={field.name}
-                        value={field.value}
-                        onChange={handleTypeChange}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      <FieldError errors={[fieldState.error]} />
-                    </Field>
-                  )}
-                />
-
                 <Controller
                   name="date"
                   control={control}
@@ -281,17 +294,20 @@ export function ImportDataEntrySheet() {
 
                 <RawDataDisclosure raw={entry?.parsed?.raw} />
               </Stack>
+              )}
 
-              <SheetFooter>
-                {showUnlink && (
-                  <Button type="button" variant="outline" disabled={loading}>
-                    Unlink
+              {step === 'details' && (
+                <SheetFooter>
+                  {showUnlink && (
+                    <Button type="button" variant="outline" disabled={loading}>
+                      Unlink
+                    </Button>
+                  )}
+                  <Button type="submit" disabled={loading}>
+                    {actionLabel}
                   </Button>
-                )}
-                <Button type="submit" disabled={loading}>
-                  {actionLabel}
-                </Button>
-              </SheetFooter>
+                </SheetFooter>
+              )}
             </Stack>
           </Stack>
         </form>
