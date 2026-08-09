@@ -38,6 +38,10 @@ export function MonthInput(props: MonthInputProps) {
   const [open, setOpen] = React.useState(false)
   const [year, setYear] = React.useState(() => new Date().getFullYear())
 
+  const today = new Date()
+  const isCurrentMonth = (month: number) =>
+    year === today.getFullYear() && month === today.getMonth()
+
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
       if (mode === 'single') {
@@ -171,6 +175,10 @@ export function MonthInput(props: MonthInputProps) {
                   isPrimary &&
                     'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground',
                   isInRange && !isPrimary && 'bg-accent text-accent-foreground',
+                  isCurrentMonth(i) &&
+                    !isPrimary &&
+                    !isInRange &&
+                    'rounded-md bg-accent text-accent-foreground',
                 )}
                 onClick={() => handleSelect(i)}
               >
@@ -178,6 +186,11 @@ export function MonthInput(props: MonthInputProps) {
               </Button>
             )
           })}
+        </div>
+        <div className="flex justify-center border-t mt-3 pt-2">
+          <Button variant="ghost" size="sm" onClick={() => setYear(new Date().getFullYear())}>
+            Today
+          </Button>
         </div>
       </PopoverContent>
     </Popover>

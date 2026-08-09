@@ -32,6 +32,12 @@ export function DateInput({
   calendarProps,
 }: DateInputProps) {
   const [open, setOpen] = React.useState(false)
+  const [month, setMonth] = React.useState<Date>(() => value ?? new Date())
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setMonth(value ?? new Date())
+    setOpen(nextOpen)
+  }
 
   const handleSelect = (date: Date | undefined) => {
     onChange?.(date)
@@ -40,7 +46,7 @@ export function DateInput({
 
   return (
     <div className="relative w-full">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
             id={id}
@@ -66,13 +72,19 @@ export function DateInput({
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            defaultMonth={value ?? new Date()}
+            month={month}
+            onMonthChange={setMonth}
             selected={value}
             onSelect={handleSelect}
             captionLayout="dropdown"
             weekStartsOn={1}
             {...calendarProps}
           />
+          <div className="flex justify-center border-t p-2">
+            <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
+              Today
+            </Button>
+          </div>
         </PopoverContent>
       </Popover>
       {clearable && value && (
