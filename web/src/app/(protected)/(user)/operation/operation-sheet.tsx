@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Control, Controller, useForm, useWatch } from 'react-hook-form'
 import { create } from 'zustand'
 import { formatDate } from 'date-fns'
-import { ArrowLeftIcon } from 'lucide-react'
+import { ArrowDownIcon, ArrowLeftIcon } from 'lucide-react'
 
 import { operationUrls } from '@/api/operation'
 import { AccountInput } from '@/components/common/input/account-input'
@@ -96,92 +96,100 @@ export interface TypeFieldsProps {
 export function ExchangeFields({ control, accountUsages }: TypeFieldsProps) {
   return (
     <>
-      <Controller
-        name="accountFrom"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>From</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
+      <Stack gap={3} className="rounded-lg bg-muted p-3">
+        <Controller
+          name="accountFrom"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>From</FieldLabel>
+              <FrequentAccounts
+                usages={accountUsages}
+                accountType={AccountType.ACCOUNT}
+                onSelect={field.onChange}
+              />
+              <AccountInput
+                id={field.name}
+                type={AccountType.ACCOUNT}
+                value={field.value}
+                onChange={field.onChange}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
 
-      <Controller
-        name="amountFrom"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Amount From</FieldLabel>
-            <AmountInput
-              id={field.name}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={amountFieldErrors(fieldState.error)} />
-          </Field>
-        )}
-      />
+        <Controller
+          name="amountFrom"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Amount From</FieldLabel>
+              <AmountInput
+                id={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={amountFieldErrors(fieldState.error)} />
+            </Field>
+          )}
+        />
+      </Stack>
 
-      <Controller
-        name="accountTo"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>To</FieldLabel>
-            <FrequentAccounts
-              usages={accountUsages}
-              accountType={AccountType.ACCOUNT}
-              onSelect={field.onChange}
-            />
-            <AccountInput
-              id={field.name}
-              type={AccountType.ACCOUNT}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={[fieldState.error]} />
-          </Field>
-        )}
-      />
+      <div className="flex justify-center">
+        <ArrowDownIcon className="text-muted-foreground size-4" />
+      </div>
 
-      <Controller
-        name="amountTo"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={field.name}>Amount To</FieldLabel>
-            <AmountInput
-              id={field.name}
-              value={field.value}
-              onChange={field.onChange}
-              aria-invalid={fieldState.invalid}
-            />
-            <FieldError errors={amountFieldErrors(fieldState.error)} />
-          </Field>
-        )}
-      />
+      <Stack gap={3} className="rounded-lg bg-muted p-3">
+        <Controller
+          name="accountTo"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>To</FieldLabel>
+              <FrequentAccounts
+                usages={accountUsages}
+                accountType={AccountType.ACCOUNT}
+                onSelect={field.onChange}
+              />
+              <AccountInput
+                id={field.name}
+                type={AccountType.ACCOUNT}
+                value={field.value}
+                onChange={field.onChange}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="amountTo"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Amount To</FieldLabel>
+              <AmountInput
+                id={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={amountFieldErrors(fieldState.error)} />
+            </Field>
+          )}
+        />
+      </Stack>
     </>
   )
 }
 
 export function TransferFields({ control, accountUsages }: TypeFieldsProps) {
   return (
-    <>
+    <Stack gap={3} className="rounded-lg bg-muted p-3">
       <Controller
         name="accountFrom"
         control={control}
@@ -244,13 +252,13 @@ export function TransferFields({ control, accountUsages }: TypeFieldsProps) {
           </Field>
         )}
       />
-    </>
+    </Stack>
   )
 }
 
 export function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
   return (
-    <>
+    <Stack gap={3} className="rounded-lg bg-muted p-3">
       <Controller
         name="accountFrom"
         control={control}
@@ -313,13 +321,13 @@ export function ExpenseFields({ control, accountUsages }: TypeFieldsProps) {
           </Field>
         )}
       />
-    </>
+    </Stack>
   )
 }
 
 export function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
   return (
-    <>
+    <Stack gap={3} className="rounded-lg bg-muted p-3">
       <Controller
         name="accountTo"
         control={control}
@@ -382,7 +390,7 @@ export function IncomeFields({ control, accountUsages }: TypeFieldsProps) {
           </Field>
         )}
       />
-    </>
+    </Stack>
   )
 }
 
