@@ -29,6 +29,7 @@ class UserService(
     private val userConverter: UserConverter,
     private val settingService: SettingService,
     private val passwordEncoder: PasswordEncoder,
+    private val demoDataCleanupService: DemoDataCleanupService,
 ) : UserDetailsService, Loggable() {
 
     fun adminList(): List<AdminUserRecord> = userRepository.findAll()
@@ -46,8 +47,7 @@ class UserService(
         return userConverter.toRecord(user, settings)
     }
 
-    @Transactional
-    fun adminUpdate(record: AdminUserRecord) {
+    fun adminUpdate(record: AdminUserRecord): AdminUserRecord {
         if (record.name.isBlank()) {
             throw badRequestException("Name is blank")
         }
@@ -67,7 +67,8 @@ class UserService(
                 tenant = record.tenant ?: UUID.randomUUID(),
                 name = record.name,
                 login = record.login,
-                deleted = record.deleted
+                deleted = record.deleted,
+                demo = record.demo,
             )
 
         if (!record.password.isNullOrBlank()) {
@@ -84,6 +85,8 @@ class UserService(
             settings.pricingFeature = record.pricingFeature
             settingService.update(settings)
         }
+
+        return userConverter.toAdminRecord(user)
     }
 
     @Transactional
@@ -105,6 +108,18 @@ class UserService(
         val user = userRepository.find(id)
         user.deleted = true
         userRepository.save(user)
+    }
+
+    @Transactional
+    fun deleteDemoUser(id: UUID) {
+        val user = userRepository.find(id)
+        if (!user.demo) {
+            throw badRequestException("User is not a demo user")
+        }
+        val tenant = user.tenant ?: throw badRequestException("Demo user has no tenant")
+
+        demoDataCleanupService.wipeTenant(tenant)
+        userRepository.delete(user)
     }
 
     override fun loadUserByUsername(username: String): UserDetails {

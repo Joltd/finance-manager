@@ -4,8 +4,9 @@ import com.evgenltd.financemanager.common.component.DataResponse
 import com.evgenltd.financemanager.common.component.SkipLogging
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.badRequestException
+import com.evgenltd.financemanager.user.component.withTenant
 import com.evgenltd.financemanager.user.record.AdminUserRecord
-import com.evgenltd.financemanager.user.service.UserEventService
+import com.evgenltd.financemanager.user.service.DemoDataGeneratorService
 import com.evgenltd.financemanager.user.service.UserService
 import com.evgenltd.financemanager.user.service.currentUser
 import org.springframework.dao.DataIntegrityViolationException
@@ -18,7 +19,7 @@ import java.util.*
 @SkipLogging
 class AdminUserController(
     private val userService: UserService,
-    private val userEventService: UserEventService,
+    private val demoDataGeneratorService: DemoDataGeneratorService,
 ) : Loggable() {
 
     @GetMapping("/api/v1/admin/user")
@@ -32,12 +33,20 @@ class AdminUserController(
     @PostMapping("/api/v1/admin/user")
     @PreAuthorize("hasRole('ADMIN')")
     fun update(@RequestBody record: AdminUserRecord) {
-        try {
+        val saved = try {
             userService.adminUpdate(record)
-//                .also { userEventService.adminUser() }
         } catch (e: DataIntegrityViolationException) {
             log.error("Unable to save user", e)
             throw badRequestException("Login already in use")
+        }
+
+        if (record.id == null && record.demo) {
+            try {
+                demoDataGeneratorService.generate(saved.tenant!!)
+            } catch (e: Exception) {
+                log.error("Unable to generate demo data for tenant ${saved.tenant}", e)
+                throw badRequestException("User was created but demo data generation failed")
+            }
         }
     }
 
@@ -47,12 +56,21 @@ class AdminUserController(
         if (currentUser() == id) {
             throw badRequestException("Unable to delete current user")
         }
+
+        val target = userService.adminById(id)
+        if (target.demo) {
+            val tenant = target.tenant ?: throw badRequestException("Demo user has no tenant")
+            withTenant(tenant) {
+                userService.deleteDemoUser(id)
+            }
+            return
+        }
+
         try {
             userService.adminDelete(id)
         } catch (_: Exception) {
             userService.adminMarkAsDelete(id)
         }
-//        userEventService.adminUser()
     }
 
 }

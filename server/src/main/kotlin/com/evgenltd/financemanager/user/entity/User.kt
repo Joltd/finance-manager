@@ -30,6 +30,8 @@ class User(
     var role: UserRole = UserRole.USER,
 
     var deleted: Boolean = false,
+
+    var demo: Boolean = false,
 ) {
 
     override fun equals(other: Any?): Boolean {

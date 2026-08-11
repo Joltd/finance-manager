@@ -24,6 +24,7 @@ class UserConverter() {
         login = entity.login,
         deleted = entity.deleted,
         pricingFeature = pricingFeature,
+        demo = entity.demo,
     )
 
 }

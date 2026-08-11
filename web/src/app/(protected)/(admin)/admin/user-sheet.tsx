@@ -42,6 +42,7 @@ const userFormSchema = z.object({
   password: z.string(),
   deleted: z.boolean(),
   pricingFeature: z.boolean(),
+  demo: z.boolean(),
 })
 
 type UserFormState = z.infer<typeof userFormSchema>
@@ -55,6 +56,7 @@ function createDefaultFormState(): UserFormState {
     password: '',
     deleted: false,
     pricingFeature: false,
+    demo: false,
   }
 }
 
@@ -65,6 +67,7 @@ function userToFormState(user: AdminUser): UserFormState {
     password: '',
     deleted: user.deleted,
     pricingFeature: user.pricingFeature ?? false,
+    demo: user.demo ?? false,
   }
 }
 
@@ -106,6 +109,7 @@ export function UserSheet() {
         password: data.password || undefined,
         deleted: data.deleted,
         pricingFeature: data.pricingFeature,
+        demo: data.demo,
       },
     })
     void listStore.fetch()
@@ -175,6 +179,25 @@ export function UserSheet() {
                   </Field>
                 )}
               />
+
+              {!userId && (
+                <Controller
+                  name="demo"
+                  control={control}
+                  render={({ field }) => (
+                    <Field orientation="horizontal">
+                      <Checkbox
+                        id={field.name}
+                        checked={field.value}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                      <FieldLabel htmlFor={field.name}>
+                        Demo user (generates sample data)
+                      </FieldLabel>
+                    </Field>
+                  )}
+                />
+              )}
 
               {userId && (
                 <Controller

@@ -18,9 +18,17 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>, JpaSp
 
     fun existsByImportDataDayImportDataAndOperationId(importData: ImportData, operationId: UUID): Boolean
 
-    fun findByIdInAndVisible(ids: List<UUID>, visible: Boolean): List<ImportDataEntry>
+    @Query("select ide from ImportDataEntry ide where ide.id = :id and ide.importDataDay.importData.id = :importDataId")
+    fun findByIdAndImportDataId(id: UUID, importDataId: UUID): ImportDataEntry?
+
+    @Query("select ide from ImportDataEntry ide where ide.id in :ids and ide.importDataDay.importData.id = :importDataId")
+    fun findAllByIdInAndImportDataId(ids: List<UUID>, importDataId: UUID): List<ImportDataEntry>
 
     @EntityGraph(attributePaths = ["operations"])
-    fun findAllByIdIn(ids: List<UUID>): List<ImportDataEntry>
+    @Query("select ide from ImportDataEntry ide where ide.id in :ids and ide.importDataDay.importData.id = :importDataId")
+    fun findAllByIdInAndImportDataIdFetchOperations(ids: List<UUID>, importDataId: UUID): List<ImportDataEntry>
+
+    @Query("select ide from ImportDataEntry ide where ide.id in :ids and ide.visible = :visible and ide.importDataDay.importData.id = :importDataId")
+    fun findByIdInAndVisibleAndImportDataId(ids: List<UUID>, visible: Boolean, importDataId: UUID): List<ImportDataEntry>
 
 }

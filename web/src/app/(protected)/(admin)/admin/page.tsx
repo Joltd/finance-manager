@@ -7,6 +7,7 @@ import { userUrls } from '@/api/user'
 import { Layout } from '@/components/common/layout/layout'
 import { Stack } from '@/components/common/layout/stack'
 import { Typography } from '@/components/common/typography/typography'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -97,6 +98,7 @@ function UserRow({
           >
             {user.name}
           </Typography>
+          {user.demo && <Badge variant="secondary">Demo</Badge>}
           <Typography as="span" variant="muted" className="text-xs shrink-0">
             {user.login}
           </Typography>

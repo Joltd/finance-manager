@@ -289,7 +289,8 @@ class ImportDataActionService(
     @Transactional
     fun linkOperation(id: UUID, entryId: UUID, operationId: UUID): List<LocalDate> {
         val importData = importDataRepository.find(id)
-        val entry = importDataEntryRepository.find(entryId)
+        val entry = importDataEntryRepository.findByIdAndImportDataId(entryId, id)
+            ?: throw badRequestException("ImportDataEntry [$entryId] not found")
 
         val alreadyLinked = importDataEntryRepository.existsByImportDataDayImportDataAndOperationId(importData, operationId)
         if (alreadyLinked) {
@@ -319,8 +320,10 @@ class ImportDataActionService(
     }
 
     @Transactional
-    fun unlinkOperation(id: UUID, entryIds: List<UUID>): List<LocalDate> =
-        importDataEntryRepository.findAllById(entryIds)
+    fun unlinkOperation(id: UUID, entryIds: List<UUID>): List<LocalDate> {
+        importDataRepository.find(id)
+
+        return importDataEntryRepository.findAllByIdInAndImportDataId(entryIds, id)
             .flatMap {
                 val operationDate = it.operation?.date
                 it.operation?.raw = ""
@@ -330,12 +333,13 @@ class ImportDataActionService(
             }
             .mapNotNull { it }
             .distinct()
+    }
 
     @Transactional
     fun entryVisible(id: UUID, operationIds: List<UUID>, entryIds: List<UUID>, visible: Boolean): List<LocalDate> {
         val importData = importDataRepository.find(id)
 
-        val affectedEntryDates = importDataEntryRepository.findByIdInAndVisible(entryIds, !visible)
+        val affectedEntryDates = importDataEntryRepository.findByIdInAndVisibleAndImportDataId(entryIds, !visible, id)
             .onEach { it.visible = visible }
             .map { it.importDataDay.date }
 
@@ -358,7 +362,7 @@ class ImportDataActionService(
     // without transaction since operationProcessService.save() contains notify logic
     fun approveSuggestion(id: UUID, entryIds: List<UUID>): List<Pair<UUID, UUID>> {
         importDataRepository.find(id)
-        return importDataEntryRepository.findAllByIdIn(entryIds)
+        return importDataEntryRepository.findAllByIdInAndImportDataIdFetchOperations(entryIds, id)
             .filter { it.operation == null }
             .mapNotNull { entry ->
                 entry.suggested()
