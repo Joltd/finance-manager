@@ -3,10 +3,12 @@ package com.evgenltd.financemanager.operation.controller
 import com.evgenltd.financemanager.AbstractIntegrationTest
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
-import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
+import com.evgenltd.financemanager.testsupport.fixture.accountRecordOf
+import com.evgenltd.financemanager.testsupport.fixture.expenseRecord
+import com.evgenltd.financemanager.testsupport.fixture.incomeRecord
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -219,9 +221,9 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `multiple expenses in the same month - turnover aggregates all transactions`() {
         // 100 + 50 + 200 = 350 USD total expense in January
-        postOperation(expenseRecord(date = LocalDate.of(2024, 1, 15), valueUsd = 1000000L, description = "Groceries"))
-        postOperation(expenseRecord(date = LocalDate.of(2024, 1, 20), valueUsd = 500000L, description = "Transport"))
-        postOperation(expenseRecord(date = LocalDate.of(2024, 1, 25), valueUsd = 2000000L, description = "Rent"))
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 1, 15), valueUsd = 1000000L, description = "Groceries"))
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 1, 20), valueUsd = 500000L, description = "Transport"))
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 1, 25), valueUsd = 2000000L, description = "Rent"))
 
         withTenant {
             val balance = balanceRepository.findByAccountAndAmountCurrency(bankAccount, "USD")!!
@@ -238,9 +240,9 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `operations across multiple months - turnovers reflect monthly amounts and running total`() {
         // Jan: +1000, Feb: -200, Mar: -150 → cumulative: +1000, +800, +650
-        postOperation(incomeRecord(date = LocalDate.of(2024, 1, 15), valueUsd = 10000000L))  // +1000
-        postOperation(expenseRecord(date = LocalDate.of(2024, 2, 10), valueUsd = 2000000L))  // -200
-        postOperation(expenseRecord(date = LocalDate.of(2024, 3, 5), valueUsd = 1500000L))   // -150
+        postOperation(incomeRecord(incomeCategory = incomeCategory, bankAccount = bankAccount, date = LocalDate.of(2024, 1, 15), valueUsd = 10000000L))  // +1000
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 2, 10), valueUsd = 2000000L))  // -200
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 3, 5), valueUsd = 1500000L))   // -150
 
         withTenant {
             val balance = balanceRepository.findByAccountAndAmountCurrency(bankAccount, "USD")!!
@@ -266,14 +268,14 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `update operation in past month - all subsequent turnovers and balance are recalculated`() {
         // Create income in Jan and expense in Feb
-        postOperation(incomeRecord(date = LocalDate.of(2024, 1, 15), valueUsd = 10000000L)) // +1000
-        postOperation(expenseRecord(date = LocalDate.of(2024, 2, 10), valueUsd = 2000000L)) // -200
+        postOperation(incomeRecord(incomeCategory = incomeCategory, bankAccount = bankAccount, date = LocalDate.of(2024, 1, 15), valueUsd = 10000000L)) // +1000
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 2, 10), valueUsd = 2000000L)) // -200
 
         // Update Jan income from 1000 to 500
         val janOperationId: UUID = withTenant {
             operationRepository.findAll().first { it.date.month == Month.JANUARY }.id!!
         }
-        postOperation(incomeRecord(id = janOperationId, date = LocalDate.of(2024, 1, 15), valueUsd = 5000000L)) // +500
+        postOperation(incomeRecord(incomeCategory = incomeCategory, bankAccount = bankAccount, id = janOperationId, date = LocalDate.of(2024, 1, 15), valueUsd = 5000000L)) // +500
 
         withTenant {
             val balance = balanceRepository.findByAccountAndAmountCurrency(bankAccount, "USD")!!
@@ -294,8 +296,8 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `delete one of multiple operations - remaining operations determine balance and turnovers`() {
-        postOperation(expenseRecord(date = LocalDate.of(2024, 1, 15), valueUsd = 1000000L)) // -100
-        postOperation(expenseRecord(date = LocalDate.of(2024, 1, 20), valueUsd = 500000L))  // -50
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 1, 15), valueUsd = 1000000L)) // -100
+        postOperation(expenseRecord(bankAccount = bankAccount, expenseCategory = expenseCategory, date = LocalDate.of(2024, 1, 20), valueUsd = 500000L))  // -50
 
         val operationToDelete: UUID = withTenant {
             operationRepository.findAll().first { it.date == LocalDate.of(2024, 1, 15) }.id!!
@@ -315,39 +317,6 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
 
     // --- helpers ---
 
-    private fun expenseRecord(
-        id: UUID? = null,
-        date: LocalDate,
-        valueUsd: Long,
-        description: String = "",
-    ) = OperationRecord(
-        id = id,
-        date = date,
-        type = OperationType.EXPENSE,
-        amountFrom = Amount(valueUsd, "USD"),
-        accountFrom = accountRecordOf(bankAccount),
-        amountTo = Amount(valueUsd, "USD"),
-        accountTo = accountRecordOf(expenseCategory),
-        description = description,
-    )
-
-    private fun incomeRecord(
-        id: UUID? = null,
-        date: LocalDate,
-        valueUsd: Long,
-    ) = OperationRecord(
-        id = id,
-        date = date,
-        type = OperationType.INCOME,
-        amountFrom = Amount(valueUsd, "USD"),
-        accountFrom = accountRecordOf(incomeCategory),
-        amountTo = Amount(valueUsd, "USD"),
-        accountTo = accountRecordOf(bankAccount),
-        description = "",
-    )
-
-    // --- helpers ---
-
     private fun postOperation(record: OperationRecord): ResponseEntity<String> =
         restClient.post()
             .uri("/api/v1/operation")
@@ -362,13 +331,4 @@ class OperationControllerIntegrationTest : AbstractIntegrationTest() {
             .headers { it.addAll(authHeaders()) }
             .retrieve()
             .toEntity(String::class.java)
-
-    private fun accountRecordOf(account: Account) = AccountRecord(
-        id = account.id,
-        name = account.name,
-        type = account.type,
-        parser = null,
-        deleted = false,
-        reviseDate = null,
-    )
 }
