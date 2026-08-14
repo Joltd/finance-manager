@@ -99,25 +99,25 @@ class SpecificationExtensionTest : AbstractRepositoryTest() {
     }
 
     @Test
-    fun `amountBetween - compares against the raw scale-4 stored value, not a human-scale BigDecimal`() {
+    fun `amountBetween - matches a human-scale BigDecimal range against the scale-4 stored value`() {
         // 100.0000 USD is stored as the raw Long 1000000 (Amount.SCALE = 4).
         val hundredDollarOperation = operationRepository.save(
             expenseOperation(LocalDate.of(2024, 1, 15), valueUsd = 1_000_000L)
         )
 
         // A caller passing a human-scale range (e.g. "50.00" to "150.00", as a UI amount filter would)
-        // does NOT match, because amountBetween compares that BigDecimal directly against the raw
-        // scale-4 Long column (1,000,000) instead of scaling it first via Amount.toAmountValue().
-        val humanScaleResult = operationRepository.findAll(
+        // matches, because amountBetween now scales the BigDecimal via Amount.toAmountValue() before
+        // comparing it against the raw scale-4 Long column.
+        val matchingResult = operationRepository.findAll(
             Operation::amountFrom amountBetween BigDecimalRange(BigDecimal("50"), BigDecimal("150"))
         )
-        assertThat(humanScaleResult).isEmpty()
+        assertThat(matchingResult).extracting("id").containsExactly(hundredDollarOperation.id)
 
-        // Only a range expressed in the same raw scale-4 units actually matches.
-        val rawScaleResult = operationRepository.findAll(
-            Operation::amountFrom amountBetween BigDecimalRange(BigDecimal("500000"), BigDecimal("1500000"))
+        // A range that doesn't cover 100 in human-scale terms does not match.
+        val nonMatchingResult = operationRepository.findAll(
+            Operation::amountFrom amountBetween BigDecimalRange(BigDecimal("200"), BigDecimal("300"))
         )
-        assertThat(rawScaleResult).extracting("id").containsExactly(hundredDollarOperation.id)
+        assertThat(nonMatchingResult).isEmpty()
     }
 
     private fun expenseOperation(date: LocalDate, valueUsd: Long = 1_000_000L, currency: String = "USD") = Operation(

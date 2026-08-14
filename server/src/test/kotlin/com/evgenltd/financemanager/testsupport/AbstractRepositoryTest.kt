@@ -1,11 +1,9 @@
 package com.evgenltd.financemanager.testsupport
 
-import com.evgenltd.financemanager.config.TestAsyncConfig
 import com.evgenltd.financemanager.user.component.tenantContext
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -19,15 +17,22 @@ import java.util.UUID
  * back after each test - no manual cleanup is required. The tenant `ThreadLocal` is
  * set/cleared automatically so every test runs under [TEST_TENANT] by construction,
  * instead of silently falling back to the zero-UUID tenant.
+ *
+ * Uses a tenant UUID distinct from [com.evgenltd.financemanager.AbstractIntegrationTest]'s -
+ * that base class commits real rows (only cleaned in @BeforeEach), so sharing a tenant
+ * would let its leftover data leak into this class's whole-table assertions.
+ *
+ * Do not use this base for services that are themselves `@Transactional(propagation = NEVER)`
+ * (e.g. OperationProcessService, ImportDataProcessService) or that cascade into one via an
+ * event - the ambient transaction here conflicts with that. Use AbstractIntegrationTest instead.
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestAsyncConfig::class)
 @Transactional
 abstract class AbstractRepositoryTest {
 
     companion object {
-        val TEST_TENANT: UUID = UUID.fromString("00000000-0000-0000-0000-000000000001")
+        val TEST_TENANT: UUID = UUID.fromString("00000000-0000-0000-0000-000000000003")
     }
 
     @BeforeEach

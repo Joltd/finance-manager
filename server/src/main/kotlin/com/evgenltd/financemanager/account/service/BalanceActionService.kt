@@ -12,6 +12,7 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.operation.service.signedAmount
+import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -24,6 +25,7 @@ class BalanceActionService(
     private val turnoverRepository: TurnoverRepository,
     private val transactionRepository: TransactionRepository,
     private val balanceEventService: BalanceEventService,
+    private val entityManager: EntityManager,
 ) : Loggable() {
 
     @SkipLogging
@@ -57,6 +59,11 @@ class BalanceActionService(
             log.warn("Balance not found for accountId: $accountId, currency: $currency")
             return null
         }
+        // calculationRequest() sets calculationDate/calculationVersion via a native bulk update,
+        // which bypasses Hibernate's session - under Open-Session-In-View, an already-loaded
+        // Balance (e.g. from findCurrencies() earlier in the same request) would otherwise still
+        // read those fields as stale/null here, silently skipping the recalculation below.
+        entityManager.refresh(balance)
 
         val calculationDate = balance.calculationDate
         val calculationVersion = balance.calculationVersion

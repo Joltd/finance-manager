@@ -6,6 +6,7 @@ import com.evgenltd.financemanager.common.record.BigDecimalRange
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.badRequestException
+import com.evgenltd.financemanager.common.util.toAmountValue
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.pricing.entity.PricingItem
 import com.evgenltd.financemanager.tag.entity.Tag
@@ -117,25 +118,25 @@ fun <E : Any> KProperty1<E, Amount?>.amountIsNotZero(): Specification<E> = Speci
 
 infix fun <E : Any> KProperty1<E, Amount?>.amountGt(value: BigDecimal?): Specification<E> = valueNonNull(value) {
     Specification { root, _, builder ->
-        builder.greaterThan(root.get<Amount>(name).get(Amount::value.name), value)
+        builder.greaterThan(root.get<Amount>(name).get<Long>(Amount::value.name), it.toAmountValue())
     }
 }
 
 infix fun <E : Any> KProperty1<E, Amount?>.amountGte(value: BigDecimal?): Specification<E> = valueNonNull(value) {
     Specification { root, _, builder ->
-        builder.greaterThanOrEqualTo(root.get<Amount>(name).get(Amount::value.name), value)
+        builder.greaterThanOrEqualTo(root.get<Amount>(name).get<Long>(Amount::value.name), it.toAmountValue())
     }
 }
 
 infix fun <E : Any> KProperty1<E, Amount?>.amountLt(value: BigDecimal?): Specification<E> = valueNonNull(value) {
     Specification { root, _, builder ->
-        builder.lessThan(root.get<Amount>(name).get(Amount::value.name), value)
+        builder.lessThan(root.get<Amount>(name).get<Long>(Amount::value.name), it.toAmountValue())
     }
 }
 
 infix fun <E : Any> KProperty1<E, Amount?>.amountLte(value: BigDecimal?): Specification<E> = valueNonNull(value) {
     Specification { root, _, builder ->
-        builder.lessThanOrEqualTo(root.get<Amount>(name).get(Amount::value.name), value)
+        builder.lessThanOrEqualTo(root.get<Amount>(name).get<Long>(Amount::value.name), it.toAmountValue())
     }
 }
 

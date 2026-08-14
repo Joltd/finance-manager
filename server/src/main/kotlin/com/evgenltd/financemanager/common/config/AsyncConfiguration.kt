@@ -11,7 +11,7 @@ import java.util.concurrent.Executor
 
 @Configuration
 @EnableAsync
-@Profile("!test")
+@Profile("!test | async")
 class AsyncConfiguration(
     private val taskDecorator: ContextPropagatingTaskDecorator,
 ) : AsyncConfigurer {
