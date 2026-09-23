@@ -25,8 +25,9 @@ fun InputStream.readCsv(skip: Int = 0, delimiter: String = ","): List<CsvRow> {
 //    }
 
     val fields = lines.first()
+        .removePrefix("﻿")
         .split(delimiter)
-        .map { it.trim() }
+        .map { it.trim().removeSurrounding("\"") }
         .toList()
 
     return lines.drop(1)

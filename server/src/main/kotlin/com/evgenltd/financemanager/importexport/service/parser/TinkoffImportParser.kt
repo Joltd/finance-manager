@@ -15,13 +15,14 @@ class TinkoffImportParser : ImportParser {
     override fun parse(importData: ImportData, stream: InputStream): ImportDataParsed = ImportDataParsed(
         entries = stream
             .readCsv(delimiter = ";")
-            .filter { it[3].clean() == "OK" }
+            .filter { row -> STATUS_OK.any { row[STATUS].clean().trim().equals(it, ignoreCase = true) } }
             .map { cells ->
-                val date = cells[0].clean().dateTime("dd.MM.yyyy HH:mm:ss")
-                val amount = cells[6].clean().amount("RUB")
-                val description = cells[11].clean()
-                val category = cells[9].clean()
-                val mcc = cells[10].clean().takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""
+                val date = cells[DATE].clean().dateTime("dd.MM.yyyy HH:mm:ss")
+                val currency = cells[ACCOUNT_CURRENCY].clean().ifBlank { DEFAULT_CURRENCY }
+                val amount = cells[ACCOUNT_AMOUNT].clean().amount(currency)
+                val description = cells[DESCRIPTION].clean()
+                val category = cells[USER_CATEGORY].clean().ifBlank { cells[DEFAULT_CATEGORY].clean() }
+                val mcc = cells[MCC].clean().takeIf { it.isNotBlank() }?.let { " ($it)" } ?: ""
                 val type = if (amount.value < 0) OperationType.EXPENSE else OperationType.INCOME
                 val hint = type.hint()?.let { typeHint -> "$typeHint $description - $category$mcc" }
                 ImportDataParsedEntry(
@@ -45,6 +46,21 @@ class TinkoffImportParser : ImportParser {
         OperationType.EXPENSE -> "Списание"
         OperationType.INCOME -> "Поступление"
         else -> null
+    }
+
+    private companion object {
+        const val DATE = "Дата операции"
+        const val ACCOUNT_AMOUNT = "Сумма в валюте счёта"
+        const val ACCOUNT_CURRENCY = "Валюта счёта"
+        const val STATUS = "Статус"
+        const val DEFAULT_CATEGORY = "Категория по-умолчанию"
+        const val USER_CATEGORY = "Ваша категория"
+        const val MCC = "MCC"
+        const val DESCRIPTION = "Описание"
+
+        // latin and cyrillic spellings
+        val STATUS_OK = listOf("OK", "ОК")
+        const val DEFAULT_CURRENCY = "RUB"
     }
 
 }
