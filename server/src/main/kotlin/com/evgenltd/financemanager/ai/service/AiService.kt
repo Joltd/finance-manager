@@ -3,7 +3,6 @@ package com.evgenltd.financemanager.ai.service
 import com.evgenltd.financemanager.ai.record.EmbeddingResult
 import com.evgenltd.financemanager.ai.record.ParseEntry
 import org.springframework.stereotype.Service
-import java.io.InputStream
 
 @Service
 class AiService(
@@ -16,6 +15,6 @@ class AiService(
         aiProviderResolver.resolve().embedding(data)
     }
 
-    fun parse(stream: InputStream): List<ParseEntry> = aiProviderResolver.resolve().parse(stream)
+    fun parse(filename: String): List<ParseEntry> = aiProviderResolver.resolve().parse(filename)
 
 }

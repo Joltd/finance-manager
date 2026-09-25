@@ -25,5 +25,6 @@ exchange:
 ai:
   open-ai:
     api-key: dummy
+    parse-model: gpt-6-luna
 
 APP_VERSION: test

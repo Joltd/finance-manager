@@ -17,6 +17,7 @@ exchange:
 ai:
   open-ai:
     api-key: ${OPEN_AI_API_KEY}
+    parse-model: gpt-6-luna
 
 sse:
   connection-timeout-ms: 3600000
