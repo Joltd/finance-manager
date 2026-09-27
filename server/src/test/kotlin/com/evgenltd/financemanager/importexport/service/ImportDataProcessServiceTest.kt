@@ -1,94 +1,97 @@
 package com.evgenltd.financemanager.importexport.service
 
-import com.evgenltd.financemanager.AbstractIntegrationTest
-import com.evgenltd.financemanager.account.entity.Account
-import com.evgenltd.financemanager.account.entity.AccountType
-import com.evgenltd.financemanager.common.repository.find
-import com.evgenltd.financemanager.common.util.Amount
-import com.evgenltd.financemanager.importexport.entity.ImportData
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
+import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
+import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import java.util.UUID
 
-/**
- * Covers the simpler, lock-wrapped mutation methods of ImportDataProcessService
- * (saveActualBalance/resetRevision/delete). The heavier pipeline (beginNewImport,
- * calculateTotal) needs file + AI-provider fixtures and is deferred - same reasoning
- * as skipping the HTML-based Sber/BCC import parsers in Phase 1.
- *
- * Extends AbstractIntegrationTest (not the transactional AbstractRepositoryTest) because
- * ImportDataProcessService is itself @Transactional(propagation = Propagation.NEVER) in
- * production - an ambient test transaction would conflict with that.
- */
-class ImportDataProcessServiceTest : AbstractIntegrationTest() {
+class ImportDataProcessServiceTest {
 
-    @Autowired
-    private lateinit var importDataProcessService: ImportDataProcessService
+    private val actionService = mock<ImportDataActionService>()
+    private val eventService = mock<ImportDataEventService>()
+    private val service = ImportDataProcessService(actionService, eventService)
+    private val importId = UUID.randomUUID()
 
-    private lateinit var account: Account
+    @Test
+    fun `beginNewImport - runs every stage in order and batches embeddings`() {
+        executeLockedBlock()
+        whenever(actionService.parseImportData(importId, "statement.csv")).thenReturn(listOf(parsedEntry()))
+        val entryIds = (1..51).map { UUID.randomUUID() }
+        whenever(actionService.prepareImportData(eq(importId), any())).thenReturn(entryIds)
 
-    @BeforeEach
-    fun setUp() {
-        cleanupTestData()
-        withTenant {
-            account = accountRepository.save(Account(name = "Bank", type = AccountType.ACCOUNT))
+        service.beginNewImport(importId, "statement.csv")
+
+        inOrder(actionService) {
+            verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.PARSING, null)
+            verify(actionService).parseImportData(importId, "statement.csv")
+            verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.PREPARATION, null)
+            verify(actionService).prepareImportData(eq(importId), any())
+            verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.EMBEDDING, null)
+            verify(actionService).prepareHintEmbeddings(entryIds.take(50))
+            verify(actionService).prepareHintEmbeddings(entryIds.drop(50))
+            verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.SUGGESTION, null)
+            verify(actionService).prepareSuggestions(importId)
+            verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.LINKING, null)
+            verify(actionService).linkEntries(importId)
+            verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.CALCULATION, null)
+            verify(actionService).calculateTotals(importId)
+            verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.DONE, null)
         }
     }
 
     @Test
-    fun `saveActualBalance - creates a total for a currency seen for the first time`() {
-        val importDataId = withTenant { importDataRepository.save(ImportData(account = account)).id!! }
+    fun `beginNewImport - empty parse result marks import failed`() {
+        executeLockedBlock()
+        whenever(actionService.parseImportData(importId, "empty.csv")).thenReturn(emptyList())
 
-        withTenant { importDataProcessService.saveActualBalance(importDataId, Amount(1_000_000L, "USD")) }
+        service.beginNewImport(importId, "empty.csv")
 
-        withTenant {
-            val totals = importDataTotalRepository.findByImportData(importDataRepository.find(importDataId))
-            assertThat(totals).hasSize(1)
-            assertThat(totals.first().currency).isEqualTo("USD")
-            assertThat(totals.first().actual).isEqualTo(Amount(1_000_000L, "USD"))
-        }
+        verify(actionService).updateParsingStatus(
+            importId,
+            ImportDataParsingStatus.FAILED,
+            "No transaction entries were parsed",
+        )
+        verify(actionService, never()).prepareImportData(eq(importId), any())
     }
 
     @Test
-    fun `saveActualBalance - updates the existing total for the same currency instead of duplicating it`() {
-        val importDataId = withTenant { importDataRepository.save(ImportData(account = account)).id!! }
-        withTenant { importDataProcessService.saveActualBalance(importDataId, Amount(1_000_000L, "USD")) }
+    fun `beginNewImport - stage exception marks import failed`() {
+        executeLockedBlock()
+        whenever(actionService.parseImportData(importId, "broken.csv")).thenThrow(IllegalStateException("AI unavailable"))
 
-        withTenant { importDataProcessService.saveActualBalance(importDataId, Amount(2_000_000L, "USD")) }
+        service.beginNewImport(importId, "broken.csv")
 
-        withTenant {
-            val totals = importDataTotalRepository.findByImportData(importDataRepository.find(importDataId))
-            assertThat(totals).hasSize(1)
-            assertThat(totals.first().actual).isEqualTo(Amount(2_000_000L, "USD"))
+        verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.FAILED, "AI unavailable")
+    }
+
+    private fun executeLockedBlock() {
+        whenever(actionService.withTryLock(eq(importId), any())).thenAnswer {
+            it.getArgument<() -> Unit>(1).invoke()
+            true
         }
     }
 
-    @Test
-    fun `resetRevision - sets the account's revise date to today`() {
-        val importDataId = withTenant {
-            account.reviseDate = LocalDate.of(2020, 1, 1)
-            accountRepository.save(account)
-            importDataRepository.save(ImportData(account = account)).id!!
-        }
-
-        withTenant { importDataProcessService.resetRevision(importDataId) }
-
-        withTenant {
-            assertThat(accountRepository.find(account.id!!).reviseDate).isEqualTo(LocalDate.now())
-        }
-    }
-
-    @Test
-    fun `delete - removes the import data row`() {
-        val importDataId = withTenant { importDataRepository.save(ImportData(account = account)).id!! }
-
-        withTenant { importDataProcessService.delete(importDataId) }
-
-        withTenant {
-            assertThat(importDataRepository.findById(importDataId)).isEmpty()
-        }
-    }
+    private fun parsedEntry() = ImportDataParsedEntry(
+        raw = "2026-01-02,10.00,USD",
+        date = null,
+        direction = null,
+        amount = null,
+        currency = null,
+        transactionId = null,
+        mcc = null,
+        bankType = null,
+        bankCategory = null,
+        merchant = null,
+        counterparty = null,
+        purpose = null,
+        description = null,
+        message = null,
+    )
 }

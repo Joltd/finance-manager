@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.operation.entity
 
 import com.evgenltd.financemanager.account.entity.Account
-import com.evgenltd.financemanager.ai.entity.Embedding
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.tag.entity.Tag
 import jakarta.persistence.*
@@ -49,11 +48,9 @@ class Operation(
 
     var description: String?,
 
-    var raw: String = "",
-
-    @ManyToOne
-    @JoinColumn(name = "hint_id")
-    var hint: Embedding? = null,
+    @OneToOne
+    @JoinColumn(name = "operation_data_id", unique = true)
+    var operationData: OperationData? = null,
 
     @OneToMany(mappedBy = "operation", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     var transactions: MutableList<Transaction> = mutableListOf(),

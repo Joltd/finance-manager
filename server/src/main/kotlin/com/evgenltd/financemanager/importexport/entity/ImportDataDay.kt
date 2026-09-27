@@ -16,7 +16,7 @@ class ImportDataDay(
     @JoinColumn(name = "import_data_id")
     var importData: ImportData,
 
-    var date: LocalDate,
+    var date: LocalDate?,
 
     /**
      * Valid by all totals validity

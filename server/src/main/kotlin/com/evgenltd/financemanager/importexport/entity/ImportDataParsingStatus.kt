@@ -3,10 +3,11 @@ package com.evgenltd.financemanager.importexport.entity
 enum class ImportDataParsingStatus {
     CREATED,
     PARSING,
-    INTERPRETATION,
+    PREPARATION,
+    EMBEDDING,
+    SUGGESTION,
     LINKING,
     CALCULATION,
     DONE,
     FAILED,
 }
-

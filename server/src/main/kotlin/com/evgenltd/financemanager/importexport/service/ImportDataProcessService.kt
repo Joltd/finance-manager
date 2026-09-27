@@ -1,75 +1,62 @@
 package com.evgenltd.financemanager.importexport.service
 
-import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
-import com.evgenltd.financemanager.common.service.FileService
-import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
-import com.evgenltd.financemanager.importexport.record.ImportDataCalculateTotalEvent
-import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
-import com.evgenltd.financemanager.operation.record.OperationRecord
-import com.evgenltd.financemanager.operation.service.OperationProcessService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 @Transactional(propagation = Propagation.NEVER)
 class ImportDataProcessService(
-    private val importDataRepository: ImportDataRepository,
-    private val importDataEntryRepository: ImportDataEntryRepository,
     private val importDataActionService: ImportDataActionService,
     private val importDataEventService: ImportDataEventService,
-    private val operationProcessService: OperationProcessService,
-    private val fileService: FileService,
-    private val publisher: ApplicationEventPublisher,
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(ImportDataProcessService::class.java)
 
     @Async
     fun beginNewImport(id: UUID, filename: String) {
-        /*
         importDataActionService.withTryLock(id) {
             try {
                 updateParsingStatus(id, ImportDataParsingStatus.PARSING)
-                val result = fileService.load(filename) {
-                    importDataActionService.parseImportData(id, it)
-                }
-                importDataActionService.prepareImportData(id, result)
-                if (result.entries.isEmpty()) {
-                    updateParsingStatus(id, ImportDataParsingStatus.FAILED)
+                val parsedEntries = importDataActionService.parseImportData(id, filename)
+                if (parsedEntries.isEmpty()) {
+                    updateParsingStatus(id, ImportDataParsingStatus.FAILED, "No transaction entries were parsed")
                     return@withTryLock
                 }
 
-                updateParsingStatus(id, ImportDataParsingStatus.INTERPRETATION)
-                importDataEntryRepository.findByImportDataId(id)
-                    .chunked(50)
-                    .onEach { ids ->
-                        importDataActionService.prepareHintEmbeddings(ids)
-                        importDataActionService.interpretImportDataEntries(ids)
-                    }
+                updateParsingStatus(id, ImportDataParsingStatus.PREPARATION)
+                val entryIds = importDataActionService.prepareImportData(id, parsedEntries)
+
+                updateParsingStatus(id, ImportDataParsingStatus.EMBEDDING)
+                entryIds.chunked(EMBEDDING_BATCH_SIZE)
+                    .forEach { importDataActionService.prepareHintEmbeddings(it) }
+
+                updateParsingStatus(id, ImportDataParsingStatus.SUGGESTION)
+                importDataActionService.prepareSuggestions(id)
 
                 updateParsingStatus(id, ImportDataParsingStatus.LINKING)
-                importDataActionService.linkExistedOperations(id)
+                importDataActionService.linkEntries(id)
 
                 updateParsingStatus(id, ImportDataParsingStatus.CALCULATION)
-                calculateTotal(id)
+                importDataActionService.calculateTotals(id)
 
                 updateParsingStatus(id, ImportDataParsingStatus.DONE)
             } catch (e: Exception) {
-                updateParsingStatus(id, ImportDataParsingStatus.FAILED, e.message)
-                log.error("Unable to parse data", e)
+                updateParsingStatus(id, ImportDataParsingStatus.FAILED, e.message ?: "Unknown import error")
+                log.error("Unable to import data", e)
             }
         }
-        */
+    }
+
+    fun delete(id: UUID) {
+        importDataActionService.withLock(id) {
+            importDataActionService.delete(id)
+        }
     }
 
     private fun updateParsingStatus(id: UUID, status: ImportDataParsingStatus, message: String? = null) {
@@ -77,98 +64,7 @@ class ImportDataProcessService(
         importDataEventService.importData(id)
     }
 
-    fun saveActualBalance(id: UUID, balance: Amount) {
-        importDataActionService.withLock(id) {
-            importDataActionService.saveActualBalance(id, balance)
-        }
-        importDataEventService.importData(id)
+    private companion object {
+        const val EMBEDDING_BATCH_SIZE = 50
     }
-
-    fun resetRevision(id: UUID) {
-        importDataActionService.withLock(id) {
-            importDataActionService.resetRevision(id)
-        }
-        importDataEventService.importData(id)
-    }
-
-    fun delete(id: UUID) {
-        importDataActionService.withLock(id) {
-            importDataRepository.deleteById(id)
-        }
-    }
-
-    fun linkOperationById(id: UUID, entryId: UUID, operationId: UUID) {
-        importDataActionService.withLock(id) {
-            val dates = importDataActionService.linkOperation(id, entryId, operationId)
-            publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
-        }
-    }
-
-    fun linkOperation(id: UUID, entryId: UUID, operation: OperationRecord) {
-        importDataActionService.withLock(id) {
-            val operationId = operationProcessService.update(operation) // recalculation by operation events
-            importDataActionService.linkOperation(id, entryId, operationId)
-        }
-    }
-
-    fun unlinkOperation(id: UUID, entryIds: List<UUID>) {
-        if (entryIds.isEmpty()) {
-            return
-        }
-        importDataActionService.withLock(id) {
-            val dates = importDataActionService.unlinkOperation(id, entryIds)
-            publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
-        }
-    }
-
-    fun entryVisibility(id: UUID, operationIds: List<UUID>, entryIds: List<UUID>, visible: Boolean) {
-        if (operationIds.isEmpty() || entryIds.isEmpty()) {
-            return
-        }
-        importDataActionService.withLock(id) {
-            val dates = importDataActionService.entryVisible(id, operationIds, entryIds, visible)
-            publisher.publishEvent(ImportDataCalculateTotalEvent(id, dates))
-        }
-    }
-
-    fun approveSuggestion(id: UUID, entryIds: List<UUID>) {
-        if (entryIds.isEmpty()) {
-            return
-        }
-        importDataActionService.withLock(id) {
-            val result = importDataActionService.approveSuggestion(id, entryIds)  // recalculation by operation events
-            result.forEach { (entryId, operationId) ->
-                importDataActionService.linkOperation(id, entryId, operationId)
-            }
-        }
-    }
-
-    fun calculateTotal(id: UUID) {
-        calculateTotal(id, null)
-    }
-
-    @EventListener
-    @Async
-    fun calculateTotal(event: ImportDataCalculateTotalEvent) {
-        calculateTotal(event.id, event.dates)
-    }
-
-    @EventListener
-    fun balanceCalculationCompleted(event: BalanceCalculationCompleted) {
-        importDataRepository.findByAccountId(event.accountId)
-            .onEach {
-                publisher.publishEvent(ImportDataCalculateTotalEvent(it.id!!))
-            }
-    }
-
-    private fun calculateTotal(id: UUID, dates: List<LocalDate>?) {
-        importDataActionService.withLock(id) {
-            val affectedDates = importDataActionService.calculateTotal(id, dates)
-            importDataEventService.importData(id)
-            if (affectedDates.isNotEmpty()) {
-                importDataEventService.importDataEntry(id, affectedDates)
-            }
-        }
-    }
-
 }

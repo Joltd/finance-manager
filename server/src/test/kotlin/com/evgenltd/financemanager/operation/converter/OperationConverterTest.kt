@@ -5,8 +5,11 @@ import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.ai.converter.EmbeddingConverter
+import com.evgenltd.financemanager.ai.entity.Embedding
+import com.evgenltd.financemanager.ai.record.EmbeddingRecord
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.operation.entity.OperationData
 import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.operation.record.OperationRecord
 import com.evgenltd.financemanager.tag.converter.TagConverter
@@ -58,6 +61,29 @@ class OperationConverterTest {
         assertThat(record.description).isEqualTo("Groceries")
         assertThat(record.hint).isNull()
         assertThat(record.tags).extracting("id").containsExactly(tag.id)
+    }
+
+    @Test
+    fun `toRecord - reads legacy raw and hint API fields through operation data`() {
+        val embeddingId = UUID.randomUUID()
+        val embedding = Embedding(id = embeddingId, input = "merchant: Market")
+        whenever(embeddingConverter.toRecord(embedding)).thenReturn(EmbeddingRecord(embeddingId, embedding.input))
+        val entity = Operation(
+            id = UUID.randomUUID(),
+            date = LocalDate.of(2024, 1, 15),
+            type = OperationType.EXPENSE,
+            amountFrom = Amount(1000000L, "USD"),
+            accountFrom = bankAccount,
+            amountTo = Amount(1000000L, "USD"),
+            accountTo = expenseCategory,
+            description = "Groceries",
+            operationData = OperationData(raw = "original row", hint = embedding),
+        )
+
+        val record = converter.toRecord(entity)
+
+        assertThat(record.raw).isEqualTo("original row")
+        assertThat(record.hint).isEqualTo(EmbeddingRecord(embeddingId, "merchant: Market"))
     }
 
     @Test

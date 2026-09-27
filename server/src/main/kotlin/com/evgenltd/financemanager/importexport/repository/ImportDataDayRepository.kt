@@ -12,7 +12,7 @@ import java.util.*
 @Repository
 interface ImportDataDayRepository : JpaRepository<ImportDataDay, UUID>, JpaSpecificationExecutor<ImportDataDay> {
 
-    @Query("select min(ide.date) as min, max(ide.date) as max from ImportDataDay ide where ide.importData = :importData")
+    @Query("select min(ide.date) as min, max(ide.date) as max from ImportDataDay ide where ide.importData = :importData and ide.date is not null")
     fun findImportDataDateRange(importData: ImportData): ImportDataDateRange
 
 }

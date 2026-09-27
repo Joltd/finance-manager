@@ -29,8 +29,8 @@ class OperationConverter(
         amountTo = entity.amountTo,
         accountTo = entity.accountTo.let { accountConverter.toRecord(it) },
         description = entity.description,
-        raw = entity.raw,
-        hint = entity.hint?.let { embeddingConverter.toRecord(it) },
+        raw = entity.operationData?.raw.orEmpty(),
+        hint = entity.operationData?.hint?.let { embeddingConverter.toRecord(it) },
         tags = entity.tags.map { tagConverter.toRecord(it) },
     )
 

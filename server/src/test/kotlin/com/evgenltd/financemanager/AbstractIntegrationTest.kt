@@ -5,9 +5,9 @@ import com.evgenltd.financemanager.account.repository.BalanceRepository
 import com.evgenltd.financemanager.account.repository.TurnoverRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
-import com.evgenltd.financemanager.importexport.repository.ImportDataOperationRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataTotalRepository
+import com.evgenltd.financemanager.operation.repository.OperationDataRepository
 import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.repository.TransactionRepository
 import com.evgenltd.financemanager.user.component.withTenant
@@ -62,10 +62,10 @@ abstract class AbstractIntegrationTest {
     protected lateinit var transactionRepository: TransactionRepository
 
     @Autowired
-    protected lateinit var importDataOperationRepository: ImportDataOperationRepository
+    protected lateinit var importDataEntryRepository: ImportDataEntryRepository
 
     @Autowired
-    protected lateinit var importDataEntryRepository: ImportDataEntryRepository
+    protected lateinit var operationDataRepository: OperationDataRepository
 
     @Autowired
     protected lateinit var importDataDayRepository: ImportDataDayRepository
@@ -90,12 +90,12 @@ abstract class AbstractIntegrationTest {
 
     protected fun cleanupTestData() {
         withTenant {
-            importDataOperationRepository.deleteAll()
             importDataEntryRepository.deleteAll()
             importDataDayRepository.deleteAll()
             importDataTotalRepository.deleteAll()
             importDataRepository.deleteAll()
             operationRepository.deleteAll()
+            operationDataRepository.deleteAll()
             turnoverRepository.deleteAll()
             balanceRepository.deleteAll()
             accountRepository.deleteAll()

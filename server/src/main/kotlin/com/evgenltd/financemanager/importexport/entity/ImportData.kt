@@ -1,7 +1,6 @@
 package com.evgenltd.financemanager.importexport.entity
 
 import com.evgenltd.financemanager.account.entity.Account
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedFailedEntry
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.TenantId
@@ -43,9 +42,6 @@ class ImportData(
 
     @JdbcTypeCode(SqlTypes.JSON)
     var hiddenOperations: MutableSet<UUID> = mutableSetOf(),
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    var failedEntries: MutableList<ImportDataParsedFailedEntry> = mutableListOf(),
 
 ) {
     override fun equals(other: Any?): Boolean {
