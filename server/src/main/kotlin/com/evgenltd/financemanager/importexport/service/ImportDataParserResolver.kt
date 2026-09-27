@@ -6,10 +6,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class ImportDataParserResolver(
-    private val parsers: List<ImportParser>,
     private val aiParser: AiImportParser,
 ) {
 
-    fun resolve(parser: String?): ImportParser = parsers.firstOrNull { it.name == parser } ?: aiParser
+    fun resolve(@Suppress("UNUSED_PARAMETER") parser: String?): ImportParser = aiParser
 
 }

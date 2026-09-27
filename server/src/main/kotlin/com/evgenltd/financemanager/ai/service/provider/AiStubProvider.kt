@@ -16,7 +16,7 @@ class AiStubProvider : AiProvider {
 
     override fun embedding(data: List<String>): List<EmbeddingResult> = data.map { stubEmbedding(it) }
 
-    override fun parse(stream: InputStream): List<ParseEntry> {
+    override fun parse(filename: String, stream: InputStream, currency: String?): List<ParseEntry> {
         return emptyList()
     }
 

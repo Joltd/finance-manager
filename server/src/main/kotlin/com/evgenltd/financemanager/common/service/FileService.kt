@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.common.service
 
 import com.evgenltd.financemanager.common.component.SkipLogging
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
@@ -17,7 +18,19 @@ class FileService(
 ) {
 
     fun store(file: MultipartFile): String {
-        val filename = UUID.randomUUID().toString()
+        val extension = file.originalFilename
+            ?.substringAfterLast('/')
+            ?.substringAfterLast('\\')
+            ?.substringAfterLast('.', "")
+            ?.takeIf { it.matches(SAFE_EXTENSION) }
+            ?.lowercase()
+        val filename = buildString {
+            append(UUID.randomUUID())
+            if (extension != null) {
+                append('.')
+                append(extension)
+            }
+        }
         val filePath = Paths.get(path).resolve(filename)
         Files.copy(file.inputStream, filePath)
         return filename
@@ -29,7 +42,7 @@ class FileService(
         }
     }
 
-//    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     fun cleanup() {
         Files.list(Paths.get(path))
             .filter {
@@ -46,5 +59,9 @@ class FileService(
                 } catch (e: Exception) {
                 }
             }
+    }
+
+    private companion object {
+        val SAFE_EXTENSION = Regex("[A-Za-z0-9]{1,10}")
     }
 }

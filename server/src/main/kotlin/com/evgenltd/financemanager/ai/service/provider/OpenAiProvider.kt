@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ObjectMapper
 import java.io.InputStream
+import java.net.URLConnection
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
@@ -47,7 +48,7 @@ class OpenAiProvider(
             ?: emptyList()
     }
 
-    override fun parse(stream: InputStream): List<ParseEntry> {
+    override fun parse(filename: String, stream: InputStream, currency: String?): List<ParseEntry> {
         val systemPrompt = javaClass.classLoader
             .getResourceAsStream("prompts/openai/parse.txt")
             ?.bufferedReader(StandardCharsets.UTF_8)
@@ -55,17 +56,46 @@ class OpenAiProvider(
             ?.trim()
             ?: return emptyList()
 
-        val userInput = stream
-            .bufferedReader(StandardCharsets.UTF_8)
-            .use { it.readText() }
-            .trim()
-
-        if (userInput.isEmpty()) {
+        val fileBytes = stream.readAllBytes()
+        if (fileBytes.isEmpty()) {
             return emptyList()
         }
 
-        val request = mapOf(
-            "model" to "gpt-5-mini",
+        val request = buildParseRequest(filename, fileBytes, currency, systemPrompt)
+
+        val response = request(listOf("responses"), request) ?: return emptyList()
+        val outputText = response.extractOutputText() ?: return emptyList()
+        return mapper.readValue(outputText, ParseResult::class.java).results
+    }
+
+    internal fun buildParseRequest(
+        filename: String,
+        fileBytes: ByteArray,
+        currency: String?,
+        systemPrompt: String,
+    ): Map<String, Any> {
+        val mediaType = URLConnection.guessContentTypeFromName(filename) ?: "application/octet-stream"
+        val fileData = "data:$mediaType;base64,${Base64.getEncoder().encodeToString(fileBytes)}"
+        val nullableString = mapOf("type" to listOf("string", "null"))
+        val propertyNames = listOf(
+            "raw",
+            "date",
+            "direction",
+            "amount",
+            "currency",
+            "transactionId",
+            "mcc",
+            "bankType",
+            "bankCategory",
+            "merchant",
+            "counterparty",
+            "purpose",
+            "description",
+            "message",
+        )
+
+        return mapOf(
+            "model" to "gpt-6-luna",
             "input" to listOf(
                 mapOf(
                     "role" to "system",
@@ -80,8 +110,17 @@ class OpenAiProvider(
                     "role" to "user",
                     "content" to listOf(
                         mapOf(
+                            "type" to "input_file",
+                            "filename" to filename,
+                            "file_data" to fileData,
+                        ),
+                        mapOf(
                             "type" to "input_text",
-                            "text" to userInput,
+                            "text" to if (currency.isNullOrBlank()) {
+                                "Extract the bank transaction records and their facts from the attached file. No default currency was specified."
+                            } else {
+                                "Extract the bank transaction records and their facts from the attached file. The user specified ${currency.trim().uppercase(Locale.ROOT)} as the default currency."
+                            },
                         )
                     )
                 ),
@@ -102,13 +141,24 @@ class OpenAiProvider(
                                     "additionalProperties" to false,
                                     "properties" to mapOf(
                                         "raw" to mapOf("type" to "string"),
-                                        "date" to mapOf("type" to listOf("string", "null")),
-                                        "amount" to mapOf("type" to listOf("number", "null")),
-                                        "currency" to mapOf("type" to listOf("string", "null")),
-                                        "description" to mapOf("type" to listOf("string", "null")),
-                                        "hint" to mapOf("type" to listOf("string", "null")),
+                                        "date" to nullableString,
+                                        "direction" to mapOf(
+                                            "type" to listOf("string", "null"),
+                                            "enum" to listOf("IN", "OUT", null),
+                                        ),
+                                        "amount" to nullableString,
+                                        "currency" to nullableString,
+                                        "transactionId" to nullableString,
+                                        "mcc" to nullableString,
+                                        "bankType" to nullableString,
+                                        "bankCategory" to nullableString,
+                                        "merchant" to nullableString,
+                                        "counterparty" to nullableString,
+                                        "purpose" to nullableString,
+                                        "description" to nullableString,
+                                        "message" to nullableString,
                                     ),
-                                    "required" to listOf("raw", "date", "amount", "currency", "description", "hint"),
+                                    "required" to propertyNames,
                                 )
                             )
                         ),
@@ -118,9 +168,6 @@ class OpenAiProvider(
             )
         )
 
-        val response = request(listOf("responses"), request) ?: return emptyList()
-        val outputText = response.extractOutputText() ?: return emptyList()
-        return mapper.readValue(outputText, ParseResult::class.java).results
     }
 
     private fun request(path: List<String>, body: Any): JsonNode? {

@@ -1,3 +1,4 @@
+/*
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.account.entity.Account
@@ -41,3 +42,4 @@ class TronScanImportParserTest {
 
     private fun String.toStream() = ByteArrayInputStream(toByteArray(StandardCharsets.UTF_8))
 }
+*/

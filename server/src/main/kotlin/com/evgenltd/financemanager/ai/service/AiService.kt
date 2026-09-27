@@ -16,6 +16,7 @@ class AiService(
         aiProviderResolver.resolve().embedding(data)
     }
 
-    fun parse(stream: InputStream): List<ParseEntry> = aiProviderResolver.resolve().parse(stream)
+    fun parse(filename: String, stream: InputStream, currency: String?): List<ParseEntry> =
+        aiProviderResolver.resolve().parse(filename, stream, currency)
 
 }

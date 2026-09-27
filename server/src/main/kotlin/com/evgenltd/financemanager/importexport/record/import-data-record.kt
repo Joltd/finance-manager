@@ -1,11 +1,11 @@
 package com.evgenltd.financemanager.importexport.record
 
-import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.ai.record.EmbeddingRecord
 import com.evgenltd.financemanager.common.record.Range
 import com.evgenltd.financemanager.common.record.SeekDirection
+import com.evgenltd.financemanager.common.record.TransactionDirection
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.operation.entity.OperationType
@@ -110,21 +110,21 @@ data class ImportDataEntryApproveSuggestionRequest(
     val entryIds: List<UUID>,
 )
 
-data class ImportDataParsed(
-    val entries: List<ImportDataParsedEntry>,
-    val failed: List<ImportDataParsedFailedEntry>,
-)
-
 data class ImportDataParsedEntry(
-    val raw: String = "",
-    val date: LocalDate,
-    val type: OperationType,
-    val accountFrom: Account? = null,
-    val amountFrom: Amount,
-    val accountTo: Account? = null,
-    val amountTo: Amount,
-    val description: String,
-    val hint: String? = null,
+    val raw: String,
+    val date: LocalDate?,
+    val direction: TransactionDirection?,
+    val amount: String?,
+    val currency: String?,
+    val transactionId: String?,
+    val mcc: String?,
+    val bankType: String?,
+    val bankCategory: String?,
+    val merchant: String?,
+    val counterparty: String?,
+    val purpose: String?,
+    val description: String?,
+    val message: String?,
 )
 
 data class ImportDataParsedFailedEntry(

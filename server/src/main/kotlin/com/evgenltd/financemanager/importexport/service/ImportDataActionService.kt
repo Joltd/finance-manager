@@ -12,7 +12,6 @@ import com.evgenltd.financemanager.common.util.Loggable
 import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.emptyAmount
 import com.evgenltd.financemanager.importexport.entity.*
-import com.evgenltd.financemanager.importexport.record.ImportDataParsed
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.record.OperationKey
 import com.evgenltd.financemanager.importexport.repository.*
@@ -26,7 +25,6 @@ import com.evgenltd.financemanager.operation.service.byAccount
 import com.evgenltd.financemanager.operation.service.byCurrency
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.InputStream
 import java.time.LocalDate
 import java.util.*
 
@@ -62,9 +60,10 @@ class ImportDataActionService(
         )
 
 
-    fun parseImportData(id: UUID, stream: InputStream): ImportDataParsed {
+    /*
+    fun parseImportData(id: UUID, filename: String): List<ImportDataParsedEntry> {
         val importData = importDataRepository.find(id)
-        return importDataParserResolver.resolve(importData.account.parser).parse(importData, stream)
+        return importDataParserResolver.resolve(importData.account.parser).parse(importData, filename)
     }
 
     @Transactional
@@ -78,6 +77,7 @@ class ImportDataActionService(
             prepareEntry(entry, importData, days)
         }
     }
+    */
 
     @Transactional
     fun updateParsingStatus(id: UUID, status: ImportDataParsingStatus, message: String? = null) {
@@ -88,6 +88,7 @@ class ImportDataActionService(
         }
     }
 
+    /*
     private fun prepareDays(entries: List<ImportDataParsedEntry>, importData: ImportData): Map<LocalDate, ImportDataDay> =
         entries.map { it.date }
             .distinct()
@@ -115,6 +116,7 @@ class ImportDataActionService(
             hintInput = entry.hint,
         ).let { importDataOperationRepository.save(it) }
     }
+    */
 
     fun prepareHintEmbeddings(entryIds: List<UUID>) {
         val operations = importDataOperationRepository.findForHintEmbedding(entryIds, ImportDataOperationType.PARSED)

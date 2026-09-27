@@ -1,3 +1,4 @@
+/*
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.importexport.entity.ImportData
@@ -59,3 +60,4 @@ class SberImportParser : ImportParser {
         .replace(" ", "")
         .replace(",", ".")
 }
+*/

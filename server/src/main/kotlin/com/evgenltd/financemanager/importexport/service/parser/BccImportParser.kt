@@ -1,3 +1,4 @@
+/*
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.importexport.entity.ImportData
@@ -43,3 +44,4 @@ class BccImportParser : ImportParser {
     private fun String.cleanAmount(): String = replace("₸", "")
         .replace(" ", "")
 }
+*/

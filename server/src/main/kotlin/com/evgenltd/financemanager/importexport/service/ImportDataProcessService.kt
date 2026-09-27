@@ -36,6 +36,7 @@ class ImportDataProcessService(
 
     @Async
     fun beginNewImport(id: UUID, filename: String) {
+        /*
         importDataActionService.withTryLock(id) {
             try {
                 updateParsingStatus(id, ImportDataParsingStatus.PARSING)
@@ -68,6 +69,7 @@ class ImportDataProcessService(
                 log.error("Unable to parse data", e)
             }
         }
+        */
     }
 
     private fun updateParsingStatus(id: UUID, status: ImportDataParsingStatus, message: String? = null) {

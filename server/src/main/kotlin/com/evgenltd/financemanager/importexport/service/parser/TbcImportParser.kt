@@ -1,3 +1,4 @@
+/*
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.common.util.fromFractionalString
@@ -100,3 +101,4 @@ class TbcImportParser : ImportParser {
 
 
 }
+*/

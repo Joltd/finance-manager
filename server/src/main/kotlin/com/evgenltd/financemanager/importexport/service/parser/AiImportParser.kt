@@ -1,72 +1,75 @@
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.ai.service.AiService
-import com.evgenltd.financemanager.common.util.fromFractionalString
-import com.evgenltd.financemanager.common.util.isNegative
+import com.evgenltd.financemanager.ai.record.ParseEntry
+import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.importexport.entity.ImportData
-import com.evgenltd.financemanager.importexport.record.ImportDataParsed
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
-import com.evgenltd.financemanager.importexport.record.ImportDataParsedFailedEntry
-import com.evgenltd.financemanager.operation.entity.OperationType
 import org.springframework.stereotype.Service
-import java.io.InputStream
+import java.time.LocalDate
+import java.util.Locale
 
 @Service
 class AiImportParser(
     private val aiService: AiService,
+    private val fileService: FileService,
 ) : ImportParser {
 
     override val name: String = "AI"
 
-    override fun parse(
-        importData: ImportData,
-        stream: InputStream
-    ): ImportDataParsed {
-        val account = importData.account
-
-        val entries = mutableListOf<ImportDataParsedEntry>()
-        val failed = mutableListOf<ImportDataParsedFailedEntry>()
-
-        for (it in aiService.parse(stream)) {
-            try {
-                val date = it.date
-                    ?.date("yyyy-MM-dd")
-                    ?: throw IllegalStateException("Date is missing")
-                val amountValue = it.amount
-                    ?: throw IllegalStateException("Amount is missing")
-                val currency = it.currency
-                    ?: importData.currency
-                    ?: throw IllegalStateException("Currency is missing")
-
-                val amount = fromFractionalString(amountValue, currency)
-
-                val type = if (amount.isNegative()) OperationType.EXPENSE else OperationType.INCOME
-
-                val (accountFrom, accountTo) = when (type) {
-                    OperationType.EXPENSE -> account to null
-                    OperationType.INCOME -> null to account
-                    else -> null to null
-                }
-
-                entries.add(
-                    ImportDataParsedEntry(
-                        raw = it.raw,
-                        date = date,
-                        type = type,
-                        accountFrom = accountFrom,
-                        amountFrom = amount.abs(),
-                        accountTo = accountTo,
-                        amountTo = amount.abs(),
-                        description = it.description.orEmpty(),
-                        hint = it.hint,
-                    )
-                )
-            } catch (e: Exception) {
-                failed.add(ImportDataParsedFailedEntry(raw = it.raw, message = e.message ?: "Unknown error"))
-            }
+    override fun parse(importData: ImportData, filename: String): List<ImportDataParsedEntry> =
+        fileService.load(filename) { stream ->
+            aiService.parse(filename, stream, importData.currency).map { it.toParsedEntry(importData.currency) }
         }
 
-        return ImportDataParsed(entries = entries, failed = failed)
+    private fun ParseEntry.toParsedEntry(defaultCurrency: String?): ImportDataParsedEntry {
+        val normalizedDate = date
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        val normalizedAmount = amount
+            ?.trim()
+            ?.removePrefix("+")
+            ?.removePrefix("-")
+            ?.replace(" ", "")
+            ?.takeIf { it.matches(DECIMAL_AMOUNT) }
+        val normalizedCurrency = (currency ?: defaultCurrency)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.uppercase(Locale.ROOT)
+
+        val problems = buildList {
+            if (normalizedDate == null) add("Date is missing or invalid")
+            if (direction == null) add("Direction is missing")
+            if (normalizedAmount == null) add("Amount is missing")
+            if (normalizedCurrency == null) add("Currency is missing")
+        }
+        val normalizedMessage = listOfNotNull(message.clean(), problems.takeIf { it.isNotEmpty() }?.joinToString("; "))
+            .joinToString("; ")
+            .takeIf { it.isNotEmpty() }
+
+        return ImportDataParsedEntry(
+            raw = raw,
+            date = normalizedDate,
+            direction = direction,
+            amount = normalizedAmount,
+            currency = normalizedCurrency,
+            transactionId = transactionId.clean(),
+            mcc = mcc.clean(),
+            bankType = bankType.clean(),
+            bankCategory = bankCategory.clean(),
+            merchant = merchant.clean(),
+            counterparty = counterparty.clean(),
+            purpose = purpose.clean(),
+            description = description.clean(),
+            message = normalizedMessage,
+        )
+    }
+
+    private fun String?.clean(): String? = this?.trim()?.takeIf { it.isNotEmpty() }
+
+    private companion object {
+        val DECIMAL_AMOUNT = Regex("\\d+(\\.\\d+)?")
     }
 
 }

@@ -24,6 +24,11 @@ enum class SeekDirection {
     FORWARD,
 }
 
+enum class TransactionDirection {
+    IN,
+    OUT,
+}
+
 data class EntityPageRequest<T>(
     val page: Int = 0,
     val size: Int = 50,

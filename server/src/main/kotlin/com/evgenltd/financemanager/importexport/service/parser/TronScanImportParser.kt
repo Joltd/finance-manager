@@ -1,3 +1,4 @@
+/*
 package com.evgenltd.financemanager.importexport.service.parser
 
 import com.evgenltd.financemanager.common.util.isZero
@@ -40,3 +41,4 @@ class TronScanImportParser : ImportParser {
         failed = emptyList(),
     )
 }
+*/

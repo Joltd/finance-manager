@@ -11,5 +11,5 @@ interface AiProvider {
 
     fun embedding(data: List<String>): List<EmbeddingResult>
 
-    fun parse(stream: InputStream): List<ParseEntry>
+    fun parse(filename: String, stream: InputStream, currency: String?): List<ParseEntry>
 }
