@@ -55,3 +55,8 @@ interface ImportDataDateRange {
     val min: LocalDate?
     val max: LocalDate?
 }
+
+interface AccountScore {
+    val accountId: UUID
+    val score: Double
+}

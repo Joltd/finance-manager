@@ -20,6 +20,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 import java.time.LocalDate
 import java.util.UUID
@@ -74,6 +75,7 @@ class ImportDataEntry(
     var description: String? = null,
 
     @OneToMany(mappedBy = "importDataEntry", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    @OrderBy("score DESC, id ASC")
     var suggestions: MutableList<ImportDataSuggestion> = mutableListOf(),
 ) {
     override fun equals(other: Any?): Boolean {
