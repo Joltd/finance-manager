@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { ArrowLeftIcon } from 'lucide-react'
 import { Operation, OperationType } from '@/types/operation'
-import type { ImportDataEntry } from '@/types/import-data'
+import type { ImportDataEntryOld } from '@/types/import-data'
 import {
   createDefaultFormState,
   createPresetFormState,
@@ -47,8 +47,8 @@ import { formatDate } from 'date-fns'
 
 interface ImportDataEntrySheetState {
   open: boolean
-  entry: ImportDataEntry | null
-  openSheet: (entry: ImportDataEntry) => void
+  entry: ImportDataEntryOld | null
+  openSheet: (entry: ImportDataEntryOld) => void
   closeSheet: () => void
 }
 
@@ -59,7 +59,7 @@ const useImportDataEntrySheetStore = create<ImportDataEntrySheetState>((set) => 
   closeSheet: () => set({ open: false }),
 }))
 
-export function openImportDataEntrySheet(entry: ImportDataEntry) {
+export function openImportDataEntrySheet(entry: ImportDataEntryOld) {
   useImportDataEntrySheetStore.getState().openSheet(entry)
 }
 
@@ -75,7 +75,7 @@ export function ImportDataEntrySheet() {
   const userStore = useUserStore()
   const mainAccountId = importData?.account.id
   const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState<number | null>(null)
-  const [selectionEntry, setSelectionEntry] = useState<ImportDataEntry | null>(null)
+  const [selectionEntry, setSelectionEntry] = useState<ImportDataEntryOld | null>(null)
   if (entry !== selectionEntry) {
     setSelectionEntry(entry)
     setSelectedSuggestionIdx(null)

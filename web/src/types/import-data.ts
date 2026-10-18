@@ -36,14 +36,8 @@ export interface ImportData {
   dateRange?: DateRange
   parsingStatus: ImportDataParsingStatus
   message?: string
-  failedEntries: ImportDataParsedFailedEntry[]
   valid: boolean
   totals: ImportDataTotal[]
-}
-
-export interface ImportDataParsedFailedEntry {
-  raw: string
-  message: string
 }
 
 export interface ImportDataOperation {
@@ -62,7 +56,7 @@ export interface ImportDataOperation {
   rating?: SuggestionRating
 }
 
-export interface ImportDataEntry {
+export interface ImportDataEntryOld {
   id?: string
   linked: boolean
   operation?: Operation
@@ -70,6 +64,23 @@ export interface ImportDataEntry {
   parsed?: ImportDataOperation
   parsedVisible: boolean
   suggestions: ImportDataOperation[]
+}
+
+export interface ImportDataEntryData {
+  id: string
+  date?: string
+  type?: OperationType
+  amountFrom?: Amount
+  accountFrom?: AccountReference
+  amountTo?: Amount
+  accountTo?: AccountReference
+  description?: string
+  raw: string
+}
+
+export interface ImportDataEntry {
+  entry?: ImportDataEntryData
+  operation?: Operation
 }
 
 export interface ImportDataDay {

@@ -1,3 +1,6 @@
+server:
+  port: 8580
+
 #spring:
 #  jpa:
 #    show-sql: true

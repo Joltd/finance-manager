@@ -4,14 +4,23 @@ import com.evgenltd.financemanager.AbstractIntegrationTest
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.common.record.Reference
+import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportData
+import com.evgenltd.financemanager.importexport.entity.ImportDataDay
+import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
+import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
+import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.operation.entity.Operation
+import com.evgenltd.financemanager.operation.entity.OperationData
+import com.evgenltd.financemanager.operation.entity.OperationType
 import com.evgenltd.financemanager.testsupport.ApiResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
+import java.time.LocalDate
 
 /**
  * Covers the import endpoints intentionally kept while the UI-specific import API is disabled.
@@ -58,6 +67,136 @@ class ImportDataControllerIntegrationTest : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `get - exposes processing and failure states`() {
+        val cases = listOf(
+            ImportDataParsingStatus.PARSING to null,
+            ImportDataParsingStatus.DONE to null,
+            ImportDataParsingStatus.FAILED to "Unable to parse file",
+        )
+
+        cases.forEach { (status, message) ->
+            val importData = withTenant {
+                importDataRepository.save(
+                    ImportData(account = account, parsingStatus = status, message = message)
+                )
+            }
+            val response = restClient.get()
+                .uri("/api/v1/import-data/${importData.id}")
+                .headers { it.addAll(authHeaders()) }
+                .retrieve()
+                .body(object : ParameterizedTypeReference<ApiResponse<ImportDataRecord>>() {})
+
+            val record = response!!.body!!
+            assertThat(record.parsingStatus).isEqualTo(status)
+            assertThat(record.message).isEqualTo(message)
+        }
+    }
+
+    @Test
+    fun `entry list - returns linked, import-only and operation-only rows without duplicates`() {
+        val date = LocalDate.of(2026, 9, 14)
+        val counterparty = withTenant {
+            accountRepository.save(Account(name = "Groceries", type = AccountType.EXPENSE))
+        }
+        val importData = withTenant {
+            importDataRepository.save(ImportData(account = account, currency = "USD"))
+        }
+        val day = withTenant {
+            importDataDayRepository.save(ImportDataDay(importData = importData, date = date))
+        }
+        val linkedOperation = withTenant {
+            operationRepository.save(operation(date, counterparty, Amount(10_000, "USD")))
+        }
+        val standaloneOperation = withTenant {
+            operationRepository.save(operation(date, counterparty, Amount(20_000, "USD")))
+        }
+        withTenant {
+            operationRepository.save(operation(date, counterparty, Amount(30_000, "EUR")))
+            val linkedData = operationDataRepository.save(OperationData(raw = "linked row"))
+            val importOnlyData = operationDataRepository.save(OperationData(raw = "import-only row"))
+            val undatedData = operationDataRepository.save(OperationData(raw = "undated row"))
+            importDataEntryRepository.save(
+                ImportDataEntry(
+                    importDataDay = day,
+                    operation = linkedOperation,
+                    operationData = linkedData,
+                    date = date,
+                    type = OperationType.EXPENSE,
+                    amountFrom = Amount(10_000, "USD"),
+                    accountFrom = account,
+                    amountTo = Amount(10_000, "USD"),
+                    accountTo = counterparty,
+                )
+            )
+            importDataEntryRepository.save(
+                ImportDataEntry(
+                    importDataDay = day,
+                    operationData = importOnlyData,
+                    date = date,
+                    type = OperationType.EXPENSE,
+                    amountFrom = Amount(40_000, "USD"),
+                    accountFrom = account,
+                    amountTo = Amount(40_000, "USD"),
+                    accountTo = counterparty,
+                )
+            )
+            val undatedDay = importDataDayRepository.save(ImportDataDay(importData = importData, date = null))
+            importDataEntryRepository.save(
+                ImportDataEntry(importDataDay = undatedDay, operationData = undatedData)
+            )
+        }
+
+        val response = restClient.get()
+            .uri("/api/v1/import-data/${importData.id}/entry?pointers=$date")
+            .headers { it.addAll(authHeaders()) }
+            .retrieve()
+            .body(object : ParameterizedTypeReference<ApiResponse<List<ImportDataDayRecord>>>() {})
+
+        val rows = response!!.body!!.single().entries
+        assertThat(rows).hasSize(3)
+        assertThat(rows).anySatisfy { row ->
+            assertThat(row.entry?.raw).isEqualTo("linked row")
+            assertThat(row.operation?.id).isEqualTo(linkedOperation.id)
+        }
+        assertThat(rows).anySatisfy { row ->
+            assertThat(row.entry?.raw).isEqualTo("import-only row")
+            assertThat(row.operation).isNull()
+        }
+        assertThat(rows).anySatisfy { row ->
+            assertThat(row.entry).isNull()
+            assertThat(row.operation?.id).isEqualTo(standaloneOperation.id)
+        }
+        assertThat(rows.mapNotNull { it.operation?.id }).containsOnlyOnce(linkedOperation.id)
+    }
+
+    @Test
+    fun `entry list - seeks in both directions across import and operation-only dates`() {
+        val pointer = LocalDate.of(2026, 9, 14)
+        val olderDate = pointer.minusDays(1)
+        val newerDate = pointer.plusDays(1)
+        val counterparty = withTenant {
+            accountRepository.save(Account(name = "Groceries", type = AccountType.EXPENSE))
+        }
+        val importData = withTenant {
+            importDataRepository.save(ImportData(account = account, currency = "USD"))
+        }
+        withTenant {
+            importDataDayRepository.save(ImportDataDay(importData = importData, date = olderDate))
+            operationRepository.save(operation(newerDate, counterparty, Amount(10_000, "USD")))
+        }
+
+        fun seek(direction: String): List<ImportDataDayRecord> = restClient.get()
+            .uri("/api/v1/import-data/${importData.id}/entry?pointer=$pointer&direction=$direction")
+            .headers { it.addAll(authHeaders()) }
+            .retrieve()
+            .body(object : ParameterizedTypeReference<ApiResponse<List<ImportDataDayRecord>>>() {})!!
+            .body!!
+
+        assertThat(seek("BACKWARD").map { it.date }).containsExactly(olderDate)
+        assertThat(seek("FORWARD").map { it.date }).containsExactly(newerDate)
+    }
+
+    @Test
     fun `delete - removes the import data row`() {
         val importData = withTenant { importDataRepository.save(ImportData(account = account)) }
 
@@ -70,4 +209,14 @@ class ImportDataControllerIntegrationTest : AbstractIntegrationTest() {
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         withTenant { assertThat(importDataRepository.findById(importData.id!!)).isEmpty() }
     }
+
+    private fun operation(date: LocalDate, counterparty: Account, amount: Amount) = Operation(
+        date = date,
+        type = OperationType.EXPENSE,
+        amountFrom = amount,
+        accountFrom = account,
+        amountTo = amount,
+        accountTo = counterparty,
+        description = null,
+    )
 }
