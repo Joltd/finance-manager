@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/common/typography/typography'
 import { Stack } from '@/components/common/layout/stack'
+import { cn } from '@/lib/utils'
 
 interface SeekProps {
   seekForward: () => Promise<void>
@@ -13,9 +15,16 @@ interface SeekProps {
   loadingBackward: boolean
   exhaustedForward: boolean
   exhaustedBackward: boolean
+  initialized: boolean
+  loadingLoad?: boolean
   children: React.ReactNode
   className?: string
   reverse?: boolean
+}
+
+interface ScrollAnchor {
+  element: Element
+  top: number
 }
 
 export function Seek({
@@ -25,73 +34,92 @@ export function Seek({
   loadingBackward,
   exhaustedForward,
   exhaustedBackward,
+  initialized,
+  loadingLoad = false,
   children,
   className,
   error,
   reverse = false,
 }: SeekProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const anchorRef = useRef<ScrollAnchor | null>(null)
 
-  const handleAnchoredSeek = useCallback(async (seek: () => Promise<void>) => {
+  const captureAnchor = useCallback(() => {
     const container = containerRef.current
-    const items = Array.from(container?.children ?? []) as HTMLDivElement[]
-    const child = items.find((it) => it.dataset.id !== 'seek-sentinel')
-    const childOffsetTop = child?.offsetTop ?? 0
-
-    await seek()
-
-    if (child && container) {
-      requestAnimationFrame(() => {
-        container.scrollTop = child.offsetTop - childOffsetTop
-      })
+    if (!container) {
+      anchorRef.current = null
+      return
     }
+    const containerTop = container.getBoundingClientRect().top
+    const element = Array.from(container.children).find(
+      (it) =>
+        (it as HTMLElement).dataset.id !== 'seek-sentinel' &&
+        it.getBoundingClientRect().bottom > containerTop,
+    )
+    anchorRef.current = element ? { element, top: element.getBoundingClientRect().top } : null
   }, [])
 
-  // The top sentinel always inserts content above the current viewport, so it
-  // always gets the anchor treatment; the bottom one never needs it.
-  const handleTop = useCallback(
-    () => handleAnchoredSeek(reverse ? seekBackward : seekForward),
-    [handleAnchoredSeek, reverse, seekBackward, seekForward],
-  )
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    const anchor = anchorRef.current
+    if (container && anchor?.element.isConnected) {
+      const delta = anchor.element.getBoundingClientRect().top - anchor.top
+      if (delta !== 0) container.scrollTop += delta
+    }
+    captureAnchor()
+  })
 
-  const handleBottom = useCallback(async () => {
-    await (reverse ? seekForward() : seekBackward())
-  }, [reverse, seekForward, seekBackward])
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    container.addEventListener('scroll', captureAnchor, { passive: true })
+    return () => container.removeEventListener('scroll', captureAnchor)
+  }, [captureAnchor, error])
 
   const topSentinel = reverse
-    ? { id: 'backward', loading: loadingBackward, exhausted: exhaustedBackward }
-    : { id: 'forward', loading: loadingForward, exhausted: exhaustedForward }
+    ? { id: 'backward', seek: seekBackward, loading: loadingBackward, exhausted: exhaustedBackward }
+    : { id: 'forward', seek: seekForward, loading: loadingForward, exhausted: exhaustedForward }
 
   const bottomSentinel = reverse
-    ? { id: 'forward', loading: loadingForward, exhausted: exhaustedForward }
-    : { id: 'backward', loading: loadingBackward, exhausted: exhaustedBackward }
-
-  if (error) {
-    return (
-      <Stack ref={containerRef} scrollable gap={0} className={className}>
-        <Stack align="center" justify="center" className="flex-1">
-          <Typography variant="muted">{error}</Typography>
-        </Stack>
-      </Stack>
-    )
-  }
+    ? { id: 'forward', seek: seekForward, loading: loadingForward, exhausted: exhaustedForward }
+    : { id: 'backward', seek: seekBackward, loading: loadingBackward, exhausted: exhaustedBackward }
 
   return (
-    <Stack ref={containerRef} scrollable gap={0} className={className}>
-      <SeekSentinelBlock
-        id={topSentinel.id}
-        onIntersect={handleTop}
-        loading={topSentinel.loading}
-        exhausted={topSentinel.exhausted}
-      />
-      {children}
-      <SeekSentinelBlock
-        id={bottomSentinel.id}
-        onIntersect={handleBottom}
-        loading={bottomSentinel.loading}
-        exhausted={bottomSentinel.exhausted}
-      />
-    </Stack>
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      {loadingLoad && (
+        <Progress className="absolute top-0 inset-x-0 z-20 rounded-none bg-transparent h-0.5" />
+      )}
+      {error ? (
+        <Stack ref={containerRef} scrollable gap={0} className={cn('flex-1', className)}>
+          <Stack align="center" justify="center" className="flex-1">
+            <Typography variant="muted">{error}</Typography>
+          </Stack>
+        </Stack>
+      ) : (
+        <Stack
+          ref={containerRef}
+          scrollable
+          gap={0}
+          className={cn('flex-1 [overflow-anchor:none]', className)}
+        >
+          {initialized && (
+            <SeekSentinelBlock
+              id={topSentinel.id}
+              onIntersect={topSentinel.seek}
+              loading={topSentinel.loading}
+              exhausted={topSentinel.exhausted}
+            />
+          )}
+          {children}
+          <SeekSentinelBlock
+            id={bottomSentinel.id}
+            onIntersect={bottomSentinel.seek}
+            loading={bottomSentinel.loading}
+            exhausted={bottomSentinel.exhausted}
+          />
+        </Stack>
+      )}
+    </div>
   )
 }
 

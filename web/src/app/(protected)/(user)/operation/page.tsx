@@ -100,6 +100,8 @@ function OperationPageContent() {
     loadingBackward,
     exhaustedForward,
     exhaustedBackward,
+    initialized,
+    loadingLoad,
     seekForward,
     seekBackward,
     resetData,
@@ -219,6 +221,8 @@ function OperationPageContent() {
         loadingBackward={loadingBackward}
         exhaustedForward={exhaustedForward}
         exhaustedBackward={exhaustedBackward}
+        initialized={initialized}
+        loadingLoad={loadingLoad}
       >
         {data.map((group) => (
           <Group key={group.date} title={formatDateCommon(group.date)}>

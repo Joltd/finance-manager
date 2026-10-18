@@ -48,7 +48,6 @@ export function useImportDataActions() {
   const loading =
     importData.loading ||
     importData.data?.parsingStatus !== ImportDataParsingStatus.DONE ||
-    importDataEntries.loadingRefresh ||
     importDataEntries.loadingLoad ||
     actualBalanceRequest.loading ||
     resetRevisionRequest.loading ||

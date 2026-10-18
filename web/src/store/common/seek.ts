@@ -22,8 +22,8 @@ export interface SeekState<TData, TBody, TQuery, TPath, TPointer> {
   pathParams?: TPath
   exhaustedForward: boolean
   exhaustedBackward: boolean
-  loadingRefresh: boolean
   loadingLoad: boolean
+  initialized: boolean
   version: number
 }
 
@@ -34,7 +34,6 @@ export interface SeekActions<TBody, TQuery, TPath, TPointer> {
   setBody: (body: TBody) => void
   setQueryParams: (params: TQuery) => void
   setPathParams: (params: TPath) => void
-  refresh: () => Promise<void>
   load: (pointers: TPointer[]) => Promise<void>
   resetData: () => void
   reset: () => void
@@ -92,8 +91,8 @@ export function createSeekSlice<
     pathParams: undefined,
     exhaustedForward: false,
     exhaustedBackward: false,
-    loadingRefresh: false,
     loadingLoad: false,
+    initialized: false,
     version: 0,
 
     seekForward: async (): Promise<void> => {
@@ -105,6 +104,7 @@ export function createSeekSlice<
         queryParams,
         pathParams,
         pointer: storedPointer,
+        version,
       } = get()
 
       if (exhaustedForward || loadingForward) return
@@ -122,23 +122,25 @@ export function createSeekSlice<
           method !== 'GET' ? body : undefined,
         )
 
-        if (newItems.length === 0) {
-          set({ loadingForward: false, exhaustedForward: true })
-          return
-        }
-
         set((state) => {
+          if (state.version !== version) return {}
+          if (newItems.length === 0) {
+            return { loadingForward: false, exhaustedForward: true, initialized: true }
+          }
           const merged = [...newItems, ...state.data]
-          if (merged.length <= MAX_SIZE) return { data: merged, loadingForward: false }
+          if (merged.length <= MAX_SIZE) {
+            return { data: merged, loadingForward: false, initialized: true }
+          }
           return {
             data: merged.slice(0, MAX_SIZE),
             loadingForward: false,
             exhaustedBackward: false,
+            initialized: true,
           }
         })
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        set({ error: message, loadingForward: false })
+        set((state) => (state.version !== version ? {} : { error: message, loadingForward: false }))
         throw err
       }
     },
@@ -152,6 +154,7 @@ export function createSeekSlice<
         queryParams,
         pathParams,
         pointer: storedPointer,
+        version,
       } = get()
 
       if (exhaustedBackward || loadingBackward) return
@@ -169,23 +172,25 @@ export function createSeekSlice<
           method !== 'GET' ? body : undefined,
         )
 
-        if (newItems.length === 0) {
-          set({ loadingBackward: false, exhaustedBackward: true })
-          return
-        }
-
         set((state) => {
+          if (state.version !== version) return {}
+          if (newItems.length === 0) {
+            return { loadingBackward: false, exhaustedBackward: true, initialized: true }
+          }
           const merged = [...state.data, ...newItems]
-          if (merged.length <= MAX_SIZE) return { data: merged, loadingBackward: false }
+          if (merged.length <= MAX_SIZE) {
+            return { data: merged, loadingBackward: false, initialized: true }
+          }
           return {
             data: merged.slice(merged.length - MAX_SIZE),
             loadingBackward: false,
             exhaustedForward: false,
+            initialized: true,
           }
         })
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        set({ error: message, loadingBackward: false })
+        set((state) => (state.version !== version ? {} : { error: message, loadingBackward: false }))
         throw err
       }
     },
@@ -194,35 +199,6 @@ export function createSeekSlice<
     setBody: (body: TBody) => set({ body }),
     setQueryParams: (params: TQuery) => set({ queryParams: params }),
     setPathParams: (params: TPath) => set({ pathParams: params }),
-
-    // deprecated
-    refresh: async (): Promise<void> => {
-      const { data, body, queryParams, pathParams } = get()
-      const pointers = data.map(getPointer)
-
-      set({ loadingRefresh: true })
-
-      try {
-        const updatedItems = await executeRequest(
-          path,
-          method,
-          pathParams as Record<string, string> | undefined,
-          { ...queryParams, pointers },
-          method !== 'GET' ? body : undefined,
-        )
-
-        set((state) => ({
-          loadingRefresh: false,
-          data: state.data.map((existing) => {
-            const updated = updatedItems.find((item) => getPointer(item) === getPointer(existing))
-            return updated ?? existing
-          }),
-        }))
-      } catch (err) {
-        set({ loadingRefresh: false })
-        throw err
-      }
-    },
 
     load: async (pointers: TPointer[]): Promise<void> => {
       const { data, exhaustedForward, exhaustedBackward, body, queryParams, pathParams, version } =
@@ -312,6 +288,7 @@ export function createSeekSlice<
         exhaustedForward: false,
         exhaustedBackward: false,
         loadingLoad: false,
+        initialized: false,
         version: state.version + 1,
       })),
 
@@ -328,6 +305,7 @@ export function createSeekSlice<
         exhaustedForward: false,
         exhaustedBackward: false,
         loadingLoad: false,
+        initialized: false,
         version: state.version + 1,
       })),
   })

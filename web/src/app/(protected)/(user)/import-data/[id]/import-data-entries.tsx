@@ -10,14 +10,11 @@ import { Seek } from '@/components/common/layout/seek'
 import { Stack } from '@/components/common/layout/stack'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Typography } from '@/components/common/typography/typography'
-import { Progress } from '@/components/ui/progress'
 import { useSse } from '@/hooks/use-sse'
 import { cn, formatDateCommon } from '@/lib/utils'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
 import { AccountReference } from '@/types/account'
-import { Amount } from '@/types/common/amount'
 import { ImportDataEntry, ImportDataParsingStatus } from '@/types/import-data'
-import { OperationType } from '@/types/operation'
 
 export function ImportDataEntries({ id }: { id: string }) {
   const {
@@ -25,10 +22,10 @@ export function ImportDataEntries({ id }: { id: string }) {
     error,
     loadingForward,
     loadingBackward,
-    loadingRefresh,
     loadingLoad,
     exhaustedForward,
     exhaustedBackward,
+    initialized,
     seekForward,
     seekBackward,
     resetData,
@@ -54,34 +51,30 @@ export function ImportDataEntries({ id }: { id: string }) {
   })
 
   return (
-    <div className="relative flex-1 min-h-0">
-      {(loadingRefresh || loadingLoad) && (
-        <Progress className="absolute top-0 inset-x-0 z-20 rounded-none bg-transparent h-0.5" />
-      )}
-      <Seek
-        seekForward={seekForward}
-        seekBackward={seekBackward}
-        error={error}
-        loadingForward={loadingForward}
-        loadingBackward={loadingBackward}
-        exhaustedForward={exhaustedForward}
-        exhaustedBackward={exhaustedBackward}
-        reverse
-        className="h-full"
-      >
-        {data.map((day) => (
-          <Group key={day.date} title={formatDateCommon(day.date)}>
-            {day.entries.map((item, index) => (
-              <ImportDataRow
-                key={item.entry?.id ?? item.operation?.id ?? index}
-                item={item}
-                mainAccountId={importData?.account.id}
-              />
-            ))}
-          </Group>
-        ))}
-      </Seek>
-    </div>
+    <Seek
+      seekForward={seekForward}
+      seekBackward={seekBackward}
+      error={error}
+      loadingForward={loadingForward}
+      loadingBackward={loadingBackward}
+      exhaustedForward={exhaustedForward}
+      exhaustedBackward={exhaustedBackward}
+      initialized={initialized}
+      loadingLoad={loadingLoad}
+      reverse
+    >
+      {[...data].reverse().map((day) => (
+        <Group key={day.date} title={formatDateCommon(day.date)}>
+          {day.entries.map((item, index) => (
+            <ImportDataRow
+              key={item.entry?.id ?? item.operation?.id ?? index}
+              item={item}
+              mainAccountId={importData?.account.id}
+            />
+          ))}
+        </Group>
+      ))}
+    </Seek>
   )
 }
 
