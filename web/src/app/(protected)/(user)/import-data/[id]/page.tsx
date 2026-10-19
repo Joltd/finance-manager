@@ -30,7 +30,7 @@ export default function ImportDataPage() {
       {data?.id === id && data.parsingStatus === ImportDataParsingStatus.DONE ? (
         <>
           <ImportDataEntries id={id} />
-          <ImportDataFooter totals={data.totals} />
+          <ImportDataFooter id={id} totals={data.totals} />
         </>
       ) : data?.id === id ? (
         <ImportDataStatusPlaceholder status={data.parsingStatus} message={data.message} />

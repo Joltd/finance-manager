@@ -33,6 +33,14 @@ interface ImportDataEntryRepository : JpaRepository<ImportDataEntry,UUID>, JpaSp
     fun findEntriesByImportDataId(id: UUID): List<ImportDataEntry>
 
     @Query("""
+        select ide from ImportDataEntry ide
+        where ide.importDataDay.importData.id = :id
+            and ide.valid = true
+            and ide.operation is null
+    """)
+    fun findForCommit(id: UUID): List<ImportDataEntry>
+
+    @Query("""
         select
             top_similar.account_id,
             sum(1.0 / (top_similar.distance + 1e-5)) as score

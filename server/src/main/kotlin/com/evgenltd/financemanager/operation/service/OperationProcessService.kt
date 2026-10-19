@@ -46,7 +46,7 @@ class OperationProcessService(
         notifyChanges(listOf(OperationChangeRecord(old, new)))
     }
 
-    private fun notifyChanges(changes: List<OperationChangeRecord>) {
+    fun notifyChanges(changes: List<OperationChangeRecord>) {
         changes.asSequence()
             .filter { (old, new) -> isOperationChanged(old, new) }
             .flatMap { (old, new) -> listOf(old, new) }

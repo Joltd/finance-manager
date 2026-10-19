@@ -11,6 +11,7 @@ import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataDay
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
+import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.record.AccountScore
 import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
@@ -20,19 +21,24 @@ import com.evgenltd.financemanager.importexport.repository.ImportDataSuggestionR
 import com.evgenltd.financemanager.operation.entity.OperationData
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.operation.record.OperationChangeRecord
 import com.evgenltd.financemanager.operation.repository.OperationDataRepository
 import com.evgenltd.financemanager.operation.repository.OperationRepository
+import com.evgenltd.financemanager.operation.service.OperationService
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.data.jpa.domain.Specification
+import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 import java.util.Optional
 import java.util.UUID
@@ -49,6 +55,7 @@ class ImportDataActionServiceTest {
     private val accountRepository = mock<AccountRepository>()
     private val embeddingActionService = mock<EmbeddingActionService>()
     private val lockService = mock<LockService>()
+    private val operationService = mock<OperationService>()
     private val service = ImportDataActionService(
         parserResolver,
         importDataRepository,
@@ -60,6 +67,8 @@ class ImportDataActionServiceTest {
         accountRepository,
         embeddingActionService,
         lockService,
+        ImportDataConverter(mock(), mock()),
+        operationService,
     )
 
     private val importId = UUID.randomUUID()
@@ -114,6 +123,7 @@ class ImportDataActionServiceTest {
         assertThat(completeEntry.accountFrom).isSameAs(account)
         assertThat(completeEntry.accountTo).isNull()
         assertThat(completeEntry.description).isEqualTo("Weekly shop")
+        assertThat(completeEntry.valid).isFalse()
         assertThat(completeEntry.operationData.transactionId).isEqualTo("tx-1")
         assertThat(completeEntry.operationData.mcc).isEqualTo("5411")
         assertThat(completeEntry.operationData.bankType).isEqualTo("Card purchase")
@@ -132,6 +142,7 @@ class ImportDataActionServiceTest {
         assertThat(partialEntry.accountFrom).isNull()
         assertThat(partialEntry.accountTo).isNull()
         assertThat(partialEntry.operationData.raw).isEqualTo("unparsed row")
+        assertThat(partialEntry.valid).isFalse()
     }
 
     @Test
@@ -188,6 +199,7 @@ class ImportDataActionServiceTest {
         assertThat(entry.suggestions.map { it.score }).containsExactly(2.5, 0.8)
         assertThat(entry.suggestions).allMatch { it.description == entry.description }
         assertThat(entry.accountTo).isSameAs(groceries)
+        assertThat(entry.valid).isTrue()
         verify(suggestionRepository).saveAll(entry.suggestions)
     }
 
@@ -204,6 +216,7 @@ class ImportDataActionServiceTest {
 
         assertThat(entry.suggestions).hasSize(1)
         assertThat(entry.accountFrom).isNull()
+        assertThat(entry.valid).isFalse()
     }
 
     @Test
@@ -276,6 +289,57 @@ class ImportDataActionServiceTest {
         assertThat(importData.totals.single().parsed).isEqualTo(Amount(-1_000, "USD"))
         assertThat(importData.valid).isFalse()
         verifyNoInteractions(operationRepository)
+    }
+
+    @Test
+    fun `commit - rejects import that is not processed yet`() {
+        importData.parsingStatus = ImportDataParsingStatus.EMBEDDING
+
+        assertThatThrownBy { service.commit(importId) }
+            .isInstanceOf(ResponseStatusException::class.java)
+            .hasMessageContaining("Import is not ready for commit")
+        verifyNoInteractions(operationService)
+    }
+
+    @Test
+    fun `commit - saves operations for candidates and links them to entries`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        val date = LocalDate.of(2026, 2, 3)
+        val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = date)
+        val category = Account(id = UUID.randomUUID(), name = "Groceries", type = AccountType.EXPENSE)
+        val entry = importEntry(day, OperationType.EXPENSE, accountFrom = account, accountTo = category)
+        val changes = listOf(OperationChangeRecord(old = null, new = null))
+        whenever(entryRepository.findForCommit(importId)).thenReturn(listOf(entry))
+        whenever(operationService.save(any())).thenReturn(changes)
+
+        val result = service.commit(importId)
+
+        assertThat(result).isSameAs(changes)
+        val operationsCaptor = argumentCaptor<List<Operation>>()
+        verify(operationService).save(operationsCaptor.capture())
+        val operation = operationsCaptor.firstValue.single()
+        assertThat(operation.id).isNull()
+        assertThat(operation.date).isEqualTo(date)
+        assertThat(operation.type).isEqualTo(OperationType.EXPENSE)
+        assertThat(operation.amountFrom).isEqualTo(Amount(1_000, "USD"))
+        assertThat(operation.accountFrom).isSameAs(account)
+        assertThat(operation.amountTo).isEqualTo(Amount(1_000, "USD"))
+        assertThat(operation.accountTo).isSameAs(category)
+        assertThat(operation.description).isEqualTo("Description")
+        assertThat(operation.operationData).isSameAs(entry.operationData)
+        assertThat(entry.operation).isSameAs(operation)
+        verify(entryRepository).findEntriesByImportDataId(importId)
+    }
+
+    @Test
+    fun `commit - does nothing without candidates`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        whenever(entryRepository.findForCommit(importId)).thenReturn(emptyList())
+
+        val result = service.commit(importId)
+
+        assertThat(result).isEmpty()
+        verify(operationService, never()).save(any())
     }
 
     private fun parsedEntry(

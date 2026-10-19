@@ -75,4 +75,15 @@ class ImportDataConverter(
     )
 
     fun toRecord(total: ImportDataTotal): ImportDataTotalRecord = toRecord(total, null)
+
+    fun toOperationRecord(entry: ImportDataEntry): Operation = Operation(
+        date = entry.date!!,
+        type = entry.type!!,
+        amountFrom = entry.amountFrom!!,
+        accountFrom = entry.accountFrom!!,
+        amountTo = entry.amountTo!!,
+        accountTo = entry.accountTo!!,
+        description = entry.description,
+        operationData = entry.operationData,
+    )
 }

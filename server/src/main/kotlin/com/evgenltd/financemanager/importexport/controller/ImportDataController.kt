@@ -54,6 +54,10 @@ class ImportDataController(
         return importData.id!!
     }
 
+    @PostMapping("/api/v1/import-data/{id}/commit")
+    @PreAuthorize("hasRole('USER')")
+    fun commit(@PathVariable id: UUID) = importDataProcessService.commit(id)
+
     @DeleteMapping("/api/v1/import-data/{id}")
     @PreAuthorize("hasRole('USER')")
     fun delete(@PathVariable id: UUID) = importDataProcessService.delete(id)

@@ -23,6 +23,8 @@ export function useImportDataActions() {
     importDataUrls.calculateTotal,
   )
 
+  const commitRequest = useRequest<void, never, never, { id: string }>(importDataUrls.commit)
+
   const unlinkRequest = useRequest<ImportDataDay[], { entryIds: string[] }, never, { id: string }>(
     importDataUrls.unlink,
   )
@@ -52,6 +54,7 @@ export function useImportDataActions() {
     actualBalanceRequest.loading ||
     resetRevisionRequest.loading ||
     calculateTotalRequest.loading ||
+    commitRequest.loading ||
     unlinkRequest.loading ||
     approveRequest.loading ||
     linkByIdRequest.loading ||
@@ -62,6 +65,7 @@ export function useImportDataActions() {
     actualBalanceRequest.error ??
     resetRevisionRequest.error ??
     calculateTotalRequest.error ??
+    commitRequest.error ??
     unlinkRequest.error ??
     approveRequest.error ??
     linkByIdRequest.error ??
@@ -74,6 +78,8 @@ export function useImportDataActions() {
   const resetRevision = (id: string) => resetRevisionRequest.submit({ pathParams: { id } })
 
   const calculateTotal = (id: string) => calculateTotalRequest.submit({ pathParams: { id } })
+
+  const commit = (id: string) => commitRequest.submit({ pathParams: { id } })
 
   const unlink = (id: string, entryIds: string[]) =>
     unlinkRequest.submit({ pathParams: { id }, body: { entryIds } })
@@ -96,6 +102,7 @@ export function useImportDataActions() {
     actualBalance,
     resetRevision,
     calculateTotal,
+    commit,
     unlink,
     approve,
     linkById,

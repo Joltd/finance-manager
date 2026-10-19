@@ -10,6 +10,7 @@ import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.emptyAmount
+import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.fromFractionalString
 import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataDay
@@ -25,8 +26,10 @@ import com.evgenltd.financemanager.importexport.repository.ImportDataSuggestionR
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationData
 import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.operation.record.OperationChangeRecord
 import com.evgenltd.financemanager.operation.repository.OperationDataRepository
 import com.evgenltd.financemanager.operation.repository.OperationRepository
+import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.operation.service.amountsForAccount
 import com.evgenltd.financemanager.operation.service.byAccount
 import org.springframework.stereotype.Service
@@ -45,6 +48,8 @@ class ImportDataActionService(
     private val accountRepository: AccountRepository,
     private val embeddingActionService: EmbeddingActionService,
     private val lockService: LockService,
+    private val importDataConverter: ImportDataConverter,
+    private val operationService: OperationService,
 ) {
 
     fun withTryLock(id: UUID?, block: () -> Unit): Boolean =
@@ -109,7 +114,9 @@ class ImportDataActionService(
                 amountTo = amount,
                 accountTo = importData.account.takeIf { type == OperationType.INCOME },
                 description = parsed.description,
-            ).let { importDataEntryRepository.save(it) }
+            )
+                .also { it.refreshValid() }
+                .let { importDataEntryRepository.save(it) }
         }.map { it.id!! }
     }
 
@@ -173,6 +180,7 @@ class ImportDataActionService(
                         else -> Unit
                     }
                 }
+            entry.refreshValid()
         }
     }
 
@@ -255,6 +263,25 @@ class ImportDataActionService(
     }
 
     @Transactional
+    fun commit(id: UUID): List<OperationChangeRecord> {
+        val importData = importDataRepository.find(id)
+        if (importData.parsingStatus != ImportDataParsingStatus.DONE) {
+            throw badRequestException("Import is not ready for commit")
+        }
+
+        val pairs = importDataEntryRepository.findForCommit(id)
+            .map { entry -> entry to importDataConverter.toOperationRecord(entry) }
+        if (pairs.isEmpty()) {
+            return emptyList()
+        }
+
+        val changes = operationService.save(pairs.map { (_, operation) -> operation })
+        pairs.forEach { (entry, operation) -> entry.operation = operation }
+        calculateTotals(id)
+        return changes
+    }
+
+    @Transactional
     fun updateParsingStatus(id: UUID, status: ImportDataParsingStatus, message: String? = null) {
         val importData = importDataRepository.find(id)
         importData.parsingStatus = status
@@ -291,6 +318,11 @@ class ImportDataActionService(
         amountTo = amountTo ?: return null,
         accountTo = accountTo?.id ?: return null,
     )
+
+    private fun ImportDataEntry.refreshValid() {
+        valid = date != null && type != null && amountFrom != null && accountFrom != null &&
+            amountTo != null && accountTo != null
+    }
 
     private fun ImportDataEntry.isParsed(): Boolean =
         date != null && type != null && amountFrom != null && amountTo != null

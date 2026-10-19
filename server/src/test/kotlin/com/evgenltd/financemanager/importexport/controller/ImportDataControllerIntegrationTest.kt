@@ -11,6 +11,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.importexport.service.ImportDataActionService
 import com.evgenltd.financemanager.operation.entity.Operation
 import com.evgenltd.financemanager.operation.entity.OperationData
 import com.evgenltd.financemanager.operation.entity.OperationType
@@ -18,6 +19,7 @@ import com.evgenltd.financemanager.testsupport.ApiResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
@@ -26,6 +28,9 @@ import java.time.LocalDate
  * Covers the import endpoints intentionally kept while the UI-specific import API is disabled.
  */
 class ImportDataControllerIntegrationTest : AbstractIntegrationTest() {
+
+    @Autowired
+    private lateinit var importDataActionService: ImportDataActionService
 
     private lateinit var account: Account
 
@@ -194,6 +199,83 @@ class ImportDataControllerIntegrationTest : AbstractIntegrationTest() {
 
         assertThat(seek("BACKWARD").map { it.date }).containsExactly(olderDate)
         assertThat(seek("FORWARD").map { it.date }).containsExactly(newerDate)
+    }
+
+    @Test
+    fun `commit - creates and links operations only for valid unlinked entries`() {
+        val date = LocalDate.of(2026, 9, 14)
+        val counterparty = withTenant {
+            accountRepository.save(Account(name = "Groceries", type = AccountType.EXPENSE))
+        }
+        val importData = withTenant {
+            importDataRepository.save(
+                ImportData(account = account, currency = "USD", parsingStatus = ImportDataParsingStatus.DONE)
+            )
+        }
+        val existingOperation = withTenant {
+            operationRepository.save(operation(date, counterparty, Amount(10_000, "USD")))
+        }
+        val (linked, committable, invalid) = withTenant {
+            val day = importDataDayRepository.save(ImportDataDay(importData = importData, date = date))
+            fun entry(raw: String, accountTo: Account?, amount: Amount, operation: Operation? = null) =
+                importDataEntryRepository.save(
+                    ImportDataEntry(
+                        importDataDay = day,
+                        operation = operation,
+                        operationData = operationDataRepository.save(OperationData(raw = raw)),
+                        date = date,
+                        type = OperationType.EXPENSE,
+                        amountFrom = amount,
+                        accountFrom = account,
+                        amountTo = amount,
+                        accountTo = accountTo,
+                        description = raw,
+                        valid = accountTo != null,
+                    )
+                )
+            Triple(
+                entry("linked row", counterparty, Amount(10_000, "USD"), existingOperation),
+                entry("committable row", counterparty, Amount(40_000, "USD")),
+                entry("invalid row", null, Amount(50_000, "USD")),
+            )
+        }
+
+        fun commit() = restClient.post()
+            .uri("/api/v1/import-data/${importData.id}/commit")
+            .headers { it.addAll(authHeaders()) }
+            .retrieve()
+            .toEntity(String::class.java)
+
+        fun parsedTotals() = withTenant {
+            importDataTotalRepository.findAll()
+                .partition { it.importData?.id == importData.id }
+                .let { (importTotals, dayTotals) ->
+                    importTotals.single().parsed to dayTotals.single().parsed
+                }
+        }
+
+        // a processed import always has totals, so commit has to rebuild existing ones
+        withTenant { importDataActionService.calculateTotals(importData.id!!) }
+        assertThat(parsedTotals()).isEqualTo(Amount(-90_000, "USD") to Amount(-90_000, "USD"))
+
+        assertThat(commit().statusCode).isEqualTo(HttpStatus.OK)
+
+        assertThat(parsedTotals()).isEqualTo(Amount(-50_000, "USD") to Amount(-50_000, "USD"))
+        withTenant {
+            assertThat(operationRepository.count()).isEqualTo(2)
+            val committed = importDataEntryRepository.findById(committable.id!!).get().operation!!
+            assertThat(committed.id).isNotEqualTo(existingOperation.id)
+            assertThat(committed.amountFrom).isEqualTo(Amount(40_000, "USD"))
+            assertThat(committed.accountTo.id).isEqualTo(counterparty.id)
+            assertThat(committed.description).isEqualTo("committable row")
+            assertThat(committed.operationData?.id).isEqualTo(committable.operationData.id)
+            assertThat(importDataEntryRepository.findById(linked.id!!).get().operation?.id)
+                .isEqualTo(existingOperation.id)
+            assertThat(importDataEntryRepository.findById(invalid.id!!).get().operation).isNull()
+        }
+
+        assertThat(commit().statusCode).isEqualTo(HttpStatus.OK)
+        withTenant { assertThat(operationRepository.count()).isEqualTo(2) }
     }
 
     @Test

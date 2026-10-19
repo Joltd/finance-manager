@@ -74,6 +74,8 @@ class ImportDataEntry(
 
     var description: String? = null,
 
+    var valid: Boolean = false,
+
     @OneToMany(mappedBy = "importDataEntry", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     @OrderBy("score DESC, id ASC")
     var suggestions: MutableList<ImportDataSuggestion> = mutableListOf(),

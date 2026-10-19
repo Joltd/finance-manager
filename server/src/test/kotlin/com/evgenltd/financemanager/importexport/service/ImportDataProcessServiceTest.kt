@@ -1,7 +1,18 @@
 package com.evgenltd.financemanager.importexport.service
 
+import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
+import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
+import com.evgenltd.financemanager.common.util.Amount
+import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
+import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
+import com.evgenltd.financemanager.operation.entity.OperationType
+import com.evgenltd.financemanager.operation.record.OperationChangeRecord
+import com.evgenltd.financemanager.operation.record.OperationChangeStateRecord
+import com.evgenltd.financemanager.operation.service.OperationProcessService
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -9,14 +20,23 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
+import java.time.LocalDate
 import java.util.UUID
 
 class ImportDataProcessServiceTest {
 
     private val actionService = mock<ImportDataActionService>()
     private val eventService = mock<ImportDataEventService>()
-    private val service = ImportDataProcessService(actionService, eventService)
+    private val importDataRepository = mock<ImportDataRepository>()
+    private val operationProcessService = mock<OperationProcessService>()
+    private val service = ImportDataProcessService(
+        actionService,
+        eventService,
+        importDataRepository,
+        operationProcessService,
+    )
     private val importId = UUID.randomUUID()
 
     @Test
@@ -70,6 +90,80 @@ class ImportDataProcessServiceTest {
 
         verify(actionService).updateParsingStatus(importId, ImportDataParsingStatus.FAILED, "AI unavailable")
     }
+
+    @Test
+    fun `commit - notifies operation changes after commit and refreshes import`() {
+        executeBlockingLockedBlock()
+        val date = LocalDate.of(2026, 2, 3)
+        val changes = listOf(change(date), change(date), change(date.plusDays(1)))
+        whenever(actionService.commit(importId)).thenReturn(changes)
+
+        service.commit(importId)
+
+        inOrder(actionService, operationProcessService, eventService) {
+            verify(actionService).commit(importId)
+            verify(operationProcessService).notifyChanges(changes)
+            verify(eventService).importData(importId)
+            verify(eventService).importDataEntry(importId, listOf(date, date.plusDays(1)))
+        }
+    }
+
+    @Test
+    fun `commit - nothing committed skips entry event`() {
+        executeBlockingLockedBlock()
+        whenever(actionService.commit(importId)).thenReturn(emptyList())
+
+        service.commit(importId)
+
+        verify(operationProcessService).notifyChanges(emptyList())
+        verify(eventService).importData(importId)
+        verify(eventService, never()).importDataEntry(any(), any())
+    }
+
+    @Test
+    fun `commit - failed commit does not notify changes`() {
+        executeBlockingLockedBlock()
+        whenever(actionService.commit(importId)).thenThrow(IllegalStateException("constraint violation"))
+
+        assertThatThrownBy { service.commit(importId) }.isInstanceOf(IllegalStateException::class.java)
+
+        verifyNoInteractions(operationProcessService, eventService)
+    }
+
+    @Test
+    fun `balanceCalculationCompleted - refreshes imports of the account`() {
+        val accountId = UUID.randomUUID()
+        val account = Account(id = accountId, name = "Bank", type = AccountType.ACCOUNT)
+        val first = ImportData(id = UUID.randomUUID(), account = account)
+        val second = ImportData(id = UUID.randomUUID(), account = account)
+        whenever(importDataRepository.findByAccountId(accountId)).thenReturn(listOf(first, second))
+
+        service.balanceCalculationCompleted(BalanceCalculationCompleted(accountId, "USD"))
+
+        verify(eventService).importData(first.id!!)
+        verify(eventService).importData(second.id!!)
+    }
+
+    private fun executeBlockingLockedBlock() {
+        whenever(actionService.withLock(eq(importId), any<() -> Any>())).thenAnswer {
+            it.getArgument<() -> Any>(1).invoke()
+        }
+    }
+
+    private fun change(date: LocalDate) = OperationChangeRecord(
+        old = null,
+        new = OperationChangeStateRecord(
+            id = UUID.randomUUID(),
+            date = date,
+            type = OperationType.EXPENSE,
+            amountFrom = Amount(1_000, "USD"),
+            accountFrom = UUID.randomUUID(),
+            accountFromType = AccountType.ACCOUNT,
+            amountTo = Amount(1_000, "USD"),
+            accountTo = UUID.randomUUID(),
+            accountToType = AccountType.EXPENSE,
+        ),
+    )
 
     private fun executeLockedBlock() {
         whenever(actionService.withTryLock(eq(importId), any())).thenAnswer {
