@@ -30,6 +30,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.data.jpa.domain.Specification
 import java.time.LocalDate
@@ -224,10 +225,11 @@ class ImportDataActionServiceTest {
     }
 
     @Test
-    fun `calculateTotals - aggregates parsed entries and all account operations by currency`() {
+    fun `calculateTotals - aggregates parsed entries without linked operation by currency`() {
         val date = LocalDate.of(2026, 2, 3)
         val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = date)
-        importData.days.add(day)
+        val linkedDay = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = date.plusDays(1))
+        importData.days.addAll(listOf(day, linkedDay))
         val expenseAccount = Account(id = UUID.randomUUID(), name = "Groceries", type = AccountType.EXPENSE)
         val incomeAccount = Account(id = UUID.randomUUID(), name = "Salary", type = AccountType.INCOME)
         val expense = importEntry(
@@ -252,27 +254,28 @@ class ImportDataActionServiceTest {
             accountTo = expenseAccount,
         )
         val incomplete = importEntry(day, null, amount = null)
-        whenever(entryRepository.findEntriesByImportDataId(importId))
-            .thenReturn(listOf(expense, income, foreignCurrency, incomplete))
-        whenever(operationRepository.findAll(any<Specification<Operation>>())).thenReturn(
-            listOf(
-                operation(date, OperationType.EXPENSE, account, expenseAccount, Amount(800, "USD")),
-                operation(date, OperationType.INCOME, incomeAccount, account, Amount(300, "USD")),
-                operation(date, OperationType.EXPENSE, account, expenseAccount, Amount(1_500, "EUR")),
-            ),
+        income.operation = operation(date, OperationType.INCOME, incomeAccount, account, Amount(400, "USD"))
+        val linkedExpense = importEntry(
+            linkedDay,
+            OperationType.EXPENSE,
+            amount = Amount(300, "USD"),
+            accountFrom = account,
+            accountTo = expenseAccount,
         )
+        linkedExpense.operation = operation(linkedDay.date!!, OperationType.EXPENSE, account, expenseAccount, Amount(300, "USD"))
+        whenever(entryRepository.findEntriesByImportDataId(importId))
+            .thenReturn(listOf(expense, income, foreignCurrency, incomplete, linkedExpense))
 
         service.calculateTotals(importId)
 
         assertThat(day.totals).hasSize(1)
-        assertThat(day.totals.single().parsed).isEqualTo(Amount(-600, "USD"))
-        assertThat(day.totals.single().operation).isEqualTo(Amount(-500, "USD"))
-        assertThat(day.totals.single().suggested).isEqualTo(Amount(0, "USD"))
+        assertThat(day.totals.single().parsed).isEqualTo(Amount(-1_000, "USD"))
         assertThat(day.totals.single().actual).isEqualTo(Amount(0, "USD"))
         assertThat(day.valid).isFalse()
-        assertThat(importData.totals.single().parsed).isEqualTo(Amount(-600, "USD"))
-        assertThat(importData.totals.single().operation).isEqualTo(Amount(-500, "USD"))
+        assertThat(linkedDay.totals.single().parsed).isEqualTo(Amount(0, "USD"))
+        assertThat(importData.totals.single().parsed).isEqualTo(Amount(-1_000, "USD"))
         assertThat(importData.valid).isFalse()
+        verifyNoInteractions(operationRepository)
     }
 
     private fun parsedEntry(

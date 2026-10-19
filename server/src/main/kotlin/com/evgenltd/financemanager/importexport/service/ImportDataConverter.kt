@@ -43,6 +43,7 @@ class ImportDataConverter(
             totals = importData.totals.map { toRecord(it, balances[it.currency]) },
         )
 
+    @Suppress("DEPRECATION")
     private fun toRecord(total: ImportDataTotal, balance: Amount?): ImportDataTotalRecord =
         ImportDataTotalRecord(
             currency = total.currency,

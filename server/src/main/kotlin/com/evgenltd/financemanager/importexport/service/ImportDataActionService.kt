@@ -213,27 +213,19 @@ class ImportDataActionService(
         val importData = importDataRepository.find(id)
         val entries = importDataEntryRepository.findEntriesByImportDataId(id)
         val entriesByDay = entries.groupBy { it.importDataDay.id }
-        val dates = importData.days.mapNotNull { it.date }.distinct()
-        val operationsByDate = if (dates.isEmpty()) {
-            emptyMap()
-        } else {
-            ((Operation::date contains dates) and byAccount(importData.account))
-                .let { operationRepository.findAll(it) }
-                .groupBy { it.date }
-        }
 
         importData.days.forEach { day ->
-            val parsed = entriesByDay[day.id].orEmpty()
-                .filter { it.isParsed() }
+            val parsedEntries = entriesByDay[day.id].orEmpty().filter { it.isParsed() }
+            val parsed = parsedEntries
+                .filter { it.operation == null }
                 .flatMap { it.amountsForAccount(importData.account) }
                 .totalByCurrency()
-            val operation = day.date
-                ?.let { operationsByDate[it] }
-                .orEmpty()
-                .amountsForAccount(importData.account)
-                .totalByCurrency()
-            val currencies = (parsed.keys + operation.keys)
+            // currencies of linked entries are kept, so a fully linked currency still has a (zero) total
+            val currencies = parsedEntries
+                .flatMap { it.amountsForAccount(importData.account) }
+                .map { it.currency }
                 .filter { importData.currency == null || it == importData.currency }
+                .distinct()
                 .sorted()
 
             day.totals.clear()
@@ -241,7 +233,6 @@ class ImportDataActionService(
                 emptyTotal(currency).also { total ->
                     total.importDataDay = day
                     total.parsed = parsed[currency] ?: emptyAmount(currency)
-                    total.operation = operation[currency] ?: emptyAmount(currency)
                 }
             })
             day.valid = false
@@ -257,7 +248,6 @@ class ImportDataActionService(
                     emptyTotal(currency).also { total ->
                         total.importData = importData
                         total.parsed = totals.map { it.parsed }.sum(currency)
-                        total.operation = totals.map { it.operation }.sum(currency)
                     }
                 },
         )

@@ -8,6 +8,7 @@ import { useOperationPresetStore } from '@/store/operation-preset'
 import { ImportDataParsingStatus } from '@/types/import-data'
 import { ImportDataEntries, ImportDataStatusPlaceholder } from './import-data-entries'
 import { ImportDataHeader } from './import-data-header'
+import { ImportDataFooter } from './import-data-totals'
 
 export default function ImportDataPage() {
   const { id } = useParams<{ id: string }>()
@@ -27,7 +28,10 @@ export default function ImportDataPage() {
     <Layout>
       <ImportDataHeader id={id} />
       {data?.id === id && data.parsingStatus === ImportDataParsingStatus.DONE ? (
-        <ImportDataEntries id={id} />
+        <>
+          <ImportDataEntries id={id} />
+          <ImportDataFooter totals={data.totals} />
+        </>
       ) : data?.id === id ? (
         <ImportDataStatusPlaceholder status={data.parsingStatus} message={data.message} />
       ) : null}

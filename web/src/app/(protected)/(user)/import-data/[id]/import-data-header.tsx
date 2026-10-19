@@ -3,12 +3,16 @@
 import { useEffect } from 'react'
 import { AlertCircleIcon } from 'lucide-react'
 import { importDataChannels } from '@/api/import-data'
+import { Filler } from '@/components/common/layout/filler'
 import { Stack } from '@/components/common/layout/stack'
 import { ReviseBadge } from '@/components/common/typography/revise-badge'
 import { Typography } from '@/components/common/typography/typography'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSse } from '@/hooks/use-sse'
+import { formatDateCommon } from '@/lib/utils'
 import { useImportDataStore } from '@/store/import-data'
+import { DateRange } from '@/types/common/common'
+import { ImportDataAmounts } from './import-data-totals'
 
 export function ImportDataHeader({ id }: { id: string }) {
   const { data, loading, error, fetch, setPathParams, reset } = useImportDataStore()
@@ -49,9 +53,18 @@ export function ImportDataHeader({ id }: { id: string }) {
 
   return (
     <Stack gap={3} className="shrink-0">
-      <Stack orientation="horizontal" align="center" gap={3}>
-        <Typography variant="large">{data.account.name}</Typography>
-        <ReviseBadge reviseDate={data.account.reviseDate} />
+      <Stack gap={1}>
+        <Stack orientation="horizontal" align="center" gap={3}>
+          <Typography variant="large">{data.account.name}</Typography>
+          <ReviseBadge reviseDate={data.account.reviseDate} />
+        </Stack>
+        <Stack orientation="horizontal" align="center" gap={3}>
+          {data.dateRange && (
+            <Typography variant="muted">{formatPeriod(data.dateRange)}</Typography>
+          )}
+          <Filler />
+          <ImportDataAmounts amounts={data.totals.map((total) => total.balance)} />
+        </Stack>
       </Stack>
 
       {data.message && (
@@ -65,4 +78,9 @@ export function ImportDataHeader({ id }: { id: string }) {
       )}
     </Stack>
   )
+}
+
+function formatPeriod({ from, to }: DateRange): string {
+  if (from === to) return formatDateCommon(from)
+  return `${formatDateCommon(from)} – ${formatDateCommon(to)}`
 }

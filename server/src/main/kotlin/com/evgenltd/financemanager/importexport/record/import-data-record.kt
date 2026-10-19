@@ -30,7 +30,9 @@ data class ImportDataRecord(
 data class ImportDataTotalRecord(
     val currency: String,
     val parsed: Amount,
+    @Deprecated("Not calculated, totals are based on parsed only")
     val suggested: Amount,
+    @Deprecated("Not calculated, totals are based on parsed only")
     val operation: Amount,
     val actual: Amount,
     val balance: Amount,

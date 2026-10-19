@@ -22,7 +22,9 @@ export enum ImportDataParsingStatus {
 export interface ImportDataTotal {
   currency: string
   parsed: Amount
+  /** @deprecated not calculated, totals are based on parsed only */
   suggested: Amount
+  /** @deprecated not calculated, totals are based on parsed only */
   operation: Amount
   actual: Amount
   balance: Amount

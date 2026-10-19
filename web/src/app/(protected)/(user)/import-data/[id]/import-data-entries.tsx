@@ -15,6 +15,7 @@ import { cn, formatDateCommon } from '@/lib/utils'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
 import { AccountReference } from '@/types/account'
 import { ImportDataEntry, ImportDataParsingStatus } from '@/types/import-data'
+import { ImportDataDayTotals } from './import-data-totals'
 
 export function ImportDataEntries({ id }: { id: string }) {
   const {
@@ -72,6 +73,7 @@ export function ImportDataEntries({ id }: { id: string }) {
               mainAccountId={importData?.account.id}
             />
           ))}
+          <ImportDataDayTotals totals={day.totals} />
         </Group>
       ))}
     </Seek>

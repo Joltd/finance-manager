@@ -35,6 +35,7 @@ class ImportDataTotal(
     )
     var parsed: Amount,
 
+    @Deprecated("Not calculated, totals are based on parsed only")
     @Embedded
     @AttributeOverrides(
         AttributeOverride(name = "value", column = Column(name = "operation_value")),
@@ -42,6 +43,7 @@ class ImportDataTotal(
     )
     var operation: Amount,
 
+    @Deprecated("Not calculated, totals are based on parsed only")
     @Embedded
     @AttributeOverrides(
         AttributeOverride(name = "value", column = Column(name = "suggested_value")),
@@ -68,7 +70,7 @@ class ImportDataTotal(
 
     override fun hashCode(): Int = id?.hashCode() ?: 0
 
-    override fun toString(): String = "ImportDataTotal(id=$id, importData=$importData, importDataDay=$importDataDay, valid=$valid, currency='$currency', parsed=$parsed, operation=$operation, suggested=$suggested, actual=$actual)"
+    override fun toString(): String = "ImportDataTotal(id=$id, importData=$importData, importDataDay=$importDataDay, valid=$valid, currency='$currency', parsed=$parsed, actual=$actual)"
 
 }
 
