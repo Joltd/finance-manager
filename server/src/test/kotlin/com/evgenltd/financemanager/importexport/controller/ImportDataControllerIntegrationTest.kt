@@ -272,6 +272,7 @@ class ImportDataControllerIntegrationTest : AbstractIntegrationTest() {
             assertThat(importDataEntryRepository.findById(linked.id!!).get().operation?.id)
                 .isEqualTo(existingOperation.id)
             assertThat(importDataEntryRepository.findById(invalid.id!!).get().operation).isNull()
+            assertThat(accountRepository.findById(account.id!!).get().reviseDate).isEqualTo(date)
         }
 
         assertThat(commit().statusCode).isEqualTo(HttpStatus.OK)

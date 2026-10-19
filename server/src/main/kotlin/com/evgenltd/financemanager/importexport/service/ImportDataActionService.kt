@@ -277,6 +277,13 @@ class ImportDataActionService(
 
         val changes = operationService.save(pairs.map { (_, operation) -> operation })
         pairs.forEach { (entry, operation) -> entry.operation = operation }
+
+        val account = importData.account
+        val lastDate = pairs.maxOf { (_, operation) -> operation.date }
+        account.reviseDate = account.reviseDate
+            ?.let { maxOf(it, lastDate) }
+            ?: lastDate
+
         calculateTotals(id)
         return changes
     }

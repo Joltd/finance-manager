@@ -328,7 +328,39 @@ class ImportDataActionServiceTest {
         assertThat(operation.description).isEqualTo("Description")
         assertThat(operation.operationData).isSameAs(entry.operationData)
         assertThat(entry.operation).isSameAs(operation)
+        assertThat(account.reviseDate).isEqualTo(date)
         verify(entryRepository).findEntriesByImportDataId(importId)
+    }
+
+    @Test
+    fun `commit - moves account revise date to the latest committed entry`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        account.reviseDate = LocalDate.of(2026, 1, 31)
+        val category = Account(id = UUID.randomUUID(), name = "Groceries", type = AccountType.EXPENSE)
+        val entries = listOf(LocalDate.of(2026, 2, 5), LocalDate.of(2026, 2, 3))
+            .map { ImportDataDay(id = UUID.randomUUID(), importData = importData, date = it) }
+            .map { importEntry(it, OperationType.EXPENSE, accountFrom = account, accountTo = category) }
+        whenever(entryRepository.findForCommit(importId)).thenReturn(entries)
+        whenever(operationService.save(any())).thenReturn(emptyList())
+
+        service.commit(importId)
+
+        assertThat(account.reviseDate).isEqualTo(LocalDate.of(2026, 2, 5))
+    }
+
+    @Test
+    fun `commit - keeps later account revise date`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        account.reviseDate = LocalDate.of(2026, 3, 1)
+        val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = LocalDate.of(2026, 2, 3))
+        val category = Account(id = UUID.randomUUID(), name = "Groceries", type = AccountType.EXPENSE)
+        val entry = importEntry(day, OperationType.EXPENSE, accountFrom = account, accountTo = category)
+        whenever(entryRepository.findForCommit(importId)).thenReturn(listOf(entry))
+        whenever(operationService.save(any())).thenReturn(emptyList())
+
+        service.commit(importId)
+
+        assertThat(account.reviseDate).isEqualTo(LocalDate.of(2026, 3, 1))
     }
 
     @Test
@@ -339,6 +371,7 @@ class ImportDataActionServiceTest {
         val result = service.commit(importId)
 
         assertThat(result).isEmpty()
+        assertThat(account.reviseDate).isNull()
         verify(operationService, never()).save(any())
     }
 

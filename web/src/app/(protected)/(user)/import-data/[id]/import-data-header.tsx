@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { AlertCircleIcon } from 'lucide-react'
 import { importDataChannels } from '@/api/import-data'
-import { Filler } from '@/components/common/layout/filler'
 import { Stack } from '@/components/common/layout/stack'
 import { ReviseBadge } from '@/components/common/typography/revise-badge'
 import { Typography } from '@/components/common/typography/typography'
@@ -12,7 +11,7 @@ import { useSse } from '@/hooks/use-sse'
 import { formatDateCommon } from '@/lib/utils'
 import { useImportDataStore } from '@/store/import-data'
 import { DateRange } from '@/types/common/common'
-import { ImportDataAmounts } from './import-data-totals'
+import { ImportDataAmounts } from './import-data-amounts'
 
 export function ImportDataHeader({ id }: { id: string }) {
   const { data, loading, error, fetch, setPathParams, reset } = useImportDataStore()
@@ -62,8 +61,14 @@ export function ImportDataHeader({ id }: { id: string }) {
           {data.dateRange && (
             <Typography variant="muted">{formatPeriod(data.dateRange)}</Typography>
           )}
-          <Filler />
-          <ImportDataAmounts amounts={data.totals.map((total) => total.balance)} />
+          <ImportDataAmounts
+            label={
+              <Typography as="span" variant="small">
+                Balance
+              </Typography>
+            }
+            amounts={data.totals.map((total) => total.balance)}
+          />
         </Stack>
       </Stack>
 
