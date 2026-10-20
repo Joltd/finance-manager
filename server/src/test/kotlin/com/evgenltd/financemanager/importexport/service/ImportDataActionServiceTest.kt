@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
+import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.ai.entity.Embedding
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
@@ -12,6 +13,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportData
 import com.evgenltd.financemanager.importexport.entity.ImportDataDay
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.record.AccountScore
 import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
@@ -374,6 +376,169 @@ class ImportDataActionServiceTest {
         assertThat(account.reviseDate).isNull()
         verify(operationService, never()).save(any())
     }
+
+    @Test
+    fun `updateEntry - updates the draft and recalculates validity and totals`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        val date = LocalDate.of(2026, 2, 3)
+        val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = date)
+        val category = Account(id = UUID.randomUUID(), name = "Groceries", type = AccountType.EXPENSE)
+        val entry = stubEntry(importEntry(day, type = null, amount = null))
+        stubAccounts(account, category)
+
+        val dates = service.updateEntry(
+            importId,
+            entry.id!!,
+            updateRecord(
+                date,
+                OperationType.EXPENSE,
+                accountFrom = account,
+                accountTo = category,
+                amount = Amount(2_000, "USD"),
+                description = "Lunch",
+            ),
+        )
+
+        assertThat(dates).containsExactly(date)
+        assertThat(entry.type).isEqualTo(OperationType.EXPENSE)
+        assertThat(entry.amountFrom).isEqualTo(Amount(2_000, "USD"))
+        assertThat(entry.accountFrom).isSameAs(account)
+        assertThat(entry.amountTo).isEqualTo(Amount(2_000, "USD"))
+        assertThat(entry.accountTo).isSameAs(category)
+        assertThat(entry.description).isEqualTo("Lunch")
+        assertThat(entry.valid).isTrue()
+        verify(entryRepository).findEntriesByImportDataId(importId)
+    }
+
+    @Test
+    fun `updateEntry - keeps an incomplete draft invalid`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = LocalDate.of(2026, 2, 3))
+        val entry = stubEntry(importEntry(day, OperationType.EXPENSE))
+        stubAccounts(account)
+
+        service.updateEntry(
+            importId,
+            entry.id!!,
+            updateRecord(day.date!!, OperationType.EXPENSE, accountFrom = account, amount = null),
+        )
+
+        assertThat(entry.accountTo).isNull()
+        assertThat(entry.amountFrom).isNull()
+        assertThat(entry.valid).isFalse()
+    }
+
+    @Test
+    fun `updateEntry - allows exchange within the import account`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = LocalDate.of(2026, 2, 3))
+        val entry = stubEntry(importEntry(day, OperationType.EXPENSE))
+        stubAccounts(account)
+
+        service.updateEntry(
+            importId,
+            entry.id!!,
+            updateRecord(day.date!!, OperationType.EXCHANGE, accountFrom = account, accountTo = account),
+        )
+
+        assertThat(entry.type).isEqualTo(OperationType.EXCHANGE)
+        assertThat(entry.valid).isTrue()
+    }
+
+    @Test
+    fun `updateEntry - rejects entries that cannot be edited`() {
+        val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = LocalDate.of(2026, 2, 3))
+        val foreignDay = ImportDataDay(
+            id = UUID.randomUUID(),
+            importData = ImportData(id = UUID.randomUUID(), account = account),
+            date = day.date,
+        )
+        val category = Account(id = UUID.randomUUID(), name = "Groceries", type = AccountType.EXPENSE)
+        val record = updateRecord(day.date!!, OperationType.EXPENSE, accountFrom = account, accountTo = category)
+        stubAccounts(account, category)
+
+        importData.parsingStatus = ImportDataParsingStatus.CALCULATION
+        val notReady = stubEntry(importEntry(day, OperationType.EXPENSE))
+        assertRejected(notReady, record, "Import is not ready for editing")
+
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        val foreign = stubEntry(importEntry(foreignDay, OperationType.EXPENSE))
+        assertRejected(foreign, record, "Entry does not belong to the import")
+
+        val linked = stubEntry(importEntry(day, OperationType.EXPENSE))
+        linked.operation = operation(day.date!!, OperationType.EXPENSE, account, category, Amount(1_000, "USD"))
+        assertRejected(linked, record, "Entry is already linked to an operation")
+    }
+
+    @Test
+    fun `updateEntry - rejects accounts that break the import account rules`() {
+        importData.parsingStatus = ImportDataParsingStatus.DONE
+        val date = LocalDate.of(2026, 2, 3)
+        val day = ImportDataDay(id = UUID.randomUUID(), importData = importData, date = date)
+        val other = Account(id = UUID.randomUUID(), name = "Cash", type = AccountType.ACCOUNT)
+        val groceries = Account(id = UUID.randomUUID(), name = "Groceries", type = AccountType.EXPENSE)
+        val salary = Account(id = UUID.randomUUID(), name = "Salary", type = AccountType.INCOME)
+        stubAccounts(account, other, groceries, salary)
+        val entry = stubEntry(importEntry(day, OperationType.EXPENSE, accountFrom = account))
+
+        val cases = listOf(
+            updateRecord(date, OperationType.EXPENSE, accountFrom = other, accountTo = groceries)
+                to "Expense must be paid from the import account",
+            updateRecord(date, OperationType.INCOME, accountFrom = salary, accountTo = other)
+                to "Income must be received to the import account",
+            updateRecord(date, OperationType.TRANSFER, accountFrom = other, accountTo = null)
+                to "Import account must be one of the operation sides",
+            updateRecord(date, OperationType.EXPENSE, accountFrom = account, accountTo = salary)
+                to "Invalid counterpart account type for EXPENSE",
+            updateRecord(date, OperationType.EXCHANGE, accountFrom = groceries, accountTo = account)
+                to "Invalid counterpart account type for EXCHANGE",
+            updateRecord(date, OperationType.TRANSFER, accountFrom = account, accountTo = account)
+                to "Transfer accounts must differ",
+        )
+
+        cases.forEach { (record, message) -> assertRejected(entry, record, message) }
+        assertThat(entry.accountFrom).isSameAs(account)
+        verify(entryRepository, never()).findEntriesByImportDataId(importId)
+    }
+
+    private fun assertRejected(entry: ImportDataEntry, record: ImportDataEntryUpdateRecord, message: String) {
+        assertThatThrownBy { service.updateEntry(importId, entry.id!!, record) }
+            .isInstanceOf(ResponseStatusException::class.java)
+            .hasMessageContaining(message)
+    }
+
+    private fun stubEntry(entry: ImportDataEntry): ImportDataEntry = entry.also {
+        whenever(entryRepository.findById(it.id!!)).thenReturn(Optional.of(it))
+    }
+
+    private fun stubAccounts(vararg accounts: Account) {
+        accounts.forEach { whenever(accountRepository.findById(it.id!!)).thenReturn(Optional.of(it)) }
+    }
+
+    private fun updateRecord(
+        date: LocalDate,
+        type: OperationType,
+        accountFrom: Account? = null,
+        accountTo: Account? = null,
+        amount: Amount? = Amount(1_000, "USD"),
+        description: String? = null,
+    ) = ImportDataEntryUpdateRecord(
+        date = date,
+        type = type,
+        amountFrom = amount,
+        accountFrom = accountFrom?.let { reference(it) },
+        amountTo = amount,
+        accountTo = accountTo?.let { reference(it) },
+        description = description,
+    )
+
+    private fun reference(account: Account) = AccountReferenceRecord(
+        id = account.id!!,
+        name = account.name,
+        deleted = account.deleted,
+        type = account.type,
+        reviseDate = account.reviseDate,
+    )
 
     private fun parsedEntry(
         raw: String,

@@ -4,15 +4,9 @@ export const importDataUrls = {
   root: '/api/v1/import-data',
   id: '/api/v1/import-data/:id',
   entry: '/api/v1/import-data/:id/entry',
+  entryById: '/api/v1/import-data/:id/entry/:entryId',
   begin: '/api/v1/import-data/begin',
   commit: '/api/v1/import-data/:id/commit',
-  actualBalance: '/api/v1/import-data/:id/actual-balance',
-  resetRevision: '/api/v1/import-data/:id/reset-revision',
-  calculateTotal: '/api/v1/import-data/:id/calculate-total',
-  unlink: '/api/v1/import-data/:id/entry/unlink',
-  approve: '/api/v1/import-data/:id/entry/approve',
-  link: '/api/v1/import-data/:id/entry/link',
-  linkById: '/api/v1/import-data/:id/entry/:entryId/link',
 }
 
 export const importDataChannels = {

@@ -7,9 +7,11 @@ import { useImportDataStore } from '@/store/import-data'
 import { useOperationPresetStore } from '@/store/operation-preset'
 import { ImportDataParsingStatus } from '@/types/import-data'
 import { ImportDataEntries, ImportDataStatusPlaceholder } from './import-data-entries'
+import { ImportDataEntrySheet } from './import-data-entry-sheet'
 import { ImportDataHeader } from './import-data-header'
 
 import { ImportDataFooter } from '@/app/(protected)/(user)/import-data/[id]/import-data-footer'
+import { OperationSheet } from '@/app/(protected)/(user)/operation/operation-sheet'
 
 export default function ImportDataPage() {
   const { id } = useParams<{ id: string }>()
@@ -27,6 +29,9 @@ export default function ImportDataPage() {
 
   return (
     <Layout className="min-h-0 flex-1">
+      <OperationSheet />
+      <ImportDataEntrySheet />
+
       <ImportDataHeader id={id} />
       {data?.id === id && data.parsingStatus === ImportDataParsingStatus.DONE ? (
         <>

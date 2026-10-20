@@ -79,7 +79,9 @@ class ImportDataService(
             .let { operationRepository.findAll(it) }
             .groupBy { it.date }
 
-        return dates.distinct().map { date ->
+        // todo implement special list for empty dates
+        val reload = filter.pointers != null
+        return dates.distinct().mapNotNull { date ->
             val day = daysByDate[date]
             val entries = day?.entries.orEmpty()
                 .filter { it.date != null }
@@ -88,6 +90,11 @@ class ImportDataService(
             val operations = freeOperations[date].orEmpty()
                 .sortedBy { it.id }
                 .map { importDataConverter.toRecord(it) }
+            // a reloaded date without rows (e.g. its last entry moved to another day) is omitted,
+            // so the client drops that day instead of keeping an empty group
+            if (reload && entries.isEmpty() && operations.isEmpty()) {
+                return@mapNotNull null
+            }
             ImportDataDayRecord(
                 date = date,
                 valid = day?.valid ?: false,

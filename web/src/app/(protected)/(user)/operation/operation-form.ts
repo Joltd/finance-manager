@@ -7,83 +7,86 @@ import { Amount, amountSchema } from '@/types/common/amount'
 import { OperationType } from '@/types/operation'
 import { Tag, tagSchema } from '@/types/tag'
 
-export const FROM_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
-  EXPENSE: AccountType.ACCOUNT,
-  INCOME: AccountType.INCOME,
-  TRANSFER: AccountType.ACCOUNT,
-  EXCHANGE: AccountType.ACCOUNT,
+/**
+ * Which side of the operation `account` is on: OUT = account is "from", IN = account is "to".
+ */
+export enum OperationDirection {
+  OUT = 'OUT',
+  IN = 'IN',
 }
 
-export const TO_ACCOUNT_TYPE: Partial<Record<OperationType, AccountType>> = {
-  EXPENSE: AccountType.EXPENSE,
-  INCOME: AccountType.ACCOUNT,
-  TRANSFER: AccountType.ACCOUNT,
-  EXCHANGE: AccountType.ACCOUNT,
+/** `account` is always a regular account; the counterpart type depends on the operation type. */
+export const COUNTERPART_ACCOUNT_TYPE: Record<OperationType, AccountType> = {
+  [OperationType.EXPENSE]: AccountType.EXPENSE,
+  [OperationType.INCOME]: AccountType.INCOME,
+  [OperationType.TRANSFER]: AccountType.ACCOUNT,
+  [OperationType.EXCHANGE]: AccountType.ACCOUNT,
 }
 
-export const operationFormSchema = z
-  .object({
-    type: z.enum(OperationType),
-    date: z.date(),
-    accountFrom: accountReferenceSchema.optional(),
-    accountTo: accountReferenceSchema.optional(),
-    amount: amountSchema.optional(),
-    amountFrom: amountSchema.optional(),
-    amountTo: amountSchema.optional(),
-    description: z.string(),
-    tags: z.array(tagSchema),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.accountFrom) {
-      ctx.addIssue({ code: 'custom', path: ['accountFrom'], message: 'Required' })
-    } else {
-      const constraint = FROM_ACCOUNT_TYPE[data.type]
-      if (constraint && data.accountFrom.type !== constraint) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['accountFrom'],
-          message: 'Invalid account type for this operation',
-        })
-      }
-    }
+/** Expense and income have a fixed direction; transfer and exchange can be swapped. */
+const FIXED_DIRECTION: Partial<Record<OperationType, OperationDirection>> = {
+  [OperationType.EXPENSE]: OperationDirection.OUT,
+  [OperationType.INCOME]: OperationDirection.IN,
+}
 
-    if (!data.accountTo) {
-      ctx.addIssue({ code: 'custom', path: ['accountTo'], message: 'Required' })
-    } else {
-      const constraint = TO_ACCOUNT_TYPE[data.type]
-      if (constraint && data.accountTo.type !== constraint) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['accountTo'],
-          message: 'Invalid account type for this operation',
-        })
-      }
-    }
+export const operationFormBaseSchema = z.object({
+  type: z.enum(OperationType),
+  date: z.date(),
+  direction: z.enum(OperationDirection),
+  account: accountReferenceSchema.optional(),
+  counterpart: accountReferenceSchema.optional(),
+  amount: amountSchema.optional(),
+  // EXCHANGE only: the amount on the counterpart side
+  counterAmount: amountSchema.optional(),
+  description: z.string(),
+  tags: z.array(tagSchema),
+})
 
-    if (
-      data.type === OperationType.TRANSFER &&
-      data.accountFrom &&
-      data.accountTo &&
-      data.accountFrom.id === data.accountTo.id
-    ) {
-      ctx.addIssue({ code: 'custom', path: ['accountTo'], message: 'From and To accounts must differ' })
-    }
+export type OperationFormState = z.infer<typeof operationFormBaseSchema>
 
-    if (data.type === OperationType.EXCHANGE) {
-      if (!data.amountFrom) {
-        ctx.addIssue({ code: 'custom', path: ['amountFrom'], message: 'Required' })
-      }
-      if (!data.amountTo) {
-        ctx.addIssue({ code: 'custom', path: ['amountTo'], message: 'Required' })
-      }
-    } else {
-      if (!data.amount) {
-        ctx.addIssue({ code: 'custom', path: ['amount'], message: 'Required' })
-      }
-    }
-  })
+type OperationFormRefinementCtx = z.core.$RefinementCtx<OperationFormState>
 
-export type OperationFormState = z.infer<typeof operationFormSchema>
+function addIssue(ctx: OperationFormRefinementCtx, path: keyof OperationFormState, message: string) {
+  ctx.addIssue({ code: 'custom', path: [path], message })
+}
+
+/**
+ * Account type checks shared by the strict operation schema and lenient schemas built on the same
+ * form state (e.g. the import entry form). Only validates the accounts that are present.
+ */
+export function refineOperationAccounts(data: OperationFormState, ctx: OperationFormRefinementCtx) {
+  if (data.account && data.account.type !== AccountType.ACCOUNT) {
+    addIssue(ctx, 'account', 'Invalid account type for this operation')
+  }
+  if (data.counterpart && data.counterpart.type !== COUNTERPART_ACCOUNT_TYPE[data.type]) {
+    addIssue(ctx, 'counterpart', 'Invalid account type for this operation')
+  }
+  if (
+    data.type === OperationType.TRANSFER &&
+    data.account &&
+    data.counterpart &&
+    data.account.id === data.counterpart.id
+  ) {
+    addIssue(ctx, 'counterpart', 'From and To accounts must differ')
+  }
+}
+
+export const operationFormSchema = operationFormBaseSchema.superRefine((data, ctx) => {
+  if (!data.account) {
+    addIssue(ctx, 'account', 'Required')
+  }
+  if (!data.counterpart) {
+    addIssue(ctx, 'counterpart', 'Required')
+  }
+  refineOperationAccounts(data, ctx)
+
+  if (!data.amount) {
+    addIssue(ctx, 'amount', 'Required')
+  }
+  if (data.type === OperationType.EXCHANGE && !data.counterAmount) {
+    addIssue(ctx, 'counterAmount', 'Required')
+  }
+})
 
 export const operationFormResolver = zodResolver(operationFormSchema)
 
@@ -91,11 +94,11 @@ export function createDefaultFormState(): OperationFormState {
   return {
     type: OperationType.EXCHANGE,
     date: new Date(),
-    accountFrom: undefined,
-    accountTo: undefined,
+    direction: OperationDirection.OUT,
+    account: undefined,
+    counterpart: undefined,
     amount: undefined,
-    amountFrom: undefined,
-    amountTo: undefined,
+    counterAmount: undefined,
     description: '',
     tags: [],
   }
@@ -103,70 +106,92 @@ export function createDefaultFormState(): OperationFormState {
 
 /**
  * Transitions form state to a new operation type:
- * - Clears accountFrom/accountTo if their account types are incompatible with the new type.
- * - Converts between single amount and amountFrom/amountTo for EXCHANGE ↔ other.
+ * - Keeps `account` (it is a regular account for every type).
+ * - Clears `counterpart` if its account type is incompatible with the new type.
+ * - Forces the direction for expense/income, keeps it for transfer/exchange.
+ * - Copies `amount` into `counterAmount` when switching to exchange, drops it otherwise.
  */
 export function transitType(form: OperationFormState, newType: OperationType): OperationFormState {
-  const fromConstraint = FROM_ACCOUNT_TYPE[newType]
-  const toConstraint = TO_ACCOUNT_TYPE[newType]
+  const counterpart =
+    form.counterpart?.type === COUNTERPART_ACCOUNT_TYPE[newType] ? form.counterpart : undefined
+  const direction = FIXED_DIRECTION[newType] ?? form.direction
+  const counterAmount =
+    newType === OperationType.EXCHANGE ? (form.counterAmount ?? form.amount) : undefined
 
-  let rawFrom = form.accountFrom
-  let rawTo = form.accountTo
-
-  if (form.type === OperationType.INCOME && newType === OperationType.EXPENSE) {
-    rawFrom = form.accountTo
-    rawTo = undefined
-  } else if (form.type === OperationType.EXPENSE && newType === OperationType.INCOME) {
-    rawFrom = undefined
-    rawTo = form.accountFrom
-  }
-
-  const accountFrom = !fromConstraint || rawFrom?.type === fromConstraint ? rawFrom : undefined
-  const accountTo = !toConstraint || rawTo?.type === toConstraint ? rawTo : undefined
-
-  const wasExchange = form.type === OperationType.EXCHANGE
-  const isExchange = newType === OperationType.EXCHANGE
-
-  let { amount, amountFrom, amountTo } = form
-
-  if (wasExchange && !isExchange) {
-    // Collapse two amounts into one (use amountFrom as the single amount)
-    amount = amountFrom
-    amountFrom = undefined
-    amountTo = undefined
-  } else if (!wasExchange && isExchange) {
-    // Expand single amount into two (copy to both sides)
-    amountFrom = amount
-    amountTo = amount
-    amount = undefined
-  }
-
-  return { ...form, type: newType, accountFrom, accountTo, amount, amountFrom, amountTo }
+  return { ...form, type: newType, direction, counterpart, counterAmount }
 }
 
 interface OperationLike {
   type: OperationType
-  date: string
+  date?: string
   accountFrom?: AccountReference
   accountTo?: AccountReference
-  amountFrom: Amount
-  amountTo: Amount
+  amountFrom?: Amount
+  amountTo?: Amount
   description?: string
   tags?: Tag[]
 }
 
-export function operationToFormState(source: OperationLike): OperationFormState {
-  const isExchange = source.type === OperationType.EXCHANGE
+/**
+ * Resolves which side `accountId` is on. Without `accountId` (or when it matches the "from" side)
+ * transfer/exchange are treated as outgoing, so an exchange within a single account loads as OUT.
+ */
+function resolveDirection(source: OperationLike, accountId?: string): OperationDirection {
+  const fixed = FIXED_DIRECTION[source.type]
+  if (fixed) return fixed
+  if (
+    accountId !== undefined &&
+    source.accountFrom?.id !== accountId &&
+    source.accountTo?.id === accountId
+  ) {
+    return OperationDirection.IN
+  }
+  return OperationDirection.OUT
+}
+
+/**
+ * Converts an operation-like object (an operation or an import entry) into form state.
+ * `accountId` picks which side becomes `account` for transfer/exchange.
+ */
+export function toFormState(source: OperationLike, accountId?: string): OperationFormState {
+  const direction = resolveDirection(source, accountId)
+  const out = direction === OperationDirection.OUT
   return {
     type: source.type,
-    date: new Date(source.date + 'T00:00:00'),
-    accountFrom: source.accountFrom,
-    accountTo: source.accountTo,
-    amount: !isExchange ? source.amountFrom : undefined,
-    amountFrom: isExchange ? source.amountFrom : undefined,
-    amountTo: isExchange ? source.amountTo : undefined,
+    date: source.date ? parseISO(source.date) : new Date(),
+    direction,
+    account: out ? source.accountFrom : source.accountTo,
+    counterpart: out ? source.accountTo : source.accountFrom,
+    amount: out ? source.amountFrom : source.amountTo,
+    counterAmount:
+      source.type === OperationType.EXCHANGE
+        ? out
+          ? source.amountTo
+          : source.amountFrom
+        : undefined,
     description: source.description ?? '',
     tags: source.tags ?? [],
+  }
+}
+
+export interface OperationFields {
+  type: OperationType
+  accountFrom?: AccountReference
+  accountTo?: AccountReference
+  amountFrom?: Amount
+  amountTo?: Amount
+}
+
+/** Converts form state back into from/to fields of the request body. */
+export function toOperationFields(form: OperationFormState): OperationFields {
+  const out = form.direction === OperationDirection.OUT
+  const counterAmount = form.type === OperationType.EXCHANGE ? form.counterAmount : form.amount
+  return {
+    type: form.type,
+    accountFrom: out ? form.account : form.counterpart,
+    accountTo: out ? form.counterpart : form.account,
+    amountFrom: out ? form.amount : counterAmount,
+    amountTo: out ? counterAmount : form.amount,
   }
 }
 
@@ -189,24 +214,18 @@ export function createPresetFormState(
   if (preset.date) {
     state = { ...state, date: parseISO(preset.date) }
   }
-  const fromConstraint = FROM_ACCOUNT_TYPE[state.type]
-  if (preset.account && (!fromConstraint || preset.account.type === fromConstraint)) {
-    state = { ...state, accountFrom: preset.account }
+  if (preset.account?.type === AccountType.ACCOUNT) {
+    state = { ...state, account: preset.account }
   }
-  const toConstraint = TO_ACCOUNT_TYPE[state.type]
-  if (preset.category && (!toConstraint || preset.category.type === toConstraint)) {
-    state = { ...state, accountTo: preset.category }
+  if (preset.category?.type === COUNTERPART_ACCOUNT_TYPE[state.type]) {
+    state = { ...state, counterpart: preset.category }
   }
   const currency = preset.currency ?? defaultCurrency
   if (currency) {
-    if (state.type === OperationType.EXCHANGE) {
-      state = {
-        ...state,
-        amountFrom: { value: 0, currency },
-        amountTo: { value: 0, currency },
-      }
-    } else {
-      state = { ...state, amount: { value: 0, currency } }
+    state = {
+      ...state,
+      amount: { value: 0, currency },
+      counterAmount: state.type === OperationType.EXCHANGE ? { value: 0, currency } : undefined,
     }
   }
   return state

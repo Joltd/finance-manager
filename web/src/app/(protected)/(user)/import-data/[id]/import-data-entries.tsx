@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { format, subDays } from 'date-fns'
-import { AlertCircleIcon, ArrowRightIcon, Clock3Icon } from 'lucide-react'
+import { AlertCircleIcon, ArrowRightIcon, Clock3Icon, EyeIcon, PencilIcon } from 'lucide-react'
 import { importDataChannels } from '@/api/import-data'
 import { OperationIcon } from '@/components/common/icon/operation-icon'
 import { Group } from '@/components/common/layout/group'
@@ -10,12 +10,15 @@ import { Seek } from '@/components/common/layout/seek'
 import { Stack } from '@/components/common/layout/stack'
 import { AmountLabel } from '@/components/common/typography/amount-label'
 import { Typography } from '@/components/common/typography/typography'
+import { Button } from '@/components/ui/button'
 import { useSse } from '@/hooks/use-sse'
 import { cn, formatDateCommon } from '@/lib/utils'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
 import { AccountReference } from '@/types/account'
 import { ImportDataEntry, ImportDataParsingStatus } from '@/types/import-data'
+import { openOperationSheet } from '@/app/(protected)/(user)/operation/operation-sheet'
 import { ImportDataAmounts } from './import-data-amounts'
+import { openImportDataEntrySheet } from './import-data-entry-sheet'
 
 export function ImportDataEntries({ id }: { id: string }) {
   const {
@@ -104,13 +107,22 @@ export function ImportDataRow({
     source.amountTo &&
     (source.amountFrom.value !== source.amountTo.value ||
       source.amountFrom.currency !== source.amountTo.currency)
+
+  const handleOpen = () => {
+    if (item.operation?.id) {
+      openOperationSheet(item.operation.id, { readOnly: true })
+    } else if (item.entry) {
+      openImportDataEntrySheet(item.entry)
+    }
+  }
+
   return (
     <Stack
       orientation="horizontal"
       align="center"
       gap={3}
       className={cn(
-        'min-w-0 border-l-[3px] py-2.5 pr-1 pl-2',
+        'group min-w-0 border-l-[3px] py-2.5 pr-1 pl-2',
         rowStateClass[resolveRowState(item)],
       )}
     >
@@ -125,6 +137,16 @@ export function ImportDataRow({
           {counterpart}
         </Typography>
       </Stack>
+
+      <Button
+        size="icon"
+        variant="ghost"
+        className="opacity-0 w-5 h-5 group-hover:opacity-100 transition-opacity shrink-0"
+        aria-label={item.operation ? 'View operation' : 'Edit entry'}
+        onClick={handleOpen}
+      >
+        {item.operation ? <EyeIcon className="w-3! h-3!" /> : <PencilIcon className="w-3! h-3!" />}
+      </Button>
 
       <Stack orientation="horizontal" align="center" justify="end" gap={1} className="shrink-0">
         <AmountLabel amount={source.amountFrom} />

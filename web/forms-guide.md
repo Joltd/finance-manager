@@ -3,8 +3,9 @@
 Audience: AI agents implementing or refactoring forms in `web/`. This documents the canonical
 pattern for react-hook-form (RHF) + zod + shadcn/ui `Field` components used in this codebase,
 derived from `web/src/app/(protected)/(user)/operation/operation-form.ts` +
-`operation-sheet.tsx` + `import-data-entry-sheet.tsx`, which are the current reference
-implementation. Follow it for any new form; when refactoring an existing form, prefer migrating
+`operation-fields.tsx` + `operation-sheet.tsx` and
+`import-data/[id]/import-data-entry-form.ts` + `import-data-entry-sheet.tsx`, which are the
+current reference implementation. Follow it for any new form; when refactoring an existing form, prefer migrating
 it to this pattern over extending the legacy style described in §11.
 
 ## 1. File layout
@@ -14,8 +15,8 @@ it to this pattern over extending the legacy style described in §11.
 - **Sibling `<feature>-form.ts`**: zod schema, inferred `FormState` type, resolver, and *pure*
   helper functions (no hooks, no store reads — all inputs passed as parameters). Extract into
   this file when either is true:
-  - The same schema/state-shaping logic is needed by more than one component (e.g. a Sheet and
-    an import/suggestion picker both building the same form state).
+  - The same schema/state-shaping logic is needed by more than one component (e.g. the operation
+    sheet and the import entry sheet both building `OperationFormState`).
   - The resolver has non-trivial cross-field/conditional validation (`superRefine`) or the
     state-shaping logic (type transitions, domain-object → form-state conversion, preset-based
     defaults) is more than a few lines.
@@ -73,7 +74,7 @@ Rules:
 - `FieldError` takes `errors={[fieldState.error]}` (the array form), not `children`. This is
   what makes §4 (nested errors) possible without a different API.
 - When a field is updated from auxiliary UI (a "quick select" button, `FrequentAccounts`, a
-  suggestion card), call `field.onChange(...)` directly inside that field's own `render`, not an
+  direction swap button), call `field.onChange(...)` directly inside that field's own `render`, not an
   external `setValue(...)` — `field.onChange` behaves like a real user edit (triggers
   validation/dirty tracking); `setValue` needs explicit
   `{ shouldValidate: true, shouldDirty: true }` to match, and it's easy to forget.
@@ -145,7 +146,7 @@ doesn't use every prop yet.
    useEffect(() => {
      if (!open) return
      if (entityId) {
-       // fetch, then a separate effect keyed on the fetched data calls reset(operationToFormState(data))
+       // fetch, then a separate effect keyed on the fetched data calls reset(toFormState(data))
      } else {
        reset(createPresetFormState(presetStore, userStore.data?.settings?.operationDefaultCurrency))
      }
@@ -156,14 +157,19 @@ doesn't use every prop yet.
    and "build default form state from presets" — into the sibling `*-form.ts` file as **pure**
    functions that take plain data as parameters (not hooks or store reads). That's what lets the
    exact same hydration logic be reused across multiple sheets built on the same `FormState`
-   (`operationToFormState`, `createPresetFormState` are used by both `operation-sheet.tsx` and
-   `import-data-entry-sheet.tsx`).
+   (`toFormState` and `createPresetFormState` from `operation-form.ts` are used by
+   `operation-sheet.tsx` directly and by `import-data-entry-form.ts`'s `entryToFormState`).
+   When the sheet is opened with the entity object itself instead of an id (e.g.
+   `openImportDataEntrySheet(entry)`), key the effect on `[open, entry]` and `reset()` from it
+   directly — no fetch step.
 
 - Default to full RHF (`useForm` + `zodResolver` + `reset()`) for the form — it gives
   validation and dirty-tracking for free and fits the `Controller` pattern in §3 directly. Both
-  `operation-sheet.tsx` and `import-data-entry-sheet.tsx` use this, even though the latter also
-  lets the user pick among several pre-built suggestion states — RHF's `reset()` handles loading
-  a picked suggestion into the form just as well as loading a fetched entity.
+  `operation-sheet.tsx` and `import-data-entry-sheet.tsx` use this.
+- When two forms share one `FormState` but differ in strictness, share the base `z.object` and
+  the reusable checks, and give each form its own `superRefine`: `operationFormSchema` requires
+  every field, while `importDataEntryFormSchema` (a draft that may stay incomplete) requires only
+  `type`/`date`/`account`; both reuse `operationFormBaseSchema` and `refineOperationAccounts`.
 - A bare `useState<FormState>` (no RHF, no validation) is only appropriate when there is no
   schema/`Controller` rendering involved at all — e.g. a component that just holds which of
   several pre-built states is currently selected for display, with the actual form living
@@ -174,16 +180,22 @@ doesn't use every prop yet.
 
 When a discriminator field (e.g. `type`) changes which other fields are shown/required:
 
-- Split each variant into its own small component taking `{ control, ...auxData }` props (see
-  `ExchangeFields` / `TransferFields` / `ExpenseFields` / `IncomeFields`, exported from
-  `operation-sheet.tsx`), and switch between them in JSX based on `watch('type')`. When another
-  form shares the same `FormState` (e.g. `import-data-entry-sheet.tsx` sharing
-  `OperationFormState` with `operation-sheet.tsx`), import and reuse these components instead of
-  recreating them — same rationale as §1's "same schema/state-shaping logic needed by more than
-  one component" rule, just applied to the field-group JSX instead of the schema.
+- Keep the per-variant field groups in one component that switches on `watch('type')` (see
+  `OperationTypeFields` in `operation-fields.tsx`) and expose the variations other forms need as
+  props instead of copying the JSX: `disabled` for a read-only view, `accountLocked` when the
+  caller pins `account` (the import entry sheet locks the import's account). When another form
+  shares the same `FormState` (e.g. `import-data-entry-sheet.tsx` sharing `OperationFormState`
+  with `operation-sheet.tsx`), import and reuse these components instead of recreating them —
+  same rationale as §1's "same schema/state-shaping logic needed by more than one component"
+  rule, just applied to the field-group JSX instead of the schema.
+- Shape the form state around what the user edits, not around the wire format, and convert in
+  `onSubmit` (§8). `OperationFormState` stores `account` / `counterpart` / `amount` /
+  `counterAmount` plus a `direction` (OUT/IN, swappable for transfer and exchange) instead of
+  `accountFrom` / `accountTo`; `toOperationFields(form)` builds the from/to request fields. That
+  keeps `account` stable across type changes, which a locked account depends on.
 - Keep the "which account type is valid for which operation type" mapping in one place in the
-  `*-form.ts` file (`FROM_ACCOUNT_TYPE` / `TO_ACCOUNT_TYPE`) and reuse it from both the zod
-  schema's `superRefine` and the type-transition helper — don't duplicate the mapping.
+  `*-form.ts` file (`COUNTERPART_ACCOUNT_TYPE`) and reuse it from both the zod schema's
+  `superRefine` and the type-transition helper — don't duplicate the mapping.
 - A discriminator change is allowed to fully `reset()` the form via a pure `transitType(values,
   newType)` helper. Losing per-field dirty/error state on that transition is **intentional**
   (switching type = "refill from scratch", not an incremental edit) — do not treat it as a bug

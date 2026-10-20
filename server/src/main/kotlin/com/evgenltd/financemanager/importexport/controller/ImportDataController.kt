@@ -7,6 +7,7 @@ import com.evgenltd.financemanager.common.service.FileService
 import com.evgenltd.financemanager.importexport.record.ImportDataCreateRequest
 import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryFilter
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.service.ImportDataProcessService
 import com.evgenltd.financemanager.importexport.service.ImportDataService
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
@@ -53,6 +55,14 @@ class ImportDataController(
         importDataProcessService.beginNewImport(importData.id!!, filename)
         return importData.id!!
     }
+
+    @PostMapping("/api/v1/import-data/{id}/entry/{entryId}")
+    @PreAuthorize("hasRole('USER')")
+    fun updateEntry(
+        @PathVariable id: UUID,
+        @PathVariable entryId: UUID,
+        @RequestBody record: ImportDataEntryUpdateRecord,
+    ) = importDataProcessService.updateEntry(id, entryId, record)
 
     @PostMapping("/api/v1/import-data/{id}/commit")
     @PreAuthorize("hasRole('USER')")

@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.account.record.BalanceCalculationCompleted
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRecord
 import com.evgenltd.financemanager.importexport.repository.ImportDataRepository
 import com.evgenltd.financemanager.operation.service.OperationProcessService
 import org.slf4j.Logger
@@ -70,6 +71,15 @@ class ImportDataProcessService(
             .distinct()
             .takeIf { it.isNotEmpty() }
             ?.let { importDataEventService.importDataEntry(id, it) }
+    }
+
+    fun updateEntry(id: UUID, entryId: UUID, record: ImportDataEntryUpdateRecord) {
+        val dates = importDataActionService.withLock(id) {
+            importDataActionService.updateEntry(id, entryId, record)
+        }
+
+        importDataEventService.importData(id)
+        importDataEventService.importDataEntry(id, dates)
     }
 
     fun delete(id: UUID) {

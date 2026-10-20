@@ -1,13 +1,7 @@
 import { Amount } from '@/types/common/amount'
 import { AccountReference } from '@/types/account'
 import { Operation, OperationType } from '@/types/operation'
-import { DateRange, Embedding } from '@/types/common/common'
-
-export enum SuggestionRating {
-  GOOD = 'GOOD',
-  FAIR = 'FAIR',
-  POOR = 'POOR',
-}
+import { DateRange } from '@/types/common/common'
 
 export enum ImportDataParsingStatus {
   CREATED = 'CREATED',
@@ -42,32 +36,6 @@ export interface ImportData {
   totals: ImportDataTotal[]
 }
 
-export interface ImportDataOperation {
-  id?: string
-  date: string
-  type: OperationType
-  amountFrom: Amount
-  accountFrom?: AccountReference
-  amountTo: Amount
-  accountTo?: AccountReference
-  description?: string
-  raw: string
-  hint?: Embedding
-  selected: boolean
-  distance?: number
-  rating?: SuggestionRating
-}
-
-export interface ImportDataEntryOld {
-  id?: string
-  linked: boolean
-  operation?: Operation
-  operationVisible: boolean
-  parsed?: ImportDataOperation
-  parsedVisible: boolean
-  suggestions: ImportDataOperation[]
-}
-
 export interface ImportDataEntryData {
   id: string
   date?: string
@@ -78,6 +46,16 @@ export interface ImportDataEntryData {
   accountTo?: AccountReference
   description?: string
   raw: string
+}
+
+export interface ImportDataEntryUpdate {
+  date: string
+  type: OperationType
+  amountFrom?: Amount
+  accountFrom?: AccountReference
+  amountTo?: Amount
+  accountTo?: AccountReference
+  description?: string
 }
 
 export interface ImportDataEntry {

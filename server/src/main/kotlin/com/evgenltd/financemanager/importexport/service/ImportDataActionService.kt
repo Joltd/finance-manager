@@ -1,11 +1,13 @@
 package com.evgenltd.financemanager.importexport.service
 
 import com.evgenltd.financemanager.account.entity.Account
+import com.evgenltd.financemanager.account.entity.AccountType
 import com.evgenltd.financemanager.account.repository.AccountRepository
 import com.evgenltd.financemanager.ai.service.EmbeddingActionService
 import com.evgenltd.financemanager.common.record.TransactionDirection
 import com.evgenltd.financemanager.common.repository.and
 import com.evgenltd.financemanager.common.repository.contains
+import com.evgenltd.financemanager.common.repository.eq
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.service.LockService
 import com.evgenltd.financemanager.common.util.Amount
@@ -18,6 +20,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.importexport.entity.ImportDataSuggestion
 import com.evgenltd.financemanager.importexport.entity.emptyTotal
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataParsedEntry
 import com.evgenltd.financemanager.importexport.repository.ImportDataDayRepository
 import com.evgenltd.financemanager.importexport.repository.ImportDataEntryRepository
@@ -32,8 +35,10 @@ import com.evgenltd.financemanager.operation.repository.OperationRepository
 import com.evgenltd.financemanager.operation.service.OperationService
 import com.evgenltd.financemanager.operation.service.amountsForAccount
 import com.evgenltd.financemanager.operation.service.byAccount
+import org.hibernate.Hibernate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -289,6 +294,105 @@ class ImportDataActionService(
     }
 
     @Transactional
+    fun updateEntry(id: UUID, entryId: UUID, record: ImportDataEntryUpdateRecord): List<LocalDate> {
+        val importData = importDataRepository.find(id)
+        if (importData.parsingStatus != ImportDataParsingStatus.DONE) {
+            throw badRequestException("Import is not ready for editing")
+        }
+        val entry = importDataEntryRepository.find(entryId)
+        if (entry.importDataDay.importData.id != importData.id) {
+            throw badRequestException("Entry does not belong to the import")
+        }
+        if (entry.operation != null) {
+            throw badRequestException("Entry is already linked to an operation")
+        }
+
+        val accountFrom = record.accountFrom?.let { accountRepository.find(it.id) }
+        val accountTo = record.accountTo?.let { accountRepository.find(it.id) }
+        validateEntryAccounts(importData.account, record.type, accountFrom, accountTo)
+
+        val oldDate = entry.date
+        if (oldDate != record.date) {
+            moveToDay(importData, entry, record.date)
+        }
+
+        entry.type = record.type
+        entry.amountFrom = record.amountFrom
+        entry.accountFrom = accountFrom
+        entry.amountTo = record.amountTo
+        entry.accountTo = accountTo
+        entry.description = record.description
+        entry.refreshValid()
+
+        calculateTotals(id)
+        return listOfNotNull(oldDate, record.date).distinct()
+    }
+
+    // todo move to common place
+    private fun validateEntryAccounts(
+        importAccount: Account,
+        type: OperationType,
+        accountFrom: Account?,
+        accountTo: Account?,
+    ) {
+        val counterpart = when (type) {
+            OperationType.EXPENSE -> {
+                if (accountFrom?.id != importAccount.id) {
+                    throw badRequestException("Expense must be paid from the import account")
+                }
+                accountTo
+            }
+            OperationType.INCOME -> {
+                if (accountTo?.id != importAccount.id) {
+                    throw badRequestException("Income must be received to the import account")
+                }
+                accountFrom
+            }
+            OperationType.TRANSFER, OperationType.EXCHANGE -> when (importAccount.id) {
+                accountFrom?.id -> accountTo
+                accountTo?.id -> accountFrom
+                else -> throw badRequestException("Import account must be one of the operation sides")
+            }
+        }
+
+        val counterpartType = when (type) {
+            OperationType.EXPENSE -> AccountType.EXPENSE
+            OperationType.INCOME -> AccountType.INCOME
+            OperationType.TRANSFER, OperationType.EXCHANGE -> AccountType.ACCOUNT
+        }
+        if (counterpart != null && counterpart.type != counterpartType) {
+            throw badRequestException("Invalid counterpart account type for $type")
+        }
+        if (type == OperationType.TRANSFER && accountFrom != null && accountFrom.id == accountTo?.id) {
+            throw badRequestException("Transfer accounts must differ")
+        }
+    }
+
+    private fun moveToDay(importData: ImportData, entry: ImportDataEntry, date: LocalDate) {
+        val oldDay = entry.importDataDay
+        // calculateTotals iterates importData.days, so the collection is loaded up front and kept in
+        // sync below instead of relying on queued changes of a lazy collection
+        Hibernate.initialize(importData.days)
+        val newDay = importDataDayRepository
+            .findOne((ImportDataDay::importData eq importData) and (ImportDataDay::date eq date))
+            .orElse(null)
+            ?: importDataDayRepository.save(ImportDataDay(importData = importData, date = date))
+                .also { importData.days.add(it) }
+
+        // oldDay.entries is deliberately left untouched: it has orphanRemoval, so removing the entry
+        // from that collection would delete the entry itself
+        entry.importDataDay = newDay
+        entry.date = date
+        importDataEntryRepository.flush()
+
+        // after the flush the old day's entries are read from the database, so deleting an emptied
+        // day cascades to nothing but its totals
+        if (!importDataEntryRepository.existsByImportDataDay(oldDay)) {
+            importData.days.remove(oldDay)
+        }
+    }
+
+    @Transactional
     fun updateParsingStatus(id: UUID, status: ImportDataParsingStatus, message: String? = null) {
         val importData = importDataRepository.find(id)
         importData.parsingStatus = status
@@ -325,11 +429,6 @@ class ImportDataActionService(
         amountTo = amountTo ?: return null,
         accountTo = accountTo?.id ?: return null,
     )
-
-    private fun ImportDataEntry.refreshValid() {
-        valid = date != null && type != null && amountFrom != null && accountFrom != null &&
-            amountTo != null && accountTo != null
-    }
 
     private fun ImportDataEntry.isParsed(): Boolean =
         date != null && type != null && amountFrom != null && amountTo != null

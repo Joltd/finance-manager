@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.importexport.controller
 import com.evgenltd.financemanager.AbstractIntegrationTest
 import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.AccountType
+import com.evgenltd.financemanager.account.record.AccountReferenceRecord
 import com.evgenltd.financemanager.common.record.Reference
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.importexport.entity.ImportData
@@ -10,6 +11,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataDay
 import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataParsingStatus
 import com.evgenltd.financemanager.importexport.record.ImportDataDayRecord
+import com.evgenltd.financemanager.importexport.record.ImportDataEntryUpdateRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
 import com.evgenltd.financemanager.importexport.service.ImportDataActionService
 import com.evgenltd.financemanager.operation.entity.Operation
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
+import java.util.UUID
 
 /**
  * Covers the import endpoints intentionally kept while the UI-specific import API is disabled.
@@ -280,6 +283,128 @@ class ImportDataControllerIntegrationTest : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `update entry - saves the draft in place and recalculates totals`() {
+        val date = LocalDate.of(2026, 9, 14)
+        val groceries = withTenant {
+            accountRepository.save(Account(name = "Groceries", type = AccountType.EXPENSE))
+        }
+        val importData = doneImport()
+        val day = withTenant { importDataDayRepository.save(ImportDataDay(importData = importData, date = date)) }
+        val entry = importEntry(day, "row", Amount(10_000, "USD"))
+        withTenant { importDataActionService.calculateTotals(importData.id!!) }
+
+        val response = updateEntry(
+            importData,
+            entry,
+            updateRecord(date, accountTo = groceries, amount = Amount(25_000, "USD"), description = "Lunch"),
+        )
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        withTenant {
+            val updated = importDataEntryRepository.findById(entry.id!!).get()
+            assertThat(updated.accountTo?.id).isEqualTo(groceries.id)
+            assertThat(updated.amountFrom).isEqualTo(Amount(25_000, "USD"))
+            assertThat(updated.description).isEqualTo("Lunch")
+            assertThat(updated.valid).isTrue()
+        }
+        assertThat(parsedTotals(importData))
+            .isEqualTo(Amount(-25_000, "USD") to mapOf(day.id to Amount(-25_000, "USD")))
+    }
+
+    @Test
+    fun `update entry - moves the entry to an existing day and removes the emptied one`() {
+        val firstDate = LocalDate.of(2026, 9, 14)
+        val secondDate = firstDate.plusDays(1)
+        val importData = doneImport()
+        val (firstDay, secondDay) = withTenant {
+            importDataDayRepository.save(ImportDataDay(importData = importData, date = firstDate)) to
+                importDataDayRepository.save(ImportDataDay(importData = importData, date = secondDate))
+        }
+        val moved = importEntry(firstDay, "moved row", Amount(10_000, "USD"))
+        importEntry(secondDay, "staying row", Amount(20_000, "USD"))
+        withTenant { importDataActionService.calculateTotals(importData.id!!) }
+
+        val response = updateEntry(importData, moved, updateRecord(secondDate, amount = Amount(10_000, "USD")))
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        withTenant {
+            val updated = importDataEntryRepository.findById(moved.id!!).get()
+            assertThat(updated.importDataDay.id).isEqualTo(secondDay.id)
+            assertThat(updated.date).isEqualTo(secondDate)
+            assertThat(operationDataRepository.findById(moved.operationData.id!!)).isPresent
+            assertThat(importDataDayRepository.findById(firstDay.id!!)).isEmpty
+        }
+        assertThat(parsedTotals(importData))
+            .isEqualTo(Amount(-30_000, "USD") to mapOf(secondDay.id to Amount(-30_000, "USD")))
+        assertThat(entryList(importData, firstDate)).isEmpty()
+        assertThat(entryList(importData, secondDate).single().entries).hasSize(2)
+    }
+
+    @Test
+    fun `update entry - moves the entry to a new day and keeps the old day with remaining entries`() {
+        val date = LocalDate.of(2026, 9, 14)
+        val newDate = date.minusDays(3)
+        val importData = doneImport()
+        val day = withTenant { importDataDayRepository.save(ImportDataDay(importData = importData, date = date)) }
+        val moved = importEntry(day, "moved row", Amount(10_000, "USD"))
+        importEntry(day, "staying row", Amount(20_000, "USD"))
+        withTenant { importDataActionService.calculateTotals(importData.id!!) }
+
+        val response = updateEntry(importData, moved, updateRecord(newDate, amount = Amount(10_000, "USD")))
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        val newDay = withTenant {
+            val updated = importDataEntryRepository.findById(moved.id!!).get()
+            assertThat(updated.date).isEqualTo(newDate)
+            assertThat(importDataDayRepository.findById(day.id!!)).isPresent
+            importDataDayRepository.findById(updated.importDataDay.id!!).get()
+        }
+        assertThat(newDay.id).isNotEqualTo(day.id)
+        assertThat(newDay.date).isEqualTo(newDate)
+        assertThat(parsedTotals(importData)).isEqualTo(
+            Amount(-30_000, "USD") to mapOf(
+                day.id to Amount(-20_000, "USD"),
+                newDay.id to Amount(-10_000, "USD"),
+            )
+        )
+        assertThat(entryList(importData, newDate).single().entries.single().entry?.raw).isEqualTo("moved row")
+    }
+
+    @Test
+    fun `update entry - rejects an entry linked to an operation`() {
+        val date = LocalDate.of(2026, 9, 14)
+        val groceries = withTenant {
+            accountRepository.save(Account(name = "Groceries", type = AccountType.EXPENSE))
+        }
+        val importData = doneImport()
+        val day = withTenant { importDataDayRepository.save(ImportDataDay(importData = importData, date = date)) }
+        val linked = withTenant {
+            val operation = operationRepository.save(operation(date, groceries, Amount(10_000, "USD")))
+            importDataEntryRepository.save(
+                ImportDataEntry(
+                    importDataDay = day,
+                    operation = operation,
+                    operationData = operationDataRepository.save(OperationData(raw = "linked row")),
+                    date = date,
+                    type = OperationType.EXPENSE,
+                    amountFrom = Amount(10_000, "USD"),
+                    accountFrom = account,
+                    amountTo = Amount(10_000, "USD"),
+                    accountTo = groceries,
+                )
+            )
+        }
+
+        val response = updateEntry(importData, linked, updateRecord(date, amount = Amount(99_000, "USD")))
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        withTenant {
+            assertThat(importDataEntryRepository.findById(linked.id!!).get().amountFrom)
+                .isEqualTo(Amount(10_000, "USD"))
+        }
+    }
+
+    @Test
     fun `delete - removes the import data row`() {
         val importData = withTenant { importDataRepository.save(ImportData(account = account)) }
 
@@ -291,6 +416,73 @@ class ImportDataControllerIntegrationTest : AbstractIntegrationTest() {
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         withTenant { assertThat(importDataRepository.findById(importData.id!!)).isEmpty() }
+    }
+
+    private fun doneImport(): ImportData = withTenant {
+        importDataRepository.save(
+            ImportData(account = account, currency = "USD", parsingStatus = ImportDataParsingStatus.DONE)
+        )
+    }
+
+    private fun importEntry(day: ImportDataDay, raw: String, amount: Amount): ImportDataEntry = withTenant {
+        importDataEntryRepository.save(
+            ImportDataEntry(
+                importDataDay = day,
+                operationData = operationDataRepository.save(OperationData(raw = raw)),
+                date = day.date,
+                type = OperationType.EXPENSE,
+                amountFrom = amount,
+                accountFrom = account,
+                amountTo = amount,
+            )
+        )
+    }
+
+    private fun updateRecord(
+        date: LocalDate,
+        accountTo: Account? = null,
+        amount: Amount? = null,
+        description: String? = null,
+    ) = ImportDataEntryUpdateRecord(
+        date = date,
+        type = OperationType.EXPENSE,
+        amountFrom = amount,
+        accountFrom = reference(account),
+        amountTo = amount,
+        accountTo = accountTo?.let { reference(it) },
+        description = description,
+    )
+
+    private fun reference(account: Account) = AccountReferenceRecord(
+        id = account.id!!,
+        name = account.name,
+        deleted = account.deleted,
+        type = account.type,
+        reviseDate = account.reviseDate,
+    )
+
+    private fun updateEntry(importData: ImportData, entry: ImportDataEntry, record: ImportDataEntryUpdateRecord) =
+        restClient.post()
+            .uri("/api/v1/import-data/${importData.id}/entry/${entry.id}")
+            .headers { it.addAll(authHeaders()) }
+            .body(record)
+            .retrieve()
+            .toEntity(String::class.java)
+
+    private fun entryList(importData: ImportData, date: LocalDate): List<ImportDataDayRecord> = restClient.get()
+        .uri("/api/v1/import-data/${importData.id}/entry?pointers=$date")
+        .headers { it.addAll(authHeaders()) }
+        .retrieve()
+        .body(object : ParameterizedTypeReference<ApiResponse<List<ImportDataDayRecord>>>() {})!!
+        .body!!
+
+    /** Import-level parsed total and parsed totals per day id. */
+    private fun parsedTotals(importData: ImportData): Pair<Amount, Map<UUID?, Amount>> = withTenant {
+        importDataTotalRepository.findAll()
+            .partition { it.importData?.id == importData.id }
+            .let { (importTotals, dayTotals) ->
+                importTotals.single().parsed to dayTotals.associate { it.importDataDay?.id to it.parsed }
+            }
     }
 
     private fun operation(date: LocalDate, counterparty: Account, amount: Amount) = Operation(

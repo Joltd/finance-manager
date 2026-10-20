@@ -69,6 +69,16 @@ data class ImportDataEntryDataRecord(
     val raw: String,
 )
 
+data class ImportDataEntryUpdateRecord(
+    val date: LocalDate,
+    val type: OperationType,
+    val amountFrom: Amount?,
+    val accountFrom: AccountReferenceRecord?,
+    val amountTo: Amount?,
+    val accountTo: AccountReferenceRecord?,
+    val description: String?,
+)
+
 data class ImportDataParsedEntry(
     val raw: String,
     val date: LocalDate?,

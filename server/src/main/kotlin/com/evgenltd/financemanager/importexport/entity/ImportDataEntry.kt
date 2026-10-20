@@ -80,6 +80,11 @@ class ImportDataEntry(
     @OrderBy("score DESC, id ASC")
     var suggestions: MutableList<ImportDataSuggestion> = mutableListOf(),
 ) {
+    fun refreshValid() {
+        valid = date != null && type != null && amountFrom != null && accountFrom != null &&
+            amountTo != null && accountTo != null
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

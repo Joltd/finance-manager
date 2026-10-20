@@ -1,112 +1,27 @@
 import { useRequest } from '@/hooks/use-request'
-import { Amount } from '@/types/common/amount'
-import { Operation } from '@/types/operation'
 import { importDataUrls } from '@/api/import-data'
-import { ImportDataDay, ImportDataParsingStatus } from '@/types/import-data'
+import { ImportDataParsingStatus } from '@/types/import-data'
 import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-data'
-import { operationUrls } from '@/api/operation'
 
 export function useImportDataActions() {
   const importData = useImportDataStore()
   const importDataEntries = useImportDataEntrySeekStore()
-  const operation = useRequest(operationUrls.root)
-
-  const actualBalanceRequest = useRequest<void, Amount, never, { id: string }>(
-    importDataUrls.actualBalance,
-  )
-
-  const resetRevisionRequest = useRequest<void, never, never, { id: string }>(
-    importDataUrls.resetRevision,
-  )
-
-  const calculateTotalRequest = useRequest<void, never, never, { id: string }>(
-    importDataUrls.calculateTotal,
-  )
 
   const commitRequest = useRequest<void, never, never, { id: string }>(importDataUrls.commit)
-
-  const unlinkRequest = useRequest<ImportDataDay[], { entryIds: string[] }, never, { id: string }>(
-    importDataUrls.unlink,
-  )
-
-  const approveRequest = useRequest<ImportDataDay[], { entryIds: string[] }, never, { id: string }>(
-    importDataUrls.approve,
-  )
-
-  const linkByIdRequest = useRequest<
-    ImportDataDay[],
-    { entryId: string; operationId: string },
-    never,
-    { id: string }
-  >(importDataUrls.link)
-
-  const linkRequest = useRequest<
-    ImportDataDay[],
-    Omit<Operation, 'raw'>,
-    never,
-    { id: string; entryId: string }
-  >(importDataUrls.linkById)
 
   const loading =
     importData.loading ||
     importData.data?.parsingStatus !== ImportDataParsingStatus.DONE ||
     importDataEntries.loadingLoad ||
-    actualBalanceRequest.loading ||
-    resetRevisionRequest.loading ||
-    calculateTotalRequest.loading ||
-    commitRequest.loading ||
-    unlinkRequest.loading ||
-    approveRequest.loading ||
-    linkByIdRequest.loading ||
-    linkRequest.loading ||
-    operation.loading
+    commitRequest.loading
 
-  const error =
-    actualBalanceRequest.error ??
-    resetRevisionRequest.error ??
-    calculateTotalRequest.error ??
-    commitRequest.error ??
-    unlinkRequest.error ??
-    approveRequest.error ??
-    linkByIdRequest.error ??
-    linkRequest.error ??
-    operation.error
-
-  const actualBalance = (id: string, balance: Amount) =>
-    actualBalanceRequest.submit({ pathParams: { id }, body: balance })
-
-  const resetRevision = (id: string) => resetRevisionRequest.submit({ pathParams: { id } })
-
-  const calculateTotal = (id: string) => calculateTotalRequest.submit({ pathParams: { id } })
+  const error = commitRequest.error
 
   const commit = (id: string) => commitRequest.submit({ pathParams: { id } })
-
-  const unlink = (id: string, entryIds: string[]) =>
-    unlinkRequest.submit({ pathParams: { id }, body: { entryIds } })
-
-  const approve = (id: string, entryIds: string[]) =>
-    approveRequest.submit({ pathParams: { id }, body: { entryIds } })
-
-  const linkById = (id: string, entryId: string, operationId: string) =>
-    linkByIdRequest.submit({ pathParams: { id }, body: { entryId, operationId } })
-
-  const link = (id: string, entryId: string, operation: Omit<Operation, 'raw'>) =>
-    linkRequest.submit({ pathParams: { id, entryId }, body: operation })
-
-  const saveOperation = (body: Omit<Operation, 'raw'>) =>
-    operation.submit({ body })
 
   return {
     loading,
     error,
-    actualBalance,
-    resetRevision,
-    calculateTotal,
     commit,
-    unlink,
-    approve,
-    linkById,
-    link,
-    saveOperation,
   }
 }
