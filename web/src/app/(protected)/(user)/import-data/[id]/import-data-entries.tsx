@@ -17,6 +17,7 @@ import { useImportDataEntrySeekStore, useImportDataStore } from '@/store/import-
 import { AccountReference } from '@/types/account'
 import { ImportDataEntry, ImportDataParsingStatus } from '@/types/import-data'
 import { openOperationSheet } from '@/app/(protected)/(user)/operation/operation-sheet'
+import { ImportDataAccountInput, resolveCounterpartSide } from './import-data-account-input'
 import { ImportDataAmounts } from './import-data-amounts'
 import { openImportDataEntrySheet } from './import-data-entry-sheet'
 
@@ -73,7 +74,7 @@ export function ImportDataEntries({ id }: { id: string }) {
             <ImportDataRow
               key={item.entry?.id ?? item.operation?.id ?? index}
               item={item}
-              mainAccountId={importData?.account.id}
+              mainAccount={importData?.account}
             />
           ))}
           <ImportDataAmounts
@@ -93,15 +94,19 @@ export function ImportDataEntries({ id }: { id: string }) {
 
 export function ImportDataRow({
   item,
-  mainAccountId,
+  mainAccount,
 }: {
   item: ImportDataEntry
-  mainAccountId?: string
+  mainAccount?: AccountReference
 }) {
   const source = item.operation ?? item.entry
   if (!source) return null
 
-  const counterpart = resolveCounterpart(mainAccountId, source.accountFrom, source.accountTo)
+  const counterpart = resolveCounterpart(mainAccount?.id, source.accountFrom, source.accountTo)
+  const editableEntry =
+    !item.operation && item.entry?.date && item.entry.type ? item.entry : undefined
+  const counterpartSide =
+    editableEntry && mainAccount ? resolveCounterpartSide(editableEntry, mainAccount.id) : undefined
   const showBothAmounts =
     source.amountFrom &&
     source.amountTo &&
@@ -133,9 +138,17 @@ export function ImportDataRow({
       )}
 
       <Stack orientation="horizontal" align="center" gap={2} className="min-w-0 flex-1">
-        <Typography as="span" variant="muted" className="truncate text-xs">
-          {counterpart}
-        </Typography>
+        {editableEntry && mainAccount && counterpartSide ? (
+          <ImportDataAccountInput
+            entry={editableEntry}
+            mainAccount={mainAccount}
+            side={counterpartSide}
+          />
+        ) : (
+          <Typography as="span" variant="muted" className="truncate text-xs">
+            {counterpart}
+          </Typography>
+        )}
       </Stack>
 
       <Button

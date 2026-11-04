@@ -46,6 +46,12 @@ export interface ImportDataEntryData {
   accountTo?: AccountReference
   description?: string
   raw: string
+  suggestions: ImportDataSuggestion[]
+}
+
+export interface ImportDataSuggestion {
+  account: AccountReference
+  score: number
 }
 
 export interface ImportDataEntryUpdate {

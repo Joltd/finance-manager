@@ -11,6 +11,7 @@ import com.evgenltd.financemanager.importexport.entity.ImportDataEntry
 import com.evgenltd.financemanager.importexport.entity.ImportDataTotal
 import com.evgenltd.financemanager.importexport.record.ImportDataDateRange
 import com.evgenltd.financemanager.importexport.record.ImportDataRecord
+import com.evgenltd.financemanager.importexport.record.ImportDataSuggestionRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryDataRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataEntryRecord
 import com.evgenltd.financemanager.importexport.record.ImportDataTotalRecord
@@ -66,6 +67,12 @@ class ImportDataConverter(
             accountTo = entry.accountTo?.let { accountConverter.toAccountReference(it) },
             description = entry.description,
             raw = entry.operationData.raw,
+            suggestions = entry.suggestions.map {
+                ImportDataSuggestionRecord(
+                    account = accountConverter.toAccountReference(it.account),
+                    score = it.score,
+                )
+            },
         ),
         operation = entry.operation?.let { operationConverter.toRecord(it) },
     )

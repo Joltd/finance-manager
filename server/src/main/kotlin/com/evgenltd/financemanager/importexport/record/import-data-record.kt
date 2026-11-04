@@ -67,6 +67,12 @@ data class ImportDataEntryDataRecord(
     val accountTo: AccountReferenceRecord?,
     val description: String?,
     val raw: String,
+    val suggestions: List<ImportDataSuggestionRecord> = emptyList(),
+)
+
+data class ImportDataSuggestionRecord(
+    val account: AccountReferenceRecord,
+    val score: Double,
 )
 
 data class ImportDataEntryUpdateRecord(

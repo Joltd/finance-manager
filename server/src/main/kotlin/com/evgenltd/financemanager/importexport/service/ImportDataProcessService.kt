@@ -39,15 +39,15 @@ class ImportDataProcessService(
                 updateParsingStatus(id, ImportDataParsingStatus.PREPARATION)
                 val entryIds = importDataActionService.prepareImportData(id, parsedEntries)
 
-                updateParsingStatus(id, ImportDataParsingStatus.EMBEDDING)
-                entryIds.chunked(EMBEDDING_BATCH_SIZE)
-                    .forEach { importDataActionService.prepareHintEmbeddings(it) }
-
-                updateParsingStatus(id, ImportDataParsingStatus.SUGGESTION)
-                importDataActionService.prepareSuggestions(id)
-
-                updateParsingStatus(id, ImportDataParsingStatus.LINKING)
-                importDataActionService.linkEntries(id)
+//                updateParsingStatus(id, ImportDataParsingStatus.EMBEDDING)
+//                entryIds.chunked(EMBEDDING_BATCH_SIZE)
+//                    .forEach { importDataActionService.prepareHintEmbeddings(it) }
+//
+//                updateParsingStatus(id, ImportDataParsingStatus.SUGGESTION)
+//                importDataActionService.prepareSuggestions(id)
+//
+//                updateParsingStatus(id, ImportDataParsingStatus.LINKING)
+//                importDataActionService.linkEntries(id)
 
                 updateParsingStatus(id, ImportDataParsingStatus.CALCULATION)
                 importDataActionService.calculateTotals(id)
