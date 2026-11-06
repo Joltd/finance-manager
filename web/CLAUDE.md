@@ -162,5 +162,6 @@ implementing or refactoring any form.
 | `/reference` | ReferencePage | scrollable Layout, EntityList |
 | `/report/income-expense` | IncomeExpensePage | scrollable Layout |
 | `/report/top-flow` | TopFlowPage | scrollable Layout |
+| `/report/pricing-comparison` | PricingComparisonPage | scrollable Layout, slice form (useFieldArray), behind `pricingFeature` |
 | `/import-data` | ImportDataPage | — |
 | `/settings` | SettingsPage | — |

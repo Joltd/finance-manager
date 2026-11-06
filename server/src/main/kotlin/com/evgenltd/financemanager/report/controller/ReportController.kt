@@ -2,6 +2,7 @@ package com.evgenltd.financemanager.report.controller
 
 import com.evgenltd.financemanager.common.component.DataResponse
 import com.evgenltd.financemanager.report.record.*
+import com.evgenltd.financemanager.report.service.PricingComparisonReportService
 import com.evgenltd.financemanager.report.service.ReportService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @DataResponse
 class ReportController(
     private val reportService: ReportService,
+    private val pricingComparisonReportService: PricingComparisonReportService,
 ) {
 
     @PostMapping("/api/v1/report/top-flow")
@@ -26,5 +28,10 @@ class ReportController(
     @PostMapping("/api/v1/report/income-expense")
     @PreAuthorize("hasRole('USER')")
     fun incomeExpenseReport(@RequestBody filter: IncomeExpenseFilter): IncomeExpenseReportRecord = reportService.incomeExpenseReport(filter)
+
+    @PostMapping("/api/v1/report/pricing-comparison")
+    @PreAuthorize("hasRole('USER')")
+    fun pricingComparisonReport(@RequestBody filter: PricingComparisonFilter): PricingComparisonReportRecord =
+        pricingComparisonReportService.report(filter)
 
 }

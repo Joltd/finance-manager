@@ -9,10 +9,12 @@ import {
   Tags,
   PlusIcon,
   Receipt,
+  Scale,
   ShoppingCart,
   Trash2Icon,
   TrendingUp,
   Wallet,
+  type LucideIcon,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import {
@@ -33,9 +35,11 @@ import { SidebarUserFooter } from './sidebar-user-footer'
 import { useImportDataListStore } from '@/store/import-data'
 import { useRequest } from '@/hooks/use-request'
 import { useSettingsFlag } from '@/hooks/use-settings-flag'
+import { useUserStore } from '@/store/user'
 import { importDataUrls } from '@/api/import-data'
 import { openImportDataBeginDialog } from '@/app/(protected)/(user)/import-data/[id]/import-data-begin-dialog'
 import { Reference } from '@/types/common/reference'
+import type { Settings } from '@/types/user'
 
 const mainNav = [
   { href: '/operation', label: 'Operations', icon: ArrowLeftRight },
@@ -48,10 +52,24 @@ const pricingNav = [
   { href: '/pricing-order', label: 'Pricing Orders', icon: ShoppingCart },
 ]
 
-const reportsNav = [
+interface NavItem {
+  href: string
+  label: string
+  icon: LucideIcon
+  // the item is shown only when this settings flag is enabled
+  feature?: keyof Settings
+}
+
+const reportsNav: NavItem[] = [
   { href: '/report/income-expense', label: 'Income & Expense', icon: TrendingUp },
   { href: '/report/top-flow', label: 'Top Flow', icon: ArrowUpDown },
   { href: '/report/tagged-flow', label: 'Tagged Flow', icon: Tags },
+  {
+    href: '/report/pricing-comparison',
+    label: 'Pricing Comparison',
+    icon: Scale,
+    feature: 'pricingFeature',
+  },
 ]
 
 export function UserAppSidebar() {
@@ -59,6 +77,8 @@ export function UserAppSidebar() {
   const router = useRouter()
   const { setOpenMobile } = useSidebar()
   const pricingEnabled = useSettingsFlag('pricingFeature')
+  const settings = useUserStore((state) => state.data?.settings)
+  const visibleReportsNav = reportsNav.filter((item) => !item.feature || Boolean(settings?.[item.feature]))
   const importDataList = useImportDataListStore()
   const deleteImport = useRequest(importDataUrls.id, { method: 'DELETE' })
 
@@ -123,7 +143,7 @@ export function UserAppSidebar() {
           <SidebarGroupLabel>Reports</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {reportsNav.map(({ href, label, icon: Icon }) => (
+              {visibleReportsNav.map(({ href, label, icon: Icon }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
                     <Link href={href} prefetch={false}>

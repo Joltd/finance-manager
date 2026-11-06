@@ -4,6 +4,8 @@ import {
   Dashboard,
   IncomeExpenseFilter,
   IncomeExpenseReport,
+  PricingComparisonFilter,
+  PricingComparisonReport,
   TaggedFlowFilter,
   TaggedFlowReport,
   TopFlowFilter,
@@ -26,3 +28,8 @@ export const useIncomeExpenseReportStore = createFetchStore<
   IncomeExpenseReport,
   IncomeExpenseFilter
 >(reportUrls.incomeExpense, 'POST')
+
+export const usePricingComparisonReportStore = createFetchStore<
+  PricingComparisonReport,
+  PricingComparisonFilter
+>(reportUrls.pricingComparison, 'POST')

@@ -3,4 +3,5 @@ export const reportUrls = {
   topFlow: '/api/v1/report/top-flow',
   taggedFlow: '/api/v1/report/tagged-flow',
   incomeExpense: '/api/v1/report/income-expense',
+  pricingComparison: '/api/v1/report/pricing-comparison',
 }

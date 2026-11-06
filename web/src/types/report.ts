@@ -92,3 +92,40 @@ export interface IncomeExpenseGroup {
 export interface IncomeExpenseReport {
   groups: IncomeExpenseGroup[]
 }
+
+// pricing-comparison
+
+export interface PricingComparisonSlice {
+  date: DateRange
+  country?: string
+  city?: string
+  store?: string
+}
+
+export interface PricingComparisonFilter {
+  slices: PricingComparisonSlice[]
+}
+
+export interface PricingComparisonValue {
+  amount?: Amount
+  // percentage relative to the base (first) slice
+  deviation?: number
+}
+
+export interface PricingComparisonColumn {
+  // slice as it was sent and normalized by the backend
+  slice: PricingComparisonSlice
+  empty: boolean
+  total: PricingComparisonValue
+}
+
+export interface PricingComparisonCategory {
+  category: string
+  // aligned with PricingComparisonReport.columns
+  values: PricingComparisonValue[]
+}
+
+export interface PricingComparisonReport {
+  columns: PricingComparisonColumn[]
+  categories: PricingComparisonCategory[]
+}

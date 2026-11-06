@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.pricing.converter
 import com.evgenltd.financemanager.common.repository.find
 import com.evgenltd.financemanager.common.util.Amount
 import com.evgenltd.financemanager.common.util.badRequestException
+import com.evgenltd.financemanager.exchangerate.entity.BASE_CURRENCY
 import com.evgenltd.financemanager.pricing.entity.PricingOrder
 import com.evgenltd.financemanager.pricing.record.PricingOrderRecord
 import com.evgenltd.financemanager.pricing.repository.PricingItemRepository
@@ -33,6 +34,15 @@ class PricingOrderConverter(
         val item = pricingItemRepository.find(record.item.id ?: throw badRequestException("Item is required"))
 
         return entity?.also {
+            val priceAffected = it.date != record.date ||
+                it.item != item ||
+                it.price != record.price ||
+                it.quantity.compareTo(record.quantity) != 0
+            if (priceAffected) {
+                // USD price is derived from these fields, so it's recalculated by the background job
+                it.rate = null
+                it.priceUsd = Amount(0, BASE_CURRENCY)
+            }
             it.date = record.date
             it.item = item
             it.price = record.price
@@ -48,7 +58,7 @@ class PricingOrderConverter(
             price = record.price,
             quantity = record.quantity,
             rate = null,
-            priceUsd = Amount(0, "USD"),
+            priceUsd = Amount(0, BASE_CURRENCY),
             country = record.country,
             city = record.city,
             store = record.store,
