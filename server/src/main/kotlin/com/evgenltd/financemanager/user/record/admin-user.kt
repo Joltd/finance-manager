@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.user.record
 
+import com.evgenltd.financemanager.settings.record.AdminSettingsRecord
 import java.util.UUID
 
 data class AdminUserRecord(
@@ -9,6 +10,6 @@ data class AdminUserRecord(
     val login: String,
     val password: String? = null,
     val deleted: Boolean = false,
-    val pricingFeature: Boolean? = null,
+    val settings: AdminSettingsRecord? = null,
     val demo: Boolean = false,
 )

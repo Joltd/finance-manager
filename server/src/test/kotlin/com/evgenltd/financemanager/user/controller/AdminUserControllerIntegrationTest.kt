@@ -1,11 +1,18 @@
 package com.evgenltd.financemanager.user.controller
 
 import com.evgenltd.financemanager.AbstractIntegrationTest
+import com.evgenltd.financemanager.account.entity.Currency
+import com.evgenltd.financemanager.account.repository.CurrencyRepository
+import com.evgenltd.financemanager.settings.entity.Setting
+import com.evgenltd.financemanager.settings.record.AdminSettingsRecord
+import com.evgenltd.financemanager.settings.repository.SettingRepository
 import com.evgenltd.financemanager.testsupport.ApiResponse
 import com.evgenltd.financemanager.user.component.ROOT_TENANT
+import com.evgenltd.financemanager.user.component.withTenant
 import com.evgenltd.financemanager.user.entity.User
 import com.evgenltd.financemanager.user.entity.UserRole
 import com.evgenltd.financemanager.user.record.AdminUserRecord
+import com.evgenltd.financemanager.user.record.UserRecord
 import com.evgenltd.financemanager.user.repository.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -21,6 +28,12 @@ class AdminUserControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var userRepository: UserRepository
+
+    @Autowired
+    private lateinit var settingRepository: SettingRepository
+
+    @Autowired
+    private lateinit var currencyRepository: CurrencyRepository
 
     @AfterEach
     fun tearDown() {
@@ -57,6 +70,82 @@ class AdminUserControllerIntegrationTest : AbstractIntegrationTest() {
             .body(object : ParameterizedTypeReference<ApiResponse<AdminUserRecord>>() {})
 
         assertThat(response!!.body!!.login).isEqualTo("alice")
+    }
+
+    @Test
+    fun `admin settings are scoped to the selected tenant and stay read only for the user`() {
+        val tenant = UUID.randomUUID()
+        val otherTenant = UUID.randomUUID()
+        val user = userRepository.save(User(tenant = tenant, name = "Alice", login = "alice"))
+        val other = userRepository.save(User(tenant = otherTenant, name = "Bob", login = "bob"))
+        val userToken = tokenProvider.createAccessToken(user.id!!, user.login, UserRole.USER, tenant)
+        val update = AdminUserRecord(id = user.id, name = user.name, login = user.login, settings = AdminSettingsRecord(true))
+
+        fun saveAsAdmin(record: AdminUserRecord) = restClient.post()
+            .uri("/api/v1/admin/user")
+            .headers { it.addAll(adminHeaders()) }
+            .body(record)
+            .retrieve()
+            .toBodilessEntity()
+
+        fun readAsAdmin(id: UUID) = restClient.get()
+            .uri("/api/v1/admin/user/$id")
+            .headers { it.addAll(adminHeaders()) }
+            .retrieve()
+            .body(object : ParameterizedTypeReference<ApiResponse<AdminUserRecord>>() {})!!.body!!
+
+        fun readAsUser() = restClient.get()
+            .uri("/api/v1/user")
+            .headers { it.setBearerAuth(userToken) }
+            .retrieve()
+            .body(object : ParameterizedTypeReference<ApiResponse<UserRecord>>() {})!!.body!!
+
+        fun saveAsUser(record: UserRecord) = restClient.post()
+            .uri("/api/v1/user")
+            .headers { it.setBearerAuth(userToken) }
+            .body(record)
+            .retrieve()
+            .toBodilessEntity()
+
+        try {
+            withTenant(tenant) {
+                currencyRepository.save(Currency(name = "USD", crypto = false))
+                settingRepository.save(Setting(name = "operation.default.currency", value = "USD"))
+            }
+            withTenant(otherTenant) { currencyRepository.save(Currency(name = "USD", crypto = false)) }
+
+            assertThat(saveAsAdmin(update).statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(readAsAdmin(user.id!!).settings?.pricingFeature).isTrue()
+            assertThat(readAsAdmin(other.id!!).settings?.pricingFeature).isNull()
+
+            assertThat(saveAsAdmin(update.copy(name = "Updated Alice", settings = AdminSettingsRecord())).statusCode)
+                .isEqualTo(HttpStatus.OK)
+            val current = readAsUser()
+            assertThat(current.name).isEqualTo("Updated Alice")
+            assertThat(current.settings.pricingFeature).isTrue()
+
+            val userUpdate = current.copy(settings = current.settings.copy(pricingFeature = null, operationDefaultCurrencyScale = 2))
+            assertThat(saveAsUser(userUpdate).statusCode).isEqualTo(HttpStatus.OK)
+            val saved = readAsUser()
+            assertThat(saved.settings.pricingFeature).isTrue()
+            assertThat(saved.settings.operationDefaultCurrency).isEqualTo("USD")
+            assertThat(saved.settings.operationDefaultCurrencyScale).isEqualTo(2)
+
+            assertThat(saveAsUser(saved.copy(settings = saved.settings.copy(operationDefaultCurrencyScale = null))).statusCode)
+                .isEqualTo(HttpStatus.OK)
+            assertThat(readAsUser().settings.operationDefaultCurrencyScale).isNull()
+
+            assertThat(saveAsAdmin(update.copy(settings = AdminSettingsRecord(false))).statusCode).isEqualTo(HttpStatus.OK)
+            val disabled = readAsUser().settings
+            assertThat(disabled.pricingFeature).isFalse()
+            assertThat(disabled.operationDefaultCurrency).isEqualTo("USD")
+        } finally {
+            withTenant(tenant) {
+                settingRepository.deleteAll()
+                currencyRepository.deleteAll()
+            }
+            withTenant(otherTenant) { currencyRepository.deleteAll() }
+        }
     }
 
     @Test

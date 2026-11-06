@@ -7,7 +7,6 @@ import com.evgenltd.financemanager.common.util.badRequestException
 import com.evgenltd.financemanager.common.util.unauthorizedException
 import com.evgenltd.financemanager.settings.service.SettingService
 import com.evgenltd.financemanager.user.converter.UserConverter
-import com.evgenltd.financemanager.user.component.withTenant
 import com.evgenltd.financemanager.user.entity.User
 import com.evgenltd.financemanager.user.record.AdminUserRecord
 import com.evgenltd.financemanager.user.record.ApplicationUser
@@ -37,8 +36,8 @@ class UserService(
 
     fun adminById(id: UUID): AdminUserRecord {
         val user = userRepository.find(id)
-        val pricingFeature = withTenant(user.tenant) { settingService.load().pricingFeature }
-        return userConverter.toAdminRecord(user, pricingFeature)
+        val settings = user.tenant?.let { settingService.loadAdminRecord(it) }
+        return userConverter.toAdminRecord(user, settings)
     }
 
     fun byIdOrNull(id: UUID): UserRecord? {
@@ -47,6 +46,7 @@ class UserService(
         return userConverter.toRecord(user, settings)
     }
 
+    @Transactional
     fun adminUpdate(record: AdminUserRecord): AdminUserRecord {
         if (record.name.isBlank()) {
             throw badRequestException("Name is blank")
@@ -80,13 +80,12 @@ class UserService(
 
         userRepository.save(user)
 
-        withTenant(user.tenant) {
-            val settings = settingService.load()
-            settings.pricingFeature = record.pricingFeature
-            settingService.update(settings)
+        val settings = user.tenant?.let { tenant ->
+            record.settings?.let { settingService.updateRecord(it, tenant) }
+                ?: settingService.loadAdminRecord(tenant)
         }
 
-        return userConverter.toAdminRecord(user)
+        return userConverter.toAdminRecord(user, settings)
     }
 
     @Transactional

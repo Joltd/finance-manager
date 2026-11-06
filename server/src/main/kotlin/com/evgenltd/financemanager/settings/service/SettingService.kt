@@ -4,19 +4,20 @@ import com.evgenltd.financemanager.account.entity.Account
 import com.evgenltd.financemanager.account.entity.Currency
 import com.evgenltd.financemanager.account.repository.CurrencyRepository
 import com.evgenltd.financemanager.common.component.SkipLogging
-import com.evgenltd.financemanager.exchangerate.service.provider.ExchangeRateProviders
 import com.evgenltd.financemanager.settings.converter.SettingConverter
 import com.evgenltd.financemanager.settings.entity.Setting
 import com.evgenltd.financemanager.settings.entity.Settings
 import com.evgenltd.financemanager.settings.entity.SettingName
 import com.evgenltd.financemanager.settings.entity.SystemSettings
+import com.evgenltd.financemanager.settings.record.AdminSettingsRecord
 import com.evgenltd.financemanager.settings.record.SettingsRecord
 import com.evgenltd.financemanager.settings.repository.SettingRepository
+import com.evgenltd.financemanager.user.component.currentTenant
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityManager
-import jakarta.transaction.NotSupportedException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -42,7 +43,11 @@ class SettingService(
 
     fun load(): Settings = settingRepository.findAll().read()
 
+    fun load(tenant: UUID): Settings = settingRepository.findByTenant(tenant).read(tenant)
+
     fun loadRecord(): SettingsRecord = load().let { settingConverter.toRecord(it) }
+
+    fun loadAdminRecord(tenant: UUID): AdminSettingsRecord = settingConverter.toAdminRecord(load(tenant))
 
     fun updateSystem(settings: SystemSettings) {
         settingRepository.findByTenantIsNull()
@@ -50,20 +55,41 @@ class SettingService(
             .let { settingRepository.saveAll(it) }
     }
 
-    fun update(settings: Settings) {
-        settingRepository.findAll()
-            .update(settings)
-            .let { settingRepository.saveAll(it) }
+    @Transactional
+    fun updateRecord(settingsRecord: SettingsRecord) {
+        currentTenant()?.let { lockSettings(it) }
+        settingRepository.findAll().updateSettings { settingConverter.fillEntity(it, settingsRecord) }
     }
 
-    fun updateRecord(settingsRecord: SettingsRecord) {
-        val settings = settingConverter.toEntity(settingsRecord)
-        update(settings)
+    @Transactional
+    fun updateRecord(settingsRecord: AdminSettingsRecord, tenant: UUID): AdminSettingsRecord {
+        lockSettings(tenant)
+        val settings = settingRepository.findByTenant(tenant)
+            .updateSettings(tenant) { settingConverter.fillEntity(it, settingsRecord) }
+        return settingConverter.toAdminRecord(settings)
+    }
+
+    private fun lockSettings(tenant: UUID) {
+        // Serialize updates even when a setting has no row to lock yet.
+        entityManager.createNativeQuery("select 1 from pg_advisory_xact_lock(hashtextextended(:key, 0))")
+            .setParameter("key", "settings:$tenant")
+            .singleResult
+    }
+
+    private fun List<Setting>.updateSettings(tenant: UUID? = null, fill: (Settings) -> Unit): Settings {
+        val previous = read<Settings>(tenant)
+        val settings = previous.copy().also(fill)
+        val (removed, saved) = update(settings, tenant, previous).partition { it.value == null }
+        if (removed.isNotEmpty()) {
+            settingRepository.deleteAll(removed)
+        }
+        settingRepository.saveAll(saved)
+        return settings
     }
 
     //
 
-    private inline fun <reified T : Any> List<Setting>.read(): T {
+    private inline fun <reified T : Any> List<Setting>.read(tenant: UUID? = null): T {
         val settingIndex = associateBy { it.name }
         val settings = T::class.createInstance()
         for (property in T::class.declaredMemberProperties) {
@@ -71,14 +97,18 @@ class SettingService(
                 continue
             }
 
-            val value = prepareSettingParameter(property, settingIndex)
+            val value = prepareSettingParameter(property, settingIndex, tenant)
             property.isAccessible = true
             property.setter.call(settings, value)
         }
         return settings
     }
 
-    private fun <T> prepareSettingParameter(property: KMutableProperty1<T, *>, settings: Map<String, Setting>): Any? {
+    private fun <T> prepareSettingParameter(
+        property: KMutableProperty1<T, *>,
+        settings: Map<String, Setting>,
+        tenant: UUID?,
+    ): Any? {
         if (property.name == "version") {
             return version
         }
@@ -102,11 +132,16 @@ class SettingService(
                     ?: throw RuntimeException("Parameter ${property.name} value $settingValue is unknown enum ${parameterType.java}")
             }
             parameterType == Currency::class -> {
-                currencyRepository.findByName(settingValue)
+                if (tenant == null) {
+                    currencyRepository.findByName(settingValue)
+                } else {
+                    currencyRepository.findByTenantAndName(tenant, settingValue)
+                }
             }
             parameterType.hasAnnotation<Entity>() -> {
                 val id = UUID.fromString(settingValue)
                 entityManager.find(parameterType.java, id)
+                    .takeUnless { tenant != null && it is Account && it.tenant != tenant }
             }
             parameterType == Int::class -> settingValue.toInt()
             parameterType == Long::class -> settingValue.toLong()
@@ -119,7 +154,11 @@ class SettingService(
         }
     }
 
-    private inline fun <reified T : Any> List<Setting>.update(settings: T): List<Setting> {
+    private inline fun <reified T : Any> List<Setting>.update(
+        settings: T,
+        tenant: UUID? = null,
+        previous: T? = null,
+    ): List<Setting> {
         val settingIndex = associateBy { it.name }
 
         return T::class.declaredMemberProperties
@@ -129,9 +168,12 @@ class SettingService(
                     ?: return@mapNotNull null
 
                 val settingValue = property.get(settings)
+                if (previous != null && settingValue == property.get(previous)) {
+                    return@mapNotNull null
+                }
                 val value = prepareSettingValue(settingValue)
 
-                val setting = settingIndex[settingName] ?: Setting(name = settingName)
+                val setting = settingIndex[settingName] ?: Setting(name = settingName, tenant = tenant)
                 if (setting.value == value) {
                     return@mapNotNull null
                 }

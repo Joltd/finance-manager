@@ -4,3 +4,5 @@ build
 /server/http-client/**
 files
 .claude
+/research
+application-test-local.yml

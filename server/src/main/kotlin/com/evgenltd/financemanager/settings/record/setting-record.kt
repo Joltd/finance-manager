@@ -10,3 +10,7 @@ data class SettingsRecord(
     val operationCashAccount: AccountReferenceRecord?,
     val pricingFeature: Boolean?,
 )
+
+data class AdminSettingsRecord(
+    val pricingFeature: Boolean? = null,
+)

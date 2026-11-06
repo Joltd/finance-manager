@@ -19,6 +19,10 @@ export interface User {
   settings: Settings
 }
 
+export interface AdminSettings {
+  pricingFeature?: boolean | null
+}
+
 export interface AdminUser {
   id?: string
   tenant?: string
@@ -26,6 +30,6 @@ export interface AdminUser {
   login: string
   password?: string
   deleted: boolean
-  pricingFeature?: boolean
+  settings?: AdminSettings | null
   demo?: boolean
 }

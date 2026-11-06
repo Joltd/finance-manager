@@ -3,6 +3,7 @@ package com.evgenltd.financemanager.settings.converter
 import com.evgenltd.financemanager.account.converter.AccountConverter
 import com.evgenltd.financemanager.account.converter.CurrencyConverter
 import com.evgenltd.financemanager.settings.entity.Settings
+import com.evgenltd.financemanager.settings.record.AdminSettingsRecord
 import com.evgenltd.financemanager.settings.record.SettingsRecord
 import org.springframework.stereotype.Service
 
@@ -21,13 +22,19 @@ class SettingConverter(
         pricingFeature = settings.pricingFeature,
     )
 
-    fun toEntity(settingsRecord: SettingsRecord): Settings = Settings(
-        version = settingsRecord.version,
-        operationDefaultCurrencyScale = settingsRecord.operationDefaultCurrencyScale,
-        operationDefaultCurrency = settingsRecord.operationDefaultCurrency?.let { currencyConverter.toEntity(it) },
-        operationDefaultAccount = settingsRecord.operationDefaultAccount?.let { accountConverter.toEntity(it) },
-        operationCashAccount = settingsRecord.operationCashAccount?.let { accountConverter.toEntity(it) },
-        pricingFeature = settingsRecord.pricingFeature,
+    fun toAdminRecord(settings: Settings): AdminSettingsRecord = AdminSettingsRecord(
+        pricingFeature = settings.pricingFeature,
     )
+
+    fun fillEntity(settings: Settings, record: SettingsRecord) {
+        settings.operationDefaultCurrencyScale = record.operationDefaultCurrencyScale
+        settings.operationDefaultCurrency = record.operationDefaultCurrency?.let { currencyConverter.toEntity(it) }
+        settings.operationDefaultAccount = record.operationDefaultAccount?.let { accountConverter.toEntity(it) }
+        settings.operationCashAccount = record.operationCashAccount?.let { accountConverter.toEntity(it) }
+    }
+
+    fun fillEntity(settings: Settings, record: AdminSettingsRecord) {
+        record.pricingFeature?.let { settings.pricingFeature = it }
+    }
 
 }

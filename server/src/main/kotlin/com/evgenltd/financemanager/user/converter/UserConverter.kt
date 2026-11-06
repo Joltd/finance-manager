@@ -1,5 +1,6 @@
 package com.evgenltd.financemanager.user.converter
 
+import com.evgenltd.financemanager.settings.record.AdminSettingsRecord
 import com.evgenltd.financemanager.settings.record.SettingsRecord
 import com.evgenltd.financemanager.user.entity.User
 import com.evgenltd.financemanager.user.record.AdminUserRecord
@@ -17,13 +18,13 @@ class UserConverter() {
         settings = settings,
     )
 
-    fun toAdminRecord(entity: User, pricingFeature: Boolean? = null): AdminUserRecord = AdminUserRecord(
+    fun toAdminRecord(entity: User, settings: AdminSettingsRecord? = null): AdminUserRecord = AdminUserRecord(
         id = entity.id!!,
         tenant = entity.tenant,
         name = entity.name,
         login = entity.login,
         deleted = entity.deleted,
-        pricingFeature = pricingFeature,
+        settings = settings,
         demo = entity.demo,
     )
 

@@ -8,4 +8,5 @@ import java.util.*
 @Repository
 interface SettingRepository : JpaRepository<Setting, UUID> {
     fun findByTenantIsNull(): List<Setting>
+    fun findByTenant(tenant: UUID): List<Setting>
 }

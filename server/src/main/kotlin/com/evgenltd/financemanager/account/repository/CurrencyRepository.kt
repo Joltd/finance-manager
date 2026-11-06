@@ -10,5 +10,6 @@ import java.util.*
 interface CurrencyRepository : JpaRepository<Currency, UUID>, JpaSpecificationExecutor<Currency> {
 
     fun findByName(name: String): Currency
+    fun findByTenantAndName(tenant: UUID, name: String): Currency?
 
 }

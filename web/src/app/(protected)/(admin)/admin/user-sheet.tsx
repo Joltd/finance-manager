@@ -66,7 +66,7 @@ function userToFormState(user: AdminUser): UserFormState {
     login: user.login,
     password: '',
     deleted: user.deleted,
-    pricingFeature: user.pricingFeature ?? false,
+    pricingFeature: user.settings?.pricingFeature ?? false,
     demo: user.demo ?? false,
   }
 }
@@ -75,7 +75,7 @@ export function UserSheet() {
   const { open, userId, closeSheet } = useUserSheetStore()
   const userStore = useAdminUserStore()
   const listStore = useAdminUserListStore()
-  const saveUser = useRequest(userUrls.adminRoot)
+  const saveUser = useRequest<void, AdminUser>(userUrls.adminRoot)
 
   const { control, handleSubmit, reset } = useForm<UserFormState>({
     resolver: userFormResolver,
@@ -108,7 +108,7 @@ export function UserSheet() {
         login: data.login,
         password: data.password || undefined,
         deleted: data.deleted,
-        pricingFeature: data.pricingFeature,
+        settings: { pricingFeature: data.pricingFeature },
         demo: data.demo,
       },
     })
