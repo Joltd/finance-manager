@@ -73,23 +73,45 @@ class UserControllerIntegrationTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `authRefresh - a valid refresh token issues a new access token`() {
+    fun `authRefresh - a valid refresh token issues a new access token and a rotated refresh token`() {
         userRepository.save(User(tenant = TEST_TENANT, name = "Test User", login = "auth-user-3", password = passwordEncoder.encode("password123")!!))
-        val login = restClient.post()
-            .uri("/api/public/v1/user/auth")
-            .body(AuthenticationRequest(login = "auth-user-3", password = "password123"))
-            .retrieve()
-            .body(object : ParameterizedTypeReference<ApiResponse<AuthenticationResponse>>() {})!!
-            .body!!
+        val login = login("auth-user-3", "password123")
 
-        val response = restClient.post()
-            .uri("/api/public/v1/user/auth/refresh")
-            .body(AuthenticationRefreshRequest(refreshToken = login.refreshToken))
-            .retrieve()
-            .body(object : ParameterizedTypeReference<ApiResponse<AuthenticationRefreshResponse>>() {})
+        val refreshed = refresh(login.refreshToken)
 
-        assertThat(response!!.body!!.accessToken).isNotBlank()
+        assertThat(refreshed.statusCode).isEqualTo(HttpStatus.OK)
+        val body = refreshed.body!!.body!!
+        assertThat(body.accessToken).isNotBlank()
+        assertThat(body.refreshToken).isNotBlank()
+
+        // the rotated refresh token is itself a valid refresh token
+        val refreshedAgain = refresh(body.refreshToken)
+        assertThat(refreshedAgain.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(refreshedAgain.body!!.body!!.accessToken).isNotBlank()
     }
+
+    @Test
+    fun `authRefresh - an access token is not accepted as a refresh token`() {
+        userRepository.save(User(tenant = TEST_TENANT, name = "Test User", login = "auth-user-4", password = passwordEncoder.encode("password123")!!))
+        val login = login("auth-user-4", "password123")
+
+        val response = refresh(login.accessToken)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+    }
+
+    private fun login(login: String, password: String): AuthenticationResponse = restClient.post()
+        .uri("/api/public/v1/user/auth")
+        .body(AuthenticationRequest(login = login, password = password))
+        .retrieve()
+        .body(object : ParameterizedTypeReference<ApiResponse<AuthenticationResponse>>() {})!!
+        .body!!
+
+    private fun refresh(refreshToken: String) = restClient.post()
+        .uri("/api/public/v1/user/auth/refresh")
+        .body(AuthenticationRefreshRequest(refreshToken = refreshToken))
+        .retrieve()
+        .toEntity(object : ParameterizedTypeReference<ApiResponse<AuthenticationRefreshResponse>>() {})
 
     @Test
     fun `user - returns the current user's own record`() {

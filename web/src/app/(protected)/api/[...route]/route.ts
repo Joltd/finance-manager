@@ -3,17 +3,18 @@ import {
   refreshRequest,
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
-  accessTokenCookieOptions,
-  refreshTokenCookieOptions,
   authenticatedRequest,
+  setAuthCookies,
 } from '@/lib/auth'
 
 function unauthorized(): NextResponse {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 }
 
-function isAuthFailure(status: number): boolean {
-  return status === 401 || status === 403
+// Only 401 means the token is missing, expired or invalid. 403 is a legitimate
+// "authenticated but not allowed" answer and must reach the client unchanged.
+function isUnauthorized(status: number): boolean {
+  return status === 401
 }
 
 async function protectedRequest(req: NextRequest): Promise<NextResponse> {
@@ -22,7 +23,7 @@ async function protectedRequest(req: NextRequest): Promise<NextResponse> {
 
   if (accessToken) {
     const res = await authenticatedRequest(req, accessToken, body)
-    if (!isAuthFailure(res.status)) {
+    if (!isUnauthorized(res.status)) {
       return res
     }
     await res.arrayBuffer() // drain and release the response body stream
@@ -39,14 +40,11 @@ async function protectedRequest(req: NextRequest): Promise<NextResponse> {
   }
 
   const res = await authenticatedRequest(req, refreshRes.accessToken, body)
-  if (isAuthFailure(res.status)) {
+  if (isUnauthorized(res.status)) {
     return unauthorized()
   }
 
-  res.cookies.set(ACCESS_TOKEN_COOKIE, refreshRes.accessToken, accessTokenCookieOptions)
-  if (refreshRes.refreshToken) {
-    res.cookies.set(REFRESH_TOKEN_COOKIE, refreshRes.refreshToken, refreshTokenCookieOptions)
-  }
+  setAuthCookies(res, refreshRes.accessToken, refreshRes.refreshToken)
   return res
 }
 

@@ -3,15 +3,15 @@ import { backendRequest } from '@/lib/api'
 import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
-  accessTokenCookieOptions,
-  refreshTokenCookieOptions,
   refreshRequest,
+  setAuthCookies,
 } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
-function isAuthFailure(status: number): boolean {
-  return status === 401 || status === 403
+// Only 401 means the token is missing, expired or invalid; 403 is passed through as is.
+function isUnauthorized(status: number): boolean {
+  return status === 401
 }
 
 function upstreamHeaders(accessToken: string): HeadersInit {
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       headers: upstreamHeaders(accessToken),
       signal: req.signal,
     })
-    if (!isAuthFailure(upstream.status)) {
+    if (!isUnauthorized(upstream.status)) {
       return streamResponse(upstream)
     }
     await upstream.body?.cancel()
@@ -65,15 +65,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     headers: upstreamHeaders(refreshed.accessToken),
     signal: req.signal,
   })
-  if (isAuthFailure(upstream.status)) {
+  if (isUnauthorized(upstream.status)) {
     await upstream.body?.cancel()
     return unauthorized()
   }
 
   const res = streamResponse(upstream)
-  res.cookies.set(ACCESS_TOKEN_COOKIE, refreshed.accessToken, accessTokenCookieOptions)
-  if (refreshed.refreshToken) {
-    res.cookies.set(REFRESH_TOKEN_COOKIE, refreshed.refreshToken, refreshTokenCookieOptions)
-  }
+  setAuthCookies(res, refreshed.accessToken, refreshed.refreshToken)
   return res
 }

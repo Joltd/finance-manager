@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret
 import com.nimbusds.jose.util.Base64
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
@@ -14,9 +15,12 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm
+import org.springframework.security.oauth2.jwt.JwtClaimValidator
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtEncoder
+import org.springframework.security.oauth2.jwt.JwtValidators
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
@@ -49,6 +53,7 @@ class SecurityConfig(
         }
         .oauth2ResourceServer { resourceServer ->
             resourceServer.jwt { jwt ->
+                jwt.decoder(accessTokenDecoder())
                 jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
             }.bearerTokenResolver(bearerTokenResolver())
         }
@@ -112,11 +117,31 @@ class SecurityConfig(
     @Bean
     fun jwtEncoder(): JwtEncoder = NimbusJwtEncoder(ImmutableSecret(secretKey()))
 
+    /**
+     * Authenticates Bearer requests in the resource server. Primary, so an unqualified
+     * JwtDecoder injection gets the decoder that guards the API.
+     */
     @Bean
-    fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder
+    @Primary
+    fun accessTokenDecoder(): JwtDecoder = jwtDecoder(TokenType.ACCESS)
+
+    /** Verifies refresh tokens on `/api/public/v1/user/auth/refresh`. */
+    @Bean(REFRESH_TOKEN_DECODER)
+    fun refreshTokenDecoder(): JwtDecoder = jwtDecoder(TokenType.REFRESH)
+
+    /** Checks signature and expiration, and accepts only tokens of the given [tokenType]. */
+    private fun jwtDecoder(tokenType: TokenType): JwtDecoder = NimbusJwtDecoder
         .withSecretKey(secretKey())
         .macAlgorithm(ALGORITHM)
         .build()
+        .also {
+            it.setJwtValidator(
+                DelegatingOAuth2TokenValidator(
+                    JwtValidators.createDefault(),
+                    JwtClaimValidator<String>(TokenType.CLAIM) { claim -> claim == tokenType.claimValue },
+                )
+            )
+        }
 
     private fun secretKey(): SecretKeySpec {
         val key = Base64.from(properties.secret).decode()
@@ -126,6 +151,7 @@ class SecurityConfig(
     companion object {
         val ALGORITHM = MacAlgorithm.HS512
         const val TENANT = "tenant"
+        const val REFRESH_TOKEN_DECODER = "refreshTokenDecoder"
     }
 
 }

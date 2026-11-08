@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { userUrls } from '@/api/user'
 import type { BackendResponse } from '@/types/common/common'
 import { AuthenticationRefreshResponse } from '@/types/common/auth'
@@ -9,11 +9,15 @@ export const REFRESH_TOKEN_COOKIE = 'refreshToken'
 
 const isProd = process.env.NODE_ENV === 'production'
 
+const ACCESS_TOKEN_MAX_AGE = 15 * 60 // 15 minutes
+const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 // 30 days
+
 export const accessTokenCookieOptions = {
   httpOnly: true,
   secure: isProd,
   sameSite: 'strict' as const,
   path: '/',
+  maxAge: ACCESS_TOKEN_MAX_AGE,
 }
 
 export const refreshTokenCookieOptions = {
@@ -21,6 +25,12 @@ export const refreshTokenCookieOptions = {
   secure: isProd,
   sameSite: 'strict' as const,
   path: '/',
+  maxAge: REFRESH_TOKEN_MAX_AGE,
+}
+
+export function setAuthCookies(res: NextResponse, accessToken: string, refreshToken: string) {
+  res.cookies.set(ACCESS_TOKEN_COOKIE, accessToken, accessTokenCookieOptions)
+  res.cookies.set(REFRESH_TOKEN_COOKIE, refreshToken, refreshTokenCookieOptions)
 }
 
 export async function authenticatedRequest(req: NextRequest, accessToken: string, body?: BodyInit) {

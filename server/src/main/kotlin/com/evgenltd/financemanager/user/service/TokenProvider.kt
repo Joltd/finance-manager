@@ -1,13 +1,17 @@
 package com.evgenltd.financemanager.user.service
 
-import com.evgenltd.financemanager.user.component.TenantResolver
 import com.evgenltd.financemanager.user.config.SecurityConfig
 import com.evgenltd.financemanager.user.config.SecurityProperties
+import com.evgenltd.financemanager.user.config.TokenType
 import com.evgenltd.financemanager.user.entity.UserRole
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.oauth2.jwt.JwsHeader
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
+import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters
+import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -17,6 +21,8 @@ import java.util.UUID
 class TokenProvider(
     private val properties: SecurityProperties,
     private val encoder: JwtEncoder,
+    @Qualifier(SecurityConfig.REFRESH_TOKEN_DECODER)
+    private val refreshTokenDecoder: JwtDecoder,
 ) {
 
     fun createAccessToken(id: UUID, login: String, role: UserRole, tenant: UUID): String = createToken {
@@ -24,6 +30,7 @@ class TokenProvider(
             .plus(properties.accessTokenExpirationMinutes, ChronoUnit.MINUTES)
         it.subject(login)
         it.expiresAt(expiresAt)
+        it.claim(TokenType.CLAIM, TokenType.ACCESS.claimValue)
         it.claim("userId", id)
         it.claim("authorities", role)
         it.claim(SecurityConfig.TENANT, tenant)
@@ -34,8 +41,15 @@ class TokenProvider(
             .plus(properties.refreshTokenExpirationMinutes, ChronoUnit.MINUTES)
         it.subject(login)
         it.expiresAt(expiresAt)
+        it.claim(TokenType.CLAIM, TokenType.REFRESH.claimValue)
         it.claim("userId", id)
     }
+
+    /**
+     * Verifies signature, expiration and that the token is a refresh token.
+     * @throws JwtException if any of the checks fails
+     */
+    fun parseRefreshToken(token: String): Jwt = refreshTokenDecoder.decode(token)
 
     private fun createToken(block: (JwtClaimsSet.Builder) -> Unit): String {
         val claims = JwtClaimsSet.builder()

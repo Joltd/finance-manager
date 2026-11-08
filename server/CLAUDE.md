@@ -227,7 +227,8 @@ var amountFrom: Amount,
 ## Security
 
 - JWT HS512, stateless (no sessions)
-- Access token: 15 min; refresh token: 7 days
+- Access token: 15 min; refresh token: 30 days, rotated on every `/auth/refresh` (sliding session)
+- Claim `token_type` (`access` | `refresh`): the resource server accepts only `access` tokens as Bearer, `/auth/refresh` accepts only `refresh` tokens (`TokenProvider.parseRefreshToken`)
 - Authorities claim: `authorities`, prefix: `ROLE_`
 - Public endpoints: `/api/public/**`
 - Role check: `@PreAuthorize("hasRole('USER')")` on every protected endpoint

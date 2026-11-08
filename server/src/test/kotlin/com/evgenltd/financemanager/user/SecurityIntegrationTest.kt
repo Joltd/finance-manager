@@ -7,6 +7,7 @@ import com.evgenltd.financemanager.account.record.AccountRecord
 import com.evgenltd.financemanager.testsupport.ApiResponse
 import com.evgenltd.financemanager.user.component.withTenant
 import com.evgenltd.financemanager.user.config.SecurityConfig
+import com.evgenltd.financemanager.user.config.TokenType
 import com.evgenltd.financemanager.user.entity.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.oauth2.jwt.JwsHeader
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
@@ -107,12 +109,43 @@ class SecurityIntegrationTest : AbstractIntegrationTest() {
         assertThat(response.statusCode.is4xxClientError).isTrue()
     }
 
+    @Test
+    fun `a refresh token is not accepted as a bearer token`() {
+        val refreshToken = tokenProvider.createRefreshToken(TEST_USER_ID, "test-user")
+
+        val response = getAccountsWith(refreshToken)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+
+    @Test
+    fun `a token without the token type claim is rejected`() {
+        val untyped = mintToken(TEST_TENANT, Instant.now().plus(15, ChronoUnit.MINUTES), tokenType = null)
+
+        val response = getAccountsWith(untyped)
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+
+    private fun getAccountsWith(token: String) = restClient.get()
+        .uri("/api/v1/account")
+        .headers { headers ->
+            headers.setBearerAuth(token)
+            headers.contentType = MediaType.APPLICATION_JSON
+        }
+        .retrieve()
+        .toEntity(String::class.java)
+
     private fun headersFor(tenant: UUID): HttpHeaders = HttpHeaders().apply {
         setBearerAuth(mintToken(tenant, Instant.now().plus(15, ChronoUnit.MINUTES)))
         contentType = MediaType.APPLICATION_JSON
     }
 
-    private fun mintToken(tenant: UUID, expiresAt: Instant): String {
+    private fun mintToken(
+        tenant: UUID,
+        expiresAt: Instant,
+        tokenType: TokenType? = TokenType.ACCESS,
+    ): String {
         // NimbusJwtEncoder requires expiresAt > issuedAt even for an intentionally-expired token,
         // so issuedAt must be relative to expiresAt rather than a fixed Instant.now().
         val claims = JwtClaimsSet.builder()
@@ -122,6 +155,7 @@ class SecurityIntegrationTest : AbstractIntegrationTest() {
             .claim("userId", UUID.randomUUID())
             .claim("authorities", UserRole.USER)
             .claim(SecurityConfig.TENANT, tenant)
+            .also { builder -> tokenType?.let { builder.claim(TokenType.CLAIM, it.claimValue) } }
             .build()
         val header = JwsHeader.with(SecurityConfig.ALGORITHM).build()
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).tokenValue

@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -37,7 +36,6 @@ class UserController(
     private val tokenProvider: TokenProvider,
     private val userService: UserService,
     private val userRepository: UserRepository,
-    private val jwtDecoder: JwtDecoder,
 ) : Loggable() {
 
     @GetMapping("/api/v1/user")
@@ -74,7 +72,7 @@ class UserController(
     @PostMapping("/api/public/v1/user/auth/refresh")
     fun authRefresh(@RequestBody request: AuthenticationRefreshRequest): ResponseEntity<AuthenticationRefreshResponse> {
         val jwt = try {
-            jwtDecoder.decode(request.refreshToken)
+            tokenProvider.parseRefreshToken(request.refreshToken)
         } catch (e: JwtException) {
             log.error("Invalid jwt", e)
             throw badRequestException("Invalid refresh token")
@@ -91,7 +89,9 @@ class UserController(
         } ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val accessToken = tokenProvider.createAccessToken(user.id!!, user.login, user.role, tenant)
-        return ResponseEntity.ok(AuthenticationRefreshResponse(accessToken = accessToken))
+        // Rotation: each refresh extends the session by another refresh-token lifetime
+        val refreshToken = tokenProvider.createRefreshToken(user.id!!, user.login)
+        return ResponseEntity.ok(AuthenticationRefreshResponse(accessToken = accessToken, refreshToken = refreshToken))
     }
 
 }

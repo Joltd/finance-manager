@@ -38,6 +38,7 @@ data class AuthenticationRefreshRequest(
 
 data class AuthenticationRefreshResponse(
     val accessToken: String,
+    val refreshToken: String,
 )
 
 data class UserRecord(

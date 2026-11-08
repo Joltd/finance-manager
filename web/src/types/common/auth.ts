@@ -5,5 +5,5 @@ export interface AuthenticationResponse {
 
 export interface AuthenticationRefreshResponse {
   accessToken: string
-  refreshToken?: string
+  refreshToken: string
 }
