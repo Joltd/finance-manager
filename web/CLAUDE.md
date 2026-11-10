@@ -41,7 +41,7 @@ All pages follow a Linear-inspired layout with these components from `@/componen
 
 | Component | Description |
 |---|---|
-| `<Layout>` | Root flex-col container. Prop `scrollable` adds `overflow-y-auto`. |
+| `<Layout>` | Root flex-col container. Prop `scrollable` adds `overflow-y-auto`. Prop `width="narrow"` keeps the content in a centered phone-width column (mobile-first pages) — use it instead of passing `className`. |
 | `<PageHeader>` | `px-4 md:px-6 py-3 border-b`. Props: `title`, `description?`, `actions?`. |
 | `<FilterBar>` | `px-4 md:px-6 py-2 border-b bg-muted/30`. Wraps `<Filter>`. |
 | `<PageContent>` | `p-4 md:p-6 gap-6`. Prop `scrollable` makes it flex-1 + scroll. |
