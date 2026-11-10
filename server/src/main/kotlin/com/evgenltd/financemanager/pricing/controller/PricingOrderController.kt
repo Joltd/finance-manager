@@ -24,7 +24,8 @@ class PricingOrderController(
 
     @GetMapping("/api/v1/pricing/order/defaults")
     @PreAuthorize("hasRole('USER')")
-    fun loadDefaults(): PricingOrderDefaults = pricingOrderService.loadDefaults()
+    fun loadDefaults(@RequestParam("survey", required = false) survey: UUID?): PricingOrderDefaults =
+        pricingOrderService.loadDefaults(survey)
 
     @GetMapping("/api/v1/pricing/order")
     @PreAuthorize("hasRole('USER')")

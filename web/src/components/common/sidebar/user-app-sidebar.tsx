@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   ArrowUpDown,
   BookOpen,
+  ClipboardList,
   Tags,
   PlusIcon,
   Receipt,
@@ -46,6 +47,7 @@ const mainNav = [
 const pricingNav = [
   { href: '/pricing-item', label: 'Pricing Items', icon: Receipt },
   { href: '/pricing-order', label: 'Pricing Orders', icon: ShoppingCart },
+  { href: '/pricing-survey', label: 'Pricing Surveys', icon: ClipboardList },
 ]
 
 const reportsNav = [
@@ -106,7 +108,11 @@ export function UserAppSidebar() {
               <SidebarMenu>
                 {pricingNav.map(({ href, label, icon: Icon }) => (
                   <SidebarMenuItem key={href}>
-                    <SidebarMenuButton asChild isActive={pathname === href} tooltip={label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === href || pathname.startsWith(`${href}/`)}
+                      tooltip={label}
+                    >
                       <Link href={href} prefetch={false}>
                         <Icon />
                         <span>{label}</span>

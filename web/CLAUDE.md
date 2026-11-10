@@ -159,6 +159,9 @@ implementing or refactoring any form.
 | `/operation` | OperationPage | Seek-based |
 | `/pricing-item` | PricingItemPage | scrollable Layout, page-based pagination |
 | `/pricing-order` | PricingOrderPage | scrollable Layout, page-based pagination |
+| `/pricing-order/new` | PricingOrderNewPage | Quick Add wizard (`QuickAdd`), narrow mobile-first column |
+| `/pricing-survey` | PricingSurveyPage | scrollable Layout, narrow mobile-first column |
+| `/pricing-survey/[id]` | PricingSurveyProgressPage | progress by category; content is replaced by `QuickAdd` in place |
 | `/reference` | ReferencePage | scrollable Layout, EntityList |
 | `/report/income-expense` | IncomeExpensePage | scrollable Layout |
 | `/report/top-flow` | TopFlowPage | scrollable Layout |

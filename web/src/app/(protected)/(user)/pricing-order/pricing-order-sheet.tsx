@@ -128,6 +128,9 @@ export function PricingOrderSheet() {
     reset(pricingOrderToFormState(order))
   }, [pricingOrderStore.data]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // An order collected within a survey keeps the survey location
+  const survey = pricingOrderId ? pricingOrderStore.data?.survey : undefined
+
   const onSubmit = async (data: PricingOrderFormState) => {
     await savePricingOrder.submit({
       body: {
@@ -140,6 +143,7 @@ export function PricingOrderSheet() {
         city: data.city,
         store: data.store,
         comment: data.comment || undefined,
+        survey,
       },
     })
     void listStore.fetch()
@@ -240,6 +244,7 @@ export function PricingOrderSheet() {
                       url={pricingOrderUrls.countryReference}
                       value={field.value}
                       onChange={field.onChange}
+                      disabled={Boolean(survey)}
                       aria-invalid={fieldState.invalid}
                     />
                     <FieldError errors={[fieldState.error]} />
@@ -258,6 +263,7 @@ export function PricingOrderSheet() {
                       url={pricingOrderUrls.cityReference}
                       value={field.value}
                       onChange={field.onChange}
+                      disabled={Boolean(survey)}
                       aria-invalid={fieldState.invalid}
                     />
                     <FieldError errors={[fieldState.error]} />

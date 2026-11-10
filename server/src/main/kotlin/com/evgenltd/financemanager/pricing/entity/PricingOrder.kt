@@ -49,6 +49,10 @@ class PricingOrder(
 
     var createdAt: LocalDateTime,
 
+    @ManyToOne
+    @JoinColumn(name = "survey_id")
+    var survey: PricingSurvey? = null,
+
 ) {
 
     fun asString(): String {

@@ -13,6 +13,7 @@ import com.evgenltd.financemanager.pricing.record.PricingOrderDefaults
 import com.evgenltd.financemanager.pricing.record.PricingOrderFilter
 import com.evgenltd.financemanager.pricing.record.PricingOrderRecord
 import com.evgenltd.financemanager.pricing.repository.PricingOrderRepository
+import com.evgenltd.financemanager.pricing.repository.PricingSurveyRepository
 import com.evgenltd.financemanager.settings.service.SettingService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -26,17 +27,23 @@ import java.util.UUID
 class PricingOrderService(
     private val pricingOrderRepository: PricingOrderRepository,
     private val pricingOrderConverter: PricingOrderConverter,
+    private val pricingSurveyRepository: PricingSurveyRepository,
     private val settingService: SettingService,
 ) {
 
-    fun loadDefaults(): PricingOrderDefaults {
-        val settings = settingService.load()
-        val lastOrder = pricingOrderRepository.findFirstByOrderByCreatedAtDesc()
+    // Within a survey the location and currency come from the survey itself, the date is always today
+    fun loadDefaults(surveyId: UUID?): PricingOrderDefaults {
+        val survey = surveyId?.let { pricingSurveyRepository.find(it) }
+        val lastOrder = if (survey != null) {
+            pricingOrderRepository.findFirstBySurveyOrderByCreatedAtDesc(survey)
+        } else {
+            pricingOrderRepository.findFirstByOrderByCreatedAtDesc()
+        }
         return PricingOrderDefaults(
-            date = lastOrder?.date ?: LocalDate.now(),
-            currency = settings.operationDefaultCurrency?.name,
-            country = lastOrder?.country ?: "",
-            city = lastOrder?.city ?: "",
+            date = LocalDate.now(),
+            currency = survey?.currency ?: settingService.load().operationDefaultCurrency?.name,
+            country = survey?.country ?: lastOrder?.country ?: "",
+            city = survey?.city ?: lastOrder?.city ?: "",
             store = lastOrder?.store ?: "",
             comment = lastOrder?.comment,
         )

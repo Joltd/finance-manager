@@ -36,12 +36,14 @@ export interface LocationValues {
 
 interface LocationStepProps {
   initial: LocationValues
+  // Hides the date, country and city: they are predefined by the survey the order is added to
+  locationFixed?: boolean
   saving: boolean
   onSave: (values: LocationValues) => void
   onBack: () => void
 }
 
-export function LocationStep({ initial, saving, onSave, onBack }: LocationStepProps) {
+export function LocationStep({ initial, locationFixed, saving, onSave, onBack }: LocationStepProps) {
   const { control, handleSubmit } = useForm<LocationFormState>({
     resolver: locationFormResolver,
     defaultValues: initial,
@@ -71,6 +73,7 @@ export function LocationStep({ initial, saving, onSave, onBack }: LocationStepPr
                 id={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={locationFixed}
                 aria-invalid={fieldState.invalid}
               />
               <FieldError errors={[fieldState.error]} />
@@ -89,6 +92,7 @@ export function LocationStep({ initial, saving, onSave, onBack }: LocationStepPr
                 url={pricingOrderUrls.countryReference}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={locationFixed}
                 aria-invalid={fieldState.invalid}
               />
               <FieldError errors={[fieldState.error]} />
@@ -107,6 +111,7 @@ export function LocationStep({ initial, saving, onSave, onBack }: LocationStepPr
                 url={pricingOrderUrls.cityReference}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={locationFixed}
                 aria-invalid={fieldState.invalid}
               />
               <FieldError errors={[fieldState.error]} />
@@ -138,7 +143,12 @@ export function LocationStep({ initial, saving, onSave, onBack }: LocationStepPr
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={field.name}>Comment</FieldLabel>
-              <Input id={field.name} aria-invalid={fieldState.invalid} placeholder="Not set" {...field} />
+              <Input
+                id={field.name}
+                aria-invalid={fieldState.invalid}
+                placeholder="Not set"
+                {...field}
+              />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}

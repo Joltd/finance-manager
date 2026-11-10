@@ -1,5 +1,6 @@
 import { Amount } from '@/types/common/amount'
 import { PricingItem } from '@/types/pricing-item'
+import { PricingSurvey } from '@/types/pricing-survey'
 
 export interface PricingOrder {
   id?: string
@@ -13,6 +14,7 @@ export interface PricingOrder {
   city: string
   store: string
   comment?: string
+  survey?: PricingSurvey
 }
 
 export interface PricingOrderFilter {

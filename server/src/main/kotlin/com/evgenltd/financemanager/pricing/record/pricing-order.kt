@@ -27,6 +27,7 @@ data class PricingOrderRecord(
     val city: String,
     val store: String,
     val comment: String?,
+    val survey: PricingSurveyRecord? = null,
 )
 
 data class PricingOrderFilter(
